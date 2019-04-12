@@ -1,6 +1,7 @@
 include AUTHORS.rst
 include CONTRIBUTING.rst
 include LICENSE
+include LICENSE_datacube
 
 recursive-include test *
 recursive-exclude * __pycache__

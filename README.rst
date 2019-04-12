@@ -25,6 +25,12 @@ Documentation: https://corteva.github.io/rioxarray.
 Credits
 -------
 
+The *reproject* functionality was adopted from https://github.com/opendatacube/datacube-core
+  - Source file: `geo_xarray.py <https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py>`_
+  - `datacube is licensed <https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE>`_ under the Apache License, Version 2.0.
+    The datacube license is included as `LICENSE_datacube <https://github.com/corteva/rioxarray/blob/master/LICENSE_datacube>`_.
+
+
 This package was originally templated with with Cookiecutter_.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
