@@ -1,0 +1,34 @@
+#-------------------------------------------------------------------------------
+#System specifications for Appveyor
+#-------------------------------------------------------------------------------
+
+environment:
+  matrix:
+    - PYTHON_VERSION: "3.6"
+      MINICONDA: "C:\\Miniconda3-x64"
+
+install:
+  - 'SET PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%'
+  - conda config --set always_yes yes
+  - conda config --add channels conda-forge
+  - conda config --add channels conda-forge
+  - conda update -q conda python
+
+#-----------------------------------------------------------------------------
+# Create conda environment
+#-----------------------------------------------------------------------------
+  - conda create -n test python=%PYTHON_VERSION% rasterio=1.0.* scipy xarray
+  - activate test
+
+#-------------------------------------------------------------------------------
+# Install rioxarray
+#-------------------------------------------------------------------------------
+  - pip install -e .[all]
+
+build: false
+
+test_script:
+  - pytest --cov-report term-missing --cov=rioxarray
+  - flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
+  - flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
+  - black --check .

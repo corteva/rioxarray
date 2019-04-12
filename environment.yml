@@ -1,0 +1,13 @@
+# Configuration file for creating a Conda Environment with dependencies needed for rioxarray.
+# Create the environment by running the following command (after installing Miniconda):
+#   $ conda env create -f environment.yml
+
+name: rioxarray
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.6
+- rasterio=1.0.*
+- scipy
+- xarray
