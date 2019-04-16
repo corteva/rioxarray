@@ -10,11 +10,7 @@ from rioxarray import __version__
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = [
-    "rasterio",
-    "scipy",
-    "xarray",
-]
+requirements = ["rasterio", "scipy", "xarray"]
 
 test_requirements = ["pytest>=3.6", "pytest-cov", "mock"]
 

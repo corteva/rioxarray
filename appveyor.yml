@@ -17,7 +17,7 @@ install:
 #-----------------------------------------------------------------------------
 # Create conda environment
 #-----------------------------------------------------------------------------
-  - conda create -n test python=%PYTHON_VERSION% rasterio=1.0.* scipy xarray
+  - conda create -n test python=%PYTHON_VERSION% rasterio=1.0.* scipy xarray netcdf4
   - activate test
 
 #-------------------------------------------------------------------------------

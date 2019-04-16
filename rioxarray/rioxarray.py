@@ -3,11 +3,11 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 
-Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core
+Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core  # noqa
 Source file:
-- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py
+- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py  # noqa
 datacube is licensed under the Apache License, Version 2.0:
-- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE
+- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa
 
 """
 import copy

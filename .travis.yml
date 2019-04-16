@@ -6,7 +6,7 @@ os:
   - linux
   - osx
 env:
-  - PYTHON_VERSION="3.5"
+  # - PYTHON_VERSION="3.5" # Skipped due to libpoppler errors
   - PYTHON_VERSION="3.6"
   - PYTHON_VERSION="3.7"
 notifications:
@@ -28,7 +28,7 @@ before_install:
 - conda config --add channels conda-forge
 - conda config --add channels conda-forge
 # Create conda environment
-- conda create -n test python=$PYTHON_VERSION rasterio=1.0.* scipy xarray
+- conda create -n test python=$PYTHON_VERSION rasterio=1.0.* scipy xarray netcdf4
 - source activate test
 
 install:

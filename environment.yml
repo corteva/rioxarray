@@ -11,3 +11,4 @@ dependencies:
 - rasterio=1.0.*
 - scipy
 - xarray
+- netcdf4

@@ -15,7 +15,7 @@ Documentation: https://corteva.github.io/rioxarray.
 .. image:: https://travis-ci.com/corteva/rioxarray.svg?branch=master
     :target: https://travis-ci.com/corteva/rioxarray
 
-.. image:: https://ci.appveyor.com/api/projects/status/bjxhlbt5tjsonwo8?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true
     :target: https://ci.appveyor.com/project/snowman2/rioxarray
 
 .. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
