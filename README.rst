@@ -34,3 +34,8 @@ The *reproject* functionality was adopted from https://github.com/opendatacube/d
 This package was originally templated with with Cookiecutter_.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
+
+
+.. image:: https://badges.gitter.im/rioxarray/community.svg
+   :alt: Join the chat at https://gitter.im/rioxarray/community
+   :target: https://gitter.im/rioxarray/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
