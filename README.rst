@@ -6,6 +6,11 @@ rasterio xarray extension.
 
 Documentation: https://corteva.github.io/rioxarray.
 
+
+.. image:: https://badges.gitter.im/rioxarray/community.svg
+   :alt: Join the chat at https://gitter.im/rioxarray/community
+   :target: https://gitter.im/rioxarray/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
     :target: https://github.com/corteva/rioxarray/blob/master/LICENSE
 
@@ -35,7 +40,3 @@ This package was originally templated with with Cookiecutter_.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 
-
-.. image:: https://badges.gitter.im/rioxarray/community.svg
-   :alt: Join the chat at https://gitter.im/rioxarray/community
-   :target: https://gitter.im/rioxarray/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
