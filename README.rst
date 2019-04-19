@@ -39,4 +39,3 @@ The *reproject* functionality was adopted from https://github.com/opendatacube/d
 This package was originally templated with with Cookiecutter_.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
-
