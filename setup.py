@@ -1,11 +1,25 @@
 # -*- coding: utf-8 -*-
 """The setup script."""
 
+import os
+import sys
 from itertools import chain
 
 from setuptools import find_packages, setup
 
-from rioxarray import __version__
+
+def get_version():
+    """
+    retreive rioxarray version information in version variable
+    (taken from pyproj)
+    """
+    with open(os.path.join("rioxarray", "_version.py")) as vfh:
+        for line in vfh:
+            if line.find("__version__") >= 0:
+                # parse __version__ and remove surrounding " or '
+                return line.split("=")[1].strip()[1:-1]
+    sys.exit("ERROR: pyproj version not fount.")
+
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -45,6 +59,6 @@ setup(
     tests_require=test_requirements,
     extras_require=extras_require,
     url="https://github.com/corteva/rioxarray",
-    version=__version__,
+    version=get_version(),
     zip_safe=False,
 )
