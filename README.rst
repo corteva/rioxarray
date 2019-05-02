@@ -17,6 +17,9 @@ Documentation: https://corteva.github.io/rioxarray.
 .. image:: https://img.shields.io/pypi/v/rioxarray.svg
     :target: https://pypi.python.org/pypi/rioxarray
 
+.. image:: https://img.shields.io/conda/vn/conda-forge/rioxarray.svg
+    :target: https://anaconda.org/conda-forge/rioxarray
+
 .. image:: https://travis-ci.com/corteva/rioxarray.svg?branch=master
     :target: https://travis-ci.com/corteva/rioxarray
 
