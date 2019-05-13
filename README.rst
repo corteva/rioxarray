@@ -4,7 +4,7 @@ rioxarray README
 
 rasterio xarray extension.
 
-Documentation: https://corteva.github.io/rioxarray.
+Documentation: https://corteva.github.io/rioxarray/html/index.html.
 
 
 .. image:: https://badges.gitter.im/rioxarray/community.svg
