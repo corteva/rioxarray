@@ -18,3 +18,11 @@ class OneDimensionalRaster(RioXarrayError):
 
 class SingleVariableDataset(RioXarrayError):
     """This is for when you have a dataset with a single variable."""
+
+
+class TooManyDimensions(RioXarrayError):
+    """This is raised when there are more dimensions than is supported by the method"""
+
+
+class InvalidDimensionOrder(RioXarrayError):
+    """This is raised when there the dimensions are not ordered correctly."""
