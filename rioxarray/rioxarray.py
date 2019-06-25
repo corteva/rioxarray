@@ -793,7 +793,9 @@ class RasterArray(XRasterBase):
 
         return interp_array
 
-    def to_raster(self, raster_path, driver="GTiff", dtype=None, **profile_kwargs):
+    def to_raster(
+        self, raster_path, driver="GTiff", dtype=None, tags=None, **profile_kwargs
+    ):
         """
         Export the DataArray to a raster file.
 
@@ -801,15 +803,17 @@ class RasterArray(XRasterBase):
         ----------
         raster_path: str
             The path to output the raster to.
-        driver: str
+        driver: str, optional
             The name of the GDAL/rasterio driver to use to export the raster.
             Default is "GTiff".
-        dtype: str
+        dtype: str, optional
             The data type to write the raster to. Default is the datasets dtype.
+        tags: dict, optional
+            A dictionary of tags to write to the raster.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
-            nodata, transform, crs, count, width, height attributes are automatically
-            added.
+            nodata, transform, crs, count, width, and height attributes
+            are automatically added.
 
         """
         width, height = self.shape
@@ -836,6 +840,8 @@ class RasterArray(XRasterBase):
                 dst.write(data, 1)
             else:
                 dst.write(data)
+            if tags is not None:
+                dst.update_tags(**tags)
 
 
 @xarray.register_dataset_accessor("rio")
