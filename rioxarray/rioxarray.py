@@ -23,7 +23,12 @@ from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
 
-from rioxarray.exceptions import NoDataInBounds, OneDimensionalRaster
+from rioxarray.exceptions import (
+    InvalidDimensionOrder,
+    NoDataInBounds,
+    OneDimensionalRaster,
+    TooManyDimensions,
+)
 from rioxarray.crs import crs_to_wkt
 
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value")
@@ -327,6 +332,32 @@ class RasterArray(XRasterBase):
         bottom = float(self._obj[self.y_dim][-1])
         return left, bottom, right, top
 
+    def _check_dimensions(self):
+        """
+        This function validates that the dimensions 2D/3D and
+        they are are in the proper order.
+
+        Returns:
+        --------
+        str or None: Name extra dimension.
+        """
+        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
+        if len(extra_dims) > 1:
+            raise TooManyDimensions("Only 2D and 3D data arrays supported.")
+        elif extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
+            raise InvalidDimensionOrder(
+                "Invalid dimension order. Expected order: {}".format(
+                    (extra_dims[0], self.y_dim, self.x_dim)
+                )
+            )
+        elif not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
+            raise InvalidDimensionOrder(
+                "Invalid dimension order. Expected order: {}".format(
+                    (self.y_dim, self.x_dim)
+                )
+            )
+        return extra_dims[0] if extra_dims else None
+
     def bounds(self, recalc=False):
         """Determine the bounds of the `xarray.DataArray`
 
@@ -438,17 +469,13 @@ class RasterArray(XRasterBase):
             dst_affine, dst_width, dst_height = _make_dst_affine(
                 self._obj, self.crs, dst_crs, resolution
             )
-        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
-        if len(extra_dims) > 1:
-            raise RuntimeError("Reproject only supports 2D and 3D datasets.")
-        if extra_dims:
-            assert self._obj.dims == (extra_dims[0], self.y_dim, self.x_dim)
+        extra_dim = self._check_dimensions()
+        if extra_dim:
             dst_data = np.zeros(
-                (self._obj[extra_dims[0]].size, dst_height, dst_width),
+                (self._obj[extra_dim].size, dst_height, dst_width),
                 dtype=self._obj.dtype.type,
             )
         else:
-            assert self._obj.dims == (self.y_dim, self.x_dim)
             dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
 
         try:
@@ -742,13 +769,10 @@ class RasterArray(XRasterBase):
         :class:`xarray.DataArray`: An interpolated :class:`xarray.DataArray` object.
 
         """
-        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
-        if len(extra_dims) > 1:
-            raise RuntimeError("Interpolate only supports 2D and 3D datasets.")
-        if extra_dims:
-            assert self._obj.dims == (extra_dims[0], self.y_dim, self.x_dim)
+        extra_dim = self._check_dimensions()
+        if extra_dim:
             interp_data = []
-            for _, sub_xds in self._obj.groupby(extra_dims[0]):
+            for _, sub_xds in self._obj.groupby(extra_dim):
                 interp_data.append(
                     self._interpolate_na(sub_xds.load().data, method=method)
                 )
@@ -786,13 +810,17 @@ class RasterArray(XRasterBase):
         """
         width, height = self.shape
         dtype = str(self._obj.dtype) if dtype is None else dtype
+        extra_dim = self._check_dimensions()
+        count = 1
+        if extra_dim is not None:
+            count = self._obj[extra_dim].size
         with rasterio.open(
             raster_path,
             "w",
             driver=driver,
             height=int(height),
             width=int(width),
-            count=len(self._obj.dims),
+            count=count,
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=True),

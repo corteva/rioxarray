@@ -688,3 +688,18 @@ def test_to_raster(tmpdir):
         assert_array_equal(rds.transform, xds.rio.transform())
         assert_array_equal(rds.nodata, xds.rio.nodata)
         assert_array_equal(rds.read(1), xds.values)
+
+
+def test_to_raster_3d(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tiff")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), autoclose=True
+    ) as mda:
+        mda.green.rio.to_raster(str(tmp_raster))
+        xds = mda.green.copy()
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.crs == xds.rio.crs
+        assert_array_equal(rds.transform, xds.rio.transform())
+        assert_array_equal(rds.nodata, xds.rio.nodata)
+        assert_array_equal(rds.read(), xds.values)
