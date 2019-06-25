@@ -347,16 +347,16 @@ class RasterArray(XRasterBase):
         elif extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
             raise InvalidDimensionOrder(
                 "Invalid dimension order. Expected order: {0}. "
-                "You can use `DataArray.transpose{0}` to reorder your dimensions.".format(
+                "You can use `DataArray.transpose{0}`"
+                " to reorder your dimensions.".format(
                     (extra_dims[0], self.y_dim, self.x_dim)
                 )
             )
         elif not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
             raise InvalidDimensionOrder(
                 "Invalid dimension order. Expected order: {0}"
-                "You can use `DataArray.transpose{0}` to reorder your dimensions.".format(
-                    (self.y_dim, self.x_dim)
-                )
+                "You can use `DataArray.transpose{0}` "
+                "to reorder your dimensions.".format((self.y_dim, self.x_dim))
             )
         return extra_dims[0] if extra_dims else None
 
