@@ -793,7 +793,7 @@ class RasterArray(XRasterBase):
 
         return interp_array
 
-    def to_raster(self, raster_path, driver="GTiff", dtype=None):
+    def to_raster(self, raster_path, driver="GTiff", dtype=None, **profile_kwargs):
         """
         Export the DataArray to a raster file.
 
@@ -806,6 +806,10 @@ class RasterArray(XRasterBase):
             Default is "GTiff".
         dtype: str
             The data type to write the raster to. Default is the datasets dtype.
+        **profile_kwargs
+            Additional keyword arguments to pass into writing the raster. The
+            nodata, transform, crs, count, width, height attributes are automatically
+            added.
 
         """
         width, height = self.shape
@@ -825,6 +829,7 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=True),
             nodata=self.nodata,
+            **profile_kwargs,
         ) as dst:
             data = self._obj.values.astype(dtype)
             if data.ndim == 2:
