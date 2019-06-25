@@ -769,6 +769,41 @@ class RasterArray(XRasterBase):
 
         return interp_array
 
+    def to_raster(self, raster_path, driver="GTiff", dtype=None):
+        """
+        Export the DataArray to a raster file.
+
+        Parameters
+        ----------
+        raster_path: str
+            The path to output the raster to.
+        driver: str
+            The name of the GDAL/rasterio driver to use to export the raster.
+            Default is "GTiff".
+        dtype: str
+            The data type to write the raster to. Default is the datasets dtype.
+
+        """
+        width, height = self.shape
+        dtype = str(self._obj.dtype) if dtype is None else dtype
+        with rasterio.open(
+            raster_path,
+            "w",
+            driver=driver,
+            height=int(height),
+            width=int(width),
+            count=len(self._obj.dims),
+            dtype=dtype,
+            crs=self.crs,
+            transform=self.transform(recalc=True),
+            nodata=self.nodata,
+        ) as dst:
+            data = self._obj.values.astype(dtype)
+            if data.ndim == 2:
+                dst.write(data, 1)
+            else:
+                dst.write(data)
+
 
 @xarray.register_dataset_accessor("rio")
 class RasterDataset(XRasterBase):

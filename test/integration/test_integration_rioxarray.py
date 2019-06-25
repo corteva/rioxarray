@@ -2,6 +2,7 @@ import os
 
 import numpy
 import pytest
+import rasterio
 import xarray
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
@@ -672,3 +673,18 @@ def test_geographic_resample_integer():
         # mds_interp.to_netcdf(sentinel_2_interp)
         # test
         _assert_xarrays_equal(mds_interp, mdc)
+
+
+def test_to_raster(tmpdir):
+    tmp_raster = tmpdir.join("modis_raster.tiff")
+    with xarray.open_dataarray(
+        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"), autoclose=True
+    ) as mda:
+        mda.rio.to_raster(str(tmp_raster))
+        xds = mda.copy()
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.crs == xds.rio.crs
+        assert_array_equal(rds.transform, xds.rio.transform())
+        assert_array_equal(rds.nodata, xds.rio.nodata)
+        assert_array_equal(rds.read(1), xds.values)
