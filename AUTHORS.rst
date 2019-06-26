@@ -11,3 +11,4 @@ Contributors
 ------------
 
 * Alfredo Delos Santos (https://github.com/alfredoahds)
+* David Hoese (https://github.com/djhoese)
