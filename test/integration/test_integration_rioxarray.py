@@ -7,7 +7,7 @@ import xarray
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
 
-from rioxarray.exceptions import NoDataInBounds, OneDimensionalRaster
+from rioxarray.exceptions import MissingCRS, NoDataInBounds, OneDimensionalRaster
 from rioxarray.rioxarray import UNWANTED_RIO_ATTRS, _make_coords
 from test.conftest import TEST_COMPARE_DATA_DIR, TEST_INPUT_DATA_DIR
 
@@ -726,3 +726,134 @@ def test_to_raster_3d(tmpdir):
         assert_array_equal(rds.transform, xds.rio.transform())
         assert_array_equal(rds.nodata, xds.rio.nodata)
         assert_array_equal(rds.read(), xds.values)
+
+
+def test_missing_dimensions():
+    test_ds = xarray.Dataset()
+    with pytest.raises(KeyError):
+        test_ds.rio
+
+
+def test_crs_setter():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.crs is None
+    out_ds = test_da.rio.set_crs(4326)
+    assert test_da.rio.crs.to_epsg() == 4326
+    assert out_ds.rio.crs.to_epsg() == 4326
+    test_ds = test_da.to_dataset(name="test")
+    assert test_ds.rio.crs is None
+    out_ds = test_ds.rio.set_crs(4326)
+    assert test_ds.rio.crs.to_epsg() == 4326
+    assert out_ds.rio.crs.to_epsg() == 4326
+
+
+def test_crs_setter__copy():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.crs is None
+    out_ds = test_da.rio.set_crs(4326, inplace=False)
+    assert test_da.rio.crs is None
+    assert out_ds.rio.crs.to_epsg() == 4326
+    test_ds = test_da.to_dataset(name="test")
+    assert test_ds.rio.crs is None
+    out_ds = test_ds.rio.set_crs(4326, inplace=False)
+    assert test_ds.rio.crs is None
+    assert out_ds.rio.crs.to_epsg() == 4326
+
+
+def test_crs_writer__array__copy():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.crs is None
+    out_da = test_da.rio.write_crs(4326, grid_mapping_name="crs")
+    assert "crs_wkt" in out_da.coords["crs"].attrs
+    assert "spatial_ref" in out_da.coords["crs"].attrs
+    out_da.rio._crs = None
+    assert out_da.rio.crs.to_epsg() == 4326
+    test_da.rio._crs = None
+    assert test_da.rio.crs is None
+    assert "crs" not in test_da.coords
+    assert out_da.attrs["grid_mapping"] == "crs"
+
+
+def test_crs_writer__array__inplace():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.crs is None
+    out_da = test_da.rio.write_crs(4326, inplace=True)
+    assert "crs_wkt" in test_da.coords["spatial_ref"].attrs
+    assert "spatial_ref" in test_da.coords["spatial_ref"].attrs
+    assert out_da.coords["spatial_ref"] == test_da.coords["spatial_ref"]
+    test_da.rio._crs = None
+    assert test_da.rio.crs.to_epsg() == 4326
+    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert out_da.attrs == test_da.attrs
+    out_da.rio._crs = None
+    assert out_da.rio.crs.to_epsg() == 4326
+
+
+def test_crs_writer__dataset__copy():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_da = test_da.to_dataset(name="test")
+    assert test_da.rio.crs is None
+    out_da = test_da.rio.write_crs(4326, grid_mapping_name="crs")
+    assert "crs_wkt" in out_da.coords["crs"].attrs
+    assert "spatial_ref" in out_da.coords["crs"].attrs
+    out_da.test.rio._crs = None
+    assert out_da.rio.crs.to_epsg() == 4326
+    assert out_da.test.attrs["grid_mapping"] == "crs"
+    # make sure input did not change the dataset
+    test_da.test.rio._crs = None
+    test_da.rio._crs = None
+    assert test_da.rio.crs is None
+    assert "crs" not in test_da.coords
+
+
+def test_crs_writer__dataset__inplace():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_da = test_da.to_dataset(name="test")
+    assert test_da.rio.crs is None
+    out_da = test_da.rio.write_crs(4326, inplace=True)
+    assert "crs_wkt" in test_da.coords["spatial_ref"].attrs
+    assert "spatial_ref" in test_da.coords["spatial_ref"].attrs
+    assert out_da.coords["spatial_ref"] == test_da.coords["spatial_ref"]
+    out_da.test.rio._crs = None
+    assert out_da.rio.crs.to_epsg() == 4326
+    test_da.test.rio._crs = None
+    test_da.rio._crs = None
+    assert test_da.rio.crs.to_epsg() == 4326
+    assert out_da.test.attrs["grid_mapping"] == "spatial_ref"
+    assert out_da.test.attrs == test_da.test.attrs
+
+
+def test_crs_writer__missing():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    with pytest.raises(MissingCRS):
+        test_da.rio.write_crs()
+    with pytest.raises(MissingCRS):
+        test_da.to_dataset(name="test").rio.write_crs()

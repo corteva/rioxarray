@@ -25,6 +25,7 @@ from scipy.interpolate import griddata
 
 from rioxarray.exceptions import (
     InvalidDimensionOrder,
+    MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
     TooManyDimensions,
@@ -32,7 +33,7 @@ from rioxarray.exceptions import (
 from rioxarray.crs import crs_to_wkt
 
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodata", "nodatavals", "crs", "is_tiled", "res")
+UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
 DEFAULT_GRID_MAP = "spatial_ref"
 
 
@@ -123,23 +124,9 @@ def add_xy_grid_meta(coords):
 
 
 def add_spatial_ref(in_ds, dst_crs, grid_map_name):
-    # remove old grid map if exists
-    try:
-        del in_ds.coords[grid_map_name]
-    except KeyError:
-        pass
-
-    # add grid mapping variable
-    in_ds.coords[grid_map_name] = xarray.Variable((), 0)
-    match_proj = crs_to_wkt(CRS.from_user_input(dst_crs))
-
-    grid_map_attrs = dict()
-    # add grid mapping variable
-    grid_map_attrs["spatial_ref"] = match_proj
-    # http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#appendix-grid-mappings
-    # http://desktop.arcgis.com/en/arcmap/10.3/manage-data/netcdf/spatial-reference-for-netcdf-data.htm
-    grid_map_attrs["crs_wkt"] = match_proj
-    in_ds.coords[grid_map_name].attrs = grid_map_attrs
+    in_ds.rio.write_crs(
+        input_crs=dst_crs, grid_mapping_name=grid_map_name, inplace=True
+    )
     return in_ds
 
 
@@ -230,7 +217,93 @@ class XRasterBase(object):
         """:obj:`rasterio.crs.CRS`:
             The projection of the dataset.
         """
-        return self._crs
+        raise NotImplementedError
+
+    def set_crs(self, input_crs, inplace=True):
+        """
+        Set the CRS value for the Dataset/DataArray without modifying
+        the dataset/data array.
+
+        Parameters:
+        -----------
+        input_crs: object
+            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+
+        Returns:
+        --------
+        xarray.Dataset or xarray.DataArray:
+        Dataset with crs attribute.
+
+        """
+        crs = CRS.from_user_input(input_crs)
+        if inplace:
+            self._crs = crs
+            return self._obj
+        xobj = self._obj.copy(deep=True)
+        xobj.rio._crs = crs
+        return xobj
+
+    def write_crs(
+        self, input_crs=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
+    ):
+        """
+        Write the CRS to the dataset in a CF compliant manner.
+
+        Parameters:
+        -----------
+        input_crs: object
+            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+        grid_mapping_name: str, optional
+            Name of the coordinate to store the CRS information in.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns:
+        --------
+        xarray.Dataset or xarray.DataArray:
+        Modified dataset with CF compliant CRS information.
+
+        """
+        if input_crs is not None:
+            data_obj = self.set_crs(input_crs, inplace=inplace)
+        elif inplace:
+            data_obj = self._obj
+        else:
+            data_obj = self._obj.copy(deep=True)
+
+        # remove old grid maping coordinate if exists
+        try:
+            del data_obj.coords[grid_mapping_name]
+        except KeyError:
+            pass
+
+        if data_obj.rio.crs is None:
+            raise MissingCRS("CRS not found. Please set the CRS with 'set_crs()'.")
+        # add grid mapping coordinate
+        data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+        crs_wkt = crs_to_wkt(data_obj.rio.crs)
+        grid_map_attrs = dict()
+        grid_map_attrs["spatial_ref"] = crs_wkt
+        # http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#appendix-grid-mappings
+        # http://desktop.arcgis.com/en/arcmap/10.3/manage-data/netcdf/spatial-reference-for-netcdf-data.htm
+        grid_map_attrs["crs_wkt"] = crs_wkt
+        data_obj.coords[grid_mapping_name].attrs = grid_map_attrs
+
+        # add grid mapping attribute to variables
+        if hasattr(data_obj, "data_vars"):
+            for var in data_obj.data_vars:
+                if (
+                    self.x_dim in data_obj[var].dims
+                    and self.y_dim in data_obj[var].dims
+                ):
+                    var_attrs = dict(data_obj[var].attrs)
+                    var_attrs.update(grid_mapping=grid_mapping_name)
+                    data_obj[var].attrs = var_attrs
+        else:
+            var_attrs = dict(data_obj.attrs)
+            var_attrs.update(grid_mapping=grid_mapping_name)
+            data_obj.attrs = var_attrs
+        return data_obj
 
     @property
     def shape(self):
@@ -255,17 +328,23 @@ class RasterArray(XRasterBase):
             Retrieve projection from `xarray.DataArray`
         """
         if self._crs is not None:
-            return self._crs
+            return None if self._crs is False else self._crs
 
         try:
             # look in grid_mapping
             grid_mapping_coord = self._obj.attrs["grid_mapping"]
-            self._crs = CRS.from_user_input(
-                self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
-            )
+            try:
+                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
+            except KeyError:
+                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["crs_wkt"]
+            self._crs = CRS.from_user_input(crs_wkt)
         except KeyError:
-            # look in attrs for 'crs' from rasterio xarray
-            self._crs = CRS.from_user_input(self._obj.attrs["crs"])
+            try:
+                # look in attrs for 'crs' from rasterio xarray
+                self._crs = CRS.from_user_input(self._obj.attrs["crs"])
+            except KeyError:
+                self._crs = False
+                return None
         return self._crs
 
     @property
