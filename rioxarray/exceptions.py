@@ -26,3 +26,7 @@ class TooManyDimensions(RioXarrayError):
 
 class InvalidDimensionOrder(RioXarrayError):
     """This is raised when there the dimensions are not ordered correctly."""
+
+
+class MissingCRS(RioXarrayError):
+    """Missing the CRS in the dataset."""
