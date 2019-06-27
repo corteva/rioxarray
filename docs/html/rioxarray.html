@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>rioxarray package &#8212; rioxarray 0.0.4 documentation</title>
+    <title>rioxarray package &#8212; rioxarray 0.0.5 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">rioxarray</a> &#187;</li> 
       </ul>
     </div>  
@@ -143,6 +143,12 @@ an exception.</p></li>
 <em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.crs" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>:
 Retrieve projection from <cite>xarray.DataArray</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.encoded_nodata">
+<em class="property">property </em><code class="sig-name descname">encoded_nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.encoded_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the encoded nodata value for the dataset if encoded.</p>
 </dd></dl>
 
 <dl class="method">
@@ -504,6 +510,19 @@ The projection of the dataset.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_crs">
+<code class="sig-name descname">set_crs</code><span class="sig-paren">(</span><em class="sig-param">input_crs</em>, <em class="sig-param">inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the CRS value for the Dataset/DataArray without modifying
+the dataset/data array.</p>
+<dl class="simple">
+<dt>input_crs: object</dt><dd><p>Anythong accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</p>
+</dd>
+</dl>
+<p>xarray.Dataset or xarray.DataArray:
+Dataset with crs attribute.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.shape">
 <em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the shape (x_size, y_size)</p>
@@ -512,6 +531,22 @@ The projection of the dataset.</p>
 <dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_crs">
+<code class="sig-name descname">write_crs</code><span class="sig-paren">(</span><em class="sig-param">input_crs=None</em>, <em class="sig-param">grid_mapping_name='spatial_ref'</em>, <em class="sig-param">inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the CRS to the dataset in a CF compliant manner.</p>
+<dl class="simple">
+<dt>input_crs: object</dt><dd><p>Anythong accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</p>
+</dd>
+<dt>grid_mapping_name: str, optional</dt><dd><p>Name of the coordinate to store the CRS information in.</p>
+</dd>
+<dt>inplace: bool, optional</dt><dd><p>If True, it will write to the existing dataset. Default is False.</p>
+</dd>
+</dl>
+<p>xarray.Dataset or xarray.DataArray:
+Modified dataset with CF compliant CRS information.</p>
 </dd></dl>
 
 </dd></dl>
@@ -581,6 +616,13 @@ The projection of the dataset.</p>
 <em class="property">exception </em><code class="sig-prename descclassname">rioxarray.exceptions.</code><code class="sig-name descname">InvalidDimensionOrder</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#InvalidDimensionOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.InvalidDimensionOrder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
 <p>This is raised when there the dimensions are not ordered correctly.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.MissingCRS">
+<em class="property">exception </em><code class="sig-prename descclassname">rioxarray.exceptions.</code><code class="sig-name descname">MissingCRS</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#MissingCRS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.MissingCRS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>Missing the CRS in the dataset.</p>
 </dd></dl>
 
 <dl class="exception">
@@ -679,7 +721,7 @@ The projection of the dataset.</p>
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >rioxarray</a> &#187;</li> 
       </ul>
     </div>
