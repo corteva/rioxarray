@@ -659,6 +659,24 @@ def test_geographic_reproject():
         _assert_xarrays_equal(mds_repr, mdc)
 
 
+def test_geographic_reproject__missing_nodata():
+    sentinel_2_geographic = os.path.join(
+        TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
+    )
+    sentinel_2_utm = os.path.join(
+        TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
+    )
+    with xarray.open_dataset(
+        sentinel_2_geographic, autoclose=True
+    ) as mda, xarray.open_dataset(sentinel_2_utm, autoclose=True) as mdc:
+        mda.red.attrs.pop("nodata")
+        mda.nir.attrs.pop("nodata")
+        mds_repr = mda.rio.reproject("+init=epsg:32721")
+        # mds_repr.to_netcdf(sentinel_2_utm)
+        # test
+        _assert_xarrays_equal(mds_repr, mdc)
+
+
 def test_geographic_resample_integer():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
@@ -676,7 +694,7 @@ def test_geographic_resample_integer():
 
 
 def test_to_raster(tmpdir):
-    tmp_raster = tmpdir.join("modis_raster.tiff")
+    tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with xarray.open_dataarray(
         os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"), autoclose=True
@@ -685,21 +703,23 @@ def test_to_raster(tmpdir):
         xds = mda.copy()
 
     with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.count == 1
         assert rds.crs == xds.rio.crs
         assert_array_equal(rds.transform, xds.rio.transform())
-        assert_array_equal(rds.nodata, xds.rio.nodata)
-        assert_array_equal(rds.read(1), xds.values)
+        assert_array_equal(rds.nodata, xds.rio.encoded_nodata)
+        assert_array_equal(rds.read(1), xds.fillna(xds.rio.encoded_nodata).values)
         assert rds.count == 1
         assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
 
 
 def test_to_raster_3d(tmpdir):
-    tmp_raster = tmpdir.join("planet_3d_raster.tiff")
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), autoclose=True
     ) as mda:
-        mda.green.rio.to_raster(str(tmp_raster))
-        xds = mda.green.copy()
+        xds = mda.green.fillna(mda.green.rio.encoded_nodata)
+        xds.rio._nodata = mda.green.rio.encoded_nodata
+        xds.rio.to_raster(str(tmp_raster))
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs
