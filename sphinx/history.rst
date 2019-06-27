@@ -5,6 +5,7 @@ History
 -----
 - Find nodata and nodatavals in 'nodata' property (pull #12)
 - Added 'encoded_nodata' property to DataArray (pull #12)
+- Write the raster with encoded_nodata instead of NaN for nodata (pull #12)
 
 0.0.4
 ------

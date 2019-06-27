@@ -851,10 +851,17 @@ class RasterArray(XRasterBase):
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=True),
-            nodata=self.nodata,
+            nodata=(
+                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+            ),
             **profile_kwargs,
         ) as dst:
-            data = self._obj.values.astype(dtype)
+
+            if self.encoded_nodata is not None:
+                out_data = self._obj.fillna(self.encoded_nodata)
+            else:
+                out_data = self._obj
+            data = out_data.astype(dtype).load().data
             if data.ndim == 2:
                 dst.write(data, 1)
             else:
