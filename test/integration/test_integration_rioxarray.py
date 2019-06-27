@@ -508,9 +508,9 @@ def test_make_src_affine__single_point():
         calculated_transform = tuple(xdi.rio.transform(recalc=True))
         # delete the transform to ensure it is not being used
         del xdi.attrs["transform"]
-        with pytest.raises(ValueError):
+        with pytest.raises(OneDimensionalRaster):
             xdi.rio.transform(recalc=True)
-        with pytest.raises(ValueError):
+        with pytest.raises(OneDimensionalRaster):
             xdi.rio.transform()
 
         assert_array_equal(attribute_transform, attribute_transform_func)

@@ -405,7 +405,7 @@ class RasterArray(XRasterBase):
             left, bottom, right, top = self._int_bounds()
 
             if width == 1 or height == 1:
-                raise ValueError(
+                raise OneDimensionalRaster(
                     "Only 1 dimenional array found. Cannot calculate the resolution."
                 )
 
