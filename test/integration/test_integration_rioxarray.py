@@ -659,6 +659,24 @@ def test_geographic_reproject():
         _assert_xarrays_equal(mds_repr, mdc)
 
 
+def test_geographic_reproject__missing_nodata():
+    sentinel_2_geographic = os.path.join(
+        TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
+    )
+    sentinel_2_utm = os.path.join(
+        TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
+    )
+    with xarray.open_dataset(
+        sentinel_2_geographic, autoclose=True
+    ) as mda, xarray.open_dataset(sentinel_2_utm, autoclose=True) as mdc:
+        mda.red.attrs.pop("nodata")
+        mda.nir.attrs.pop("nodata")
+        mds_repr = mda.rio.reproject("+init=epsg:32721")
+        # mds_repr.to_netcdf(sentinel_2_utm)
+        # test
+        _assert_xarrays_equal(mds_repr, mdc)
+
+
 def test_geographic_resample_integer():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"

@@ -31,7 +31,7 @@ from rioxarray.exceptions import (
 )
 from rioxarray.crs import crs_to_wkt
 
-FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value")
+FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
 UNWANTED_RIO_ATTRS = ("nodata", "nodatavals", "crs", "is_tiled", "res")
 DEFAULT_GRID_MAP = "spatial_ref"
 
@@ -73,18 +73,20 @@ def _get_grid_map_name(src_data_array):
 
 
 def _generate_attrs(src_data_array, dst_affine, dst_nodata):
-
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
     # remove all nodata information
     for unwanted_attr in FILL_VALUE_NAMES + UNWANTED_RIO_ATTRS:
-        try:
-            del new_attrs[unwanted_attr]
-        except KeyError:
-            pass
+        new_attrs.pop(unwanted_attr, None)
 
     # add nodata information
-    new_attrs["_FillValue"] = src_data_array.encoding.get("_FillValue", dst_nodata)
+    fill_value = (
+        src_data_array.rio.nodata
+        if src_data_array.rio.nodata is not None
+        else dst_nodata
+    )
+    if src_data_array.rio.encoded_nodata is None and fill_value is not None:
+        new_attrs["_FillValue"] = fill_value
 
     # add raster spatial information
     new_attrs["transform"] = tuple(dst_affine)
@@ -149,20 +151,11 @@ def _add_attrs_proj(new_data_array, src_data_array):
         new_data_array.rio.transform(recalc=True),
         new_data_array.rio.nodata,
     )
-    if new_data_array.rio.nodata is None:
-        try:
-            new_attrs["_FillValue"] = src_data_array.attrs["nodata"]
-        except KeyError:
-            pass
-        try:
-            new_attrs["_FillValue"] = src_data_array.attrs["nodatavals"][0]
-        except KeyError:
-            pass
     # remove fill value if it already exists in the encoding
     # this is for data arrays pulling the encoding from a
     # source data array instead of being generated anew.
     if "_FillValue" in new_data_array.encoding:
-        del new_attrs["_FillValue"]
+        new_attrs.pop("_FillValue", None)
 
     new_data_array.attrs = new_attrs
 
@@ -276,18 +269,36 @@ class RasterArray(XRasterBase):
         return self._crs
 
     @property
+    def encoded_nodata(self):
+        """Return the encoded nodata value for the dataset if encoded."""
+        return self._obj.encoding.get("_FillValue")
+
+    @property
     def nodata(self):
         """Get the nodata value for the dataset."""
         if self._nodata is not None:
-            return self._nodata
+            return None if self._nodata is False else self._nodata
 
-        if self._obj.encoding.get("_FillValue") is not None:
+        if self.encoded_nodata is not None:
             self._nodata = np.nan
         else:
             self._nodata = self._obj.attrs.get(
                 "_FillValue",
-                self._obj.attrs.get("missing_value", self._obj.attrs.get("fill_value")),
+                self._obj.attrs.get(
+                    "missing_value",
+                    self._obj.attrs.get("fill_value", self._obj.attrs.get("nodata")),
+                ),
             )
+        if self._nodata is None:
+            try:
+                self._nodata = self._obj.attrs["nodatavals"][0]
+            except (KeyError, IndexError):
+                pass
+
+        if self._nodata is None:
+            self._nodata = False
+            return None
+
         return self._nodata
 
     def resolution(self, recalc=False):
@@ -481,12 +492,16 @@ class RasterArray(XRasterBase):
             dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
 
         try:
-            dst_nodata = self._obj.dtype.type(self.nodata or -9999)
+            dst_nodata = self._obj.dtype.type(
+                self.nodata if self.nodata is not None else -9999
+            )
         except ValueError:
             # if integer, set nodata to -9999
             dst_nodata = self._obj.dtype.type(-9999)
 
-        src_nodata = self._obj.dtype.type(self._obj.attrs.get("nodata", dst_nodata))
+        src_nodata = self._obj.dtype.type(
+            self.nodata if self.nodata is not None else dst_nodata
+        )
         rasterio.warp.reproject(
             source=src_data,
             destination=dst_data,
@@ -515,6 +530,7 @@ class RasterArray(XRasterBase):
             coords=_make_coords(self._obj, dst_affine, dst_width, dst_height, dst_crs),
             dims=tuple(dst_dims),
             attrs=new_attrs,
+            encoding=self._obj.encoding,
         )
         return add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
 
@@ -788,6 +804,7 @@ class RasterArray(XRasterBase):
             coords=self._obj.coords,
             dims=self._obj.dims,
             attrs=self._obj.attrs,
+            encoding=self._obj.encoding,
         )
 
         # make sure correct attributes preserved & projection added
