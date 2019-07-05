@@ -183,9 +183,9 @@ def modis_clip(request, tmpdir):
 
 
 def test_clip_box(modis_clip):
-    with modis_clip["open"](modis_clip["input"], autoclose=True) as xdi, modis_clip[
-        "open"
-    ](modis_clip["compare"], autoclose=True) as xdc:
+    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
+        modis_clip["compare"]
+    ) as xdc:
         clipped_ds = xdi.rio.clip_box(
             minx=xdi.x[4].values,
             miny=xdi.y[6].values,
@@ -201,9 +201,9 @@ def test_clip_box(modis_clip):
 
 
 def test_clip_box__auto_expand(modis_clip):
-    with modis_clip["open"](modis_clip["input"], autoclose=True) as xdi, modis_clip[
-        "open"
-    ](modis_clip["compare"], autoclose=True) as xdc:
+    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
+        modis_clip["compare"]
+    ) as xdc:
         clipped_ds = xdi.rio.clip_box(
             minx=xdi.x[5].values,
             miny=xdi.y[5].values,
@@ -221,7 +221,7 @@ def test_clip_box__auto_expand(modis_clip):
 
 
 def test_clip_box__nodata_error(modis_clip):
-    with modis_clip["open"](modis_clip["input"], autoclose=True) as xdi:
+    with modis_clip["open"](modis_clip["input"]) as xdi:
         with pytest.raises(NoDataInBounds):
             xdi.rio.clip_box(
                 minx=xdi.x[5].values,
@@ -232,7 +232,7 @@ def test_clip_box__nodata_error(modis_clip):
 
 
 def test_clip_box__one_dimension_error(modis_clip):
-    with modis_clip["open"](modis_clip["input"], autoclose=True) as xdi:
+    with modis_clip["open"](modis_clip["input"]) as xdi:
         # test exception after raster clipped
         with pytest.raises(OneDimensionalRaster):
             xdi.rio.clip_box(
@@ -295,7 +295,7 @@ def test_clip_geojson():
 
 def test_transform_bounds():
     with xarray.open_dataarray(
-        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"), autoclose=True
+        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
     ) as xdi:
         bounds = xdi.rio.transform_bounds(
             "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84"
@@ -315,9 +315,9 @@ def test_transform_bounds():
 
 def test_reproject(modis_reproject):
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False, autoclose=True
+        modis_reproject["input"], mask_and_scale=False
     ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False, autoclose=True
+        modis_reproject["compare"], mask_and_scale=False
     ) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
         # test
@@ -326,9 +326,9 @@ def test_reproject(modis_reproject):
 
 def test_reproject_3d(modis_reproject_3d):
     with xarray.open_dataset(
-        modis_reproject_3d["input"], mask_and_scale=False, autoclose=True
+        modis_reproject_3d["input"], mask_and_scale=False
     ) as mda, xarray.open_dataset(
-        modis_reproject_3d["compare"], mask_and_scale=False, autoclose=True
+        modis_reproject_3d["compare"], mask_and_scale=False
     ) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
         # test
@@ -337,9 +337,9 @@ def test_reproject_3d(modis_reproject_3d):
 
 def test_reproject__grid_mapping(modis_reproject):
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False, autoclose=True
+        modis_reproject["input"], mask_and_scale=False
     ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False, autoclose=True
+        modis_reproject["compare"], mask_and_scale=False
     ) as mdc:
 
         # remove 'crs' attribute and add grid mapping
@@ -363,11 +363,9 @@ def test_reproject__grid_mapping(modis_reproject):
 
 
 def test_reproject__masked(modis_reproject):
-    with modis_reproject["open"](
-        modis_reproject["input"], autoclose=True
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], autoclose=True
-    ) as mdc:
+    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
+        "open"
+    ](modis_reproject["compare"]) as mdc:
         # reproject
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
         # test
@@ -375,11 +373,9 @@ def test_reproject__masked(modis_reproject):
 
 
 def test_reproject__no_transform(modis_reproject):
-    with modis_reproject["open"](
-        modis_reproject["input"], autoclose=True
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], autoclose=True
-    ) as mdc:
+    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
+        "open"
+    ](modis_reproject["compare"]) as mdc:
         orig_trans = _get_attr(mda, "transform")
         _del_attr(mda, "transform")
         # reproject
@@ -395,9 +391,9 @@ def test_reproject__no_transform(modis_reproject):
 
 def test_reproject__no_nodata(modis_reproject):
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False, autoclose=True
+        modis_reproject["input"], mask_and_scale=False
     ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False, autoclose=True
+        modis_reproject["compare"], mask_and_scale=False
     ) as mdc:
         orig_fill = _get_attr(mda, "_FillValue")
         _del_attr(mda, "_FillValue")
@@ -430,11 +426,9 @@ def test_reproject__scalar_coord():
 
 
 def test_reproject__no_nodata_masked(modis_reproject):
-    with modis_reproject["open"](
-        modis_reproject["input"], autoclose=True
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], autoclose=True
-    ) as mdc:
+    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
+        "open"
+    ](modis_reproject["compare"]) as mdc:
         _del_attr(mda, "nodata")
         # reproject
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
@@ -444,11 +438,11 @@ def test_reproject__no_nodata_masked(modis_reproject):
 
 def test_reproject_match(modis_reproject_match):
     with modis_reproject_match["open"](
-        modis_reproject_match["input"], mask_and_scale=False, autoclose=True
+        modis_reproject_match["input"], mask_and_scale=False
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], mask_and_scale=False, autoclose=True
+        modis_reproject_match["compare"], mask_and_scale=False
     ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"], mask_and_scale=False, autoclose=True
+        modis_reproject_match["match"], mask_and_scale=False
     ) as mdm:
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
@@ -458,11 +452,11 @@ def test_reproject_match(modis_reproject_match):
 
 def test_reproject_match__masked(modis_reproject_match):
     with modis_reproject_match["open"](
-        modis_reproject_match["input"], autoclose=True
+        modis_reproject_match["input"]
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], autoclose=True
+        modis_reproject_match["compare"]
     ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"], autoclose=True
+        modis_reproject_match["match"]
     ) as mdm:
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
@@ -472,11 +466,11 @@ def test_reproject_match__masked(modis_reproject_match):
 
 def test_reproject_match__no_transform_nodata(modis_reproject_match):
     with modis_reproject_match["open"](
-        modis_reproject_match["input"], autoclose=True
+        modis_reproject_match["input"]
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], autoclose=True
+        modis_reproject_match["compare"]
     ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"], autoclose=True
+        modis_reproject_match["match"]
     ) as mdm:
         _del_attr(mda, "transform")
         _del_attr(mda, "nodata")
@@ -487,9 +481,9 @@ def test_reproject_match__no_transform_nodata(modis_reproject_match):
 
 
 def test_make_src_affine(modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], autoclose=True
-    ) as xdi, xarray.open_rasterio(modis_reproject["input"]) as xri:
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+        modis_reproject["input"]
+    ) as xri:
 
         # check the transform
         attribute_transform = tuple(xdi.attrs["transform"])
@@ -510,7 +504,7 @@ def test_make_src_affine(modis_reproject):
 
 def test_make_src_affine__single_point():
     point_input = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_POINT.nc")
-    with xarray.open_dataarray(point_input, autoclose=True) as xdi:
+    with xarray.open_dataarray(point_input) as xdi:
         # check the transform
         attribute_transform = tuple(xdi.attrs["transform"])
         attribute_transform_func = tuple(xdi.rio.transform())
@@ -527,9 +521,9 @@ def test_make_src_affine__single_point():
 
 
 def test_make_coords__calc_trans(modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], autoclose=True
-    ) as xdi, xarray.open_rasterio(modis_reproject["input"]) as xri:
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+        modis_reproject["input"]
+    ) as xri:
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
@@ -550,9 +544,9 @@ def test_make_coords__calc_trans(modis_reproject):
 
 
 def test_make_coords__attr_trans(modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], autoclose=True
-    ) as xdi, xarray.open_rasterio(modis_reproject["input"]) as xri:
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+        modis_reproject["input"]
+    ) as xri:
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
@@ -576,9 +570,9 @@ def test_make_coords__attr_trans(modis_reproject):
 
 def test_interpolate_na(interpolate_na):
     with interpolate_na["open"](
-        interpolate_na["input"], mask_and_scale=False, autoclose=True
+        interpolate_na["input"], mask_and_scale=False
     ) as mda, interpolate_na["open"](
-        interpolate_na["compare"], mask_and_scale=False, autoclose=True
+        interpolate_na["compare"], mask_and_scale=False
     ) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
@@ -587,9 +581,9 @@ def test_interpolate_na(interpolate_na):
 
 def test_interpolate_na_veris(interpolate_na_veris):
     with xarray.open_dataset(
-        interpolate_na_veris["input"], mask_and_scale=False, autoclose=True
+        interpolate_na_veris["input"], mask_and_scale=False
     ) as mda, xarray.open_dataset(
-        interpolate_na_veris["compare"], mask_and_scale=False, autoclose=True
+        interpolate_na_veris["compare"], mask_and_scale=False
     ) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
@@ -598,9 +592,9 @@ def test_interpolate_na_veris(interpolate_na_veris):
 
 def test_interpolate_na_3d(interpolate_na_3d):
     with xarray.open_dataset(
-        interpolate_na_3d["input"], mask_and_scale=False, autoclose=True
+        interpolate_na_3d["input"], mask_and_scale=False
     ) as mda, xarray.open_dataset(
-        interpolate_na_3d["compare"], mask_and_scale=False, autoclose=True
+        interpolate_na_3d["compare"], mask_and_scale=False
     ) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
@@ -609,9 +603,9 @@ def test_interpolate_na_3d(interpolate_na_3d):
 
 def test_interpolate_na__nodata_filled(interpolate_na_filled):
     with interpolate_na_filled["open"](
-        interpolate_na_filled["input"], mask_and_scale=False, autoclose=True
+        interpolate_na_filled["input"], mask_and_scale=False
     ) as mda, interpolate_na_filled["open"](
-        interpolate_na_filled["compare"], mask_and_scale=False, autoclose=True
+        interpolate_na_filled["compare"], mask_and_scale=False
     ) as mdc:
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
@@ -626,10 +620,8 @@ def test_interpolate_na__nodata_filled(interpolate_na_filled):
 
 def test_interpolate_na__all_nodata(interpolate_na_nan):
     with interpolate_na_nan["open"](
-        interpolate_na_nan["input"], autoclose=True
-    ) as mda, interpolate_na_nan["open"](
-        interpolate_na_nan["compare"], autoclose=True
-    ) as mdc:
+        interpolate_na_nan["input"]
+    ) as mda, interpolate_na_nan["open"](interpolate_na_nan["compare"]) as mdc:
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
                 mda[var].values[~numpy.isnan(mda[var].values)] = numpy.nan
@@ -645,7 +637,7 @@ def test_load_in_geographic_dimensions():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
-    with xarray.open_dataset(sentinel_2_geographic, autoclose=True) as mda:
+    with xarray.open_dataset(sentinel_2_geographic) as mda:
         assert mda.rio.x_dim == "longitude"
         assert mda.rio.y_dim == "latitude"
         assert mda.rio.crs.to_epsg() == 4326
@@ -659,9 +651,9 @@ def test_geographic_reproject():
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm.nc")
-    with xarray.open_dataset(
-        sentinel_2_geographic, autoclose=True
-    ) as mda, xarray.open_dataset(sentinel_2_utm, autoclose=True) as mdc:
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+        sentinel_2_utm
+    ) as mdc:
         mds_repr = mda.rio.reproject("+init=epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
@@ -675,9 +667,9 @@ def test_geographic_reproject__missing_nodata():
     sentinel_2_utm = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
     )
-    with xarray.open_dataset(
-        sentinel_2_geographic, autoclose=True
-    ) as mda, xarray.open_dataset(sentinel_2_utm, autoclose=True) as mdc:
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+        sentinel_2_utm
+    ) as mdc:
         mda.red.attrs.pop("nodata")
         mda.nir.attrs.pop("nodata")
         mds_repr = mda.rio.reproject("+init=epsg:32721")
@@ -693,9 +685,9 @@ def test_geographic_resample_integer():
     sentinel_2_interp = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_interpolate_na.nc"
     )
-    with xarray.open_dataset(
-        sentinel_2_geographic, autoclose=True
-    ) as mda, xarray.open_dataset(sentinel_2_interp, autoclose=True) as mdc:
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+        sentinel_2_interp
+    ) as mdc:
         mds_interp = mda.rio.interpolate_na()
         # mds_interp.to_netcdf(sentinel_2_interp)
         # test
@@ -706,7 +698,7 @@ def test_to_raster(tmpdir):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with xarray.open_dataarray(
-        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"), autoclose=True
+        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
     ) as mda:
         mda.rio.to_raster(str(tmp_raster), tags=test_tags)
         xds = mda.copy()
@@ -724,7 +716,7 @@ def test_to_raster(tmpdir):
 def test_to_raster_3d(tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with xarray.open_dataset(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), autoclose=True
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
     ) as mda:
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
