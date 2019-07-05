@@ -420,6 +420,15 @@ def test_reproject__no_nodata(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
+def test_reproject__scalar_coord():
+    with xarray.open_rasterio(
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
+    ) as xdi:
+        xdi_repr = xdi.squeeze().rio.reproject("epsg:3395")
+        for coord in xdi.coords:
+            assert coord in xdi_repr
+
+
 def test_reproject__no_nodata_masked(modis_reproject):
     with modis_reproject["open"](
         modis_reproject["input"], autoclose=True

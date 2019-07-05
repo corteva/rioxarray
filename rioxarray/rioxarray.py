@@ -171,11 +171,18 @@ def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
         src_data_array.rio.y_dim,
         "spatial_ref",
     }:
-        coords[coord] = xarray.IndexVariable(
-            src_data_array[coord].dims,
-            src_data_array[coord].values,
-            src_data_array[coord].attrs,
-        )
+        if src_data_array[coord].dims:
+            coords[coord] = xarray.IndexVariable(
+                src_data_array[coord].dims,
+                src_data_array[coord].values,
+                src_data_array[coord].attrs,
+            )
+        else:
+            coords[coord] = xarray.Variable(
+                src_data_array[coord].dims,
+                src_data_array[coord].values,
+                src_data_array[coord].attrs,
+            )
     new_coords = _warp_spatial_coords(src_data_array, dst_affine, dst_width, dst_height)
     new_coords.update(coords)
     return add_xy_grid_meta(new_coords)
