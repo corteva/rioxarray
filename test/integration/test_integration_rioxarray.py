@@ -426,7 +426,7 @@ def test_reproject__scalar_coord():
     ) as xdi:
         xdi_repr = xdi.squeeze().rio.reproject("epsg:3395")
         for coord in xdi.coords:
-            assert coord in xdi_repr
+            assert coord in xdi_repr.coords
 
 
 def test_reproject__no_nodata_masked(modis_reproject):
