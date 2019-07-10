@@ -375,11 +375,16 @@ class RasterArray(XRasterBase):
                     self._obj.attrs.get("fill_value", self._obj.attrs.get("nodata")),
                 ),
             )
+
+        # look in places used by `xarray.open_rasterio`
         if self._nodata is None:
             try:
-                self._nodata = self._obj.attrs["nodatavals"][0]
-            except (KeyError, IndexError):
-                pass
+                self._nodata = self._obj._file_obj.acquire().nodata
+            except AttributeError:
+                try:
+                    self._nodata = self._obj.attrs["nodatavals"][0]
+                except (KeyError, IndexError):
+                    pass
 
         if self._nodata is None:
             self._nodata = False
@@ -918,7 +923,7 @@ class RasterArray(XRasterBase):
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
-            are automatically added.
+            are ignored.
 
         """
         width, height = self.shape
@@ -927,6 +932,32 @@ class RasterArray(XRasterBase):
         count = 1
         if extra_dim is not None:
             count = self._obj[extra_dim].size
+
+        # get the output profile from the rasterio object
+        # if opened with xarray.open_rasterio()
+        try:
+            out_profile = self._obj._file_obj.acquire().profile
+        except AttributeError:
+            out_profile = {}
+        out_profile.update(profile_kwargs)
+
+        # filter out the generated attributes
+        out_profile = {
+            key: value
+            for key, value in out_profile.items()
+            if key
+            not in (
+                "driver",
+                "height",
+                "width",
+                "crs",
+                "transform",
+                "nodata",
+                "count",
+                "dtype",
+            )
+        }
+
         with rasterio.open(
             raster_path,
             "w",
@@ -940,7 +971,7 @@ class RasterArray(XRasterBase):
             nodata=(
                 self.encoded_nodata if self.encoded_nodata is not None else self.nodata
             ),
-            **profile_kwargs,
+            **out_profile,
         ) as dst:
 
             if self.encoded_nodata is not None:

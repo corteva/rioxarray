@@ -4,6 +4,7 @@ import numpy
 import pytest
 import rasterio
 import xarray
+from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
 
@@ -727,6 +728,40 @@ def test_to_raster_3d(tmpdir):
         assert_array_equal(rds.transform, xds.rio.transform())
         assert_array_equal(rds.nodata, xds.rio.nodata)
         assert_array_equal(rds.read(), xds.values)
+
+
+def test_to_raster__preserve_profile__none_nodata(tmpdir):
+    tmp_raster = tmpdir.join("output_profile.tif")
+    input_raster = tmpdir.join("input_profile.tif")
+
+    transform = Affine.from_gdal(0, 512, 0, 0, 0, 512)
+    with rasterio.open(
+        str(input_raster),
+        "w",
+        driver="GTiff",
+        height=512,
+        width=512,
+        count=1,
+        crs="+init=epsg:4326",
+        transform=transform,
+        dtype=rasterio.float32,
+        tiled=True,
+        tilexsize=256,
+        tileysize=256,
+    ) as rds:
+        rds.write(numpy.empty((1, 512, 512), dtype=numpy.float32))
+
+    with xarray.open_rasterio(str(input_raster)) as mda:
+        mda.rio.to_raster(str(tmp_raster))
+
+    with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
+        assert rds.count == rdc.count
+        assert rds.crs == rdc.crs
+        assert_array_equal(rds.transform, rdc.transform)
+        assert_array_equal(rds.nodata, rdc.nodata)
+        assert_array_equal(rds.read(), rdc.read())
+        assert rds.profile == rdc.profile
+        assert rds.nodata is None
 
 
 def test_missing_dimensions():

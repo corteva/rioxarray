@@ -5,6 +5,8 @@ History
 -----
 - Add support for scalar coordinates in reproject (issue #15)
 - Updated writing encoding for FutureWarning (issue #18)
+- Use input raster profile for defaults to write output raster profile if opened with `xarray.open_rasterio` (issue #19)
+- Preserve None nodata if opened with `xarray.open_rasterio` (issue #20)
 
 0.0.5
 -----
