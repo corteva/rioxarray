@@ -24,6 +24,7 @@ from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
 
 from rioxarray.exceptions import (
+    DimensionError,
     InvalidDimensionOrder,
     MissingCRS,
     NoDataInBounds,
@@ -204,18 +205,19 @@ class XRasterBase(object):
     def __init__(self, xarray_obj):
         self._obj = xarray_obj
 
+        self._x_dim = None
+        self._y_dim = None
         # Determine the spatial dimensions of the `xarray.DataArray`
         if "x" in self._obj.dims and "y" in self._obj.dims:
-            self.x_dim = "x"
-            self.y_dim = "y"
+            self._x_dim = "x"
+            self._y_dim = "y"
         elif "longitude" in self._obj.dims and "latitude" in self._obj.dims:
-            self.x_dim = "longitude"
-            self.y_dim = "latitude"
-        else:
-            raise KeyError("Missing x,y dimensions ...")
+            self._x_dim = "longitude"
+            self._y_dim = "latitude"
 
         # properties
-        self._shape = None
+        self._width = None
+        self._height = None
         self._crs = None
 
     @property
@@ -312,12 +314,80 @@ class XRasterBase(object):
             data_obj.attrs = var_attrs
         return data_obj
 
+    def set_spatial_dims(self, x_dim, y_dim, inplace=True):
+        """
+        This sets the spatial dimensions of the dataset.
+
+        Parameters:
+        -----------
+        x_dim: str
+            The name of the x dimension.
+        y_dim: str
+            The name of the y dimension.
+        inplace: bool, optional
+            If True, it will modify the dataframe in place.
+            Otherwise it will return a modified copy.
+
+        Returns:
+        --------
+        xarray.Dataset or xarray.DataArray:
+            Dataset with spatial dimensions set.
+
+        """
+
+        def set_dims(obj, in_x_dim, in_y_dim):
+            if in_x_dim in obj.dims:
+                obj.rio._x_dim = x_dim
+            else:
+                raise DimensionError("x dimension not found: {}".format(x_dim))
+            if y_dim in obj.dims:
+                obj.rio._y_dim = y_dim
+            else:
+                raise DimensionError("y dimension not found: {}".format(y_dim))
+
+        if not inplace:
+            obj_copy = self._obj.copy()
+            set_dims(obj_copy, x_dim, y_dim)
+            return obj_copy
+        set_dims(self._obj, x_dim, y_dim)
+        return self._obj
+
+    @property
+    def x_dim(self):
+        if self._x_dim is not None:
+            return self._x_dim
+        raise DimensionError(
+            "x dimension not found. 'set_spatial_dims()' can address this."
+        )
+
+    @property
+    def y_dim(self):
+        if self._y_dim is not None:
+            return self._y_dim
+        raise DimensionError(
+            "x dimension not found. 'set_spatial_dims()' can address this."
+        )
+
+    @property
+    def width(self):
+        """int: Returns the width of the dataset (x dimension size)"""
+        if self._width is not None:
+            return self._width
+        self._width = self._obj[self.x_dim].size
+        return self._width
+
+    @property
+    def height(self):
+        """int: Returns the height of the dataset (y dimension size)"""
+        if self._height is not None:
+            return self._height
+        self._height = self._obj[self.y_dim].size
+        return self._height
+
     @property
     def shape(self):
-        """tuple: Returns the shape (x_size, y_size)"""
-        if self._shape is None:
-            self._shape = self._obj[self.x_dim].size, self._obj[self.y_dim].size
-        return self._shape
+        """tuple: Returns the shape (width, height)"""
+        return (self.width, self.height)
 
 
 @xarray.register_dataarray_accessor("rio")
@@ -402,8 +472,7 @@ class RasterArray(XRasterBase):
             transform attribute.
 
         """
-        width, height = self.shape
-        if not recalc or width == 1 or height == 1:
+        if not recalc or self.width == 1 or self.height == 1:
             try:
                 # get resolution from xarray rasterio
                 data_transform = Affine(*self._obj.attrs["transform"][:6])
@@ -414,19 +483,19 @@ class RasterArray(XRasterBase):
                 recalc = True
 
         if recalc:
-            left, bottom, right, top = self._int_bounds()
+            left, bottom, right, top = self._internal_bounds()
 
-            if width == 1 or height == 1:
+            if self.width == 1 or self.height == 1:
                 raise OneDimensionalRaster(
                     "Only 1 dimenional array found. Cannot calculate the resolution."
                 )
 
-            resolution_x = (right - left) / (width - 1)
-            resolution_y = (bottom - top) / (height - 1)
+            resolution_x = (right - left) / (self.width - 1)
+            resolution_y = (bottom - top) / (self.height - 1)
 
         return resolution_x, resolution_y
 
-    def _int_bounds(self):
+    def _internal_bounds(self):
         """Determine the internal bounds of the `xarray.DataArray`"""
         left = float(self._obj[self.x_dim][0])
         right = float(self._obj[self.x_dim][-1])
@@ -476,7 +545,7 @@ class RasterArray(XRasterBase):
         left, bottom, right, top: float
             Outermost coordinates.
         """
-        left, bottom, right, top = self._int_bounds()
+        left, bottom, right, top = self._internal_bounds()
         src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
         left -= src_resolution_x / 2.0
         right += src_resolution_x / 2.0
@@ -563,9 +632,6 @@ class RasterArray(XRasterBase):
         :class:`xarray.DataArray`: A reprojected DataArray.
 
         """
-        # TODO: Support lazy loading of data with dask imperative function
-        src_data = np.copy(self._obj.load().data)
-
         src_affine = self.transform()
         if dst_affine_width_height is not None:
             dst_affine, dst_width, dst_height = dst_affine_width_height
@@ -594,7 +660,7 @@ class RasterArray(XRasterBase):
             self.nodata if self.nodata is not None else dst_nodata
         )
         rasterio.warp.reproject(
-            source=src_data,
+            source=np.copy(self._obj.load().data),
             destination=dst_data,
             src_transform=src_affine,
             src_crs=self.crs,
@@ -682,12 +748,13 @@ class RasterArray(XRasterBase):
         DataArray: A sliced :class:`xarray.DataArray` object.
 
         """
-        if self._obj.y[0] > self._obj.y[-1]:
+        left, bottom, right, top = self._internal_bounds()
+        if top > bottom:
             y_slice = slice(maxy, miny)
         else:
             y_slice = slice(miny, maxy)
 
-        if self._obj.x[0] > self._obj.x[-1]:
+        if left > right:
             x_slice = slice(maxx, minx)
         else:
             x_slice = slice(minx, maxx)
@@ -718,9 +785,9 @@ class RasterArray(XRasterBase):
         DataArray: A clipped :class:`xarray.DataArray` object.
 
         """
-        if self._obj.coords["x"].size == 1 or self._obj.coords["y"].size == 1:
+        if self.width == 1 or self.height == 1:
             raise OneDimensionalRaster(
-                "At least one of the raster x,y coordinates" " has only one point."
+                "At least one of the raster x,y coordinates has only one point."
             )
 
         resolution_x, resolution_y = self.resolution()
@@ -732,10 +799,10 @@ class RasterArray(XRasterBase):
 
         cl_array = self.slice_xy(clip_minx, clip_miny, clip_maxx, clip_maxy)
 
-        if cl_array.coords["x"].size < 1 or cl_array.coords["y"].size < 1:
+        if cl_array.rio.width < 1 or cl_array.rio.height < 1:
             raise NoDataInBounds("No data found in bounds.")
 
-        if cl_array.coords["x"].size == 1 or cl_array.coords["y"].size == 1:
+        if cl_array.rio.width == 1 or cl_array.rio.height == 1:
             if auto_expand and auto_expand < auto_expand_limit:
                 return self.clip_box(
                     clip_minx,
@@ -799,10 +866,9 @@ class RasterArray(XRasterBase):
             for geometry in geometries
         ]
 
-        width, height = self.shape
         clip_mask_arr = geometry_mask(
             geometries=geometries,
-            out_shape=(int(height), int(width)),
+            out_shape=(int(self.height), int(self.width)),
             transform=self.transform(),
             invert=True,
             all_touched=all_touched,
@@ -933,7 +999,6 @@ class RasterArray(XRasterBase):
             are ignored.
 
         """
-        width, height = self.shape
         dtype = str(self._obj.dtype) if dtype is None else dtype
         extra_dim = self._check_dimensions()
         count = 1
@@ -969,8 +1034,8 @@ class RasterArray(XRasterBase):
             raster_path,
             "w",
             driver=driver,
-            height=int(height),
-            width=int(width),
+            height=int(self.height),
+            width=int(self.width),
             count=count,
             dtype=dtype,
             crs=self.crs,

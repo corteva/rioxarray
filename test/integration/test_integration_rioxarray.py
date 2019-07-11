@@ -8,7 +8,12 @@ from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
 
-from rioxarray.exceptions import MissingCRS, NoDataInBounds, OneDimensionalRaster
+from rioxarray.exceptions import (
+    DimensionError,
+    MissingCRS,
+    NoDataInBounds,
+    OneDimensionalRaster,
+)
 from rioxarray.rioxarray import UNWANTED_RIO_ATTRS, _make_coords
 from test.conftest import TEST_COMPARE_DATA_DIR, TEST_INPUT_DATA_DIR
 
@@ -796,10 +801,61 @@ def test_to_raster__preserve_profile__none_nodata(tmpdir):
         assert rds.nodata is None
 
 
-def test_missing_dimensions():
+def test_missing_spatial_dimensions():
     test_ds = xarray.Dataset()
-    with pytest.raises(KeyError):
-        test_ds.rio
+    with pytest.raises(DimensionError):
+        test_ds.rio.shape
+    with pytest.raises(DimensionError):
+        test_ds.rio.width
+    with pytest.raises(DimensionError):
+        test_ds.rio.height
+    test_da = xarray.DataArray(1)
+    with pytest.raises(DimensionError):
+        test_da.rio.shape
+    with pytest.raises(DimensionError):
+        test_da.rio.width
+    with pytest.raises(DimensionError):
+        test_da.rio.height
+
+
+def test_set_spatial_dims():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("lat", "lon"),
+        coords={"lat": numpy.arange(1, 6), "lon": numpy.arange(2, 7)},
+    )
+    test_da_copy = test_da.rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=False)
+    assert test_da_copy.rio.x_dim == "lon"
+    assert test_da_copy.rio.y_dim == "lat"
+    assert test_da_copy.rio.width == 5
+    assert test_da_copy.rio.height == 5
+    assert test_da_copy.rio.shape == (5, 5)
+    with pytest.raises(DimensionError):
+        test_da.rio.shape
+    with pytest.raises(DimensionError):
+        test_da.rio.width
+    with pytest.raises(DimensionError):
+        test_da.rio.height
+
+    test_da.rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=True)
+    assert test_da.rio.x_dim == "lon"
+    assert test_da.rio.y_dim == "lat"
+    assert test_da.rio.width == 5
+    assert test_da.rio.height == 5
+    assert test_da.rio.shape == (5, 5)
+
+
+def test_set_spatial_dims__missing():
+    test_ds = xarray.Dataset()
+    with pytest.raises(DimensionError):
+        test_ds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("lat", "lon"),
+        coords={"lat": numpy.arange(1, 6), "lon": numpy.arange(2, 7)},
+    )
+    with pytest.raises(DimensionError):
+        test_da.rio.set_spatial_dims(x_dim="long", y_dim="lati")
 
 
 def test_crs_setter():

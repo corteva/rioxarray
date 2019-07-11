@@ -9,6 +9,7 @@ History
 - Preserve None nodata if opened with `xarray.open_rasterio` (issue #20)
 - Added `drop` argument for `clip()` (issue #25)
 - Fix order of `CRS` for reprojecting geometries in `clip()` (pull #24)
+- Added `set_spatial_dims()` method for datasets when dimensions not found (issue #27)
 
 0.0.5
 -----
