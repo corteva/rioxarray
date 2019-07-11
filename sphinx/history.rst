@@ -7,6 +7,8 @@ History
 - Updated writing encoding for FutureWarning (issue #18)
 - Use input raster profile for defaults to write output raster profile if opened with `xarray.open_rasterio` (issue #19)
 - Preserve None nodata if opened with `xarray.open_rasterio` (issue #20)
+- Added `drop` argument for `clip()` (issue #25)
+- Fix order of `CRS` for reprojecting geometries in `clip()` (pull #24)
 
 0.0.5
 -----

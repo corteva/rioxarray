@@ -755,7 +755,7 @@ class RasterArray(XRasterBase):
 
         return cl_array
 
-    def clip(self, geometries, crs, all_touched=False):
+    def clip(self, geometries, crs, all_touched=False, drop=True):
         """
         Crops a :class:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -767,10 +767,14 @@ class RasterArray(XRasterBase):
             A list of geojson geometry dicts.
         crs: :obj:`rasterio.crs.CRS`
             The CRS of the input geometries.
-        all_touched : boolean, optional
+        all_touched : bool, optional
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
+        drop: bool, optional
+            If True, drop the data outside of the extent of the mask geoemtries
+            Otherwise, it will return the same raster with the data masked.
+            Default is True.
 
         Returns
         -------
@@ -791,7 +795,7 @@ class RasterArray(XRasterBase):
             >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
         """
         geometries = [
-            rasterio.warp.transform_geom(self.crs, CRS.from_user_input(crs), geometry)
+            rasterio.warp.transform_geom(CRS.from_user_input(crs), self.crs, geometry)
             for geometry in geometries
         ]
 
@@ -811,8 +815,11 @@ class RasterArray(XRasterBase):
             },
             dims=(self.y_dim, self.x_dim),
         )
+        cropped_ds = self._obj.where(clip_mask_xray, drop=drop)
+        if self.nodata is not None and not np.isnan(self.nodata):
+            cropped_ds = cropped_ds.fillna(self.nodata)
 
-        cropped_ds = self._obj.where(clip_mask_xray, drop=True).astype(self._obj.dtype)
+        cropped_ds = cropped_ds.astype(self._obj.dtype)
 
         if (
             cropped_ds.coords[self.x_dim].size < 1
@@ -1123,7 +1130,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
 
-    def clip(self, geometries, crs, all_touched=False):
+    def clip(self, geometries, crs, all_touched=False, drop=True):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
@@ -1142,6 +1149,10 @@ class RasterDataset(XRasterBase):
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
+        drop: bool, optional
+            If True, drop the data outside of the extent of the mask geoemtries
+            Otherwise, it will return the same raster with the data masked.
+            Default is True.
 
         Returns
         -------
@@ -1164,7 +1175,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             clipped_dataset[var] = self._obj[var].rio.clip(
-                geometries, crs=crs, all_touched=all_touched
+                geometries, crs=crs, all_touched=all_touched, drop=drop
             )
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset

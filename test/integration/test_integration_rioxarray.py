@@ -262,10 +262,9 @@ def test_clip_geojson():
         # add transform for test
         comp_subset.attrs["transform"] = tuple(comp_subset.rio.transform(recalc=True))
         # add grid mapping for test
-        comp_subset.attrs["grid_mapping"] = "spatial_ref"
-        comp_subset.coords["spatial_ref"] = 0
+        comp_subset.rio.write_crs(subset.rio.crs, inplace=True)
         # make sure nodata exists for test
-        comp_subset.attrs["_FillValue"] = comp_subset.attrs["nodatavals"][0]
+        comp_subset.attrs["_FillValue"] = comp_subset.rio.nodata
 
         geometries = [
             {
@@ -283,7 +282,7 @@ def test_clip_geojson():
         ]
 
         # test data array
-        clipped = xdi.rio.clip(geometries, subset.rio.crs)
+        clipped = xdi.rio.clip(geometries, comp_subset.rio.crs)
         _assert_xarrays_equal(clipped, comp_subset)
 
         # test dataset
@@ -292,6 +291,39 @@ def test_clip_geojson():
         )
         comp_subset_ds = comp_subset.to_dataset(name="test_data")
         _assert_xarrays_equal(clipped_ds, comp_subset_ds)
+
+
+def test_clip_geojson__no_drop():
+    with xarray.open_rasterio(
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
+    ) as xdi:
+        geometries = [
+            {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [-93.880889448126, 41.68465068553298],
+                        [-93.89966980835203, 41.68465068553298],
+                        [-93.89966980835203, 41.689430423525266],
+                        [-93.880889448126, 41.689430423525266],
+                        [-93.880889448126, 41.68465068553298],
+                    ]
+                ],
+            }
+        ]
+        # test data array
+        clipped = xdi.rio.clip(geometries, "epsg:4326", drop=False)
+        assert clipped.rio.crs == xdi.rio.crs
+        assert clipped.shape == xdi.shape
+        assert clipped.sum().item() == 2150801411
+
+        # test dataset
+        clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
+            geometries, "epsg:4326", drop=False
+        )
+        assert clipped_ds.rio.crs == xdi.rio.crs
+        assert clipped_ds.test_data.shape == xdi.shape
+        assert clipped_ds.test_data.sum().item() == 2150801411
 
 
 def test_transform_bounds():
