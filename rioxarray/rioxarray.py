@@ -375,11 +375,16 @@ class RasterArray(XRasterBase):
                     self._obj.attrs.get("fill_value", self._obj.attrs.get("nodata")),
                 ),
             )
+
+        # look in places used by `xarray.open_rasterio`
         if self._nodata is None:
             try:
-                self._nodata = self._obj.attrs["nodatavals"][0]
-            except (KeyError, IndexError):
-                pass
+                self._nodata = self._obj._file_obj.acquire().nodata
+            except AttributeError:
+                try:
+                    self._nodata = self._obj.attrs["nodatavals"][0]
+                except (KeyError, IndexError):
+                    pass
 
         if self._nodata is None:
             self._nodata = False
@@ -750,7 +755,7 @@ class RasterArray(XRasterBase):
 
         return cl_array
 
-    def clip(self, geometries, crs, all_touched=False):
+    def clip(self, geometries, crs, all_touched=False, drop=True):
         """
         Crops a :class:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -762,10 +767,14 @@ class RasterArray(XRasterBase):
             A list of geojson geometry dicts.
         crs: :obj:`rasterio.crs.CRS`
             The CRS of the input geometries.
-        all_touched : boolean, optional
+        all_touched : bool, optional
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
+        drop: bool, optional
+            If True, drop the data outside of the extent of the mask geoemtries
+            Otherwise, it will return the same raster with the data masked.
+            Default is True.
 
         Returns
         -------
@@ -786,7 +795,7 @@ class RasterArray(XRasterBase):
             >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
         """
         geometries = [
-            rasterio.warp.transform_geom(self.crs, CRS.from_user_input(crs), geometry)
+            rasterio.warp.transform_geom(CRS.from_user_input(crs), self.crs, geometry)
             for geometry in geometries
         ]
 
@@ -806,8 +815,11 @@ class RasterArray(XRasterBase):
             },
             dims=(self.y_dim, self.x_dim),
         )
+        cropped_ds = self._obj.where(clip_mask_xray, drop=drop)
+        if self.nodata is not None and not np.isnan(self.nodata):
+            cropped_ds = cropped_ds.fillna(self.nodata)
 
-        cropped_ds = self._obj.where(clip_mask_xray, drop=True).astype(self._obj.dtype)
+        cropped_ds = cropped_ds.astype(self._obj.dtype)
 
         if (
             cropped_ds.coords[self.x_dim].size < 1
@@ -918,7 +930,7 @@ class RasterArray(XRasterBase):
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
-            are automatically added.
+            are ignored.
 
         """
         width, height = self.shape
@@ -927,6 +939,32 @@ class RasterArray(XRasterBase):
         count = 1
         if extra_dim is not None:
             count = self._obj[extra_dim].size
+
+        # get the output profile from the rasterio object
+        # if opened with xarray.open_rasterio()
+        try:
+            out_profile = self._obj._file_obj.acquire().profile
+        except AttributeError:
+            out_profile = {}
+        out_profile.update(profile_kwargs)
+
+        # filter out the generated attributes
+        out_profile = {
+            key: value
+            for key, value in out_profile.items()
+            if key
+            not in (
+                "driver",
+                "height",
+                "width",
+                "crs",
+                "transform",
+                "nodata",
+                "count",
+                "dtype",
+            )
+        }
+
         with rasterio.open(
             raster_path,
             "w",
@@ -940,7 +978,7 @@ class RasterArray(XRasterBase):
             nodata=(
                 self.encoded_nodata if self.encoded_nodata is not None else self.nodata
             ),
-            **profile_kwargs,
+            **out_profile,
         ) as dst:
 
             if self.encoded_nodata is not None:
@@ -1092,7 +1130,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
 
-    def clip(self, geometries, crs, all_touched=False):
+    def clip(self, geometries, crs, all_touched=False, drop=True):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
@@ -1111,6 +1149,10 @@ class RasterDataset(XRasterBase):
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
+        drop: bool, optional
+            If True, drop the data outside of the extent of the mask geoemtries
+            Otherwise, it will return the same raster with the data masked.
+            Default is True.
 
         Returns
         -------
@@ -1133,7 +1175,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             clipped_dataset[var] = self._obj[var].rio.clip(
-                geometries, crs=crs, all_touched=all_touched
+                geometries, crs=crs, all_touched=all_touched, drop=drop
             )
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
