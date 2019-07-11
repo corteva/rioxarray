@@ -616,8 +616,8 @@ class RasterArray(XRasterBase):
             coords=_make_coords(self._obj, dst_affine, dst_width, dst_height, dst_crs),
             dims=tuple(dst_dims),
             attrs=new_attrs,
-            encoding=self._obj.encoding,
         )
+        xda.encoding = self._obj.encoding
         return add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
 
     def reproject_match(self, match_data_array, resampling=Resampling.nearest):
@@ -890,8 +890,8 @@ class RasterArray(XRasterBase):
             coords=self._obj.coords,
             dims=self._obj.dims,
             attrs=self._obj.attrs,
-            encoding=self._obj.encoding,
         )
+        interp_array.encoding = self._obj.encoding
 
         # make sure correct attributes preserved & projection added
         _add_attrs_proj(interp_array, self._obj)

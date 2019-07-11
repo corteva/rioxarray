@@ -4,6 +4,7 @@ History
 0.0.6
 -----
 - Add support for scalar coordinates in reproject (issue #15)
+- Updated writing encoding for FutureWarning (issue #18)
 
 0.0.5
 -----
