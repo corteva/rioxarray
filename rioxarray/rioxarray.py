@@ -233,13 +233,13 @@ class XRasterBase(object):
         Set the CRS value for the Dataset/DataArray without modifying
         the dataset/data array.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         input_crs: object
             Anythong accepted by `rasterio.crs.CRS.from_user_input`.
 
-        Returns:
-        --------
+        Returns
+        -------
         xarray.Dataset or xarray.DataArray:
         Dataset with crs attribute.
 
@@ -258,8 +258,8 @@ class XRasterBase(object):
         """
         Write the CRS to the dataset in a CF compliant manner.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         input_crs: object
             Anythong accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
@@ -267,8 +267,8 @@ class XRasterBase(object):
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
-        Returns:
-        --------
+        Returns
+        -------
         xarray.Dataset or xarray.DataArray:
         Modified dataset with CF compliant CRS information.
 
@@ -318,8 +318,8 @@ class XRasterBase(object):
         """
         This sets the spatial dimensions of the dataset.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         x_dim: str
             The name of the x dimension.
         y_dim: str
@@ -328,8 +328,8 @@ class XRasterBase(object):
             If True, it will modify the dataframe in place.
             Otherwise it will return a modified copy.
 
-        Returns:
-        --------
+        Returns
+        -------
         xarray.Dataset or xarray.DataArray:
             Dataset with spatial dimensions set.
 
@@ -508,8 +508,8 @@ class RasterArray(XRasterBase):
         This function validates that the dimensions 2D/3D and
         they are are in the proper order.
 
-        Returns:
-        --------
+        Returns
+        -------
         str or None: Name extra dimension.
         """
         extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))

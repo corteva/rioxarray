@@ -1,10 +1,12 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <title>History &#8212; rioxarray 0.0.5 documentation</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>History &#8212; rioxarray 0.0.6 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -28,7 +30,7 @@
         <li class="right" >
           <a href="authors.html" title="Credits"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.5 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.6 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -40,18 +42,30 @@
   <div class="section" id="history">
 <h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.0.5<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.0.6<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Find nodata and nodatavals in ‘nodata’ property (pull #12)</p></li>
-<li><p>Added ‘encoded_nodata’ property to DataArray (pull #12)</p></li>
-<li><p>Write the raster with encoded_nodata instead of NaN for nodata (pull #12)</p></li>
-<li><p>Added methods to set and write CRS (issue #5)</p></li>
+<li>Add support for scalar coordinates in reproject (issue #15)</li>
+<li>Updated writing encoding for FutureWarning (issue #18)</li>
+<li>Use input raster profile for defaults to write output raster profile if opened with <cite>xarray.open_rasterio</cite> (issue #19)</li>
+<li>Preserve None nodata if opened with <cite>xarray.open_rasterio</cite> (issue #20)</li>
+<li>Added <cite>drop</cite> argument for <cite>clip()</cite> (issue #25)</li>
+<li>Fix order of <cite>CRS</cite> for reprojecting geometries in <cite>clip()</cite> (pull #24)</li>
+<li>Added <cite>set_spatial_dims()</cite> method for datasets when dimensions not found (issue #27)</li>
 </ul>
 </div>
 <div class="section" id="id2">
-<h2>0.0.4<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>0.0.5<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Added ability to export data array to raster (pull #8)</p></li>
+<li>Find nodata and nodatavals in ‘nodata’ property (pull #12)</li>
+<li>Added ‘encoded_nodata’ property to DataArray (pull #12)</li>
+<li>Write the raster with encoded_nodata instead of NaN for nodata (pull #12)</li>
+<li>Added methods to set and write CRS (issue #5)</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>0.0.4<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added ability to export data array to raster (pull #8)</li>
 </ul>
 </div>
 </div>
@@ -65,8 +79,9 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">History</a><ul>
-<li><a class="reference internal" href="#id1">0.0.5</a></li>
-<li><a class="reference internal" href="#id2">0.0.4</a></li>
+<li><a class="reference internal" href="#id1">0.0.6</a></li>
+<li><a class="reference internal" href="#id2">0.0.5</a></li>
+<li><a class="reference internal" href="#id3">0.0.4</a></li>
 </ul>
 </li>
 </ul>
@@ -82,11 +97,13 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
+  <h3>Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -107,12 +124,12 @@
         <li class="right" >
           <a href="authors.html" title="Credits"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.5 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.6 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, rioxarray Contributors.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>
