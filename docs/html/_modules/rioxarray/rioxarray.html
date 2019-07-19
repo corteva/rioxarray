@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.7 documentation</title>
+    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.8 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -174,9 +174,7 @@
     <span class="sd">&quot;&quot;&quot;Make sure attributes and projection correct&quot;&quot;&quot;</span>
     <span class="c1"># make sure attributes preserved</span>
     <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span>
-        <span class="n">src_data_array</span><span class="p">,</span>
-        <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">src_data_array</span><span class="p">,</span> <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="kc">None</span>
     <span class="p">)</span>
     <span class="c1"># remove fill value if it already exists in the encoding</span>
     <span class="c1"># this is for data arrays pulling the encoding from a</span>
@@ -1343,7 +1341,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
