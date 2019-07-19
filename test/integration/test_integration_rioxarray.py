@@ -324,6 +324,8 @@ def test_clip_geojson__no_drop(invert, expected_sum):
         assert clipped.rio.crs == xdi.rio.crs
         assert clipped.shape == xdi.shape
         assert clipped.sum().item() == expected_sum
+        assert clipped.rio.nodata == 0.0
+        assert clipped.rio.nodata == xdi.rio.nodata
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
@@ -332,6 +334,7 @@ def test_clip_geojson__no_drop(invert, expected_sum):
         assert clipped_ds.rio.crs == xdi.rio.crs
         assert clipped_ds.test_data.shape == xdi.shape
         assert clipped_ds.test_data.sum().item() == expected_sum
+        assert clipped_ds.test_data.rio.nodata == xdi.rio.nodata
 
 
 def test_transform_bounds():

@@ -137,7 +137,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_attrs = _generate_attrs(
         src_data_array,
         new_data_array.rio.transform(recalc=True),
-        new_data_array.rio.nodata,
+        None,
     )
     # remove fill value if it already exists in the encoding
     # this is for data arrays pulling the encoding from a
