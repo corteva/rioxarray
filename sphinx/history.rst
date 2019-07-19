@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.8
+-----
+ - Fix setting nodata in _add_attrs_proj (pull #30) 
+
 0.0.7
 -----
 - Add option to do an inverted clip (pull #29) 
