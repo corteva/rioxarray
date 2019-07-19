@@ -822,7 +822,7 @@ class RasterArray(XRasterBase):
 
         return cl_array
 
-    def clip(self, geometries, crs, all_touched=False, drop=True):
+    def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
         """
         Crops a :class:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -842,6 +842,10 @@ class RasterArray(XRasterBase):
             If True, drop the data outside of the extent of the mask geoemtries
             Otherwise, it will return the same raster with the data masked.
             Default is True.
+        invert: boolean, optional
+            If False, pixels that do not overlap shapes will be set as nodata.
+            Otherwise, pixels that overlap the shapes will be set as nodata.
+            False by default.
 
         Returns
         -------
@@ -870,7 +874,7 @@ class RasterArray(XRasterBase):
             geometries=geometries,
             out_shape=(int(self.height), int(self.width)),
             transform=self.transform(),
-            invert=True,
+            invert=not invert,
             all_touched=all_touched,
         )
         clip_mask_xray = xarray.DataArray(
@@ -1195,7 +1199,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
 
-    def clip(self, geometries, crs, all_touched=False, drop=True):
+    def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
@@ -1218,6 +1222,10 @@ class RasterDataset(XRasterBase):
             If True, drop the data outside of the extent of the mask geoemtries
             Otherwise, it will return the same raster with the data masked.
             Default is True.
+        invert: boolean, optional
+            If False, pixels that do not overlap shapes will be set as nodata.
+            Otherwise, pixels that overlap the shapes will be set as nodata.
+            False by default.
 
         Returns
         -------
@@ -1240,7 +1248,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             clipped_dataset[var] = self._obj[var].rio.clip(
-                geometries, crs=crs, all_touched=all_touched, drop=drop
+                geometries, crs=crs, all_touched=all_touched, drop=drop, invert=invert
             )
         clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset

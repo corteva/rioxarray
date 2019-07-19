@@ -298,7 +298,10 @@ def test_clip_geojson():
         _assert_xarrays_equal(clipped_ds, comp_subset_ds)
 
 
-def test_clip_geojson__no_drop():
+@pytest.mark.parametrize(
+    "invert, expected_sum", [(False, 2150801411), (True, 535727386)]
+)
+def test_clip_geojson__no_drop(invert, expected_sum):
     with xarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
@@ -317,18 +320,18 @@ def test_clip_geojson__no_drop():
             }
         ]
         # test data array
-        clipped = xdi.rio.clip(geometries, "epsg:4326", drop=False)
+        clipped = xdi.rio.clip(geometries, "epsg:4326", drop=False, invert=invert)
         assert clipped.rio.crs == xdi.rio.crs
         assert clipped.shape == xdi.shape
-        assert clipped.sum().item() == 2150801411
+        assert clipped.sum().item() == expected_sum
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
-            geometries, "epsg:4326", drop=False
+            geometries, "epsg:4326", drop=False, invert=invert
         )
         assert clipped_ds.rio.crs == xdi.rio.crs
         assert clipped_ds.test_data.shape == xdi.shape
-        assert clipped_ds.test_data.sum().item() == 2150801411
+        assert clipped_ds.test_data.sum().item() == expected_sum
 
 
 def test_transform_bounds():
