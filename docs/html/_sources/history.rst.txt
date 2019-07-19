@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.7
+-----
+- Add option to do an inverted clip (pull #29) 
+
 0.0.6
 -----
 - Add support for scalar coordinates in reproject (issue #15)

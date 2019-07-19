@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray package &#8212; rioxarray 0.0.6 documentation</title>
+    <title>rioxarray package &#8212; rioxarray 0.0.7 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">rioxarray</a> &#187;</li> 
       </ul>
     </div>  
@@ -81,7 +81,7 @@ transform attribute.</td>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by geojson like geometry dicts.</p>
 <p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -97,6 +97,9 @@ are selected by Bresenham’s line algorithm will be burned in.</li>
 <li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geoemtries
 Otherwise, it will return the same raster with the data masked.
 Default is True.</li>
+<li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
+Otherwise, pixels that overlap the shapes will be set as nodata.
+False by default.</li>
 </ul>
 </td>
 </tr>
@@ -376,7 +379,7 @@ attribute.</li>
 <p>This is the GIS extension for <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterDataset.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by geojson like geometry dicts.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -397,6 +400,9 @@ are selected by Bresenham’s line algorithm will be burned in.</li>
 <li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geoemtries
 Otherwise, it will return the same raster with the data masked.
 Default is True.</li>
+<li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
+Otherwise, pixels that overlap the shapes will be set as nodata.
+False by default.</li>
 </ul>
 </td>
 </tr>
@@ -902,7 +908,7 @@ Otherwise it will return a modified copy.</li>
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >rioxarray</a> &#187;</li> 
       </ul>
     </div>

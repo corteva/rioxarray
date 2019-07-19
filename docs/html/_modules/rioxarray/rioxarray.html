@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.6 documentation</title>
+    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.7 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -861,7 +861,7 @@
 
         <span class="k">return</span> <span class="n">cl_array</span></div>
 
-<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :class:`xarray.DataArray` by geojson like geometry dicts.</span>
 
@@ -881,6 +881,10 @@
 <span class="sd">            If True, drop the data outside of the extent of the mask geoemtries</span>
 <span class="sd">            Otherwise, it will return the same raster with the data masked.</span>
 <span class="sd">            Default is True.</span>
+<span class="sd">        invert: boolean, optional</span>
+<span class="sd">            If False, pixels that do not overlap shapes will be set as nodata.</span>
+<span class="sd">            Otherwise, pixels that overlap the shapes will be set as nodata.</span>
+<span class="sd">            False by default.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -909,7 +913,7 @@
             <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
             <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)),</span>
             <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
-            <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">invert</span><span class="o">=</span><span class="ow">not</span> <span class="n">invert</span><span class="p">,</span>
             <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">clip_mask_xray</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
@@ -1234,7 +1238,7 @@
         <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span></div>
 
-<div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :class:`xarray.Dataset` by geojson like geometry dicts.</span>
 
@@ -1257,6 +1261,10 @@
 <span class="sd">            If True, drop the data outside of the extent of the mask geoemtries</span>
 <span class="sd">            Otherwise, it will return the same raster with the data masked.</span>
 <span class="sd">            Default is True.</span>
+<span class="sd">        invert: boolean, optional</span>
+<span class="sd">            If False, pixels that do not overlap shapes will be set as nodata.</span>
+<span class="sd">            Otherwise, pixels that overlap the shapes will be set as nodata.</span>
+<span class="sd">            False by default.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1279,7 +1287,7 @@
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
             <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
-                <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span>
+                <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span>
             <span class="p">)</span>
         <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span></div>
@@ -1335,7 +1343,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.7 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
