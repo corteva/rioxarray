@@ -30,7 +30,7 @@ before_install:
 - conda config --add channels conda-forge
 - conda config --add channels conda-forge
 # Create conda environment
-- conda create -n test python=$PYTHON_VERSION rasterio=1.0.* scipy xarray netcdf4
+- conda create -n test python=$PYTHON_VERSION rasterio=1.0.* scipy xarray netcdf4 dask
 - source activate test
 
 install:

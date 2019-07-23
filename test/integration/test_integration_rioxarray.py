@@ -8,14 +8,19 @@ from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
 
+import rioxarray
 from rioxarray.exceptions import (
     DimensionError,
     MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
 )
-from rioxarray.rioxarray import UNWANTED_RIO_ATTRS, _make_coords
-from test.conftest import TEST_COMPARE_DATA_DIR, TEST_INPUT_DATA_DIR
+from rioxarray.rioxarray import _make_coords
+from test.conftest import (
+    TEST_COMPARE_DATA_DIR,
+    TEST_INPUT_DATA_DIR,
+    _assert_xarrays_equal,
+)
 
 
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
@@ -113,71 +118,6 @@ def _del_attr(input_xr, attr):
     _mod_attr(input_xr, attr, remove=True)
 
 
-def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
-    # xarray.testing.assert_equal(input_xarray, compare_xarray)
-    def assert_attrs_equal(input_xr, compare_xr):
-        """check attrubutes that matter"""
-        if isinstance(input_xr, xarray.Dataset):
-            assert "creation_date" in input_xr.attrs
-
-        for attr in compare_xr.attrs:
-            if (
-                attr != "_FillValue"
-                and attr not in UNWANTED_RIO_ATTRS
-                and attr != "creation_date"
-            ):
-                try:
-                    assert input_xr.attrs[attr] == compare_xr.attrs[attr]
-                except ValueError:
-                    assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr])
-
-    assert_attrs_equal(input_xarray, compare_xarray)
-    if hasattr(input_xarray, "variables"):
-        # check coordinates
-        for coord in input_xarray.coords:
-            if coord in "xy":
-                assert_almost_equal(
-                    input_xarray[coord].values, compare_xarray[coord].values
-                )
-            else:
-                assert (
-                    input_xarray[coord].values == compare_xarray[coord].values
-                ).all()
-
-        for var in input_xarray.rio.vars:
-            try:
-                _assert_xarrays_equal(input_xarray[var], compare_xarray[var])
-            except AssertionError:
-                print("Error with variable {}".format(var))
-                raise
-    else:
-        try:
-            assert_almost_equal(
-                input_xarray.values, compare_xarray.values, decimal=precision
-            )
-        except AssertionError:
-            where_diff = input_xarray.values != compare_xarray.values
-            print(input_xarray.values[where_diff])
-            print(compare_xarray.values[where_diff])
-            raise
-        assert_attrs_equal(input_xarray, compare_xarray)
-
-        compare_fill_value = compare_xarray.attrs.get(
-            "_FillValue", compare_xarray.encoding.get("_FillValue")
-        )
-        input_fill_value = input_xarray.attrs.get(
-            "_FillValue", input_xarray.encoding.get("_FillValue")
-        )
-        assert_array_equal([input_fill_value], [compare_fill_value])
-        assert "grid_mapping" in compare_xarray.attrs
-        assert (
-            input_xarray[input_xarray.attrs["grid_mapping"]]
-            == compare_xarray[compare_xarray.attrs["grid_mapping"]]
-        )
-        for unwanted_attr in UNWANTED_RIO_ATTRS:
-            assert unwanted_attr not in input_xarray.attrs
-
-
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
 def modis_clip(request, tmpdir):
     return dict(
@@ -257,8 +197,9 @@ def test_clip_box__one_dimension_error(modis_clip):
             )
 
 
-def test_clip_geojson():
-    with xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_clip_geojson(request):
+    with request.param(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         # get subset for testing
@@ -301,8 +242,9 @@ def test_clip_geojson():
 @pytest.mark.parametrize(
     "invert, expected_sum", [(False, 2150801411), (True, 535727386)]
 )
-def test_clip_geojson__no_drop(invert, expected_sum):
-    with xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_clip_geojson__no_drop(request, invert, expected_sum):
+    with request.param(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         geometries = [
@@ -460,8 +402,9 @@ def test_reproject__no_nodata(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_reproject__scalar_coord():
-    with xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_reproject__scalar_coord(request):
+    with request.param(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         xdi_repr = xdi.squeeze().rio.reproject("epsg:3395")
@@ -524,8 +467,9 @@ def test_reproject_match__no_transform_nodata(modis_reproject_match):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_make_src_affine(modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_make_src_affine(request, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
         modis_reproject["input"]
     ) as xri:
 
@@ -564,8 +508,9 @@ def test_make_src_affine__single_point():
         assert_array_equal(attribute_transform, calculated_transform)
 
 
-def test_make_coords__calc_trans(modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_make_coords__calc_trans(request, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the calculated transform
@@ -587,8 +532,9 @@ def test_make_coords__calc_trans(modis_reproject):
         assert_array_equal(xri.coords["y"].values, calc_coords_calc_transr["y"].values)
 
 
-def test_make_coords__attr_trans(modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, xarray.open_rasterio(
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_make_coords__attr_trans(request, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the attribute transform
@@ -773,7 +719,8 @@ def test_to_raster_3d(tmpdir):
         assert_array_equal(rds.read(), xds.values)
 
 
-def test_to_raster__preserve_profile__none_nodata(tmpdir):
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_to_raster__preserve_profile__none_nodata(request, tmpdir):
     tmp_raster = tmpdir.join("output_profile.tif")
     input_raster = tmpdir.join("input_profile.tif")
 
@@ -794,7 +741,7 @@ def test_to_raster__preserve_profile__none_nodata(tmpdir):
     ) as rds:
         rds.write(numpy.empty((1, 512, 512), dtype=numpy.float32))
 
-    with xarray.open_rasterio(str(input_raster)) as mda:
+    with request.param(str(input_raster)) as mda:
         mda.rio.to_raster(str(tmp_raster))
 
     with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
