@@ -19,17 +19,12 @@ from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager
 from xarray.backends.locks import SerializableLock
 
+from rioxarray.exceptions import RioXarrayError
 from rioxarray.rioxarray import affine_to_coords
 
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
-
-_ERROR_MSG = (
-    "The kind of indexing operation you are trying to do is not "
-    "valid on rasterio files. Try to load your data with ds.load()"
-    "first."
-)
 
 
 class RasterioArrayWrapper(BackendArray):
@@ -83,7 +78,8 @@ class RasterioArrayWrapper(BackendArray):
         --------
         indexing.decompose_indexer
         """
-        assert len(key) == 3, "rasterio datasets should always be 3D"
+        if len(key) != 3:
+            raise RioXarrayError("rasterio datasets should always be 3D")
 
         # bands cannot be windowed but they can be listed
         band_key = key[0]
@@ -229,7 +225,7 @@ def open_rasterio(
         dask's multithreaded backend.
     masked : bool, optional
         If True, read the mask and to set values to NaN. Defaults to False.
-return
+
     Returns
     -------
     data : DataArray
@@ -275,27 +271,25 @@ return
     coords["band"] = np.asarray(riods.indexes)
 
     # Get coordinates
-    if LooseVersion(rasterio.__version__) < "1.0":
+    if LooseVersion(rasterio.__version__) < LooseVersion("1.0"):
         transform = riods.affine
     else:
         transform = riods.transform
-    if transform.is_rectilinear:
+
+    parse = True if (parse_coordinates is None) else parse_coordinates
+    if transform.is_rectilinear and parse:
         # 1d coordinates
-        parse = True if parse_coordinates is None else parse_coordinates
-        if parse:
-            coords.update(affine_to_coords(riods.transform, riods.width, riods.height))
-    else:
+        coords.update(affine_to_coords(riods.transform, riods.width, riods.height))
+    elif parse:
         # 2d coordinates
-        parse = False if (parse_coordinates is None) else parse_coordinates
-        if parse:
-            warnings.warn(
-                "The file coordinates' transformation isn't "
-                "rectilinear: xarray won't parse the coordinates "
-                "in this case. Set `parse_coordinates=False` to "
-                "suppress this warning.",
-                RuntimeWarning,
-                stacklevel=3,
-            )
+        warnings.warn(
+            "The file coordinates' transformation isn't "
+            "rectilinear: xarray won't parse the coordinates "
+            "in this case. Set `parse_coordinates=False` to "
+            "suppress this warning.",
+            RuntimeWarning,
+            stacklevel=3,
+        )
 
     # Attributes
     attrs = dict()
@@ -369,7 +363,7 @@ return
             from dask.array.core import normalize_chunks
             import dask
 
-            if dask.__version__ < "0.18.0":
+            if LooseVersion(dask.__version__) < LooseVersion("0.18.0"):
                 msg = (
                     "Automatic chunking requires dask.__version__ >= 0.18.0 . "
                     "You currently have version %s" % dask.__version__
