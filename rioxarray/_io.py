@@ -48,7 +48,7 @@ class RasterioArrayWrapper(BackendArray):
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
         if self.masked:
-            self._dtype = np.dtype("float64")
+            self._dtype = np.float64
         else:
             self._dtype = np.dtype(dtypes[0])
 
