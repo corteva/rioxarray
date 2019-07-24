@@ -565,7 +565,6 @@ class TestRasterio:
                 with rasterio.vrt.WarpedVRT(src, crs="epsg:4326") as vrt:
                     expected_shape = (vrt.width, vrt.height)
                     expected_crs = vrt.crs
-                    print(expected_crs)
                     expected_res = vrt.res
                     # Value of single pixel in center of image
                     lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
@@ -573,7 +572,6 @@ class TestRasterio:
                     with xr.open_rasterio(vrt) as da:
                         actual_shape = (da.sizes["x"], da.sizes["y"])
                         actual_crs = da.crs
-                        print(actual_crs)
                         actual_res = da.res
                         actual_val = da.sel(dict(x=lon, y=lat), method="nearest").data
 
