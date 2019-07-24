@@ -147,9 +147,12 @@ def _add_attrs_proj(new_data_array, src_data_array):
 
     # make sure projection added
     add_xy_grid_meta(new_data_array.coords)
-    return add_spatial_ref(
+    new_data_array = add_spatial_ref(
         new_data_array, src_data_array.rio.crs, _get_grid_map_name(src_data_array)
     )
+    # make sure encoding added
+    new_data_array.encoding = src_data_array.encoding.copy()
+    return new_data_array
 
 
 def _warp_spatial_coords(data_array, affine, width, height):
