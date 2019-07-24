@@ -321,9 +321,9 @@ def test_reproject(modis_reproject):
 
 @pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
 def test_reproject_3d(request, modis_reproject_3d):
-    with request.param(
-        modis_reproject_3d["input"]
-    ) as mda, request.param(modis_reproject_3d["compare"]) as mdc:
+    with request.param(modis_reproject_3d["input"]) as mda, request.param(
+        modis_reproject_3d["compare"]
+    ) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
@@ -602,18 +602,18 @@ def test_interpolate_na(interpolate_na):
 
 
 def test_interpolate_na_veris(interpolate_na_veris):
-    with xarray.open_dataset(
-        interpolate_na_veris["input"],
-    ) as mda, xarray.open_dataset(interpolate_na_veris["compare"]) as mdc:
+    with xarray.open_dataset(interpolate_na_veris["input"]) as mda, xarray.open_dataset(
+        interpolate_na_veris["compare"]
+    ) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
 def test_interpolate_na_3d(interpolate_na_3d):
-    with xarray.open_dataset(
-        interpolate_na_3d["input"]
-    ) as mda, xarray.open_dataset(interpolate_na_3d["compare"]) as mdc:
+    with xarray.open_dataset(interpolate_na_3d["input"]) as mda, xarray.open_dataset(
+        interpolate_na_3d["compare"]
+    ) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
@@ -643,11 +643,7 @@ def test_interpolate_na__nodata_filled(interpolate_na_filled):
 
 def test_interpolate_na__all_nodata(interpolate_na_nan):
     rio_opened = interpolate_na_nan["open"].__name__ == "open_rasterio"
-    mask_args = (
-        dict(masked=True)
-        if rio_opened
-        else dict(mask_and_scale=True)
-    )
+    mask_args = dict(masked=True) if rio_opened else dict(mask_and_scale=True)
     with interpolate_na_nan["open"](
         interpolate_na_nan["input"], **mask_args
     ) as mda, interpolate_na_nan["open"](
