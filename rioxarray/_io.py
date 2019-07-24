@@ -283,8 +283,7 @@ def open_rasterio(
     if riods.subdatasets:
         data_arrays = {}
         for iii, subdataset in enumerate(riods.subdatasets):
-            attribute_name = subdataset.split(":")[-1].replace(" ", "_")
-            data_arrays[attribute_name] = open_rasterio(
+            rioda = open_rasterio(
                 subdataset,
                 parse_coordinates=iii == 0 and parse_coordinates,
                 chunks=chunks,
@@ -292,6 +291,7 @@ def open_rasterio(
                 lock=lock,
                 masked=masked,
             )
+            data_arrays[rioda.name] = rioda
         return Dataset(data_arrays)
 
     if vrt_params is not None:
