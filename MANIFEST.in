@@ -2,6 +2,7 @@ include AUTHORS.rst
 include CONTRIBUTING.rst
 include LICENSE
 include LICENSE_datacube
+include LICENSE_xarray
 
 recursive-include test *
 recursive-exclude * __pycache__
