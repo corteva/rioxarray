@@ -17,15 +17,17 @@ def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
             assert "creation_date" in input_xr.attrs
 
         for attr in compare_xr.attrs:
-            if (
+            if attr == "transform":
+                assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr][:6])
+            elif (
                 attr != "_FillValue"
                 and attr not in UNWANTED_RIO_ATTRS
                 and attr != "creation_date"
             ):
                 try:
-                    assert input_xr.attrs[attr] == compare_xr.attrs[attr]
-                except ValueError:
                     assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr])
+                except (TypeError, ValueError):
+                    assert input_xr.attrs[attr] == compare_xr.attrs[attr]
 
     assert_attrs_equal(input_xarray, compare_xarray)
     if hasattr(input_xarray, "variables"):

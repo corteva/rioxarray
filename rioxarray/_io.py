@@ -12,7 +12,7 @@ from collections import OrderedDict
 from distutils.version import LooseVersion
 
 import numpy as np
-from xarray import DataArray
+from xarray import DataArray, Dataset
 from xarray.core import indexing
 from xarray.core.utils import is_scalar
 from xarray.backends.common import BackendArray
@@ -48,7 +48,7 @@ class RasterioArrayWrapper(BackendArray):
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
 
-        self._dtype = np.float64 if self.masked else np.dtype(dtypes[0])
+        self._dtype = np.dtype("float64") if self.masked else np.dtype(dtypes[0])
 
     @property
     def dtype(self):
@@ -174,6 +174,27 @@ def _parse_envi(meta):
     return parsed_meta
 
 
+def _parse_tags(tags):
+    def parsevec(s):
+        return np.fromstring(s.strip("{}"), dtype="float", sep=",")
+
+    parsed_tags = {}
+    for key, value in tags.items():
+        if value.startswith("{") and value.endswith("}"):
+            new_val = parsevec(value)
+            value = new_val if len(new_val) else value
+        else:
+            try:
+                value = int(value)
+            except (TypeError, ValueError):
+                try:
+                    value = float(value)
+                except (TypeError, ValueError):
+                    pass
+        parsed_tags[key] = value
+    return parsed_tags
+
+
 def open_rasterio(
     filename, parse_coordinates=None, chunks=None, cache=None, lock=None, masked=False
 ):
@@ -229,6 +250,8 @@ def open_rasterio(
     data : DataArray
         The newly created DataArray.
     """
+    parse_coordinates = True if parse_coordinates is None else parse_coordinates
+
     import rasterio
     from rasterio.vrt import WarpedVRT
 
@@ -255,6 +278,22 @@ def open_rasterio(
 
     manager = CachingFileManager(rasterio.open, filename, lock=lock, mode="r")
     riods = manager.acquire()
+
+    # open the subdatasets if they exist
+    if riods.subdatasets:
+        data_arrays = {}
+        for iii, subdataset in enumerate(riods.subdatasets):
+            attribute_name = subdataset.split(":")[-1].replace(" ", "_")
+            data_arrays[attribute_name] = open_rasterio(
+                subdataset,
+                parse_coordinates=iii == 0 and parse_coordinates,
+                chunks=chunks,
+                cache=cache,
+                lock=lock,
+                masked=masked,
+            )
+        return Dataset(data_arrays)
+
     if vrt_params is not None:
         riods = WarpedVRT(riods, **vrt_params)
 
@@ -274,11 +313,10 @@ def open_rasterio(
     else:
         transform = riods.transform
 
-    parse = True if (parse_coordinates is None) else parse_coordinates
-    if transform.is_rectilinear and parse:
+    if transform.is_rectilinear and parse_coordinates:
         # 1d coordinates
         coords.update(affine_to_coords(riods.transform, riods.width, riods.height))
-    elif parse:
+    elif parse_coordinates:
         # 2d coordinates
         warnings.warn(
             "The file coordinates' transformation isn't "
@@ -290,7 +328,7 @@ def open_rasterio(
         )
 
     # Attributes
-    attrs = dict()
+    attrs = _parse_tags(riods.tags(1))
     encoding = dict()
     # Affine transformation matrix (always available)
     # This describes coefficients mapping pixel coordinates to CRS
@@ -341,7 +379,10 @@ def open_rasterio(
     if cache and chunks is None:
         data = indexing.MemoryCachedArray(data)
 
-    result = DataArray(data=data, dims=("band", "y", "x"), coords=coords, attrs=attrs)
+    da_name = attrs.pop("NETCDF_VARNAME", None)
+    result = DataArray(
+        data=data, dims=("band", "y", "x"), coords=coords, attrs=attrs, name=da_name
+    )
     result.encoding = encoding
 
     if hasattr(riods, "crs") and riods.crs:

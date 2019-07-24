@@ -78,7 +78,9 @@ def interpolate_na_veris():
     )
 
 
-@pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
+@pytest.fixture(
+    params=[xarray.open_dataarray, rioxarray.open_rasterio, xarray.open_dataset]
+)
 def interpolate_na_nan(request):
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
@@ -87,7 +89,9 @@ def interpolate_na_nan(request):
     )
 
 
-@pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
+@pytest.fixture(
+    params=[xarray.open_dataset, xarray.open_dataarray, rioxarray.open_rasterio]
+)
 def modis_reproject_match(request):
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
@@ -103,7 +107,7 @@ def _mod_attr(input_xr, attr, val=None, remove=False):
             _mod_attr(input_xr[var], attr, val=val, remove=remove)
     else:
         if remove:
-            del input_xr.attrs[attr]
+            input_xr.attrs.pop(attr, None)
         else:
             input_xr.attrs[attr] = val
 
@@ -118,7 +122,9 @@ def _del_attr(input_xr, attr):
     _mod_attr(input_xr, attr, remove=True)
 
 
-@pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
+@pytest.fixture(
+    params=[xarray.open_dataset, xarray.open_dataarray, rioxarray.open_rasterio]
+)
 def modis_clip(request, tmpdir):
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
@@ -300,33 +306,38 @@ def test_transform_bounds():
 
 
 def test_reproject(modis_reproject):
+    mask_args = (
+        dict(masked=False)
+        if modis_reproject["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False
-    ) as mdc:
+        modis_reproject["input"], **mask_args
+    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_reproject_3d(modis_reproject_3d):
-    with xarray.open_dataset(
-        modis_reproject_3d["input"], mask_and_scale=False
-    ) as mda, xarray.open_dataset(
-        modis_reproject_3d["compare"], mask_and_scale=False
-    ) as mdc:
+@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
+def test_reproject_3d(request, modis_reproject_3d):
+    with request.param(
+        modis_reproject_3d["input"]
+    ) as mda, request.param(modis_reproject_3d["compare"]) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 
 
 def test_reproject__grid_mapping(modis_reproject):
+    mask_args = (
+        dict(masked=False)
+        if modis_reproject["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False
-    ) as mdc:
+        modis_reproject["input"], **mask_args
+    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
 
         # remove 'crs' attribute and add grid mapping
         mda.coords["spatial_ref"] = 0
@@ -376,11 +387,14 @@ def test_reproject__no_transform(modis_reproject):
 
 
 def test_reproject__no_nodata(modis_reproject):
+    mask_args = (
+        dict(masked=False)
+        if modis_reproject["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with modis_reproject["open"](
-        modis_reproject["input"], mask_and_scale=False
-    ) as mda, modis_reproject["open"](
-        modis_reproject["compare"], mask_and_scale=False
-    ) as mdc:
+        modis_reproject["input"], **mask_args
+    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
         orig_fill = _get_attr(mda, "_FillValue")
         _del_attr(mda, "_FillValue")
         _del_attr(mda, "nodata")
@@ -424,12 +438,17 @@ def test_reproject__no_nodata_masked(modis_reproject):
 
 
 def test_reproject_match(modis_reproject_match):
+    mask_args = (
+        dict(masked=False)
+        if modis_reproject_match["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with modis_reproject_match["open"](
-        modis_reproject_match["input"], mask_and_scale=False
+        modis_reproject_match["input"], **mask_args
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], mask_and_scale=False
+        modis_reproject_match["compare"], **mask_args
     ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"], mask_and_scale=False
+        modis_reproject_match["match"]
     ) as mdm:
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
@@ -438,10 +457,15 @@ def test_reproject_match(modis_reproject_match):
 
 
 def test_reproject_match__masked(modis_reproject_match):
+    mask_args = (
+        dict(masked=True)
+        if modis_reproject_match["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=True)
+    )
     with modis_reproject_match["open"](
-        modis_reproject_match["input"]
+        modis_reproject_match["input"], **mask_args
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"]
+        modis_reproject_match["compare"], **mask_args
     ) as mdc, xarray.open_dataarray(
         modis_reproject_match["match"]
     ) as mdm:
@@ -452,10 +476,15 @@ def test_reproject_match__masked(modis_reproject_match):
 
 
 def test_reproject_match__no_transform_nodata(modis_reproject_match):
+    mask_args = (
+        dict(masked=True)
+        if modis_reproject_match["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=True)
+    )
     with modis_reproject_match["open"](
-        modis_reproject_match["input"]
+        modis_reproject_match["input"], **mask_args
     ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"]
+        modis_reproject_match["compare"], **mask_args
     ) as mdc, xarray.open_dataarray(
         modis_reproject_match["match"]
     ) as mdm:
@@ -559,11 +588,14 @@ def test_make_coords__attr_trans(request, modis_reproject):
 
 
 def test_interpolate_na(interpolate_na):
+    mask_args = (
+        dict(masked=False)
+        if interpolate_na["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with interpolate_na["open"](
-        interpolate_na["input"], mask_and_scale=False
-    ) as mda, interpolate_na["open"](
-        interpolate_na["compare"], mask_and_scale=False
-    ) as mdc:
+        interpolate_na["input"], **mask_args
+    ) as mda, interpolate_na["open"](interpolate_na["compare"], **mask_args) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
@@ -571,10 +603,8 @@ def test_interpolate_na(interpolate_na):
 
 def test_interpolate_na_veris(interpolate_na_veris):
     with xarray.open_dataset(
-        interpolate_na_veris["input"], mask_and_scale=False
-    ) as mda, xarray.open_dataset(
-        interpolate_na_veris["compare"], mask_and_scale=False
-    ) as mdc:
+        interpolate_na_veris["input"],
+    ) as mda, xarray.open_dataset(interpolate_na_veris["compare"]) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
@@ -582,20 +612,23 @@ def test_interpolate_na_veris(interpolate_na_veris):
 
 def test_interpolate_na_3d(interpolate_na_3d):
     with xarray.open_dataset(
-        interpolate_na_3d["input"], mask_and_scale=False
-    ) as mda, xarray.open_dataset(
-        interpolate_na_3d["compare"], mask_and_scale=False
-    ) as mdc:
+        interpolate_na_3d["input"]
+    ) as mda, xarray.open_dataset(interpolate_na_3d["compare"]) as mdc:
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
 def test_interpolate_na__nodata_filled(interpolate_na_filled):
+    mask_args = (
+        dict(masked=False)
+        if interpolate_na_filled["open"].__name__ == "open_rasterio"
+        else dict(mask_and_scale=False)
+    )
     with interpolate_na_filled["open"](
-        interpolate_na_filled["input"], mask_and_scale=False
+        interpolate_na_filled["input"], **mask_args
     ) as mda, interpolate_na_filled["open"](
-        interpolate_na_filled["compare"], mask_and_scale=False
+        interpolate_na_filled["compare"], **mask_args
     ) as mdc:
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
@@ -609,9 +642,17 @@ def test_interpolate_na__nodata_filled(interpolate_na_filled):
 
 
 def test_interpolate_na__all_nodata(interpolate_na_nan):
+    rio_opened = interpolate_na_nan["open"].__name__ == "open_rasterio"
+    mask_args = (
+        dict(masked=True)
+        if rio_opened
+        else dict(mask_and_scale=True)
+    )
     with interpolate_na_nan["open"](
-        interpolate_na_nan["input"]
-    ) as mda, interpolate_na_nan["open"](interpolate_na_nan["compare"]) as mdc:
+        interpolate_na_nan["input"], **mask_args
+    ) as mda, interpolate_na_nan["open"](
+        interpolate_na_nan["compare"], **mask_args
+    ) as mdc:
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
                 mda[var].values[~numpy.isnan(mda[var].values)] = numpy.nan
@@ -619,6 +660,9 @@ def test_interpolate_na__all_nodata(interpolate_na_nan):
             mda.values[~numpy.isnan(mda.values)] = numpy.nan
 
         interpolated_ds = mda.rio.interpolate_na()
+        if rio_opened and "__xarray_dataarray_variable__" in mdc:
+            mdc = mdc["__xarray_dataarray_variable__"]
+            mdc.attrs.pop("coordinates")
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
 
@@ -636,12 +680,13 @@ def test_load_in_geographic_dimensions():
         assert mda.red.rio.crs.to_epsg() == 4326
 
 
-def test_geographic_reproject():
+@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
+def test_geographic_reproject(request):
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm.nc")
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+    with request.param(sentinel_2_geographic) as mda, request.param(
         sentinel_2_utm
     ) as mdc:
         mds_repr = mda.rio.reproject("+init=epsg:32721")
@@ -650,14 +695,15 @@ def test_geographic_reproject():
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_geographic_reproject__missing_nodata():
+@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
+def test_geographic_reproject__missing_nodata(request):
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
     )
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+    with request.param(sentinel_2_geographic) as mda, request.param(
         sentinel_2_utm
     ) as mdc:
         mda.red.attrs.pop("nodata")
@@ -668,14 +714,15 @@ def test_geographic_reproject__missing_nodata():
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_geographic_resample_integer():
+@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
+def test_geographic_resample_integer(request):
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_interp = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_interpolate_na.nc"
     )
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
+    with request.param(sentinel_2_geographic) as mda, request.param(
         sentinel_2_interp
     ) as mdc:
         mds_interp = mda.rio.interpolate_na()
@@ -684,12 +731,11 @@ def test_geographic_resample_integer():
         _assert_xarrays_equal(mds_interp, mdc)
 
 
-def test_to_raster(tmpdir):
+@pytest.fixture(params=[xarray.open_dataarray, rioxarray.open_rasterio])
+def test_to_raster(request, tmpdir):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
-    with xarray.open_dataarray(
-        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
-    ) as mda:
+    with request.param(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
         mda.rio.to_raster(str(tmp_raster), tags=test_tags)
         xds = mda.copy()
 
@@ -703,11 +749,10 @@ def test_to_raster(tmpdir):
         assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
 
 
-def test_to_raster_3d(tmpdir):
+@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
+def test_to_raster_3d(request, tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
-    with xarray.open_dataset(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
-    ) as mda:
+    with request.param(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         xds.rio.to_raster(str(tmp_raster))
