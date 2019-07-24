@@ -13,6 +13,8 @@ def test_open_rasterio_mask_chunk_clip():
         masked=True,
         chunks=True,
     ) as xdi:
+        assert str(xdi.dtype) == "float64"
+        assert str(xdi.data.dtype) == "float64"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
         assert numpy.isnan(xdi.values).sum() == 52119
