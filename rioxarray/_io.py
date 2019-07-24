@@ -47,10 +47,8 @@ class RasterioArrayWrapper(BackendArray):
         dtypes = riods.dtypes
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
-        if self.masked:
-            self._dtype = np.float64
-        else:
-            self._dtype = np.dtype(dtypes[0])
+
+        self._dtype = np.float64 if self.masked else np.dtype(dtypes[0])
 
     @property
     def dtype(self):
