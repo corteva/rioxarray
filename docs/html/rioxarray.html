@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray package &#8212; rioxarray 0.0.8 documentation</title>
+    <title>rioxarray package &#8212; rioxarray 0.0.9 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">rioxarray</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,6 +46,64 @@
             
   <div class="section" id="rioxarray-package">
 <h1>rioxarray package<a class="headerlink" href="#rioxarray-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="rioxarray-open-rasterio">
+<h2>rioxarray.open_rasterio<a class="headerlink" href="#rioxarray-open-rasterio" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rioxarray.open_rasterio">
+<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a file with rasterio (experimental).</p>
+<p>This should work with any file that rasterio can open (most often:
+geoTIFF). The x and y coordinates are generated automatically from the
+file’s geoinformation, shifted to the center of each pixel (see
+<a class="reference external" href="http://web.archive.org/web/20160326194152/http://remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2">“PixelIsArea” Raster Space</a>
+for more information).</p>
+<p>You can generate 2D coordinates from the file’s attributes with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">affine</span> <span class="k">import</span> <span class="n">Affine</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;path_to_file.tif&#39;</span><span class="p">)</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span><span class="o">*</span><span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">])</span>
+<span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ny</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">transform</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>str</em><em>, </em><em>rasterio.DatasetReader</em><em>, or </em><em>rasterio.WarpedVRT</em>) – Path to the file to open. Or already open rasterio dataset.</li>
+<li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to parse the x and y coordinates out of the file’s
+<code class="docutils literal notranslate"><span class="pre">transform</span></code> attribute or not. The default is to automatically
+parse the coordinates only if they are rectilinear (1D).
+It can be useful to set <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>
+if your files are very large or if you don’t need the coordinates.</li>
+<li><strong>chunks</strong> (<em>int</em><em>, </em><em>tuple</em><em> or </em><em>dict</em><em>, </em><em>optional</em>) – Chunk sizes along each dimension, e.g., <code class="docutils literal notranslate"><span class="pre">5</span></code>, <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">5)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">{'x':</span> <span class="pre">5,</span> <span class="pre">'y':</span> <span class="pre">5}</span></code>. If chunks is provided, it used to load the new
+DataArray into a dask array. Chunks can also be set to
+<code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> to choose sensible chunk sizes according to
+<a href="#id1"><span class="problematic" id="id2">``</span></a>dask.config.get(“array.chunk-size”).</li>
+<li><strong>cache</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, cache data loaded from the underlying datastore in memory as
+NumPy arrays when accessed to avoid reading from the underlying data-
+store multiple times. Defaults to True unless you specify the <cite>chunks</cite>
+argument to use dask, in which case it defaults to False.</li>
+<li><strong>lock</strong> (<em>False</em><em>, </em><em>True</em><em> or </em><em>threading.Lock</em><em>, </em><em>optional</em>) – If chunks is provided, this argument is passed on to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">dask.array.from_array()</span></code>. By default, a global lock is
+used to avoid issues with concurrent access to the same file when using
+dask’s multithreaded backend.</li>
+<li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and to set values to NaN. Defaults to False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>data</strong> – The newly created DataArray.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataArray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-rioxarray.rioxarray">
 <span id="rioxarray-rioxarray-module"></span><h2>rioxarray.rioxarray module<a class="headerlink" href="#module-rioxarray.rioxarray" title="Permalink to this headline">¶</a></h2>
 <p>This module is an extension for xarray to provide rasterio capabilities
@@ -857,6 +915,7 @@ Otherwise it will return a modified copy.</li>
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">rioxarray package</a><ul>
+<li><a class="reference internal" href="#rioxarray-open-rasterio">rioxarray.open_rasterio</a></li>
 <li><a class="reference internal" href="#module-rioxarray.rioxarray">rioxarray.rioxarray module</a></li>
 <li><a class="reference internal" href="#module-rioxarray.crs">rioxarray.crs module</a></li>
 <li><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a></li>
@@ -908,7 +967,7 @@ Otherwise it will return a modified copy.</li>
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >rioxarray</a> &#187;</li> 
       </ul>
     </div>

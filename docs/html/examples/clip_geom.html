@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Example - Clip &#8212; rioxarray 0.0.8 documentation</title>
+    <title>Example - Clip &#8212; rioxarray 0.0.9 documentation</title>
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="examples.html" title="Usage Examples"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Usage Examples</a> &#187;</li> 
       </ul>
     </div>  
@@ -246,37 +246,26 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Example---Clip">
 <h1>Example - Clip<a class="headerlink" href="#Example---Clip" title="Permalink to this headline">¶</a></h1>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
-<span class="kn">import</span> <span class="nn">xarray</span>
+<span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/dask/config.py:168: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  data = yaml.load(f.read()) or {}
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/distributed/config.py:20: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  defaults = yaml.load(f)
-</pre></div></div>
-</div>
 <div class="section" id="Load-in-xarray-dataset">
 <h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
+<p>Notes: - <code class="docutils literal notranslate"><span class="pre">chunks=True</span></code> only works if you have a dask installed. Otherwise, you can skip this. - <code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s2">&quot;small_dem_3m_merged.tif&quot;</span><span class="p">)</span>
+<span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -295,17 +284,17 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>&lt;xarray.DataArray (band: 1, y: 245, x: 574)&gt;
-[140630 values with dtype=uint16]
+dask.array&lt;shape=(1, 245, 574), dtype=float64, chunksize=(1, 245, 574)&gt;
 Coordinates:
-  * band     (band) int64 1
-  * y        (y) float64 4.616e+06 4.616e+06 4.616e+06 ... 4.615e+06 4.615e+06
-  * x        (x) float64 4.25e+05 4.251e+05 4.251e+05 ... 4.268e+05 4.268e+05
+  * band         (band) int64 1
+  * y            (y) float64 4.616e+06 4.616e+06 ... 4.615e+06 4.615e+06
+  * x            (x) float64 4.25e+05 4.251e+05 ... 4.268e+05 4.268e+05
+    spatial_ref  int64 0
 Attributes:
-    transform:   (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387)
-    crs:         +init=epsg:26915
-    res:         (3.0, 3.0)
-    is_tiled:    0
-    nodatavals:  (0.0,)
+    transform:     (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387)
+    scales:        (1.0,)
+    offsets:       (0.0,)
+    grid_mapping:  spatial_ref
 </pre></div>
 </div>
 </div>
@@ -314,7 +303,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">xds</span><span class="o">!=</span><span class="n">xds</span><span class="o">.</span><span class="n">nodatavals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span></span><span class="n">xds</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -323,7 +312,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f9926d34160&gt;
+<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f1c4807acc0&gt;
 </pre></div>
 </div>
 </div>
@@ -381,11 +370,7 @@ Attributes:
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>&lt;xarray.DataArray (band: 1, y: 49, x: 9)&gt;
-array([[[30696, 30699, ..., 30703, 30701],
-        [30694, 30697, ..., 30703, 30700],
-        ...,
-        [30614, 30614, ..., 30619, 30621],
-        [30611, 30610, ..., 30614, 30616]]], dtype=uint16)
+dask.array&lt;shape=(1, 49, 9), dtype=float64, chunksize=(1, 49, 9)&gt;
 Coordinates:
   * band         (band) int64 1
   * y            (y) float64 4.615e+06 4.615e+06 ... 4.615e+06 4.615e+06
@@ -393,7 +378,8 @@ Coordinates:
     spatial_ref  int64 0
 Attributes:
     transform:     (3.0, 0.0, 425500.68381405267, 0.0, -3.0, 4615477.04054638...
-    _FillValue:    0.0
+    scales:        (1.0,)
+    offsets:       (0.0,)
     grid_mapping:  spatial_ref
 </pre></div>
 </div>
@@ -412,7 +398,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f99265b3ba8&gt;
+<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f1c39904400&gt;
 </pre></div>
 </div>
 </div>
@@ -421,6 +407,85 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/examples_clip_geom_10_1.png" src="../_images/examples_clip_geom_10_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Clip-using-a-GeoDataFrame">
+<h2>Clip using a GeoDataFrame<a class="headerlink" href="#Clip-using-a-GeoDataFrame" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">geopandas</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">box</span><span class="p">,</span> <span class="n">mapping</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">geodf</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">box</span><span class="p">(</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">,</span> <span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">crs</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">clipped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geodf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">mapping</span><span class="p">),</span> <span class="n">geodf</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">clipped</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f1c3938fcf8&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_clip_geom_16_1.png" src="../_images/examples_clip_geom_16_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped_invert.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -437,6 +502,7 @@ Attributes:
 <li><a class="reference internal" href="#">Example - Clip</a><ul>
 <li><a class="reference internal" href="#Load-in-xarray-dataset">Load in xarray dataset</a></li>
 <li><a class="reference internal" href="#Clip-using-a-geometry">Clip using a geometry</a></li>
+<li><a class="reference internal" href="#Clip-using-a-GeoDataFrame">Clip using a GeoDataFrame</a></li>
 </ul>
 </li>
 </ul>
@@ -485,7 +551,7 @@ Attributes:
         <li class="right" >
           <a href="examples.html" title="Usage Examples"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" >Usage Examples</a> &#187;</li> 
       </ul>
     </div>

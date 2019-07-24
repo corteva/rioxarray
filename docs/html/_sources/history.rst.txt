@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.9
+-----
+ - Add `rioxarray.open_rasterio` (issue #7)
+
 0.0.8
 -----
  - Fix setting nodata in _add_attrs_proj (pull #30) 

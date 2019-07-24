@@ -1,6 +1,12 @@
 rioxarray package
 =================
 
+rioxarray.open_rasterio
+-----------------------
+
+.. autofunction:: rioxarray.open_rasterio
+
+
 rioxarray.rioxarray module
 --------------------------
 
