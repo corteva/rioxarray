@@ -91,7 +91,7 @@ def _generate_attrs(src_data_array, dst_affine, dst_nodata):
         new_attrs["_FillValue"] = fill_value
 
     # add raster spatial information
-    new_attrs["transform"] = tuple(dst_affine)
+    new_attrs["transform"] = tuple(dst_affine)[:6]
     new_attrs["grid_mapping"] = _get_grid_map_name(src_data_array)
 
     return new_attrs
