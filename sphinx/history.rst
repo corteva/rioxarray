@@ -4,6 +4,7 @@ History
 0.0.10
 -----
 - Add support for opening netcdf/hdf files with `rioxarray.open_rasterio` (issue #32)
+- Added `add_latlon()` method for 2D latlon coordinates (pull #34)
 
 0.0.9
 -----
