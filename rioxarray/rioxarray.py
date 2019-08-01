@@ -13,8 +13,11 @@ datacube is licensed under the Apache License, Version 2.0:
 import copy
 from abc import abstractmethod
 from datetime import datetime
+from distutils.version import LooseVersion
+from functools import partial
 
 import numpy as np
+import pyproj
 import rasterio.warp
 import xarray
 from affine import Affine
@@ -36,6 +39,7 @@ from rioxarray.crs import crs_to_wkt
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
 UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
 DEFAULT_GRID_MAP = "spatial_ref"
+_PYPROJ22 = LooseVersion(pyproj.__version__) >= LooseVersion("2.2.0")
 
 
 def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
@@ -198,6 +202,32 @@ def _make_dst_affine(src_data_array, src_crs, dst_crs, dst_resolution=None):
         src_crs, dst_crs, src_width, src_height, *src_bounds, resolution=dst_resolution
     )
     return dst_affine, dst_width, dst_height
+
+
+def _get_proj_transformer(src_crs, dst_crs):
+    """
+    Get pyproj Transformer based on version of pyproj
+
+    Parameters
+    ----------
+    src_crs: input to create source pyproj.CRS/pyproj.Proj
+    src_crs: input to create destination pyproj.CRS/pyproj.Proj
+
+    Returns
+    -------
+    pyproj Transformer
+    """
+    if _PYPROJ22:
+        return pyproj.Transformer.from_crs(src_crs, dst_crs, always_xy=True).transform
+
+    def ensure_proj(in_crs):
+        if not isinstance(in_crs, pyproj.Proj):
+            if hasattr(in_crs, "to_dict"):
+                in_crs = in_crs.to_dict()
+            in_crs = pyproj.Proj(in_crs, preserve_units=True)
+        return in_crs
+
+    return partial(pyproj.transform, ensure_proj(src_crs), ensure_proj(dst_crs))
 
 
 class XRasterBase(object):
@@ -389,6 +419,54 @@ class XRasterBase(object):
     def shape(self):
         """tuple: Returns the shape (width, height)"""
         return (self.width, self.height)
+
+    def add_latlon(self, inplace=False):
+        """Adds 2D 'latitude' and 'longitude' coordinates to
+        an `xarray.Dataset` or `xarray.DataArray` based on the
+        projection and the 'x' and 'y' coordinates. If the 'latitude'
+        and 'longitude' coordinates already exist, it will do nothing.
+
+        Parameters
+        ----------
+        inplace: bool
+            If True, it will perform the operation inplace. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.DataArray` or :obj:`xarray.Dataset`
+            The data_array with the dimensions added.
+        """
+        # don't do anything if the coordinates exist already
+        if all(coord in self._obj.coords for coord in ("latitude", "longitude")):
+            return self._obj
+
+        # Compute the lon/lat coordinates with pyproj.transform
+        transformer = _get_proj_transformer(self.crs, CRS.from_epsg(4326))
+        x_coords, y_coords = np.meshgrid(
+            self._obj.coords[self.x_dim], self._obj.coords[self.y_dim]
+        )
+        lon, lat = transformer(x_coords.flatten(), y_coords.flatten())
+        lon = np.asarray(lon).reshape((self.height, self.width))
+        lat = np.asarray(lat).reshape((self.height, self.width))
+
+        if inplace:
+            xds = self._obj
+        else:
+            xds = self._obj.copy()
+        # add coordinates to dataset
+        xds.coords["longitude"] = ((self.y_dim, self.x_dim), lon)
+        xds.coords["longitude"].attrs = {
+            "long_name": "longitude",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+        }
+        xds.coords["latitude"] = ((self.y_dim, self.x_dim), lat)
+        xds.coords["latitude"].attrs = {
+            "long_name": "latitude",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+        }
+        return xds
 
 
 @xarray.register_dataarray_accessor("rio")

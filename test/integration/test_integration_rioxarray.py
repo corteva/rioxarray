@@ -975,3 +975,70 @@ def test_crs_writer__missing():
         test_da.rio.write_crs()
     with pytest.raises(MissingCRS):
         test_da.to_dataset(name="test").rio.write_crs()
+
+
+@pytest.mark.parametrize(
+    "input_ds,compare_ds,xarray_open",
+    [
+        (
+            os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
+            os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_LATLON.nc"),
+            xarray.open_dataarray,
+        ),
+        (
+            os.path.join(TEST_INPUT_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019.nc"),
+            os.path.join(
+                TEST_COMPARE_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019_LATLON.nc"
+            ),
+            xarray.open_dataset,
+        ),
+    ],
+)
+def test_latlon(input_ds, compare_ds, xarray_open):
+    with xarray_open(input_ds, autoclose=True) as xds, xarray_open(
+        compare_ds, autoclose=True
+    ) as xdc:
+        xds_output = xds.rio.add_latlon()
+        assert "latitude" not in xds.coords
+        assert "longitude" not in xds.coords
+        xarray.testing.assert_allclose(xds_output, xdc)
+
+
+@pytest.mark.parametrize(
+    "input_ds,compare_ds,xarray_open",
+    [
+        (
+            os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
+            os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_LATLON.nc"),
+            xarray.open_dataarray,
+        ),
+        (
+            os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_LATLON.nc"),
+            os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_LATLON.nc"),
+            xarray.open_dataarray,
+        ),
+        (
+            os.path.join(TEST_INPUT_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019.nc"),
+            os.path.join(
+                TEST_COMPARE_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019_LATLON.nc"
+            ),
+            xarray.open_dataset,
+        ),
+        (
+            os.path.join(
+                TEST_COMPARE_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019_LATLON.nc"
+            ),
+            os.path.join(
+                TEST_COMPARE_DATA_DIR, "MODIS_MYD09GQ_15TWF79_20171019_LATLON.nc"
+            ),
+            xarray.open_dataset,
+        ),
+    ],
+)
+def test_latlon__inplace(input_ds, compare_ds, xarray_open):
+    with xarray_open(input_ds, autoclose=True) as xds, xarray_open(
+        compare_ds, autoclose=True
+    ) as xdc:
+        out_xds = xds.rio.add_latlon(inplace=True)
+        xarray.testing.assert_allclose(out_xds, xdc)
+        xarray.testing.assert_allclose(xds, xdc)
