@@ -245,6 +245,8 @@ class XRasterBase(object):
         Dataset with crs attribute.
 
         """
+        if hasattr(input_crs, "wkt"):
+            input_crs = input_crs.wkt
         crs = CRS.from_user_input(input_crs)
         if inplace:
             self._crs = crs
@@ -415,11 +417,11 @@ class RasterArray(XRasterBase):
                 crs_wkt = self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
             except KeyError:
                 crs_wkt = self._obj.coords[grid_mapping_coord].attrs["crs_wkt"]
-            self._crs = CRS.from_user_input(crs_wkt)
+            self.set_crs(crs_wkt, inplace=True)
         except KeyError:
             try:
-                # look in attrs for 'crs' from rasterio xarray
-                self._crs = CRS.from_user_input(self._obj.attrs["crs"])
+                # look in attrs for 'crs'
+                self.set_crs(self._obj.attrs["crs"], inplace=True)
             except KeyError:
                 self._crs = False
                 return None

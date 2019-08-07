@@ -975,3 +975,25 @@ def test_crs_writer__missing():
         test_da.rio.write_crs()
     with pytest.raises(MissingCRS):
         test_da.to_dataset(name="test").rio.write_crs()
+
+class CustomCRS(object):
+    @property
+    def wkt(self):
+        return CRS.from_epsg(4326).to_wkt()
+
+    def __str__(self):
+        return self.wkt
+
+
+def test_crs_get_custom():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+        attrs={"crs": CustomCRS()}
+    )
+    assert test_da.rio.crs.wkt == CustomCRS().wkt
+    test_ds = xarray.Dataset(
+        {"test": test_da}
+    )
+    assert test_ds.rio.crs.wkt == CustomCRS().wkt
