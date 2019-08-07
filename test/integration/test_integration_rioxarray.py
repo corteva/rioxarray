@@ -991,10 +991,8 @@ def test_crs_get_custom():
         numpy.zeros((5, 5)),
         dims=("y", "x"),
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
-        attrs={"crs": CustomCRS()}
+        attrs={"crs": CustomCRS()},
     )
     assert test_da.rio.crs.wkt == CustomCRS().wkt
-    test_ds = xarray.Dataset(
-        {"test": test_da}
-    )
+    test_ds = xarray.Dataset({"test": test_da})
     assert test_ds.rio.crs.wkt == CustomCRS().wkt
