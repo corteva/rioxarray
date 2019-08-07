@@ -976,6 +976,7 @@ def test_crs_writer__missing():
     with pytest.raises(MissingCRS):
         test_da.to_dataset(name="test").rio.write_crs()
 
+
 class CustomCRS(object):
     @property
     def wkt(self):
