@@ -13,15 +13,14 @@ from distutils.version import LooseVersion
 
 import numpy as np
 from xarray import DataArray, Dataset
-from xarray.core import indexing
-from xarray.core.utils import is_scalar
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager
 from xarray.backends.locks import SerializableLock
+from xarray.core import indexing
+from xarray.core.utils import is_scalar
 
 from rioxarray.exceptions import RioXarrayError
 from rioxarray.rioxarray import affine_to_coords
-
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()

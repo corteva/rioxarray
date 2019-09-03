@@ -1,14 +1,19 @@
 import os
+from test.conftest import (
+    TEST_COMPARE_DATA_DIR,
+    TEST_INPUT_DATA_DIR,
+    _assert_xarrays_equal,
+)
 
 import numpy
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_equal
-
 import rasterio
-import rioxarray
 import xarray
 from affine import Affine
+from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
+
+import rioxarray
 from rioxarray.exceptions import (
     DimensionError,
     MissingCRS,
@@ -16,11 +21,6 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
 )
 from rioxarray.rioxarray import _make_coords
-from test.conftest import (
-    TEST_COMPARE_DATA_DIR,
-    TEST_INPUT_DATA_DIR,
-    _assert_xarrays_equal,
-)
 
 
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])

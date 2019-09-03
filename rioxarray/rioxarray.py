@@ -15,13 +15,14 @@ from abc import abstractmethod
 from datetime import datetime
 
 import numpy as np
-
 import rasterio.warp
 import xarray
 from affine import Affine
 from rasterio.crs import CRS
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
+from scipy.interpolate import griddata
+
 from rioxarray.crs import crs_to_wkt
 from rioxarray.exceptions import (
     DimensionError,
@@ -31,7 +32,6 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     TooManyDimensions,
 )
-from scipy.interpolate import griddata
 
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
 UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
@@ -296,7 +296,7 @@ class XRasterBase(object):
             data_obj = self.set_crs(input_crs, inplace=inplace)
         else:
             data_obj = self._get_obj(inplace=inplace)
- 
+
         # remove old grid maping coordinate if exists
         try:
             del data_obj.coords[grid_mapping_name]
@@ -361,21 +361,15 @@ class XRasterBase(object):
                 else:
                     new_vars = dict(data_obj[var].attrs)
                     new_vars.pop("_FillValue", None)
-                    data_obj[var].rio.set_attrs(
-                        new_vars, inplace=True
-                    )
+                    data_obj[var].rio.set_attrs(new_vars, inplace=True)
                 data_obj[var].rio._nodata = input_nodata
         else:
             if input_nodata is not False:
-                data_obj.rio.update_attrs(
-                    dict(_FillValue=input_nodata), inplace=True
-                )
+                data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
             else:
                 new_vars = dict(data_obj.attrs)
                 new_vars.pop("_FillValue", None)
-                data_obj.rio.set_attrs(
-                    new_vars, inplace=True
-                )
+                data_obj.rio.set_attrs(new_vars, inplace=True)
             data_obj.rio._nodata = input_nodata
         return data_obj
 

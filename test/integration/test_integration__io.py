@@ -5,18 +5,17 @@ import pickle
 import shutil
 import sys
 import tempfile
+from test.conftest import TEST_COMPARE_DATA_DIR, _assert_xarrays_equal
 
 import mock
-import numpy
 import numpy as np
-from numpy.testing import assert_almost_equal
-from xarray.testing import assert_allclose, assert_identical, assert_equal
 import pytest
 import xarray as xr
+from numpy.testing import assert_almost_equal
 from xarray import DataArray
+from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
-from test.conftest import TEST_COMPARE_DATA_DIR, _assert_xarrays_equal
 
 
 def test_open_rasterio_mask_chunk_clip():
