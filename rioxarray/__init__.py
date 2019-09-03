@@ -6,5 +6,5 @@ __author__ = """rioxarray Contributors"""
 __email__ = "alansnow21@gmail.com"
 
 import rioxarray.rioxarray  # noqa
-from rioxarray._version import __version__  # noqa
 from rioxarray._io import open_rasterio  # noqa
+from rioxarray._version import __version__  # noqa

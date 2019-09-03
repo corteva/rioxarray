@@ -23,6 +23,7 @@ from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
 
+from rioxarray.crs import crs_to_wkt
 from rioxarray.exceptions import (
     DimensionError,
     InvalidDimensionOrder,
@@ -31,7 +32,6 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     TooManyDimensions,
 )
-from rioxarray.crs import crs_to_wkt
 
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
 UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
@@ -143,7 +143,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
     if "_FillValue" in new_data_array.encoding:
         new_attrs.pop("_FillValue", None)
 
-    new_data_array.attrs = new_attrs
+    new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
     add_xy_grid_meta(new_data_array.coords)
@@ -229,6 +229,23 @@ class XRasterBase(object):
         """
         raise NotImplementedError
 
+    def _get_obj(self, inplace):
+        """
+        Get the object to modify.
+
+        Parameters
+        ----------
+        inplace: bool
+            If True, returns self.
+
+        Returns
+        -------
+        xarray.Dataset or xarray.DataArray:
+        """
+        if inplace:
+            return self._obj
+        return self._obj.copy(deep=True)
+
     def set_crs(self, input_crs, inplace=True):
         """
         Set the CRS value for the Dataset/DataArray without modifying
@@ -237,7 +254,9 @@ class XRasterBase(object):
         Parameters
         ----------
         input_crs: object
-            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+            Anything accepted by `rasterio.crs.CRS.from_user_input`.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
 
         Returns
         -------
@@ -248,12 +267,9 @@ class XRasterBase(object):
         if hasattr(input_crs, "wkt"):
             input_crs = input_crs.wkt
         crs = CRS.from_user_input(input_crs)
-        if inplace:
-            self._crs = crs
-            return self._obj
-        xobj = self._obj.copy(deep=True)
-        xobj.rio._crs = crs
-        return xobj
+        obj = self._get_obj(inplace=inplace)
+        obj.rio._crs = crs
+        return obj
 
     def write_crs(
         self, input_crs=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
@@ -264,7 +280,7 @@ class XRasterBase(object):
         Parameters
         ----------
         input_crs: object
-            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+            Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
             Name of the coordinate to store the CRS information in.
         inplace: bool, optional
@@ -278,10 +294,8 @@ class XRasterBase(object):
         """
         if input_crs is not None:
             data_obj = self.set_crs(input_crs, inplace=inplace)
-        elif inplace:
-            data_obj = self._obj
         else:
-            data_obj = self._obj.copy(deep=True)
+            data_obj = self._get_obj(inplace=inplace)
 
         # remove old grid maping coordinate if exists
         try:
@@ -299,7 +313,7 @@ class XRasterBase(object):
         # http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#appendix-grid-mappings
         # http://desktop.arcgis.com/en/arcmap/10.3/manage-data/netcdf/spatial-reference-for-netcdf-data.htm
         grid_map_attrs["crs_wkt"] = crs_wkt
-        data_obj.coords[grid_mapping_name].attrs = grid_map_attrs
+        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
 
         # add grid mapping attribute to variables
         if hasattr(data_obj, "data_vars"):
@@ -308,14 +322,61 @@ class XRasterBase(object):
                     self.x_dim in data_obj[var].dims
                     and self.y_dim in data_obj[var].dims
                 ):
-                    var_attrs = dict(data_obj[var].attrs)
-                    var_attrs.update(grid_mapping=grid_mapping_name)
-                    data_obj[var].attrs = var_attrs
+                    data_obj[var].rio.update_attrs(
+                        dict(grid_mapping=grid_mapping_name), inplace=True
+                    )
         else:
-            var_attrs = dict(data_obj.attrs)
-            var_attrs.update(grid_mapping=grid_mapping_name)
-            data_obj.attrs = var_attrs
+            data_obj.rio.update_attrs(
+                dict(grid_mapping=grid_mapping_name), inplace=True
+            )
         return data_obj
+
+    def set_attrs(self, new_attrs, inplace=False):
+        """
+        Set the attributes of the dataset/dataarray and reset
+        rioxarray properties to re-search for them.
+
+        Parameters
+        ----------
+        new_attrs: dict
+            A dictionary of new attributes.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        xarray.Dataset or xarray.DataArray:
+        Modified dataset with new attributes.
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        # set the attributes
+        data_obj.attrs = new_attrs
+        # reset rioxarray properties
+        data_obj.rio._nodata = None
+        data_obj.rio._crs = None
+        return data_obj
+
+    def update_attrs(self, new_attrs, inplace=False):
+        """
+        Update the attributes of the dataset/dataarray and reset
+        rioxarray properties to re-search for them.
+
+        Parameters
+        ----------
+        new_attrs: dict
+            A dictionary of new attributes to update with.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        xarray.Dataset or xarray.DataArray:
+        Modified dataset with updated attributes.
+
+        """
+        data_attrs = dict(self._obj.attrs)
+        data_attrs.update(**new_attrs)
+        return self.set_attrs(data_attrs, inplace=inplace)
 
     def set_spatial_dims(self, x_dim, y_dim, inplace=True):
         """
@@ -348,12 +409,9 @@ class XRasterBase(object):
             else:
                 raise DimensionError("y dimension not found: {}".format(y_dim))
 
-        if not inplace:
-            obj_copy = self._obj.copy()
-            set_dims(obj_copy, x_dim, y_dim)
-            return obj_copy
-        set_dims(self._obj, x_dim, y_dim)
-        return self._obj
+        data_obj = self._get_obj(inplace=inplace)
+        set_dims(data_obj, x_dim, y_dim)
+        return data_obj
 
     @property
     def x_dim(self):
@@ -401,6 +459,54 @@ class RasterArray(XRasterBase):
         super(RasterArray, self).__init__(xarray_obj)
         # properties
         self._nodata = None
+
+    def set_nodata(self, input_nodata, inplace=True):
+        """
+        Set the nodata value for the DataArray without modifying
+        the data array.
+
+        Parameters
+        ----------
+        input_nodata: object
+            Valid nodata for dtype.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        xarray.DataArray: Dataset with nodata attribute set.
+        """
+        obj = self._get_obj(inplace=inplace)
+        obj.rio._nodata = input_nodata
+        return obj
+
+    def write_nodata(self, input_nodata, inplace=False):
+        """
+        Write the nodata to the DataArray in a CF compliant manner.
+
+        Parameters
+        ----------
+        input_nodata: object
+            Nodata value for the DataArray.
+            If input_nodata is None, it will remove the _FillValue attribute.
+        inplace: bool, optional
+            If True, it will write to the existing DataArray. Default is False.
+
+        Returns
+        -------
+        xarray.DataArray: Modified DataArray with CF compliant nodata information.
+
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        input_nodata = False if input_nodata is None else input_nodata
+        if input_nodata is not False:
+            data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
+        else:
+            new_vars = dict(data_obj.attrs)
+            new_vars.pop("_FillValue", None)
+            data_obj.rio.set_attrs(new_vars, inplace=True)
+        data_obj.rio.set_nodata(input_nodata, inplace=True)
+        return data_obj
 
     @property
     def crs(self):
@@ -1081,7 +1187,10 @@ class RasterDataset(XRasterBase):
             Retrieve projection from `xarray.Dataset`
         """
         if self._crs is None:
-            self._crs = self._obj[self.vars[0]].rio.crs
+            try:
+                self._crs = self._obj[self.vars[0]].rio.crs
+            except IndexError:
+                pass
         return self._crs
 
     def reproject(

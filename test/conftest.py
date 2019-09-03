@@ -1,7 +1,8 @@
 import os
 
-from numpy.testing import assert_almost_equal, assert_array_equal
 import xarray
+from numpy.testing import assert_almost_equal, assert_array_equal
+
 from rioxarray.rioxarray import UNWANTED_RIO_ATTRS
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "test_data")

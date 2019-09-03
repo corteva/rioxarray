@@ -5,18 +5,17 @@ import pickle
 import shutil
 import sys
 import tempfile
+from test.conftest import TEST_COMPARE_DATA_DIR, _assert_xarrays_equal
 
 import mock
-import numpy
 import numpy as np
-from numpy.testing import assert_almost_equal
-from xarray.testing import assert_allclose, assert_identical, assert_equal
 import pytest
 import xarray as xr
+from numpy.testing import assert_almost_equal
 from xarray import DataArray
+from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
-from test.conftest import TEST_COMPARE_DATA_DIR, _assert_xarrays_equal
 
 
 def test_open_rasterio_mask_chunk_clip():
@@ -29,7 +28,7 @@ def test_open_rasterio_mask_chunk_clip():
         assert str(xdi.data.dtype) == "float64"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
-        assert numpy.isnan(xdi.values).sum() == 52119
+        assert np.isnan(xdi.values).sum() == 52119
         assert xdi.encoding == {"_FillValue": 0.0}
         attrs = dict(xdi.attrs)
         assert_almost_equal(
