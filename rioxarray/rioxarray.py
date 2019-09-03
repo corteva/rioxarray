@@ -362,7 +362,7 @@ class XRasterBase(object):
                     new_vars = dict(data_obj[var].attrs)
                     new_vars.pop("_FillValue", None)
                     data_obj[var].rio.set_attrs(new_vars, inplace=True)
-                data_obj[var].rio._nodata = input_nodata
+                data_obj[var].rio.set_nodata(input_nodata, inplace=True)
         else:
             if input_nodata is not False:
                 data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
@@ -370,7 +370,7 @@ class XRasterBase(object):
                 new_vars = dict(data_obj.attrs)
                 new_vars.pop("_FillValue", None)
                 data_obj.rio.set_attrs(new_vars, inplace=True)
-            data_obj.rio._nodata = input_nodata
+            data_obj.rio.set_nodata(input_nodata, inplace=True)
         return data_obj
 
     def set_attrs(self, new_attrs, inplace=False):

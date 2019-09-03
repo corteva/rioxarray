@@ -28,7 +28,7 @@ def test_open_rasterio_mask_chunk_clip():
         assert str(xdi.data.dtype) == "float64"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
-        assert numpy.isnan(xdi.values).sum() == 52119
+        assert np.isnan(xdi.values).sum() == 52119
         assert xdi.encoding == {"_FillValue": 0.0}
         attrs = dict(xdi.attrs)
         assert_almost_equal(
