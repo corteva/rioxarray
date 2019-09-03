@@ -15,3 +15,4 @@ This page contains links to a collection of examples of how to use rioxarray.
    reproject_match.ipynb
    interpolate_na.ipynb
    transform_bounds.ipynb
+   convert_to_raster.ipynb
