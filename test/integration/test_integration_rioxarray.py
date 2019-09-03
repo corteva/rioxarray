@@ -2,13 +2,13 @@ import os
 
 import numpy
 import pytest
+from numpy.testing import assert_almost_equal, assert_array_equal
+
 import rasterio
+import rioxarray
 import xarray
 from affine import Affine
-from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
-
-import rioxarray
 from rioxarray.exceptions import (
     DimensionError,
     MissingCRS,
@@ -996,3 +996,84 @@ def test_crs_get_custom():
     assert test_da.rio.crs.wkt == CustomCRS().wkt
     test_ds = xarray.Dataset({"test": test_da})
     assert test_ds.rio.crs.wkt == CustomCRS().wkt
+
+
+def test_nodata_setter():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.nodata is None
+    out_ds = test_da.rio.set_nodata(-1)
+    assert out_ds.rio.nodata == -1
+
+
+def test_nodata_setter__copy():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.nodata is None
+    out_ds = test_da.rio.set_nodata(-1, inplace=False)
+    assert test_da.rio.nodata is None
+    assert out_ds.rio.nodata == -1
+
+
+def test_nodata_writer__array__copy():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.nodata is None
+    out_da = test_da.rio.write_nodata(-1)
+    assert test_da.rio.nodata is None
+    assert out_da.attrs["_FillValue"] == -1
+    assert out_da.rio.nodata == -1
+    out_da.rio._nodata = None
+    assert out_da.rio.nodata == -1
+    test_da.rio._nodata = None
+    assert test_da.rio.nodata is None
+    assert "_FillValue" not in test_da.attrs
+
+
+def test_nodata_writer__array__inplace():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    assert test_da.rio.nodata is None
+    out_da = test_da.rio.write_nodata(-1, inplace=True)
+    assert "_FillValue" in test_da.attrs
+    assert out_da.attrs["_FillValue"] == test_da.attrs["_FillValue"]
+    test_da.rio._nodata = None
+    assert test_da.rio.nodata == -1
+    assert out_da.attrs == test_da.attrs
+    out_da.rio._nodata = None
+    assert out_da.rio.nodata == -1
+
+
+def test_nodata_writer__missing():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_da.rio.write_nodata(None)
+    assert not test_da.attrs
+
+
+def test_nodata_writer__remove():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_nd = test_da.rio.write_nodata(-1)
+    assert not test_da.attrs
+    assert test_nd.attrs["_FillValue"] == -1
+    test_nd.rio.write_nodata(None, inplace=True)
+    assert not test_nd.attrs
