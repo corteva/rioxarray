@@ -1,9 +1,4 @@
 import os
-from test.conftest import (
-    TEST_COMPARE_DATA_DIR,
-    TEST_INPUT_DATA_DIR,
-    _assert_xarrays_equal,
-)
 
 import numpy
 import pytest
@@ -21,6 +16,11 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
 )
 from rioxarray.rioxarray import _make_coords
+from test.conftest import (
+    TEST_COMPARE_DATA_DIR,
+    TEST_INPUT_DATA_DIR,
+    _assert_xarrays_equal,
+)
 
 
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
@@ -850,6 +850,10 @@ def test_set_spatial_dims__missing():
     )
     with pytest.raises(DimensionError):
         test_da.rio.set_spatial_dims(x_dim="long", y_dim="lati")
+
+
+def test_crs_empty_dataset():
+    assert xarray.Dataset().rio.crs is None
 
 
 def test_crs_setter():

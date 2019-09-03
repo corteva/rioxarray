@@ -331,48 +331,6 @@ class XRasterBase(object):
             )
         return data_obj
 
-    def write_nodata(self, input_nodata, inplace=False):
-        """
-        Write the nodata to the dataset in a CF compliant manner.
-
-        Parameters
-        ----------
-        input_nodata: object
-            Nodata value for the dataset.
-            If input_nodata is None, it will remove the _FillValue attribute.
-        inplace: bool, optional
-            If True, it will write to the existing dataset. Default is False.
-
-        Returns
-        -------
-        xarray.Dataset or xarray.DataArray:
-        Modified dataset with CF compliant nodata information.
-
-        """
-        data_obj = self._get_obj(inplace=inplace)
-        input_nodata = False if input_nodata is None else input_nodata
-        # add grid mapping attribute to variables
-        if hasattr(data_obj, "data_vars"):
-            for var in data_obj.data_vars:
-                if input_nodata is not False:
-                    data_obj[var].rio.update_attrs(
-                        dict(_FillValue=input_nodata), inplace=True
-                    )
-                else:
-                    new_vars = dict(data_obj[var].attrs)
-                    new_vars.pop("_FillValue", None)
-                    data_obj[var].rio.set_attrs(new_vars, inplace=True)
-                data_obj[var].rio.set_nodata(input_nodata, inplace=True)
-        else:
-            if input_nodata is not False:
-                data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
-            else:
-                new_vars = dict(data_obj.attrs)
-                new_vars.pop("_FillValue", None)
-                data_obj.rio.set_attrs(new_vars, inplace=True)
-            data_obj.rio.set_nodata(input_nodata, inplace=True)
-        return data_obj
-
     def set_attrs(self, new_attrs, inplace=False):
         """
         Set the attributes of the dataset/dataarray and reset
@@ -521,6 +479,34 @@ class RasterArray(XRasterBase):
         obj = self._get_obj(inplace=inplace)
         obj.rio._nodata = input_nodata
         return obj
+
+    def write_nodata(self, input_nodata, inplace=False):
+        """
+        Write the nodata to the DataArray in a CF compliant manner.
+
+        Parameters
+        ----------
+        input_nodata: object
+            Nodata value for the DataArray.
+            If input_nodata is None, it will remove the _FillValue attribute.
+        inplace: bool, optional
+            If True, it will write to the existing DataArray. Default is False.
+
+        Returns
+        -------
+        xarray.DataArray: Modified DataArray with CF compliant nodata information.
+
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        input_nodata = False if input_nodata is None else input_nodata
+        if input_nodata is not False:
+            data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
+        else:
+            new_vars = dict(data_obj.attrs)
+            new_vars.pop("_FillValue", None)
+            data_obj.rio.set_attrs(new_vars, inplace=True)
+        data_obj.rio.set_nodata(input_nodata, inplace=True)
+        return data_obj
 
     @property
     def crs(self):
@@ -1201,7 +1187,10 @@ class RasterDataset(XRasterBase):
             Retrieve projection from `xarray.Dataset`
         """
         if self._crs is None:
-            self._crs = self._obj[self.vars[0]].rio.crs
+            try:
+                self._crs = self._obj[self.vars[0]].rio.crs
+            except IndexError:
+                pass
         return self._crs
 
     def reproject(
