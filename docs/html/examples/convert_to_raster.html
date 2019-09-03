@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Example - Convert dataset to raster (GeoTiff) &#8212; rioxarray 0.0.9 documentation</title>
+    <title>Example - Convert dataset to raster (GeoTiff) &#8212; rioxarray 0.0.10 documentation</title>
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="transform_bounds.html" title="Example - Transform Bounds"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Usage Examples</a> &#187;</li> 
       </ul>
     </div>  
@@ -434,7 +434,7 @@ Attributes:
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
-<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
 </pre></div>
 </div>
 </div>
@@ -443,30 +443,12 @@ Attributes:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>OrderedDict()
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>(None, None)
+<span></span>(OrderedDict(), None, None)
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -475,7 +457,7 @@ Attributes:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -491,37 +473,33 @@ Attributes:
 {&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: null, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
-<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">attrs</span>
-<span class="n">new_ds</span> <span class="o">=</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>(CRS.from_epsg(32722), 0.0)
+<span></span>(OrderedDict([(&#39;grid_mapping&#39;, &#39;spatial_ref&#39;),
+              (&#39;units&#39;, &#39;DN&#39;),
+              (&#39;nodata&#39;, 0.0)]),
+ CRS.from_epsg(32722),
+ 0.0)
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -530,7 +508,7 @@ Attributes:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -607,7 +585,7 @@ Attributes:
         <li class="right" >
           <a href="transform_bounds.html" title="Example - Transform Bounds"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" >Usage Examples</a> &#187;</li> 
       </ul>
     </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray package &#8212; rioxarray 0.0.9 documentation</title>
+    <title>rioxarray package &#8212; rioxarray 0.0.10 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">rioxarray</a> &#187;</li> 
       </ul>
     </div>  
@@ -342,6 +342,31 @@ transform attribute.</td>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.set_nodata">
+<code class="descname">set_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.set_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.set_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the nodata value for the DataArray without modifying
+the data array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_nodata</strong> (<em>object</em>) – Valid nodata for dtype.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>xarray.DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Dataset with nodata attribute set.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.slice_xy">
 <code class="descname">slice_xy</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.slice_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.slice_xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slice the array by x,y bounds.</p>
@@ -422,6 +447,31 @@ attribute.</li>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.write_nodata">
+<code class="descname">write_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the nodata to the DataArray in a CF compliant manner.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_nodata</strong> (<em>object</em>) – Nodata value for the DataArray.
+If input_nodata is None, it will remove the _FillValue attribute.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing DataArray. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>xarray.DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Modified DataArray with CF compliant nodata information.</p>
 </td>
 </tr>
 </tbody>
@@ -670,6 +720,32 @@ reprojected to match match_data_array.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_attrs">
+<code class="descname">set_attrs</code><span class="sig-paren">(</span><em>new_attrs</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_attrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the attributes of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>xarray.Dataset or xarray.DataArray</em></li>
+<li><em>Modified dataset with new attributes.</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.set_crs">
 <code class="descname">set_crs</code><span class="sig-paren">(</span><em>input_crs</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_crs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the CRS value for the Dataset/DataArray without modifying
@@ -678,12 +754,17 @@ the dataset/data array.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input_crs</strong> (<em>object</em>) – Anythong accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
 <li><em>xarray.Dataset or xarray.DataArray</em></li>
 <li><em>Dataset with crs attribute.</em></li>
 </ul>
+</p>
 </td>
 </tr>
 </tbody>
@@ -730,6 +811,32 @@ Otherwise it will return a modified copy.</li>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.update_attrs">
+<code class="descname">update_attrs</code><span class="sig-paren">(</span><em>new_attrs</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.update_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.update_attrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the attributes of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes to update with.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>xarray.Dataset or xarray.DataArray</em></li>
+<li><em>Modified dataset with updated attributes.</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.XRasterBase.width">
 <code class="descname">width</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.width" title="Permalink to this definition">¶</a></dt>
@@ -753,7 +860,7 @@ Otherwise it will return a modified copy.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_crs</strong> (<em>object</em>) – Anythong accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
+<li><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
 <li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the coordinate to store the CRS information in.</li>
 <li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
 </ul>
@@ -967,7 +1074,7 @@ Otherwise it will return a modified copy.</li>
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >rioxarray</a> &#187;</li> 
       </ul>
     </div>
