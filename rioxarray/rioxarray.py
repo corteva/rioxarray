@@ -254,7 +254,7 @@ class XRasterBase(object):
         Parameters
         ----------
         input_crs: object
-            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+            Anything accepted by `rasterio.crs.CRS.from_user_input`.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
@@ -280,7 +280,7 @@ class XRasterBase(object):
         Parameters
         ----------
         input_crs: object
-            Anythong accepted by `rasterio.crs.CRS.from_user_input`.
+            Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
             Name of the coordinate to store the CRS information in.
         inplace: bool, optional
