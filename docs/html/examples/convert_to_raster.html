@@ -1,0 +1,619 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Example - Convert dataset to raster (GeoTiff) &#8212; rioxarray 0.0.9 documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rioxarray" href="../modules.html" />
+    <link rel="prev" title="Example - Transform Bounds" href="transform_bounds.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modules.html" title="rioxarray"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="transform_bounds.html" title="Example - Transform Bounds"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Usage Examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="Example---Convert-dataset-to-raster-(GeoTiff)">
+<h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this headline">¶</a></h1>
+<p>Often, it is desirable to take a variable (band) out of your dataset and export it to a raster. This is possible with the <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code> method. It does most of the work for you so you don’t have to.</p>
+<p>Note: The <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code> method only works on a 2-dimensional or 3-dimensional <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
+<span class="kn">import</span> <span class="nn">xarray</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">)</span>
+<span class="n">rds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;xarray.Dataset&gt;
+Dimensions:      (time: 2, x: 10, y: 10)
+Coordinates:
+    spatial_ref  int64 ...
+  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05
+  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451
+  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06
+Data variables:
+    blue         (time, y, x) float64 ...
+    green        (time, y, x) float64 ...
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>rds.green.rio.to_raster<span class="o">?</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>[0;31mSignature:[0m
+[0mrds[0m[0;34m.[0m[0mgreen[0m[0;34m.[0m[0mrio[0m[0;34m.[0m[0mto_raster[0m[0;34m([0m[0;34m[0m
+[0;34m[0m    [0mraster_path[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0mdriver[0m[0;34m=[0m[0;34m&#39;GTiff&#39;[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0mdtype[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0mtags[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0;34m**[0m[0mprofile_kwargs[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0;31mDocstring:[0m
+Export the DataArray to a raster file.
+
+Parameters
+----------
+raster_path: str
+    The path to output the raster to.
+driver: str, optional
+    The name of the GDAL/rasterio driver to use to export the raster.
+    Default is &quot;GTiff&quot;.
+dtype: str, optional
+    The data type to write the raster to. Default is the datasets dtype.
+tags: dict, optional
+    A dictionary of tags to write to the raster.
+**profile_kwargs
+    Additional keyword arguments to pass into writing the raster. The
+    nodata, transform, crs, count, width, and height attributes
+    are ignored.
+[0;31mFile:[0m      ~/scripts/rioxarray/rioxarray/rioxarray.py
+[0;31mType:[0m      method
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;green_band.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZMA&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;xarray.DataArray &#39;green&#39; (time: 2, y: 10, x: 10)&gt;
+array([[[ 7.920639, 66.150832, 30.096116, 30.437197, 57.794734, 11.538647,
+         14.426782, 35.593171, 53.784858,  0.449093],
+        [23.804111, 67.910347, 18.694533, 30.41474 , 68.117674, 44.906057,
+         62.311842, 37.485047, 57.134336,  7.52572 ],
+        [36.653481, 39.596833, 61.07603 , 56.883093, 29.635613, 64.114699,
+         42.341689, 54.724789, 31.872344, 11.282554],
+        [32.502176, 28.090549, 58.398927, 41.224019, 34.804777, 32.184565,
+         59.392327,  9.155824, 52.967172, 67.409236],
+        [18.79468 ,  8.543429, 35.834698,  3.596245, 30.252802, 41.549499,
+         23.060248,  7.267762, 27.374099,  0.684024],
+        [ 9.93227 , 44.509446, 22.01927 , 28.514121, 36.715233, 15.03939 ,
+          2.43399 ,  0.636075, 34.43023 , 37.024545],
+        [28.874823,  1.514255, 34.210822, 10.49793 , 54.025491, 64.294026,
+         36.212813, 17.766628, 45.295952, 10.349576],
+        [58.961924, 47.334638, 64.844646, 37.634131,  7.815025, 35.139303,
+         18.501505, 35.01185 , 27.761908, 13.240655],
+        [49.544668, 57.716538, 27.389778, 11.604377, 24.826367, 15.449456,
+         26.482386, 42.855739, 10.4958  , 59.267182],
+        [37.094093, 43.294246, 33.240747, 16.85513 , 54.705119, 14.633291,
+         35.138742, 50.101683, 57.495953, 52.795405]],
+
+       [[26.137058, 16.448086,  4.503539, 33.351036, 20.32524 , 63.369743,
+         11.531512, 38.629561, 59.821441, 11.547508],
+        [ 6.438471, 28.948907,  9.949052, 23.234921, 65.539507,  9.822554,
+         55.754023, 51.590388, 57.047098,  4.929671],
+        [32.360472, 17.939979, 52.889505, 69.181176, 39.2923  , 56.442225,
+          5.699603, 21.092554,  8.93472 , 23.810367],
+        [ 3.715695, 30.653733, 44.540496, 48.578544, 24.032477, 30.339109,
+         37.376636, 58.787274, 49.308994, 59.510765],
+        [37.991912, 50.023013, 63.711135, 26.546118, 60.561058, 36.098302,
+         10.725673, 40.51609 , 47.479255, 42.710909],
+        [15.32887 , 15.878984, 30.914778, 25.902812,  3.815428, 35.530366,
+         48.426293, 44.280075,  4.468083, 18.00032 ],
+        [58.286993, 20.397714, 63.124   , 69.117495,  1.32436 , 29.024715,
+         31.601531, 34.307982,  7.990292, 36.159696],
+        [34.674335, 62.344993,  5.714717,  2.161448, 66.714977, 52.443751,
+         12.791859, 63.707491, 13.697063,  9.394474],
+        [16.766346, 26.260123, 40.68158 , 18.695085, 64.812126, 23.151592,
+         50.597642, 61.308205, 31.517123, 23.469797],
+        [44.670989, 17.533084, 39.034907, 32.676726, 53.275139, 48.731172,
+         12.958856, 21.760335, 27.292202, 18.409063]]])
+Coordinates:
+    spatial_ref  int64 ...
+  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05
+  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451
+  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06
+Attributes:
+    units:         DN
+    nodata:        0.0
+    grid_mapping:  spatial_ref
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span>rio info green_band.tif
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;compress&#34;: &#34;lzma&#34;, &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.317326412269495, -17.322997474192462], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+</pre></div></div>
+</div>
+<div class="section" id="Managing-Information-Loss-with-xarray-operations">
+<h2>Managing Information Loss with xarray operations<a class="headerlink" href="#Managing-Information-Loss-with-xarray-operations" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes, you can lose important information from your dataset when performing operations. You will likely want to keep track of your <code class="docutils literal notranslate"><span class="pre">nodata</span></code> and your <code class="docutils literal notranslate"><span class="pre">CRS</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>OrderedDict()
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>(None, None)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;combination.tif&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span>rio info combination.tif
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: null, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
+<span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">attrs</span>
+<span class="n">new_ds</span> <span class="o">=</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>(CRS.from_epsg(32722), 0.0)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;combination_keep_attrs.tif&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span>rio info combination_keep_attrs.tif
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.317326412269495, -17.322997474192462], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: 0.0, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+</pre></div></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example - Convert dataset to raster (GeoTiff)</a><ul>
+<li><a class="reference internal" href="#Managing-Information-Loss-with-xarray-operations">Managing Information Loss with xarray operations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="transform_bounds.html"
+                        title="previous chapter">Example - Transform Bounds</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../modules.html"
+                        title="next chapter">rioxarray</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/convert_to_raster.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modules.html" title="rioxarray"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="transform_bounds.html" title="Example - Transform Bounds"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.9 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="examples.html" >Usage Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, rioxarray Contributors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

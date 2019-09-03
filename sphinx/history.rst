@@ -2,7 +2,7 @@ History
 =======
 
 0.0.10
------
+------
 - Add support for opening netcdf/hdf files with `rioxarray.open_rasterio` (issue #32)
 - Added support for custom CRS with wkt attribute for datacube CRS support (issue #35)
 
