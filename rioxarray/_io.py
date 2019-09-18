@@ -249,6 +249,8 @@ def open_rasterio(
         dask's multithreaded backend.
     masked : bool, optional
         If True, read the mask and to set values to NaN. Defaults to False.
+    **open_kwargs: kwargs, optional
+        Optional keyword arguments to pass into rasterio.open().
 
     Returns
     -------
