@@ -281,6 +281,9 @@ def open_rasterio(
     if lock is None:
         lock = RASTERIO_LOCK
 
+    # ensure default for sharing is False
+    # ref https://github.com/mapbox/rasterio/issues/1504
+    open_kwargs["sharing"] = open_kwargs.get("sharing", False)
     manager = CachingFileManager(
         rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
     )
