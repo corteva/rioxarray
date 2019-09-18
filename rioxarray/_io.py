@@ -195,7 +195,13 @@ def _parse_tags(tags):
 
 
 def open_rasterio(
-    filename, parse_coordinates=None, chunks=None, cache=None, lock=None, masked=False
+    filename,
+    parse_coordinates=None,
+    chunks=None,
+    cache=None,
+    lock=None,
+    masked=False,
+    **open_kwargs
 ):
     """Open a file with rasterio (experimental).
 
@@ -275,7 +281,9 @@ def open_rasterio(
     if lock is None:
         lock = RASTERIO_LOCK
 
-    manager = CachingFileManager(rasterio.open, filename, lock=lock, mode="r")
+    manager = CachingFileManager(
+        rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
+    )
     riods = manager.acquire()
 
     # open the subdatasets if they exist
