@@ -5,7 +5,6 @@ import pickle
 import shutil
 import sys
 import tempfile
-from test.conftest import TEST_COMPARE_DATA_DIR, _assert_xarrays_equal
 
 import mock
 import numpy as np
@@ -16,6 +15,11 @@ from xarray import DataArray
 from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
+from test.conftest import (
+    TEST_COMPARE_DATA_DIR,
+    TEST_INPUT_DATA_DIR,
+    _assert_xarrays_equal,
+)
 
 
 def test_open_rasterio_mask_chunk_clip():
@@ -640,3 +644,11 @@ class TestRasterio:
                         assert_equal(actual_crs, expected_crs)
                         assert_equal(actual_res, expected_res)
                         assert_equal(expected_val, actual_val)
+
+
+def test_open_cog():
+    cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    rdsm = rioxarray.open_rasterio(cog_file)
+    assert rdsm.shape == (1, 500, 500)
+    rdso = rioxarray.open_rasterio(cog_file, overview_level=0)
+    assert rdso.shape == (1, 250, 250)
