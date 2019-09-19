@@ -195,7 +195,13 @@ def _parse_tags(tags):
 
 
 def open_rasterio(
-    filename, parse_coordinates=None, chunks=None, cache=None, lock=None, masked=False
+    filename,
+    parse_coordinates=None,
+    chunks=None,
+    cache=None,
+    lock=None,
+    masked=False,
+    **open_kwargs
 ):
     """Open a file with rasterio (experimental).
 
@@ -243,6 +249,8 @@ def open_rasterio(
         dask's multithreaded backend.
     masked : bool, optional
         If True, read the mask and to set values to NaN. Defaults to False.
+    **open_kwargs: kwargs, optional
+        Optional keyword arguments to pass into rasterio.open().
 
     Returns
     -------
@@ -275,7 +283,12 @@ def open_rasterio(
     if lock is None:
         lock = RASTERIO_LOCK
 
-    manager = CachingFileManager(rasterio.open, filename, lock=lock, mode="r")
+    # ensure default for sharing is False
+    # ref https://github.com/mapbox/rasterio/issues/1504
+    open_kwargs["sharing"] = open_kwargs.get("sharing", False)
+    manager = CachingFileManager(
+        rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
+    )
     riods = manager.acquire()
 
     # open the subdatasets if they exist
