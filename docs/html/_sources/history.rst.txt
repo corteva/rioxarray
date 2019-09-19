@@ -1,6 +1,11 @@
 History
 =======
 
+0.0.11
+------
+- Added `open_kwargs` to pass into `rasterio.open()` when using `rioxarray.open_rasterio()` (pull #48)
+- Added example opening Cloud Optimized GeoTiff (issue #45)
+
 0.0.10
 ------
 - Add support for opening netcdf/hdf files with `rioxarray.open_rasterio` (issue #32)

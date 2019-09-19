@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Example - Reproject Match &#8212; rioxarray 0.0.11 documentation</title>
+    <title>Example - Cloud Optimized GeoTiff (COG) &#8212; rioxarray 0.0.11 documentation</title>
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Interpolate Missing Data" href="interpolate_na.html" />
-    <link rel="prev" title="Example - Reproject" href="reproject.html" /> 
+    <link rel="next" title="rioxarray" href="../modules.html" />
+    <link rel="prev" title="Example - Convert dataset to raster (GeoTiff)" href="convert_to_raster.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -29,10 +29,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="interpolate_na.html" title="Example - Interpolate Missing Data"
+          <a href="../modules.html" title="rioxarray"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="reproject.html" title="Example - Reproject"
+          <a href="convert_to_raster.html" title="Example - Convert dataset to raster (GeoTiff)"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Usage Examples</a> &#187;</li> 
@@ -244,222 +244,85 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Example---Reproject-Match">
-<h1>Example - Reproject Match<a class="headerlink" href="#Example---Reproject-Match" title="Permalink to this headline">¶</a></h1>
-<div class="nbinput docutils container">
+<div class="section" id="Example---Cloud-Optimized-GeoTiff-(COG)">
+<h1>Example - Cloud Optimized GeoTiff (COG)<a class="headerlink" href="#Example---Cloud-Optimized-GeoTiff-(COG)" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
-<span class="kn">import</span> <span class="nn">xarray</span>
+<span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/dask/config.py:168: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  data = yaml.load(f.read()) or {}
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/distributed/config.py:20: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  defaults = yaml.load(f)
-</pre></div></div>
-</div>
-<div class="section" id="Load-in-xarray-datasets">
-<h2>Load in xarray datasets<a class="headerlink" href="#Load-in-xarray-datasets" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY.nc&quot;</span><span class="p">)</span>
-<span class="n">xds_match</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;</span><span class="p">)</span>
+<span></span><span class="n">cog_url</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;https://esip-pangeo-uswest2.s3-us-west-2.amazonaws.com/&quot;</span>
+    <span class="s2">&quot;sciencebase/Southern_California_Topobathy_DEM_1m_cog.tif&quot;</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;xarray.DataArray (y: 200, x: 200)&gt;
-array([[ nan,  nan,  nan, ..., 656., 656., 554.],
-       [ nan,  nan,  nan, ..., 694., 694., 642.],
-       [ nan,  nan,  nan, ..., 456., 575., 642.],
-       ...,
-       [993., 817., 817., ..., 471., 479., 498.],
-       [893., 893., 816., ..., 479., 479., 469.],
-       [816., 816., 832., ..., 515., 469., 485.]], dtype=float32)
-Coordinates:
-  * y        (y) float64 5.05e+06 5.05e+06 5.05e+06 ... 5.004e+06 5.004e+06
-  * x        (x) float64 -7.274e+06 -7.274e+06 ... -7.228e+06 -7.228e+06
-Attributes:
-    crs:        +a=6371007.181 +b=6371007.181 +lon_0=0 +no_defs +proj=sinu +u...
-    res:        [231.65635826 231.65635826]
-    is_tiled:   0
-    nodata:     -28672.0
-    transform:  [ 2.31656358e+02  0.00000000e+00 -7.27400965e+06  0.00000000e...
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7fd98d0a1c50&gt;
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_5_1.png" src="../_images/examples_reproject_match_5_1.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds_match</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ..., 1146.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1146., 1262.,  735.],
-       [  nan,   nan,   nan, ...,  912., 1024.,  853.]], dtype=float32)
-Coordinates:
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-    spatial_ref  int64 ...
-Attributes:
-    crs:           +datum=WGS84 +no_defs +proj=utm +units=m +zone=15
-    res:           [386.65122672 386.65122672]
-    is_tiled:      0
-    transform:     [ 3.86651227e+02  0.00000000e+00  4.85124883e+05  0.000000...
-    grid_mapping:  spatial_ref
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds_match</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7fd98d010630&gt;
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_7_1.png" src="../_images/examples_reproject_match_7_1.png" />
-</div>
-</div>
-</div>
-<div class="section" id="Reproject-Match">
-<h2>Reproject Match<a class="headerlink" href="#Reproject-Match" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds_repr_match</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
+<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">cog_url</span><span class="p">,</span> <span class="n">overview_level</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds_repr_match</span>
+<span></span><span class="n">rds</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,  581., ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,  682., ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ...,  821.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1024.,  853.,  583.],
-       [  nan,   nan,   nan, ...,  867.,  804.,  706.]], dtype=float32)
+<span></span>&lt;xarray.DataArray (band: 1, y: 440, x: 618)&gt;
+[271920 values with dtype=float32]
 Coordinates:
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
+  * band         (band) int64 1
+  * y            (y) float64 3.825e+06 3.824e+06 3.824e+06 ... 3.6e+06 3.6e+06
+  * x            (x) float64 1.798e+05 1.803e+05 ... 4.949e+05 4.954e+05
     spatial_ref  int64 0
 Attributes:
-    transform:     (386.65122672362685, 0.0, 485124.8828918401, 0.0, -386.651...
-    _FillValue:    -28672
+    transform:     (511.5210355987055, 0.0, 179523.99999999822, 0.0, -511.856...
+    _FillValue:    -3.4028230607370965e+38
+    scales:        (1.0,)
+    offsets:       (0.0,)
     grid_mapping:  spatial_ref
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds_repr_match</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rds</span><span class="o">!=</span><span class="n">rds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7fd98c72c908&gt;
+<span></span>&lt;matplotlib.collections.QuadMesh at 0x7fa12d9eb2e8&gt;
 </pre></div>
 </div>
 </div>
@@ -467,17 +330,7 @@ Attributes:
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_11_1.png" src="../_images/examples_reproject_match_11_1.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
-</div>
+<img alt="../_images/examples_COG_5_1.png" src="../_images/examples_COG_5_1.png" />
 </div>
 </div>
 </div>
@@ -488,25 +341,16 @@ Attributes:
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Example - Reproject Match</a><ul>
-<li><a class="reference internal" href="#Load-in-xarray-datasets">Load in xarray datasets</a></li>
-<li><a class="reference internal" href="#Reproject-Match">Reproject Match</a></li>
-</ul>
-</li>
-</ul>
-
   <h4>Previous topic</h4>
-  <p class="topless"><a href="reproject.html"
-                        title="previous chapter">Example - Reproject</a></p>
+  <p class="topless"><a href="convert_to_raster.html"
+                        title="previous chapter">Example - Convert dataset to raster (GeoTiff)</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="interpolate_na.html"
-                        title="next chapter">Example - Interpolate Missing Data</a></p>
+  <p class="topless"><a href="../modules.html"
+                        title="next chapter">rioxarray</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/examples/reproject_match.ipynb.txt"
+      <li><a href="../_sources/examples/COG.ipynb.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -536,10 +380,10 @@ Attributes:
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="interpolate_na.html" title="Example - Interpolate Missing Data"
+          <a href="../modules.html" title="rioxarray"
              >next</a> |</li>
         <li class="right" >
-          <a href="reproject.html" title="Example - Reproject"
+          <a href="convert_to_raster.html" title="Example - Convert dataset to raster (GeoTiff)"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="examples.html" >Usage Examples</a> &#187;</li> 

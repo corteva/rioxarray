@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray package &#8212; rioxarray 0.0.10 documentation</title>
+    <title>rioxarray package &#8212; rioxarray 0.0.11 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">rioxarray</a> &#187;</li> 
       </ul>
     </div>  
@@ -50,7 +50,7 @@
 <h2>rioxarray.open_rasterio<a class="headerlink" href="#rioxarray-open-rasterio" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="rioxarray.open_rasterio">
-<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em>, <em>**open_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a file with rasterio (experimental).</p>
 <p>This should work with any file that rasterio can open (most often:
 geoTIFF). The x and y coordinates are generated automatically from the
@@ -90,6 +90,7 @@ argument to use dask, in which case it defaults to False.</li>
 used to avoid issues with concurrent access to the same file when using
 dask’s multithreaded backend.</li>
 <li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and to set values to NaN. Defaults to False.</li>
+<li><strong>**open_kwargs</strong> (<em>kwargs</em><em>, </em><em>optional</em>) – Optional keyword arguments to pass into rasterio.open().</li>
 </ul>
 </td>
 </tr>
@@ -1074,7 +1075,7 @@ rioxarray properties to re-search for them.</p>
         <li class="right" >
           <a href="modules.html" title="rioxarray"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >rioxarray</a> &#187;</li> 
       </ul>
     </div>

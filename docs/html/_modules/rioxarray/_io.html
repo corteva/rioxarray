@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray._io &#8212; rioxarray 0.0.10 documentation</title>
+    <title>rioxarray._io &#8212; rioxarray 0.0.11 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -234,7 +234,13 @@
 
 
 <div class="viewcode-block" id="open_rasterio"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.open_rasterio">[docs]</a><span class="k">def</span> <span class="nf">open_rasterio</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">,</span> <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">filename</span><span class="p">,</span>
+    <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">masked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">open_kwargs</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
 
@@ -282,6 +288,8 @@
 <span class="sd">        dask&#39;s multithreaded backend.</span>
 <span class="sd">    masked : bool, optional</span>
 <span class="sd">        If True, read the mask and to set values to NaN. Defaults to False.</span>
+<span class="sd">    **open_kwargs: kwargs, optional</span>
+<span class="sd">        Optional keyword arguments to pass into rasterio.open().</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -314,7 +322,12 @@
     <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lock</span> <span class="o">=</span> <span class="n">RASTERIO_LOCK</span>
 
-    <span class="n">manager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="c1"># ensure default for sharing is False</span>
+    <span class="c1"># ref https://github.com/mapbox/rasterio/issues/1504</span>
+    <span class="n">open_kwargs</span><span class="p">[</span><span class="s2">&quot;sharing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">open_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sharing&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span>
+        <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span>
+    <span class="p">)</span>
     <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
 
     <span class="c1"># open the subdatasets if they exist</span>
@@ -493,7 +506,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.11 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

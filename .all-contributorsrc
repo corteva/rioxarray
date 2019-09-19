@@ -57,6 +57,15 @@
       "contributions": [
         "review"
       ]
+    },
+    {
+      "login": "vincentsarago",
+      "name": "Vincent Sarago",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/10407788?v=4",
+      "profile": "https://remotepixel.ca",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
