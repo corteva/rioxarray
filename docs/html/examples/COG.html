@@ -262,9 +262,10 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cog_url</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;https://esip-pangeo-uswest2.s3-us-west-2.amazonaws.com/&quot;</span>
-    <span class="s2">&quot;sciencebase/Southern_California_Topobathy_DEM_1m_cog.tif&quot;</span>
+<span></span><span class="c1"># from https://openaerialmap.org/</span>
+<span class="n">cog_url</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;https://oin-hotosm.s3.amazonaws.com/&quot;</span>
+    <span class="s2">&quot;5d7dad0becaf880008a9bc88/0/5d7dad0becaf880008a9bc89.tif&quot;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -274,7 +275,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">cog_url</span><span class="p">,</span> <span class="n">overview_level</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">cog_url</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overview_level</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -292,18 +293,17 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;xarray.DataArray (band: 1, y: 440, x: 618)&gt;
-[271920 values with dtype=float32]
+<span></span>&lt;xarray.DataArray (band: 3, y: 312, x: 688)&gt;
+[643968 values with dtype=float64]
 Coordinates:
-  * band         (band) int64 1
-  * y            (y) float64 3.825e+06 3.824e+06 3.824e+06 ... 3.6e+06 3.6e+06
-  * x            (x) float64 1.798e+05 1.803e+05 ... 4.949e+05 4.954e+05
+  * band         (band) int64 1 2 3
+  * y            (y) float64 4.34e+06 4.34e+06 4.34e+06 ... 4.339e+06 4.339e+06
+  * x            (x) float64 -1.333e+07 -1.333e+07 ... -1.333e+07 -1.333e+07
     spatial_ref  int64 0
 Attributes:
-    transform:     (511.5210355987055, 0.0, 179523.99999999822, 0.0, -511.856...
-    _FillValue:    -3.4028230607370965e+38
-    scales:        (1.0,)
-    offsets:       (0.0,)
+    transform:     (1.194328566955879, 0.0, -13334019.180693429, 0.0, -1.1943...
+    scales:        (1.0, 1.0, 1.0)
+    offsets:       (0.0, 0.0, 0.0)
     grid_mapping:  spatial_ref
 </pre></div>
 </div>
@@ -313,7 +313,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rds</span><span class="o">!=</span><span class="n">rds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">band</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -322,7 +322,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.collections.QuadMesh at 0x7fa12d9eb2e8&gt;
+<span></span>&lt;matplotlib.collections.QuadMesh at 0x7f13bb0b9828&gt;
 </pre></div>
 </div>
 </div>
