@@ -3,7 +3,7 @@ History
 
 0.0.12
 ------
- - Use `xarray.open_rasterio()` for `rioxarray.open_rasterio()` with xarray<0.12.3 (pull #40)
+- Use `xarray.open_rasterio()` for `rioxarray.open_rasterio()` with xarray<0.12.3 (pull #40)
 
 0.0.11
 ------

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>History &#8212; rioxarray 0.0.11 documentation</title>
+    <title>History &#8212; rioxarray 0.0.12 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="authors.html" title="Contributors ✨"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.11 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.12 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -42,40 +42,46 @@
   <div class="section" id="history">
 <h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.0.11<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.0.12<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Use <cite>xarray.open_rasterio()</cite> for <cite>rioxarray.open_rasterio()</cite> with xarray&lt;0.12.3 (pull #40)</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>0.0.11<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added <cite>open_kwargs</cite> to pass into <cite>rasterio.open()</cite> when using <cite>rioxarray.open_rasterio()</cite> (pull #48)</li>
 <li>Added example opening Cloud Optimized GeoTiff (issue #45)</li>
 </ul>
 </div>
-<div class="section" id="id2">
-<h2>0.0.10<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h2>0.0.10<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Add support for opening netcdf/hdf files with <cite>rioxarray.open_rasterio</cite> (issue #32)</li>
 <li>Added support for custom CRS with wkt attribute for datacube CRS support (issue #35)</li>
 <li>Added <cite>rio.set_nodata()</cite>, <cite>rio.write_nodata()</cite>, <cite>rio.set_attrs()</cite>, <cite>rio.update_attrs()</cite> (issue #37)</li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h2>0.0.9<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>0.0.9<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Add <cite>rioxarray.open_rasterio</cite> (issue #7)</li>
 </ul>
 </div>
-<div class="section" id="id4">
-<h2>0.0.8<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>0.0.8<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fix setting nodata in _add_attrs_proj (pull #30)</li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h2>0.0.7<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>0.0.7<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Add option to do an inverted clip (pull #29)</li>
 </ul>
 </div>
-<div class="section" id="id6">
-<h2>0.0.6<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2>0.0.6<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Add support for scalar coordinates in reproject (issue #15)</li>
 <li>Updated writing encoding for FutureWarning (issue #18)</li>
@@ -86,8 +92,8 @@
 <li>Added <cite>set_spatial_dims()</cite> method for datasets when dimensions not found (issue #27)</li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h2>0.0.5<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2>0.0.5<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Find nodata and nodatavals in ‘nodata’ property (pull #12)</li>
 <li>Added ‘encoded_nodata’ property to DataArray (pull #12)</li>
@@ -95,8 +101,8 @@
 <li>Added methods to set and write CRS (issue #5)</li>
 </ul>
 </div>
-<div class="section" id="id8">
-<h2>0.0.4<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2>0.0.4<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added ability to export data array to raster (pull #8)</li>
 </ul>
@@ -112,14 +118,15 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">History</a><ul>
-<li><a class="reference internal" href="#id1">0.0.11</a></li>
-<li><a class="reference internal" href="#id2">0.0.10</a></li>
-<li><a class="reference internal" href="#id3">0.0.9</a></li>
-<li><a class="reference internal" href="#id4">0.0.8</a></li>
-<li><a class="reference internal" href="#id5">0.0.7</a></li>
-<li><a class="reference internal" href="#id6">0.0.6</a></li>
-<li><a class="reference internal" href="#id7">0.0.5</a></li>
-<li><a class="reference internal" href="#id8">0.0.4</a></li>
+<li><a class="reference internal" href="#id1">0.0.12</a></li>
+<li><a class="reference internal" href="#id2">0.0.11</a></li>
+<li><a class="reference internal" href="#id3">0.0.10</a></li>
+<li><a class="reference internal" href="#id4">0.0.9</a></li>
+<li><a class="reference internal" href="#id5">0.0.8</a></li>
+<li><a class="reference internal" href="#id6">0.0.7</a></li>
+<li><a class="reference internal" href="#id7">0.0.6</a></li>
+<li><a class="reference internal" href="#id8">0.0.5</a></li>
+<li><a class="reference internal" href="#id9">0.0.4</a></li>
 </ul>
 </li>
 </ul>
@@ -162,7 +169,7 @@
         <li class="right" >
           <a href="authors.html" title="Contributors ✨"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.11 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rioxarray 0.0.12 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
