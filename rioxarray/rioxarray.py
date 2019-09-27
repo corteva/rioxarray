@@ -11,7 +11,6 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
-from abc import abstractmethod
 from datetime import datetime
 
 import numpy as np
