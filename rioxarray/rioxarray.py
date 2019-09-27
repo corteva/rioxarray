@@ -223,7 +223,7 @@ class XRasterBase(object):
     @property
     def crs(self):
         """:obj:`rasterio.crs.CRS`:
-            Retrieve projection from `xarray.DataArray`
+            Retrieve projection from `xarray.DataArray` or `xarray.Dataset`
         """
         if self._crs is not None:
             return None if self._crs is False else self._crs
