@@ -61,4 +61,5 @@ setup(
     url="https://github.com/corteva/rioxarray",
     version=get_version(),
     zip_safe=False,
+    python_requires=">=3",
 )
