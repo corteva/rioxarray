@@ -222,12 +222,29 @@ class XRasterBase(object):
         self._crs = None
 
     @property
-    @abstractmethod
     def crs(self):
         """:obj:`rasterio.crs.CRS`:
-            The projection of the dataset.
+            Retrieve projection from `xarray.DataArray`
         """
-        raise NotImplementedError
+        if self._crs is not None:
+            return None if self._crs is False else self._crs
+
+        try:
+            # look in grid_mapping
+            grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
+            try:
+                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
+            except KeyError:
+                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["crs_wkt"]
+            self.set_crs(crs_wkt, inplace=True)
+        except KeyError:
+            try:
+                # look in attrs for 'crs'
+                self.set_crs(self._obj.attrs["crs"], inplace=True)
+            except KeyError:
+                self._crs = False
+                return None
+        return self._crs
 
     def _get_obj(self, inplace):
         """
@@ -325,10 +342,7 @@ class XRasterBase(object):
                     data_obj[var].rio.update_attrs(
                         dict(grid_mapping=grid_mapping_name), inplace=True
                     )
-        else:
-            data_obj.rio.update_attrs(
-                dict(grid_mapping=grid_mapping_name), inplace=True
-            )
+        data_obj.rio.update_attrs(dict(grid_mapping=grid_mapping_name), inplace=True)
         return data_obj
 
     def set_attrs(self, new_attrs, inplace=False):
@@ -507,31 +521,6 @@ class RasterArray(XRasterBase):
             data_obj.rio.set_attrs(new_vars, inplace=True)
         data_obj.rio.set_nodata(input_nodata, inplace=True)
         return data_obj
-
-    @property
-    def crs(self):
-        """:obj:`rasterio.crs.CRS`:
-            Retrieve projection from `xarray.DataArray`
-        """
-        if self._crs is not None:
-            return None if self._crs is False else self._crs
-
-        try:
-            # look in grid_mapping
-            grid_mapping_coord = self._obj.attrs["grid_mapping"]
-            try:
-                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
-            except KeyError:
-                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["crs_wkt"]
-            self.set_crs(crs_wkt, inplace=True)
-        except KeyError:
-            try:
-                # look in attrs for 'crs'
-                self.set_crs(self._obj.attrs["crs"], inplace=True)
-            except KeyError:
-                self._crs = False
-                return None
-        return self._crs
 
     @property
     def encoded_nodata(self):
@@ -1186,11 +1175,19 @@ class RasterDataset(XRasterBase):
         """:obj:`rasterio.crs.CRS`:
             Retrieve projection from `xarray.Dataset`
         """
-        if self._crs is None:
-            try:
-                self._crs = self._obj[self.vars[0]].rio.crs
-            except IndexError:
-                pass
+        if self._crs is not None:
+            return None if self._crs is False else self._crs
+        self._crs = super().crs
+        if self._crs is not None:
+            return self._crs
+        for var in self.vars:
+            crs = self._obj[var].rio.crs
+            if crs is not None:
+                self._crs = crs
+                break
+        else:
+            self._crs = False
+            return None
         return self._crs
 
     def reproject(

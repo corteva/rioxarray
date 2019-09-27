@@ -1002,6 +1002,25 @@ def test_crs_get_custom():
     assert test_ds.rio.crs.wkt == CustomCRS().wkt
 
 
+def test_get_crs_dataset():
+    test_ds = xarray.Dataset()
+    test_ds = test_ds.rio.write_crs(4326)
+    assert test_ds.attrs["grid_mapping"] == "spatial_ref"
+    assert test_ds.rio.crs.to_epsg() == 4326
+
+
+def test_get_crs_dataset__nonstandard_grid_mapping():
+    test_ds = xarray.Dataset()
+    test_ds = test_ds.rio.write_crs(4326, grid_mapping_name="frank")
+    assert test_ds.attrs["grid_mapping"] == "frank"
+    assert test_ds.rio.crs.to_epsg() == 4326
+
+
+def test_get_crs_dataset__missing_grid_mapping_default():
+    test_ds = xarray.open_dataset(os.path.join(TEST_INPUT_DATA_DIR, "test_find_crs.nc"))
+    assert test_ds.rio.crs.to_epsg() == 32614
+
+
 def test_nodata_setter():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
