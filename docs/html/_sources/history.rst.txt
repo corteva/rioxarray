@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.13
+------
+- Improve CRS searching for xarray.Dataset & use default grid mapping name (pull #51)
+
 0.0.12
 ------
 - Use `xarray.open_rasterio()` for `rioxarray.open_rasterio()` with xarray<0.12.3 (pull #40)

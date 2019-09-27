@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.12 documentation</title>
+    <title>rioxarray.rioxarray &#8212; rioxarray 0.0.13 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.13 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -50,7 +50,6 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -261,12 +260,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
-<span class="sd">            The projection of the dataset.</span>
+<span class="sd">            Retrieve projection from `xarray.DataArray` or `xarray.Dataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># look in grid_mapping</span>
+            <span class="n">grid_mapping_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">crs_wkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">crs_wkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs_wkt&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs_wkt</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># look in attrs for &#39;crs&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
     <span class="k">def</span> <span class="nf">_get_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -364,10 +380,7 @@
                     <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span>
                         <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span>
-                <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
 <div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -546,31 +559,6 @@
             <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_vars</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">input_nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
-<span class="sd">            Retrieve projection from `xarray.DataArray`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># look in grid_mapping</span>
-            <span class="n">grid_mapping_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">crs_wkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">crs_wkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs_wkt&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs_wkt</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># look in attrs for &#39;crs&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">encoded_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1225,11 +1213,19 @@
         <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
 <span class="sd">            Retrieve projection from `xarray.Dataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">pass</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
 <div class="viewcode-block" id="RasterDataset.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
@@ -1455,7 +1451,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rioxarray 0.0.13 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
