@@ -341,6 +341,7 @@ def open_rasterio(
 
     # open the subdatasets if they exist
     if riods.subdatasets:
+        dim_groups = {}
         subdataset_filter = None
         if any((group, variable)):
             subdataset_filter = build_subdataset_filter(group, variable)
@@ -350,17 +351,24 @@ def open_rasterio(
                 subdataset
             ):
                 continue
+            with rasterio.open(subdataset) as rds:
+                shape = rds.shape
             rioda = open_rasterio(
                 subdataset,
-                parse_coordinates=iii == 0 and parse_coordinates,
+                parse_coordinates=shape not in dim_groups and parse_coordinates,
                 chunks=chunks,
                 cache=cache,
                 lock=lock,
                 masked=masked,
                 default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
             )
-            data_arrays[rioda.name] = rioda
-        return Dataset(data_arrays)
+            if shape not in dim_groups:
+                dim_groups[shape] = {rioda.name: rioda}
+            else:
+                dim_groups[shape][rioda.name] = rioda
+        if len(dim_groups) > 1:
+            return [Dataset(dim_group) for dim_group in dim_groups.values()]
+        return Dataset(list(dim_groups.values())[0])
 
     if vrt_params is not None:
         riods = WarpedVRT(riods, **vrt_params)
