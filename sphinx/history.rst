@@ -1,6 +1,11 @@
 History
 =======
 
+0.0.14
+------
+- Add `windowed` kwarg to `rio.to_raster()` to write to raster using windowed writing (pull #54)
+- Added add `rio.isel_window()` to allow selection using a rasterio.windows.Window (pull #54)
+
 0.0.13
 ------
 - Improve CRS searching for xarray.Dataset & use default grid mapping name (pull #51)

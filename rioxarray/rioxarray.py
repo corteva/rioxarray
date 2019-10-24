@@ -60,8 +60,8 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     dict: x and y coordinate arrays.
 
     """
-    x_coords, _ = (np.arange(width) + 0.5, np.zeros(width) + 0.5) * affine
-    _, y_coords = (np.zeros(height) + 0.5, np.arange(height) + 0.5) * affine
+    x_coords, _ = affine * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
+    _, y_coords = affine * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
     return {y_dim: y_coords, x_dim: x_coords}
 
 
@@ -856,7 +856,7 @@ class RasterArray(XRasterBase):
         else:
             x_slice = slice(minx, maxx)
 
-        return self._obj.sel(x=x_slice, y=y_slice)
+        return self._obj.sel({self.x_dim: x_slice, self.y_dim: y_slice})
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.DataArray` by a bounding box.
@@ -999,6 +999,22 @@ class RasterArray(XRasterBase):
 
         return cropped_ds
 
+    def isel_window(self, window):
+        """
+        Use a rasterio.window.Window to select a subset of the data.
+
+        Parameters
+        ----------
+        window: :class:`rasterio.window.Window`
+            The window of the dataset to read.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
+        """
+        row_slice, col_slice = window.toslices()
+        return self._obj.isel({self.x_dim: row_slice, self.y_dim: col_slice})
+
     def _interpolate_na(self, src_data, method="nearest"):
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
@@ -1078,7 +1094,13 @@ class RasterArray(XRasterBase):
         return interp_array
 
     def to_raster(
-        self, raster_path, driver="GTiff", dtype=None, tags=None, **profile_kwargs
+        self,
+        raster_path,
+        driver="GTiff",
+        dtype=None,
+        tags=None,
+        windowed=False,
+        **profile_kwargs,
     ):
         """
         Export the DataArray to a raster file.
@@ -1094,6 +1116,9 @@ class RasterArray(XRasterBase):
             The data type to write the raster to. Default is the datasets dtype.
         tags: dict, optional
             A dictionary of tags to write to the raster.
+        windowed: bool, optional
+            If True, it will write using the windows of the output raster.
+            Default is False.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -1146,16 +1171,22 @@ class RasterArray(XRasterBase):
             ),
             **out_profile,
         ) as dst:
-
-            if self.encoded_nodata is not None:
-                out_data = self._obj.fillna(self.encoded_nodata)
+            if windowed:
+                window_iter = dst.block_windows(1)
             else:
-                out_data = self._obj
-            data = out_data.astype(dtype).load().data
-            if data.ndim == 2:
-                dst.write(data, 1)
-            else:
-                dst.write(data)
+                window_iter = [(None, None)]
+            for _, window in window_iter:
+                if window is not None:
+                    out_data = self.isel_window(window)
+                else:
+                    out_data = self._obj
+                if self.encoded_nodata is not None:
+                    out_data = out_data.fillna(self.encoded_nodata)
+                data = out_data.astype(dtype).load().data
+                if data.ndim == 2:
+                    dst.write(data, 1, window=window)
+                else:
+                    dst.write(data, window=window)
             if tags is not None:
                 dst.update_tags(**tags)
 
