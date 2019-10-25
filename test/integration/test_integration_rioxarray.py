@@ -7,6 +7,7 @@ import xarray
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.crs import CRS
+from rasterio.windows import Window
 
 import rioxarray
 from rioxarray.exceptions import (
@@ -727,12 +728,13 @@ def test_geographic_resample_integer(request):
         _assert_xarrays_equal(mds_interp, mdc)
 
 
+@pytest.mark.parametrize("windowed", [True, False])
 @pytest.fixture(params=[xarray.open_dataarray, rioxarray.open_rasterio])
-def test_to_raster(request, tmpdir):
+def test_to_raster(request, windowed, tmpdir):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with request.param(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
-        mda.rio.to_raster(str(tmp_raster), tags=test_tags)
+        mda.rio.to_raster(str(tmp_raster), windowed=windowed, tags=test_tags)
         xds = mda.copy()
 
     with rasterio.open(str(tmp_raster)) as rds:
@@ -745,13 +747,14 @@ def test_to_raster(request, tmpdir):
         assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
 
 
+@pytest.mark.parametrize("windowed", [True, False])
 @pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
-def test_to_raster_3d(request, tmpdir):
+def test_to_raster_3d(request, windowed, tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with request.param(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
-        xds.rio.to_raster(str(tmp_raster))
+        xds.rio.to_raster(str(tmp_raster), windowed=windowed)
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs
@@ -760,8 +763,9 @@ def test_to_raster_3d(request, tmpdir):
         assert_array_equal(rds.read(), xds.values)
 
 
+@pytest.mark.parametrize("windowed", [True, False])
 @pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
-def test_to_raster__preserve_profile__none_nodata(request, tmpdir):
+def test_to_raster__preserve_profile__none_nodata(request, windowed, tmpdir):
     tmp_raster = tmpdir.join("output_profile.tif")
     input_raster = tmpdir.join("input_profile.tif")
 
@@ -783,7 +787,7 @@ def test_to_raster__preserve_profile__none_nodata(request, tmpdir):
         rds.write(numpy.empty((1, 512, 512), dtype=numpy.float32))
 
     with request.param(str(input_raster)) as mda:
-        mda.rio.to_raster(str(tmp_raster))
+        mda.rio.to_raster(str(tmp_raster), windowed=windowed)
 
     with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
         assert rds.count == rdc.count
@@ -1100,3 +1104,13 @@ def test_nodata_writer__remove():
     assert test_nd.attrs["_FillValue"] == -1
     test_nd.rio.write_nodata(None, inplace=True)
     assert not test_nd.attrs
+
+
+def test_isel_window():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
+    ) as mda:
+        assert (
+            mda.rio.isel_window(Window.from_slices(slice(10, 12), slice(10, 12)))
+            == mda.isel(x=slice(10, 12), y=slice(10, 12))
+        ).all()
