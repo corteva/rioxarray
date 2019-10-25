@@ -1,48 +1,177 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Example - Convert dataset to raster (GeoTiff) &#8212; rioxarray 0.0.13 documentation</title>
-    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Example - Convert dataset to raster (GeoTiff) &mdash; rioxarray 0.0.14 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Example - Cloud Optimized GeoTiff (COG)" href="COG.html" />
     <link rel="prev" title="Example - Transform Bounds" href="transform_bounds.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="COG.html" title="Example - Cloud Optimized GeoTiff (COG)"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="transform_bounds.html" title="Example - Transform Bounds"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.13 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Usage Examples</a> &#187;</li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> rioxarray
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.14
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Convert dataset to raster (GeoTiff)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Managing-Information-Loss-with-xarray-operations">Managing Information Loss with xarray operations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rioxarray</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="examples.html">Usage Examples</a> &raquo;</li>
+        
+      <li>Example - Convert dataset to raster (GeoTiff)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/convert_to_raster.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   
 <style>
@@ -243,6 +372,28 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
 </style>
 <div class="section" id="Example---Convert-dataset-to-raster-(GeoTiff)">
 <h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this headline">¶</a></h1>
@@ -305,6 +456,7 @@ Data variables:
 [0;34m[0m    [0mdriver[0m[0;34m=[0m[0;34m&#39;GTiff&#39;[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0mdtype[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0mtags[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0mwindowed[0m[0;34m=[0m[0;32mFalse[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0;34m**[0m[0mprofile_kwargs[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
 [0;31mDocstring:[0m
@@ -321,6 +473,9 @@ dtype: str, optional
     The data type to write the raster to. Default is the datasets dtype.
 tags: dict, optional
     A dictionary of tags to write to the raster.
+windowed: bool, optional
+    If True, it will write using the windows of the output raster.
+    Default is False.
 **profile_kwargs
     Additional keyword arguments to pass into writing the raster. The
     nodata, transform, crs, count, width, and height attributes
@@ -336,7 +491,7 @@ tags: dict, optional
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;green_band.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZMA&quot;</span><span class="p">)</span>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;green_band.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZMA&quot;</span><span class="p">,</span> <span class="n">windowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -345,7 +500,7 @@ tags: dict, optional
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -354,57 +509,10 @@ tags: dict, optional
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;xarray.DataArray &#39;green&#39; (time: 2, y: 10, x: 10)&gt;
-array([[[ 7.920639, 66.150832, 30.096116, 30.437197, 57.794734, 11.538647,
-         14.426782, 35.593171, 53.784858,  0.449093],
-        [23.804111, 67.910347, 18.694533, 30.41474 , 68.117674, 44.906057,
-         62.311842, 37.485047, 57.134336,  7.52572 ],
-        [36.653481, 39.596833, 61.07603 , 56.883093, 29.635613, 64.114699,
-         42.341689, 54.724789, 31.872344, 11.282554],
-        [32.502176, 28.090549, 58.398927, 41.224019, 34.804777, 32.184565,
-         59.392327,  9.155824, 52.967172, 67.409236],
-        [18.79468 ,  8.543429, 35.834698,  3.596245, 30.252802, 41.549499,
-         23.060248,  7.267762, 27.374099,  0.684024],
-        [ 9.93227 , 44.509446, 22.01927 , 28.514121, 36.715233, 15.03939 ,
-          2.43399 ,  0.636075, 34.43023 , 37.024545],
-        [28.874823,  1.514255, 34.210822, 10.49793 , 54.025491, 64.294026,
-         36.212813, 17.766628, 45.295952, 10.349576],
-        [58.961924, 47.334638, 64.844646, 37.634131,  7.815025, 35.139303,
-         18.501505, 35.01185 , 27.761908, 13.240655],
-        [49.544668, 57.716538, 27.389778, 11.604377, 24.826367, 15.449456,
-         26.482386, 42.855739, 10.4958  , 59.267182],
-        [37.094093, 43.294246, 33.240747, 16.85513 , 54.705119, 14.633291,
-         35.138742, 50.101683, 57.495953, 52.795405]],
-
-       [[26.137058, 16.448086,  4.503539, 33.351036, 20.32524 , 63.369743,
-         11.531512, 38.629561, 59.821441, 11.547508],
-        [ 6.438471, 28.948907,  9.949052, 23.234921, 65.539507,  9.822554,
-         55.754023, 51.590388, 57.047098,  4.929671],
-        [32.360472, 17.939979, 52.889505, 69.181176, 39.2923  , 56.442225,
-          5.699603, 21.092554,  8.93472 , 23.810367],
-        [ 3.715695, 30.653733, 44.540496, 48.578544, 24.032477, 30.339109,
-         37.376636, 58.787274, 49.308994, 59.510765],
-        [37.991912, 50.023013, 63.711135, 26.546118, 60.561058, 36.098302,
-         10.725673, 40.51609 , 47.479255, 42.710909],
-        [15.32887 , 15.878984, 30.914778, 25.902812,  3.815428, 35.530366,
-         48.426293, 44.280075,  4.468083, 18.00032 ],
-        [58.286993, 20.397714, 63.124   , 69.117495,  1.32436 , 29.024715,
-         31.601531, 34.307982,  7.990292, 36.159696],
-        [34.674335, 62.344993,  5.714717,  2.161448, 66.714977, 52.443751,
-         12.791859, 63.707491, 13.697063,  9.394474],
-        [16.766346, 26.260123, 40.68158 , 18.695085, 64.812126, 23.151592,
-         50.597642, 61.308205, 31.517123, 23.469797],
-        [44.670989, 17.533084, 39.034907, 32.676726, 53.275139, 48.731172,
-         12.958856, 21.760335, 27.292202, 18.409063]]])
-Coordinates:
-    spatial_ref  int64 ...
-  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05
-  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451
-  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06
-Attributes:
-    units:         DN
-    nodata:        0.0
-    grid_mapping:  spatial_ref
+<span></span>((2, 10, 10),
+ CRS.from_epsg(32722),
+ nan,
+ (466266.0, 8084670.0, 466296.0, 8084700.0))
 </pre></div>
 </div>
 </div>
@@ -422,7 +530,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;compress&#34;: &#34;lzma&#34;, &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.317326412269495, -17.322997474192462], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;blockxsize&#34;: 256, &#34;blockysize&#34;: 256, &#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;compress&#34;: &#34;lzma&#34;, &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: true, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 <div class="section" id="Managing-Information-Loss-with-xarray-operations">
@@ -443,7 +551,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>(OrderedDict(), None, None)
+<span></span>(OrderedDict(), CRS.from_epsg(32722), None)
 </pre></div>
 </div>
 </div>
@@ -470,7 +578,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: null, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -521,77 +629,59 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.317326412269495, -17.322997474192462], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: 0.0, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: 0.0, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 </div>
 </div>
 
 
+           </div>
+           
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Example - Convert dataset to raster (GeoTiff)</a><ul>
-<li><a class="reference internal" href="#Managing-Information-Loss-with-xarray-operations">Managing Information Loss with xarray operations</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="COG.html" class="btn btn-neutral float-right" title="Example - Cloud Optimized GeoTiff (COG)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="transform_bounds.html" class="btn btn-neutral float-left" title="Example - Transform Bounds" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="transform_bounds.html"
-                        title="previous chapter">Example - Transform Bounds</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="COG.html"
-                        title="next chapter">Example - Cloud Optimized GeoTiff (COG)</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/examples/convert_to_raster.ipynb.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, rioxarray Contributors
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="COG.html" title="Example - Cloud Optimized GeoTiff (COG)"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="transform_bounds.html" title="Example - Transform Bounds"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rioxarray 0.0.13 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="examples.html" >Usage Examples</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2019, rioxarray Contributors.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>
