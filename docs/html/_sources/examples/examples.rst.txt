@@ -18,3 +18,4 @@ This page contains links to a collection of examples of how to use rioxarray.
    transform_bounds.ipynb
    convert_to_raster.ipynb
    COG.ipynb
+   Example - Zonal Statistics <https://corteva.github.io/geocube/html/examples/zonal_statistics.html>

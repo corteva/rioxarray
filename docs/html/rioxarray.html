@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray package &mdash; rioxarray 0.0.14 documentation</title>
+  <title>rioxarray package &mdash; rioxarray 0.0.13 documentation</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                0.0.14
+                0.0.13
               </div>
             
           
@@ -386,24 +387,6 @@ an exception.</li>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="rioxarray.rioxarray.RasterArray.isel_window">
-<code class="descname">isel_window</code><span class="sig-paren">(</span><em>window</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.isel_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.isel_window" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use a rasterio.window.Window to select a subset of the data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio.window.Window</span></code>) – The window of the dataset to read.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>:obj:`xarray.Dataset` | :obj:`xarray.DataArray`</strong></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">The data in the window.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.RasterArray.nodata">
 <code class="descname">nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.nodata" title="Permalink to this definition">¶</a></dt>
@@ -547,7 +530,7 @@ the data array.</p>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.to_raster">
-<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver='GTiff'</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver='GTiff'</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export the DataArray to a raster file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -559,8 +542,6 @@ the data array.</p>
 Default is “GTiff”.</li>
 <li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
 <li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
-<li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
-Default is False.</li>
 <li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
 nodata, transform, crs, count, width, and height attributes
 are ignored.</li>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.14 documentation</title>
+  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.13 documentation</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -58,7 +59,7 @@
             
             
               <div class="version">
-                0.0.14
+                0.0.13
               </div>
             
           
@@ -216,8 +217,8 @@
 <span class="sd">    dict: x and y coordinate arrays.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x_coords</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">affine</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">affine</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">x_coords</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">affine</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">affine</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_coords</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="n">x_coords</span><span class="p">}</span></div>
 
 
@@ -1012,7 +1013,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">})</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_slice</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_slice</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.DataArray` by a bounding box.</span>
@@ -1155,22 +1156,6 @@
 
         <span class="k">return</span> <span class="n">cropped_ds</span></div>
 
-<div class="viewcode-block" id="RasterArray.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Use a rasterio.window.Window to select a subset of the data.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        window: :class:`rasterio.window.Window`</span>
-<span class="sd">            The window of the dataset to read.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">row_slice</span><span class="p">,</span> <span class="n">col_slice</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toslices</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">})</span></div>
-
     <span class="k">def</span> <span class="nf">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method uses scipy.interpolate.griddata to interpolate missing data.</span>
@@ -1250,13 +1235,7 @@
         <span class="k">return</span> <span class="n">interp_array</span></div>
 
 <div class="viewcode-block" id="RasterArray.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">raster_path</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">raster_path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">profile_kwargs</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export the DataArray to a raster file.</span>
@@ -1272,9 +1251,6 @@
 <span class="sd">            The data type to write the raster to. Default is the datasets dtype.</span>
 <span class="sd">        tags: dict, optional</span>
 <span class="sd">            A dictionary of tags to write to the raster.</span>
-<span class="sd">        windowed: bool, optional</span>
-<span class="sd">            If True, it will write using the windows of the output raster.</span>
-<span class="sd">            Default is False.</span>
 <span class="sd">        **profile_kwargs</span>
 <span class="sd">            Additional keyword arguments to pass into writing the raster. The</span>
 <span class="sd">            nodata, transform, crs, count, width, and height attributes</span>
@@ -1327,22 +1303,16 @@
             <span class="p">),</span>
             <span class="o">**</span><span class="n">out_profile</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">windowed</span><span class="p">:</span>
-                <span class="n">window_iter</span> <span class="o">=</span> <span class="n">dst</span><span class="o">.</span><span class="n">block_windows</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">window_iter</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">window_iter</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">)</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
-                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+                <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">dst</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">tags</span><span class="p">)</span></div></div>
 
