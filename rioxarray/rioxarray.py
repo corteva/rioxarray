@@ -1100,6 +1100,7 @@ class RasterArray(XRasterBase):
         dtype=None,
         tags=None,
         windowed=False,
+        recalc_transform=True,
         **profile_kwargs,
     ):
         """
@@ -1165,7 +1166,7 @@ class RasterArray(XRasterBase):
             count=count,
             dtype=dtype,
             crs=self.crs,
-            transform=self.transform(recalc=True),
+            transform=self.transform(recalc=recalc_transform),
             nodata=(
                 self.encoded_nodata if self.encoded_nodata is not None else self.nodata
             ),
