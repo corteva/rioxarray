@@ -129,23 +129,23 @@ from test.conftest import (
             False,
         ),
         (
-            'netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a',
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             None,
             "PRODUCT",
-            True,   
+            True,
         ),
         (
-            'netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a',
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             "tm5_constant_a",
             "PRODUCT",
-            True,   
+            True,
         ),
         (
-            'netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a',
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             "tm5_constant_a",
             "/PRODUCT",
-            True,   
-        )
+            True,
+        ),
     ],
 )
 def test_build_subdataset_filter(subdataset, variable, group, match):
