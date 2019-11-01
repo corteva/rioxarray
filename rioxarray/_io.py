@@ -197,9 +197,10 @@ def _parse_tags(tags):
 
 def build_subdataset_filter(group_names, variable_names):
     """
-    Examples:
-'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1'        
- 
+    Example::
+        'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":
+        MODIS_Grid_2D:sur_refl_b01_1'
+
     Parameters
     ----------
     group_names: str or list or tuple
@@ -207,7 +208,7 @@ def build_subdataset_filter(group_names, variable_names):
 
     variable_names: str or list or tuple
         Name or names of netCDF variables to filter by.
- 
+
     Returns
     -------
     re.SRE_Pattern: output of re.compile()
