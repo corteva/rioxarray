@@ -175,7 +175,9 @@ def test_open_rasterio_mask_chunk_clip():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         masked=True,
         chunks=True,
+        default_name="dem",
     ) as xdi:
+        assert xdi.name == "dem"
         assert str(xdi.dtype) == "float64"
         assert str(xdi.data.dtype) == "float64"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"

@@ -242,6 +242,7 @@ def open_rasterio(
     masked=False,
     variable=None,
     group=None,
+    default_name=None,
     **open_kwargs,
 ):
     """Open a file with rasterio (experimental).
@@ -294,6 +295,8 @@ def open_rasterio(
         Variable name or names to use to filter loading.
     group: str or list or tuple, optional
         Group name or names to use to filter loading.
+    default_name: str, optional
+        The name of the data array if none exists. Default is None.
     **open_kwargs: kwargs, optional
         Optional keyword arguments to pass into rasterio.open().
 
@@ -354,6 +357,7 @@ def open_rasterio(
                 cache=cache,
                 lock=lock,
                 masked=masked,
+                default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
             )
             data_arrays[rioda.name] = rioda
         return Dataset(data_arrays)
@@ -443,7 +447,7 @@ def open_rasterio(
     if cache and chunks is None:
         data = indexing.MemoryCachedArray(data)
 
-    da_name = attrs.pop("NETCDF_VARNAME", None)
+    da_name = attrs.pop("NETCDF_VARNAME", default_name)
     result = DataArray(
         data=data, dims=("band", "y", "x"), coords=coords, attrs=attrs, name=da_name
     )

@@ -3,11 +3,12 @@ History
 
 0.0.15
 ------
-- Add `variable` and `group` kwargs to `rioxarray.open_rasterio()` to allow filtering of subdatasets.
+- Added `variable` and `group` kwargs to `rioxarray.open_rasterio()` to allow filtering of subdatasets (pull #57)
+- Added `default_name` kwarg to `rioxarray.open_rasterio()` for backup when the original does not exist (pull #59)
 
 0.0.14
 ------
-- Add `windowed` kwarg to `rio.to_raster()` to write to raster using windowed writing (pull #54)
+- Added `windowed` kwarg to `rio.to_raster()` to write to raster using windowed writing (pull #54)
 - Added add `rio.isel_window()` to allow selection using a rasterio.windows.Window (pull #54)
 
 0.0.13
