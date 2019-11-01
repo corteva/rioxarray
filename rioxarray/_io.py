@@ -7,6 +7,7 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 """
 
 import os
+import re
 import warnings
 from collections import OrderedDict
 from distutils.version import LooseVersion
@@ -194,6 +195,39 @@ def _parse_tags(tags):
     return parsed_tags
 
 
+def build_subdataset_filter(group_names, variable_names):
+    """
+    Examples:
+'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1'        
+ 
+    Parameters
+    ----------
+    group_names: str or list or tuple
+        Name or names of netCDF groups to filter by.
+
+    variable_names: str or list or tuple
+        Name or names of netCDF variables to filter by.
+ 
+    Returns
+    -------
+    re.SRE_Pattern: output of re.compile()
+    """
+    variable_query = r"\w+"
+    if variable_names is not None:
+        if not isinstance(variable_names, (tuple, list)):
+            variable_names = [variable_names]
+        variable_query = rf"(?:{'|'.join(variable_names)})"
+    if group_names is not None:
+        if not isinstance(group_names, (tuple, list)):
+            group_names = [group_names]
+        group_query = rf"(?:{'|'.join(group_names)})"
+    else:
+        return re.compile(r"".join([r".*:(/+)?", variable_query, "$"]))
+    return re.compile(
+        r"".join([r".*:(/+)?", group_query, r":(/+)?", variable_query, r"$"])
+    )
+
+
 def open_rasterio(
     filename,
     parse_coordinates=None,
@@ -201,7 +235,9 @@ def open_rasterio(
     cache=None,
     lock=None,
     masked=False,
-    **open_kwargs
+    variable=None,
+    group=None,
+    **open_kwargs,
 ):
     """Open a file with rasterio (experimental).
 
@@ -223,32 +259,36 @@ def open_rasterio(
 
     Parameters
     ----------
-    filename : str, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename: str, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
-    parse_coordinates : bool, optional
+    parse_coordinates: bool, optional
         Whether to parse the x and y coordinates out of the file's
         ``transform`` attribute or not. The default is to automatically
         parse the coordinates only if they are rectilinear (1D).
         It can be useful to set ``parse_coordinates=False``
         if your files are very large or if you don't need the coordinates.
-    chunks : int, tuple or dict, optional
+    chunks: int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array. Chunks can also be set to
         ``True`` or ``"auto"`` to choose sensible chunk sizes according to
         ``dask.config.get("array.chunk-size").
-    cache : bool, optional
+    cache: bool, optional
         If True, cache data loaded from the underlying datastore in memory as
         NumPy arrays when accessed to avoid reading from the underlying data-
         store multiple times. Defaults to True unless you specify the `chunks`
         argument to use dask, in which case it defaults to False.
-    lock : False, True or threading.Lock, optional
+    lock: False, True or threading.Lock, optional
         If chunks is provided, this argument is passed on to
         :py:func:`dask.array.from_array`. By default, a global lock is
         used to avoid issues with concurrent access to the same file when using
         dask's multithreaded backend.
-    masked : bool, optional
+    masked: bool, optional
         If True, read the mask and to set values to NaN. Defaults to False.
+    variable: str or list or tuple, optional
+        Variable name or names to use to filter loading.
+    group: str or list or tuple, optional
+        Group name or names to use to filter loading.
     **open_kwargs: kwargs, optional
         Optional keyword arguments to pass into rasterio.open().
 
@@ -293,8 +333,15 @@ def open_rasterio(
 
     # open the subdatasets if they exist
     if riods.subdatasets:
+        subdataset_filter = None
+        if any((group, variable)):
+            subdataset_filter = build_subdataset_filter(group, variable)
         data_arrays = {}
         for iii, subdataset in enumerate(riods.subdatasets):
+            if subdataset_filter is not None and not subdataset_filter.match(
+                subdataset
+            ):
+                continue
             rioda = open_rasterio(
                 subdataset,
                 parse_coordinates=iii == 0 and parse_coordinates,

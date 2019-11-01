@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.15
+------
+- Add `variable` and `group` kwargs to `rioxarray.open_rasterio()` to allow filtering of subdatasets.
+
 0.0.14
 ------
 - Add `windowed` kwarg to `rio.to_raster()` to write to raster using windowed writing (pull #54)
