@@ -728,13 +728,13 @@ def test_geographic_resample_integer(request):
         _assert_xarrays_equal(mds_interp, mdc)
 
 
-@pytest.mark.parametrize("windowed", [True, False])
-@pytest.fixture(params=[xarray.open_dataarray, rioxarray.open_rasterio])
-def test_to_raster(request, windowed, tmpdir):
+@pytest.mark.parametrize("windowed, recalc_transform", [(True, True), (False, False)])
+@pytest.fixture(params=[xarray.open_dataarray, rioxarray.open_rasterio]) 
+def test_to_raster(request, windowed, recalc_transform, tmpdir): 
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with request.param(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
-        mda.rio.to_raster(str(tmp_raster), windowed=windowed, tags=test_tags)
+        mda.rio.to_raster(str(tmp_raster), windowed=windowed, recalc_transform=recalc_transform, tags=test_tags)
         xds = mda.copy()
 
     with rasterio.open(str(tmp_raster)) as rds:
