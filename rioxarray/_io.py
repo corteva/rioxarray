@@ -225,9 +225,9 @@ def build_subdataset_filter(group_names, variable_names):
         group_names = [re.escape(group_name) for group_name in group_names]
         group_query = rf"(?:{'|'.join(group_names)})"
     else:
-        return re.compile(r"".join([r".*:(/+)?", variable_query, r"$"]))
+        return re.compile(r"".join([r".*(?:\:/|\:)(/+)?", variable_query, r"$"]))
     return re.compile(
-        r"".join([r".*:(/+)?", group_query, r":(/+)?", variable_query, r"$"])
+        r"".join([r".*(?:\:/|\:)(/+)?", group_query, r"[:/](/+)?", variable_query, r"$"])
     )
 
 
