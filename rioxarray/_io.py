@@ -217,10 +217,12 @@ def build_subdataset_filter(group_names, variable_names):
     if variable_names is not None:
         if not isinstance(variable_names, (tuple, list)):
             variable_names = [variable_names]
+        variable_names = [re.escape(variable_name) for variable_name in variable_names]
         variable_query = rf"(?:{'|'.join(variable_names)})"
     if group_names is not None:
         if not isinstance(group_names, (tuple, list)):
             group_names = [group_names]
+        group_names = [re.escape(group_name) for group_name in group_names]
         group_query = rf"(?:{'|'.join(group_names)})"
     else:
         return re.compile(r"".join([r".*:(/+)?", variable_query, r"$"]))
