@@ -15,11 +15,159 @@ from xarray import DataArray
 from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
+from rioxarray._io import build_subdataset_filter
 from test.conftest import (
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
 )
+
+
+@pytest.mark.parametrize(
+    "subdataset, variable, group, match",
+    [
+        (
+            "netcdf:../../test/test_data/input/PLANET_SCOPE_3D.nc:blue",
+            "green",
+            None,
+            False,
+        ),
+        (
+            "netcdf:../../test/test_data/input/PLANET_SCOPE_3D.nc:blue",
+            "blue",
+            None,
+            True,
+        ),
+        (
+            "netcdf:../../test/test_data/input/PLANET_SCOPE_3D.nc:blue1",
+            "blue",
+            None,
+            False,
+        ),
+        (
+            "netcdf:../../test/test_data/input/PLANET_SCOPE_3D.nc:1blue",
+            "blue",
+            None,
+            False,
+        ),
+        (
+            "netcdf:../../test/test_data/input/PLANET_SCOPE_3D.nc:blue",
+            "blue",
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            ["sur_refl_b01_1"],
+            None,
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            None,
+            ["MODIS_Grid_2D"],
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            ("sur_refl_b01_1",),
+            ("MODIS_Grid_2D",),
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            "blue",
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            "sur_refl_b01_1",
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            None,
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            "sur_refl_b01_1",
+            None,
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            None,
+            "MODIS_Grid_2D",
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            "sur_refl_b01_1",
+            "MODIS_Grid_2D",
+            True,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            "blue",
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            "sur_refl_b01_1",
+            "gr",
+            False,
+        ),
+        (
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            None,
+            "gr",
+            False,
+        ),
+        (
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            None,
+            "PRODUCT",
+            True,
+        ),
+        (
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            "tm5_constant_a",
+            "PRODUCT",
+            True,
+        ),
+        (
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            "tm5_constant_a",
+            "/PRODUCT",
+            True,
+        ),
+    ],
+)
+def test_build_subdataset_filter(subdataset, variable, group, match):
+    assert (
+        build_subdataset_filter(group, variable).search(subdataset) is not None
+    ) == match
+
+
+def test_open_variable_filter():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), variable=["blue"]
+    ) as rds:
+        assert list(rds.data_vars) == ["blue"]
+
+
+def test_open_group_filter():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
+        variable="blue",
+        group=["non-existent"],
+    ) as rds:
+        assert list(rds.data_vars) == []
 
 
 def test_open_rasterio_mask_chunk_clip():
