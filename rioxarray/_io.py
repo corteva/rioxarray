@@ -357,7 +357,7 @@ def open_rasterio(
                 cache=cache,
                 lock=lock,
                 masked=masked,
-                default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_")
+                default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
             )
             data_arrays[rioda.name] = rioda
         return Dataset(data_arrays)
