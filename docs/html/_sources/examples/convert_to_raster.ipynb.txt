@@ -20,7 +20,8 @@
    "outputs": [],
    "source": [
     "import rioxarray\n",
-    "import xarray"
+    "import xarray\n",
+    "import re"
    ]
   },
   {
@@ -29,18 +30,24 @@
    "metadata": {},
    "outputs": [
     {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/snowal/miniconda/envs/rioxarray/lib/python3.7/site-packages/rasterio/__init__.py:216: NotGeoreferencedWarning: Dataset has no geotransform set. The identity matrix may be returned.\n",
+      "  s = DatasetReader(path, driver=driver, **kwargs)\n"
+     ]
+    },
+    {
      "data": {
       "text/plain": [
        "<xarray.Dataset>\n",
-       "Dimensions:      (time: 2, x: 10, y: 10)\n",
+       "Dimensions:      (band: 2, x: 10, y: 10)\n",
        "Coordinates:\n",
-       "    spatial_ref  int64 ...\n",
-       "  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05\n",
-       "  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451\n",
-       "  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06\n",
+       "  * band         (band) int64 1 2\n",
+       "    spatial_ref  int64 0\n",
+       "Dimensions without coordinates: x, y\n",
        "Data variables:\n",
-       "    blue         (time, y, x) float64 ...\n",
-       "    green        (time, y, x) float64 ..."
+       "    green        (band, y, x) float64 ..."
       ]
      },
      "execution_count": 2,
@@ -49,7 +56,10 @@
     }
    ],
    "source": [
-    "rds = xarray.open_dataset(\"../../test/test_data/input/PLANET_SCOPE_3D.nc\")\n",
+    "rds = rioxarray.open_rasterio(\n",
+    "    \"../../test/test_data/input/PLANET_SCOPE_3D.nc\",\n",
+    "    variable=[\"green\"],\n",
+    ")\n",
     "rds"
    ]
   },
@@ -68,6 +78,7 @@
        "\u001b[0;34m\u001b[0m    \u001b[0mdtype\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\n",
        "\u001b[0;34m\u001b[0m    \u001b[0mtags\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\n",
        "\u001b[0;34m\u001b[0m    \u001b[0mwindowed\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mFalse\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\n",
+       "\u001b[0;34m\u001b[0m    \u001b[0mrecalc_transform\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\n",
        "\u001b[0;34m\u001b[0m    \u001b[0;34m**\u001b[0m\u001b[0mprofile_kwargs\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\n",
        "\u001b[0;34m\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
        "\u001b[0;31mDocstring:\u001b[0m\n",
@@ -120,10 +131,7 @@
     {
      "data": {
       "text/plain": [
-       "((2, 10, 10),\n",
-       " CRS.from_epsg(32722),\n",
-       " nan,\n",
-       " (466266.0, 8084670.0, 466296.0, 8084700.0))"
+       "((2, 10, 10), CRS.from_dict(init='epsg:32722'), nan, (-1.5, 7.5, 10.5, 1.5))"
       ]
      },
      "execution_count": 5,
@@ -144,7 +152,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "{\"blockxsize\": 256, \"blockysize\": 256, \"bounds\": [466266.0, 8084670.0, 466296.0, 8084700.0], \"colorinterp\": [\"gray\", \"undefined\"], \"compress\": \"lzma\", \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-51.31732641226951, -17.322997474192466], \"mask_flags\": [[\"nodata\"], [\"nodata\"]], \"nodata\": NaN, \"res\": [3.0, 3.0], \"shape\": [10, 10], \"tiled\": true, \"transform\": [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
+      "{\"bounds\": [-0.5, 9.5, 9.5, -0.5], \"colorinterp\": [\"gray\", \"undefined\"], \"compress\": \"lzma\", \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-141.2324487629403, -85.5261559938556], \"mask_flags\": [[\"nodata\"], [\"nodata\"]], \"nodata\": NaN, \"res\": [1.0, -1.0], \"shape\": [10, 10], \"tiled\": false, \"transform\": [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
      ]
     }
    ],
@@ -170,7 +178,7 @@
     {
      "data": {
       "text/plain": [
-       "(OrderedDict(), CRS.from_epsg(32722), None)"
+       "(OrderedDict(), CRS.from_dict(init='epsg:32722'), None)"
       ]
      },
      "execution_count": 7,
@@ -179,7 +187,7 @@
     }
    ],
    "source": [
-    "new_ds = rds.green + rds.blue\n",
+    "new_ds = rds.green + rds.green\n",
     "new_ds.attrs, new_ds.rio.crs, new_ds.rio.nodata"
    ]
   },
@@ -201,7 +209,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "{\"bounds\": [466266.0, 8084670.0, 466296.0, 8084700.0], \"colorinterp\": [\"gray\", \"undefined\"], \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-51.31732641226951, -17.322997474192466], \"mask_flags\": [[\"all_valid\"], [\"all_valid\"]], \"nodata\": null, \"res\": [3.0, 3.0], \"shape\": [10, 10], \"tiled\": false, \"transform\": [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
+      "{\"bounds\": [-0.5, 9.5, 9.5, -0.5], \"colorinterp\": [\"gray\", \"undefined\"], \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-141.2324487629403, -85.5261559938556], \"mask_flags\": [[\"all_valid\"], [\"all_valid\"]], \"nodata\": null, \"res\": [1.0, -1.0], \"shape\": [10, 10], \"tiled\": false, \"transform\": [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
      ]
     }
    ],
@@ -218,10 +226,15 @@
      "data": {
       "text/plain": [
        "(OrderedDict([('grid_mapping', 'spatial_ref'),\n",
-       "              ('units', 'DN'),\n",
-       "              ('nodata', 0.0)]),\n",
-       " CRS.from_epsg(32722),\n",
-       " 0.0)"
+       "              ('NETCDF_DIM_time', 0),\n",
+       "              ('nodata', 0),\n",
+       "              ('units', ('DN', 'DN')),\n",
+       "              ('_FillValue', nan),\n",
+       "              ('transform', (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0)),\n",
+       "              ('scales', (1.0, 1.0)),\n",
+       "              ('offsets', (0.0, 0.0))]),\n",
+       " CRS.from_dict(init='epsg:32722'),\n",
+       " nan)"
       ]
      },
      "execution_count": 10,
@@ -230,7 +243,7 @@
     }
    ],
    "source": [
-    "new_ds = rds.green + rds.blue\n",
+    "new_ds = rds.green + rds.green\n",
     "new_ds.rio.write_crs(rds.green.rio.crs, inplace=True)\n",
     "new_ds.rio.update_attrs(rds.green.attrs, inplace=True)\n",
     "new_ds.attrs, new_ds.rio.crs, new_ds.rio.nodata"
@@ -254,7 +267,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "{\"bounds\": [466266.0, 8084670.0, 466296.0, 8084700.0], \"colorinterp\": [\"gray\", \"undefined\"], \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-51.31732641226951, -17.322997474192466], \"mask_flags\": [[\"nodata\"], [\"nodata\"]], \"nodata\": 0.0, \"res\": [3.0, 3.0], \"shape\": [10, 10], \"tiled\": false, \"transform\": [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
+      "{\"bounds\": [-0.5, 9.5, 9.5, -0.5], \"colorinterp\": [\"gray\", \"undefined\"], \"count\": 2, \"crs\": \"EPSG:32722\", \"descriptions\": [null, null], \"driver\": \"GTiff\", \"dtype\": \"float64\", \"height\": 10, \"indexes\": [1, 2], \"interleave\": \"pixel\", \"lnglat\": [-141.2324487629403, -85.5261559938556], \"mask_flags\": [[\"nodata\"], [\"nodata\"]], \"nodata\": NaN, \"res\": [1.0, -1.0], \"shape\": [10, 10], \"tiled\": false, \"transform\": [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], \"units\": [null, null], \"width\": 10}\n"
      ]
     }
    ],

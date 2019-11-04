@@ -5,6 +5,7 @@ History
 ------
 - Added `variable` and `group` kwargs to `rioxarray.open_rasterio()` to allow filtering of subdatasets (pull #57)
 - Added `default_name` kwarg to `rioxarray.open_rasterio()` for backup when the original does not exist (pull #59)
+- Added `recalc_transform` kwarg to `rio.to_raster()` (pull #56)
 
 0.0.14
 ------

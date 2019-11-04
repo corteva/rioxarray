@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray._io &mdash; rioxarray 0.0.13 documentation</title>
+  <title>rioxarray._io &mdash; rioxarray 0.0.15 documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -59,7 +58,7 @@
             
             
               <div class="version">
-                0.0.13
+                0.0.15
               </div>
             
           
@@ -164,6 +163,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="k">import</span> <span class="n">LooseVersion</span>
@@ -351,6 +351,44 @@
     <span class="k">return</span> <span class="n">parsed_tags</span>
 
 
+<span class="k">def</span> <span class="nf">build_subdataset_filter</span><span class="p">(</span><span class="n">group_names</span><span class="p">,</span> <span class="n">variable_names</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example::</span>
+<span class="sd">        &#39;HDF4_EOS:EOS_GRID:&quot;./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf&quot;:</span>
+<span class="sd">        MODIS_Grid_2D:sur_refl_b01_1&#39;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    group_names: str or list or tuple</span>
+<span class="sd">        Name or names of netCDF groups to filter by.</span>
+
+<span class="sd">    variable_names: str or list or tuple</span>
+<span class="sd">        Name or names of netCDF variables to filter by.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    re.SRE_Pattern: output of re.compile()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variable_query</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\w+&quot;</span>
+    <span class="k">if</span> <span class="n">variable_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variable_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">variable_names</span><span class="p">]</span>
+        <span class="n">variable_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">]</span>
+        <span class="n">variable_query</span> <span class="o">=</span> <span class="n">rf</span><span class="s2">&quot;(?:{&#39;|&#39;.join(variable_names)})&quot;</span>
+    <span class="k">if</span> <span class="n">group_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">group_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">group_names</span><span class="p">]</span>
+        <span class="n">group_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">group_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="n">group_names</span><span class="p">]</span>
+        <span class="n">group_query</span> <span class="o">=</span> <span class="n">rf</span><span class="s2">&quot;(?:{&#39;|&#39;.join(group_names)})&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">r</span><span class="s2">&quot;.*(?:\:/|\:)(/+)?&quot;</span><span class="p">,</span> <span class="n">variable_query</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$&quot;</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;.*(?:\:/|\:)(/+)?&quot;</span><span class="p">,</span> <span class="n">group_query</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;[:/](/+)?&quot;</span><span class="p">,</span> <span class="n">variable_query</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="open_rasterio"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.open_rasterio">[docs]</a><span class="k">def</span> <span class="nf">open_rasterio</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">,</span>
     <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -358,7 +396,10 @@
     <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">masked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">open_kwargs</span>
+    <span class="n">variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
 
@@ -380,32 +421,38 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    filename : str, rasterio.DatasetReader, or rasterio.WarpedVRT</span>
+<span class="sd">    filename: str, rasterio.DatasetReader, or rasterio.WarpedVRT</span>
 <span class="sd">        Path to the file to open. Or already open rasterio dataset.</span>
-<span class="sd">    parse_coordinates : bool, optional</span>
+<span class="sd">    parse_coordinates: bool, optional</span>
 <span class="sd">        Whether to parse the x and y coordinates out of the file&#39;s</span>
 <span class="sd">        ``transform`` attribute or not. The default is to automatically</span>
 <span class="sd">        parse the coordinates only if they are rectilinear (1D).</span>
 <span class="sd">        It can be useful to set ``parse_coordinates=False``</span>
 <span class="sd">        if your files are very large or if you don&#39;t need the coordinates.</span>
-<span class="sd">    chunks : int, tuple or dict, optional</span>
+<span class="sd">    chunks: int, tuple or dict, optional</span>
 <span class="sd">        Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or</span>
 <span class="sd">        ``{&#39;x&#39;: 5, &#39;y&#39;: 5}``. If chunks is provided, it used to load the new</span>
 <span class="sd">        DataArray into a dask array. Chunks can also be set to</span>
 <span class="sd">        ``True`` or ``&quot;auto&quot;`` to choose sensible chunk sizes according to</span>
 <span class="sd">        ``dask.config.get(&quot;array.chunk-size&quot;).</span>
-<span class="sd">    cache : bool, optional</span>
+<span class="sd">    cache: bool, optional</span>
 <span class="sd">        If True, cache data loaded from the underlying datastore in memory as</span>
 <span class="sd">        NumPy arrays when accessed to avoid reading from the underlying data-</span>
 <span class="sd">        store multiple times. Defaults to True unless you specify the `chunks`</span>
 <span class="sd">        argument to use dask, in which case it defaults to False.</span>
-<span class="sd">    lock : False, True or threading.Lock, optional</span>
+<span class="sd">    lock: False, True or threading.Lock, optional</span>
 <span class="sd">        If chunks is provided, this argument is passed on to</span>
 <span class="sd">        :py:func:`dask.array.from_array`. By default, a global lock is</span>
 <span class="sd">        used to avoid issues with concurrent access to the same file when using</span>
 <span class="sd">        dask&#39;s multithreaded backend.</span>
-<span class="sd">    masked : bool, optional</span>
+<span class="sd">    masked: bool, optional</span>
 <span class="sd">        If True, read the mask and to set values to NaN. Defaults to False.</span>
+<span class="sd">    variable: str or list or tuple, optional</span>
+<span class="sd">        Variable name or names to use to filter loading.</span>
+<span class="sd">    group: str or list or tuple, optional</span>
+<span class="sd">        Group name or names to use to filter loading.</span>
+<span class="sd">    default_name: str, optional</span>
+<span class="sd">        The name of the data array if none exists. Default is None.</span>
 <span class="sd">    **open_kwargs: kwargs, optional</span>
 <span class="sd">        Optional keyword arguments to pass into rasterio.open().</span>
 
@@ -450,8 +497,15 @@
 
     <span class="c1"># open the subdatasets if they exist</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">:</span>
+        <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)):</span>
+            <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="n">build_subdataset_filter</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
         <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">subdataset_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">subdataset_filter</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="n">subdataset</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
             <span class="n">rioda</span> <span class="o">=</span> <span class="n">open_rasterio</span><span class="p">(</span>
                 <span class="n">subdataset</span><span class="p">,</span>
                 <span class="n">parse_coordinates</span><span class="o">=</span><span class="n">iii</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parse_coordinates</span><span class="p">,</span>
@@ -459,6 +513,7 @@
                 <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
                 <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
                 <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">,</span>
+                <span class="n">default_name</span><span class="o">=</span><span class="n">subdataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">data_arrays</span><span class="p">[</span><span class="n">rioda</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rioda</span>
         <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
@@ -548,7 +603,7 @@
     <span class="k">if</span> <span class="n">cache</span> <span class="ow">and</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">MemoryCachedArray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="n">da_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_VARNAME&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">da_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_VARNAME&quot;</span><span class="p">,</span> <span class="n">default_name</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
     <span class="p">)</span>

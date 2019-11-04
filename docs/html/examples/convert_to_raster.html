@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Example - Convert dataset to raster (GeoTiff) &mdash; rioxarray 0.0.13 documentation</title>
+  <title>Example - Convert dataset to raster (GeoTiff) &mdash; rioxarray 0.0.15 documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +60,7 @@
             
             
               <div class="version">
-                0.0.13
+                0.0.15
               </div>
             
           
@@ -408,6 +407,7 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">import</span> <span class="nn">re</span>
 </pre></div>
 </div>
 </div>
@@ -416,10 +416,22 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">)</span>
+<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">,</span>
+    <span class="n">variable</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 <span class="n">rds</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/snowal/miniconda/envs/rioxarray/lib/python3.7/site-packages/rasterio/__init__.py:216: NotGeoreferencedWarning: Dataset has no geotransform set. The identity matrix may be returned.
+  s = DatasetReader(path, driver=driver, **kwargs)
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -427,15 +439,13 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>&lt;xarray.Dataset&gt;
-Dimensions:      (time: 2, x: 10, y: 10)
+Dimensions:      (band: 2, x: 10, y: 10)
 Coordinates:
-    spatial_ref  int64 ...
-  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05
-  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451
-  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06
+  * band         (band) int64 1 2
+    spatial_ref  int64 0
+Dimensions without coordinates: x, y
 Data variables:
-    blue         (time, y, x) float64 ...
-    green        (time, y, x) float64 ...
+    green        (band, y, x) float64 ...
 </pre></div>
 </div>
 </div>
@@ -459,6 +469,7 @@ Data variables:
 [0;34m[0m    [0mdtype[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0mtags[0m[0;34m=[0m[0;32mNone[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0mwindowed[0m[0;34m=[0m[0;32mFalse[0m[0;34m,[0m[0;34m[0m
+[0;34m[0m    [0mrecalc_transform[0m[0;34m=[0m[0;32mTrue[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m    [0;34m**[0m[0mprofile_kwargs[0m[0;34m,[0m[0;34m[0m
 [0;34m[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
 [0;31mDocstring:[0m
@@ -511,10 +522,7 @@ windowed: bool, optional
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>((2, 10, 10),
- CRS.from_epsg(32722),
- nan,
- (466266.0, 8084670.0, 466296.0, 8084700.0))
+<span></span>((2, 10, 10), CRS.from_dict(init=&#39;epsg:32722&#39;), nan, (-1.5, 7.5, 10.5, 1.5))
 </pre></div>
 </div>
 </div>
@@ -532,7 +540,7 @@ windowed: bool, optional
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;blockxsize&#34;: 256, &#34;blockysize&#34;: 256, &#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;compress&#34;: &#34;lzma&#34;, &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: true, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;bounds&#34;: [-0.5, 9.5, 9.5, -0.5], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;compress&#34;: &#34;lzma&#34;, &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-141.2324487629403, -85.5261559938556], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [1.0, -1.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 <div class="section" id="Managing-Information-Loss-with-xarray-operations">
@@ -543,7 +551,7 @@ windowed: bool, optional
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
+<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span>
 <span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
 </pre></div>
 </div>
@@ -553,7 +561,7 @@ windowed: bool, optional
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>(OrderedDict(), CRS.from_epsg(32722), None)
+<span></span>(OrderedDict(), CRS.from_dict(init=&#39;epsg:32722&#39;), None)
 </pre></div>
 </div>
 </div>
@@ -580,7 +588,7 @@ windowed: bool, optional
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;bounds&#34;: [-0.5, 9.5, 9.5, -0.5], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-141.2324487629403, -85.5261559938556], &#34;mask_flags&#34;: [[&#34;all_valid&#34;], [&#34;all_valid&#34;]], &#34;nodata&#34;: null, &#34;res&#34;: [1.0, -1.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -588,7 +596,7 @@ windowed: bool, optional
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">blue</span>
+<span></span><span class="n">new_ds</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span> <span class="o">+</span> <span class="n">rds</span><span class="o">.</span><span class="n">green</span>
 <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">new_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">new_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
@@ -601,10 +609,15 @@ windowed: bool, optional
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>(OrderedDict([(&#39;grid_mapping&#39;, &#39;spatial_ref&#39;),
-              (&#39;units&#39;, &#39;DN&#39;),
-              (&#39;nodata&#39;, 0.0)]),
- CRS.from_epsg(32722),
- 0.0)
+              (&#39;NETCDF_DIM_time&#39;, 0),
+              (&#39;nodata&#39;, 0),
+              (&#39;units&#39;, (&#39;DN&#39;, &#39;DN&#39;)),
+              (&#39;_FillValue&#39;, nan),
+              (&#39;transform&#39;, (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0)),
+              (&#39;scales&#39;, (1.0, 1.0)),
+              (&#39;offsets&#39;, (0.0, 0.0))]),
+ CRS.from_dict(init=&#39;epsg:32722&#39;),
+ nan)
 </pre></div>
 </div>
 </div>
@@ -631,7 +644,7 @@ windowed: bool, optional
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: 0.0, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
+{&#34;bounds&#34;: [-0.5, 9.5, 9.5, -0.5], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [null, null], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-141.2324487629403, -85.5261559938556], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [1.0, -1.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [1.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
 </div>
