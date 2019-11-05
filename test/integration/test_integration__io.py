@@ -57,91 +57,106 @@ from test.conftest import (
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             ["sur_refl_b01_1"],
             None,
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             None,
             ["MODIS_Grid_2D"],
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             ("sur_refl_b01_1",),
             ("MODIS_Grid_2D",),
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             "blue",
             "gr",
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             "sur_refl_b01_1",
             "gr",
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":MODIS_Grid_2D:sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            ":MODIS_Grid_2D:sur_refl_b01_1",
             None,
             "gr",
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             "sur_refl_b01_1",
             None,
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             None,
             "MODIS_Grid_2D",
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             "sur_refl_b01_1",
             "MODIS_Grid_2D",
             True,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             "blue",
             "gr",
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             "sur_refl_b01_1",
             "gr",
             False,
         ),
         (
-            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"://MODIS_Grid_2D://sur_refl_b01_1',
+            'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf"'
+            "://MODIS_Grid_2D://sur_refl_b01_1",
             None,
             "gr",
             False,
         ),
         (
-            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_"
+            "01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             None,
             "PRODUCT",
             True,
         ),
         (
-            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_"
+            "01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             "tm5_constant_a",
             "PRODUCT",
             True,
         ),
         (
-            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
+            "netcdf:S5P_NRTI_L2__NO2____20190513T181819_20190513T182319_08191_"
+            "01_010301_20190513T185033.nc:/PRODUCT/tm5_constant_a",
             "tm5_constant_a",
             "/PRODUCT",
             True,
@@ -161,13 +176,49 @@ def test_open_variable_filter():
         assert list(rds.data_vars) == ["blue"]
 
 
-def test_open_group_filter():
+def test_open_group_filter__missing():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
         variable="blue",
         group=["non-existent"],
     ) as rds:
         assert list(rds.data_vars) == []
+
+
+def test_open_multiple_resolution():
+    rds_list = rioxarray.open_rasterio(
+        os.path.join(
+            TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
+        )
+    )
+    assert isinstance(rds_list, list)
+    assert len(rds_list) == 2
+    for rds in rds_list:
+        assert rds.attrs["SHORTNAME"] == "MOD09GA"
+    assert rds_list[0].dims == {"y": 1200, "x": 1200, "band": 1}
+    assert rds_list[1].dims == {"y": 2400, "x": 2400, "band": 1}
+
+
+def test_open_group_filter():
+    with rioxarray.open_rasterio(
+        os.path.join(
+            TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
+        ),
+        group="MODIS_Grid_500m_2D",
+    ) as rds:
+        assert sorted(rds.data_vars) == [
+            "QC_500m_1",
+            "iobs_res_1",
+            "num_observations_500m",
+            "obscov_500m_1",
+            "sur_refl_b01_1",
+            "sur_refl_b02_1",
+            "sur_refl_b03_1",
+            "sur_refl_b04_1",
+            "sur_refl_b05_1",
+            "sur_refl_b06_1",
+            "sur_refl_b07_1",
+        ]
 
 
 def test_open_rasterio_mask_chunk_clip():

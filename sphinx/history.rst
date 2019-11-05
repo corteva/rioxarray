@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.16
+------
+-  Add support for netcdf/hdf groups with different shapes (pull #62)
+
 0.0.15
 ------
 - Added `variable` and `group` kwargs to `rioxarray.open_rasterio()` to allow filtering of subdatasets (pull #57)
