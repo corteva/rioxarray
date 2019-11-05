@@ -221,6 +221,29 @@ def test_open_group_filter():
         ]
 
 
+def test_open_group_load_attrs():
+    with rioxarray.open_rasterio(
+        os.path.join(
+            TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
+        ),
+        variable="sur_refl_b05_1",
+    ) as rds:
+        attrs = rds["sur_refl_b05_1"].attrs
+        assert sorted(attrs) == [
+            "_FillValue",
+            "grid_mapping",
+            "long_name",
+            "offsets",
+            "scales",
+            "transform",
+            "units",
+        ]
+        assert attrs["long_name"] == "500m Surface Reflectance Band 5 - first layer"
+        assert attrs["units"] == "reflectance"
+        assert attrs["_FillValue"] == -28672.0
+        assert attrs["grid_mapping"] == "spatial_ref"
+
+
 def test_open_rasterio_mask_chunk_clip():
     with rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
