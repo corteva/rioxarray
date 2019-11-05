@@ -176,7 +176,7 @@ def test_open_variable_filter():
         assert list(rds.data_vars) == ["blue"]
 
 
-def test_open_group_filter():
+def test_open_group_filter__missing():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
         variable="blue",
@@ -197,6 +197,28 @@ def test_open_multiple_resolution():
         assert rds.attrs["SHORTNAME"] == "MOD09GA"
     assert rds_list[0].dims == {"y": 1200, "x": 1200, "band": 1}
     assert rds_list[1].dims == {"y": 2400, "x": 2400, "band": 1}
+
+
+def test_open_group_filter():
+    with rioxarray.open_rasterio(
+        os.path.join(
+            TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
+        ),
+        group="MODIS_Grid_500m_2D",
+    ) as rds:
+        assert sorted(rds.data_vars) == [
+            "QC_500m_1",
+            "iobs_res_1",
+            "num_observations_500m",
+            "obscov_500m_1",
+            "sur_refl_b01_1",
+            "sur_refl_b02_1",
+            "sur_refl_b03_1",
+            "sur_refl_b04_1",
+            "sur_refl_b05_1",
+            "sur_refl_b06_1",
+            "sur_refl_b07_1",
+        ]
 
 
 def test_open_rasterio_mask_chunk_clip():
