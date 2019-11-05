@@ -303,6 +303,7 @@ def _load_subdatasets(
     """
     Load in rasterio subdatasets
     """
+    base_tags = _parse_tags(riods.tags())
     dim_groups = {}
     subdataset_filter = None
     if any((group, variable)):
@@ -327,11 +328,13 @@ def _load_subdatasets(
             dim_groups[shape][rioda.name] = rioda
 
     if len(dim_groups) > 1:
-        dataset = [Dataset(dim_group) for dim_group in dim_groups.values()]
+        dataset = [
+            Dataset(dim_group, attrs=base_tags) for dim_group in dim_groups.values()
+        ]
     elif not dim_groups:
-        dataset = Dataset()
+        dataset = Dataset(attrs=base_tags)
     else:
-        dataset = Dataset(list(dim_groups.values())[0])
+        dataset = Dataset(list(dim_groups.values())[0], attrs=base_tags)
     return dataset
 
 
