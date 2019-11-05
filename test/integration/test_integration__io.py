@@ -170,6 +170,18 @@ def test_open_group_filter():
         assert list(rds.data_vars) == []
 
 
+def test_open_multiple_resolution():
+    rds_list = rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"),
+    )
+    assert isinstance(rds_list, list)
+    assert len(rds_list) == 2
+    for rds in rds_list:
+        assert rds.attrs["SHORTNAME"] == "MOD09GA"
+    assert rds_list[0].dims == {'y': 1200, 'x': 1200, 'band': 1}
+    assert rds_list[1].dims == {'y': 2400, 'x': 2400, 'band': 1}
+
+
 def test_open_rasterio_mask_chunk_clip():
     with rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
