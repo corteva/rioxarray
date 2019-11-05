@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray._io &mdash; rioxarray 0.0.15 documentation</title>
+  <title>rioxarray._io &mdash; rioxarray 0.0.16 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.0.15
+                0.0.16
               </div>
             
           
@@ -169,6 +169,8 @@
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="k">import</span> <span class="n">LooseVersion</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="k">import</span> <span class="n">WarpedVRT</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="k">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.common</span> <span class="k">import</span> <span class="n">BackendArray</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.file_manager</span> <span class="k">import</span> <span class="n">CachingFileManager</span>
@@ -389,6 +391,144 @@
     <span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the transform from a rasterio dataset</span>
+<span class="sd">    reguardless of rasterio version.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">riods</span><span class="o">.</span><span class="n">transform</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">riods</span><span class="o">.</span><span class="n">affine</span>  <span class="c1"># rasterio &lt; 1.0</span>
+
+
+<span class="k">def</span> <span class="nf">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="n">masked</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get rasterio specific attributes/encoding</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Add rasterio attributes</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="c1"># Affine transformation matrix (always available)</span>
+    <span class="c1"># This describes coefficients mapping pixel coordinates to CRS</span>
+    <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
+    <span class="c1"># always (0, 0, 1) per definition (see</span>
+    <span class="c1"># https://github.com/sgillies/affine)</span>
+    <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">))[:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The nodata values for the raster bands</span>
+        <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+            <span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">):</span>
+        <span class="c1"># The scale values for the raster bands</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">):</span>
+        <span class="c1"># The offset values for the raster bands</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;descriptions&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">):</span>
+        <span class="c1"># Descriptions for each dataset band</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;descriptions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">):</span>
+        <span class="c1"># A list of units string for each dataset band</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">units</span>
+    <span class="k">return</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">encoding</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_driver_tags</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+    <span class="c1"># Parse extra metadata from tags, if supported</span>
+    <span class="n">parsers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ENVI&quot;</span><span class="p">:</span> <span class="n">_parse_envi</span><span class="p">}</span>
+
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">driver</span>
+    <span class="k">if</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">parsers</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">parsers</span><span class="p">[</span><span class="n">driver</span><span class="p">](</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="n">driver</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Add values as coordinates if they match the band count,</span>
+            <span class="c1"># as attributes otherwise</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
+                <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+
+<span class="k">def</span> <span class="nf">_load_subdatasets</span><span class="p">(</span>
+    <span class="n">riods</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">parse_coordinates</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">lock</span><span class="p">,</span> <span class="n">masked</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load in rasterio subdatasets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_tags</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">())</span>
+    <span class="n">dim_groups</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)):</span>
+        <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="n">build_subdataset_filter</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">subdataset_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">subdataset_filter</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">subdataset</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">subdataset</span><span class="p">)</span> <span class="k">as</span> <span class="n">rds</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">rioda</span> <span class="o">=</span> <span class="n">open_rasterio</span><span class="p">(</span>
+            <span class="n">subdataset</span><span class="p">,</span>
+            <span class="n">parse_coordinates</span><span class="o">=</span><span class="n">shape</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dim_groups</span> <span class="ow">and</span> <span class="n">parse_coordinates</span><span class="p">,</span>
+            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
+            <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">,</span>
+            <span class="n">default_name</span><span class="o">=</span><span class="n">subdataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dim_groups</span><span class="p">:</span>
+            <span class="n">dim_groups</span><span class="p">[</span><span class="n">shape</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">rioda</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">rioda</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dim_groups</span><span class="p">[</span><span class="n">shape</span><span class="p">][</span><span class="n">rioda</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rioda</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dim_groups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Dataset</span><span class="p">(</span><span class="n">dim_group</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim_group</span> <span class="ow">in</span> <span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">dim_groups</span><span class="p">:</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dataset</span>
+
+
+<span class="k">def</span> <span class="nf">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepare the data for dask computations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dask.base</span> <span class="k">import</span> <span class="n">tokenize</span>
+
+    <span class="c1"># augment the token with the file modification time</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="c1"># the filename is probably an s3 bucket rather than a regular file</span>
+        <span class="n">mtime</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">dask.array.core</span> <span class="k">import</span> <span class="n">normalize_chunks</span>
+        <span class="kn">import</span> <span class="nn">dask</span>
+
+        <span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="n">dask</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;0.18.0&quot;</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Automatic chunking requires dask.__version__ &gt;= 0.18.0 . &quot;</span>
+                <span class="s2">&quot;You currently have version </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dask</span><span class="o">.</span><span class="n">__version__</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">normalize_chunks</span><span class="p">(</span>
+            <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">previous_chunks</span><span class="o">=</span><span class="nb">tuple</span><span class="p">((</span><span class="n">c</span><span class="p">,)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">block_shape</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mtime</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
+    <span class="n">name_prefix</span> <span class="o">=</span> <span class="s2">&quot;open_rasterio-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">token</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">name_prefix</span><span class="o">=</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="open_rasterio"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.open_rasterio">[docs]</a><span class="k">def</span> <span class="nf">open_rasterio</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">,</span>
     <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -462,10 +602,6 @@
 <span class="sd">        The newly created DataArray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parse_coordinates</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">parse_coordinates</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parse_coordinates</span>
-
-    <span class="kn">import</span> <span class="nn">rasterio</span>
-    <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="k">import</span> <span class="n">WarpedVRT</span>
-
     <span class="n">vrt_params</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span>
@@ -494,29 +630,18 @@
         <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span>
     <span class="p">)</span>
     <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-
     <span class="c1"># open the subdatasets if they exist</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">:</span>
-        <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)):</span>
-            <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="n">build_subdataset_filter</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
-        <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">subdataset_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">subdataset_filter</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
-                <span class="n">subdataset</span>
-            <span class="p">):</span>
-                <span class="k">continue</span>
-            <span class="n">rioda</span> <span class="o">=</span> <span class="n">open_rasterio</span><span class="p">(</span>
-                <span class="n">subdataset</span><span class="p">,</span>
-                <span class="n">parse_coordinates</span><span class="o">=</span><span class="n">iii</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parse_coordinates</span><span class="p">,</span>
-                <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
-                <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
-                <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
-                <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">,</span>
-                <span class="n">default_name</span><span class="o">=</span><span class="n">subdataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">data_arrays</span><span class="p">[</span><span class="n">rioda</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rioda</span>
-        <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_load_subdatasets</span><span class="p">(</span>
+            <span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+            <span class="n">variable</span><span class="o">=</span><span class="n">variable</span><span class="p">,</span>
+            <span class="n">parse_coordinates</span><span class="o">=</span><span class="n">parse_coordinates</span><span class="p">,</span>
+            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
+            <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">vrt_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">riods</span> <span class="o">=</span> <span class="n">WarpedVRT</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="o">**</span><span class="n">vrt_params</span><span class="p">)</span>
@@ -524,20 +649,19 @@
     <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span>
 
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-
     <span class="c1"># Get bands</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown dims&quot;</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
     <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">indexes</span><span class="p">)</span>
 
-    <span class="c1"># Get coordinates</span>
-    <span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;1.0&quot;</span><span class="p">):</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">affine</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">transform</span>
+    <span class="c1"># parse tags</span>
+    <span class="n">attrs</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">)</span>
+    <span class="n">_parse_driver_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">is_rectilinear</span> <span class="ow">and</span> <span class="n">parse_coordinates</span><span class="p">:</span>
+    <span class="c1"># Get geospatial coordinates</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parse_coordinates</span> <span class="ow">and</span> <span class="n">transform</span><span class="o">.</span><span class="n">is_rectilinear</span><span class="p">:</span>
         <span class="c1"># 1d coordinates</span>
         <span class="n">coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">affine_to_coords</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">parse_coordinates</span><span class="p">:</span>
@@ -551,49 +675,6 @@
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="c1"># Attributes</span>
-    <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">encoding</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="c1"># Affine transformation matrix (always available)</span>
-    <span class="c1"># This describes coefficients mapping pixel coordinates to CRS</span>
-    <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
-    <span class="c1"># always (0, 0, 1) per definition (see</span>
-    <span class="c1"># https://github.com/sgillies/affine)</span>
-    <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">transform</span><span class="p">)[:</span><span class="mi">6</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># The nodata values for the raster bands</span>
-        <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
-            <span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">):</span>
-        <span class="c1"># The scale values for the raster bands</span>
-        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">):</span>
-        <span class="c1"># The offset values for the raster bands</span>
-        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;descriptions&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">):</span>
-        <span class="c1"># Descriptions for each dataset band</span>
-        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;descriptions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">):</span>
-        <span class="c1"># A list of units string for each dataset band</span>
-        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">units</span>
-
-    <span class="c1"># Parse extra metadata from tags, if supported</span>
-    <span class="n">parsers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ENVI&quot;</span><span class="p">:</span> <span class="n">_parse_envi</span><span class="p">}</span>
-
-    <span class="n">driver</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">driver</span>
-    <span class="k">if</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">parsers</span><span class="p">:</span>
-        <span class="n">meta</span> <span class="o">=</span> <span class="n">parsers</span><span class="p">[</span><span class="n">driver</span><span class="p">](</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="n">driver</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Add values as coordinates if they match the band count,</span>
-            <span class="c1"># as attributes otherwise</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
-                <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-
     <span class="n">data</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">LazilyOuterIndexedArray</span><span class="p">(</span>
         <span class="n">RasterioArrayWrapper</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">lock</span><span class="p">,</span> <span class="n">vrt_params</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="n">masked</span><span class="p">)</span>
     <span class="p">)</span>
@@ -603,6 +684,7 @@
     <span class="k">if</span> <span class="n">cache</span> <span class="ow">and</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">MemoryCachedArray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
+    <span class="c1"># create the output data array</span>
     <span class="n">da_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_VARNAME&quot;</span><span class="p">,</span> <span class="n">default_name</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
@@ -613,35 +695,7 @@
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">dask.base</span> <span class="k">import</span> <span class="n">tokenize</span>
-
-        <span class="c1"># augment the token with the file modification time</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="c1"># the filename is probably an s3 bucket rather than a regular file</span>
-            <span class="n">mtime</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
-            <span class="kn">from</span> <span class="nn">dask.array.core</span> <span class="k">import</span> <span class="n">normalize_chunks</span>
-            <span class="kn">import</span> <span class="nn">dask</span>
-
-            <span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="n">dask</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;0.18.0&quot;</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;Automatic chunking requires dask.__version__ &gt;= 0.18.0 . &quot;</span>
-                    <span class="s2">&quot;You currently have version </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dask</span><span class="o">.</span><span class="n">__version__</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">chunks</span> <span class="o">=</span> <span class="n">normalize_chunks</span><span class="p">(</span>
-                <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
-                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">previous_chunks</span><span class="o">=</span><span class="nb">tuple</span><span class="p">((</span><span class="n">c</span><span class="p">,)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">block_shape</span><span class="p">),</span>
-            <span class="p">)</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mtime</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
-        <span class="n">name_prefix</span> <span class="o">=</span> <span class="s2">&quot;open_rasterio-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">token</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">name_prefix</span><span class="o">=</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
 
     <span class="c1"># Make the file closeable</span>
     <span class="n">result</span><span class="o">.</span><span class="n">_file_obj</span> <span class="o">=</span> <span class="n">manager</span>
