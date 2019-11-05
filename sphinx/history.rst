@@ -1,6 +1,11 @@
 History
 =======
 
+0.0.17
+------
+- Renamed `descriptions` to `long_name` when opening with `open_rasterio()` (pull #63)
+- Make `units` & `long_name` scalar if they exist in rasterio attributes (pull #63)
+
 0.0.16
 ------
 -  Add support for netcdf/hdf groups with different shapes (pull #62)

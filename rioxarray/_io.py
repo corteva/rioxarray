@@ -272,11 +272,18 @@ def _get_rasterio_attrs(riods, masked):
         # The offset values for the raster bands
         attrs["offsets"] = riods.offsets
     if hasattr(riods, "descriptions") and any(riods.descriptions):
-        # Descriptions for each dataset band
-        attrs["descriptions"] = riods.descriptions
+        if len(riods.descriptions) == 1:
+            attrs["long_name"] = riods.descriptions[0]
+        else:
+            # Descriptions for each dataset band
+            attrs["long_name"] = riods.descriptions
     if hasattr(riods, "units") and any(riods.units):
         # A list of units string for each dataset band
-        attrs["units"] = riods.units
+        if len(riods.units) == 1:
+            attrs["units"] = riods.units[0]
+        else:
+            attrs["units"] = riods.units
+
     return attrs, encoding
 
 
