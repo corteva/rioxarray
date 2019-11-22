@@ -147,10 +147,7 @@ def test_clip_box(modis_clip):
             maxx=xdi.x[6].values,
             maxy=xdi.y[4].values,
         )
-        if isinstance(xdc, xarray.Dataset):
-            xdc.attrs["creation_date"] = clipped_ds.attrs["creation_date"]
         _assert_xarrays_equal(clipped_ds, xdc)
-
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -166,9 +163,6 @@ def test_clip_box__auto_expand(modis_clip):
             maxy=xdi.y[5].values,
             auto_expand=True,
         )
-
-        if isinstance(xdc, xarray.Dataset):
-            xdc.attrs["creation_date"] = clipped_ds.attrs["creation_date"]
 
         _assert_xarrays_equal(clipped_ds, xdc)
         # make sure it safely writes to netcdf
@@ -747,6 +741,7 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
             tags=test_tags,
         )
         xds = mda.copy().squeeze()
+        xds_attrs = {key: str(value) for key, value in mda.attrs.items()}
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.count == 1
@@ -755,7 +750,7 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
         assert_array_equal(rds.nodata, xds.rio.encoded_nodata)
         assert_array_equal(rds.read(1), xds.fillna(xds.rio.encoded_nodata).values)
         assert rds.count == 1
-        assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags, **xds_attrs}
 
 
 @pytest.mark.parametrize(
@@ -773,12 +768,15 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         xds.rio.to_raster(str(tmp_raster), windowed=windowed)
+        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs
         assert_array_equal(rds.transform, xds.rio.transform())
         assert_array_equal(rds.nodata, xds.rio.nodata)
         assert_array_equal(rds.read(), xds.values)
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
+        assert rds.descriptions == ("green", "green")
 
 
 @pytest.mark.xfail(reason="Precision issues with windowed writing on python 3.6")

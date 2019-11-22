@@ -12,7 +12,6 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import warnings
-from datetime import datetime
 
 import numpy as np
 import rasterio.warp
@@ -30,6 +29,7 @@ from rioxarray.exceptions import (
     MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
+    RioXarrayError,
     TooManyDimensions,
 )
 
@@ -1177,6 +1177,27 @@ class RasterArray(XRasterBase):
             ),
             **out_profile,
         ) as dst:
+            # write metadata to raster
+            tags = {} if tags is None else tags
+            dst.update_tags(**self._obj.attrs, **tags)
+
+            # write band name information
+            long_name = self._obj.attrs.get("long_name")
+            if isinstance(long_name, (tuple, list)):
+                if len(long_name) != count:
+                    raise RioXarrayError(
+                        "Number of names in the 'long_name' attribute does not equal "
+                        "the number of bands."
+                    )
+                for iii, band_description in enumerate(long_name):
+                    dst.set_band_description(iii + 1, band_description)
+            else:
+                band_description = long_name or self._obj.name
+                if band_description:
+                    for iii in range(count):
+                        dst.set_band_description(iii + 1, band_description)
+
+            # write data to raster
             if windowed:
                 window_iter = dst.block_windows(1)
             else:
@@ -1193,8 +1214,6 @@ class RasterArray(XRasterBase):
                     dst.write(data, 1, window=window)
                 else:
                     dst.write(data, window=window)
-            if tags is not None:
-                dst.update_tags(**tags)
 
 
 @xarray.register_dataset_accessor("rio")
@@ -1268,7 +1287,6 @@ class RasterDataset(XRasterBase):
                 dst_affine_width_height=dst_affine_width_height,
                 resampling=resampling,
             )
-        resampled_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return resampled_dataset
 
     def reproject_match(self, match_data_array, resampling=Resampling.nearest):
@@ -1301,7 +1319,6 @@ class RasterDataset(XRasterBase):
             resampled_dataset[var] = self._obj[var].rio.reproject_match(
                 match_data_array, resampling=resampling
             )
-        resampled_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return resampled_dataset
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
@@ -1341,7 +1358,6 @@ class RasterDataset(XRasterBase):
                 auto_expand=auto_expand,
                 auto_expand_limit=auto_expand_limit,
             )
-        clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
 
     def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
@@ -1395,7 +1411,6 @@ class RasterDataset(XRasterBase):
             clipped_dataset[var] = self._obj[var].rio.clip(
                 geometries, crs=crs, all_touched=all_touched, drop=drop, invert=invert
             )
-        clipped_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return clipped_dataset
 
     def interpolate_na(self, method="nearest"):
@@ -1415,5 +1430,4 @@ class RasterDataset(XRasterBase):
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             interpolated_dataset[var] = self._obj[var].rio.interpolate_na(method=method)
-        interpolated_dataset.attrs["creation_date"] = str(datetime.utcnow())
         return interpolated_dataset

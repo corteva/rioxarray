@@ -1,6 +1,5 @@
 import os
 
-import xarray
 from numpy.testing import assert_almost_equal, assert_array_equal
 
 from rioxarray.rioxarray import UNWANTED_RIO_ATTRS
@@ -14,9 +13,6 @@ def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
     # xarray.testing.assert_equal(input_xarray, compare_xarray)
     def assert_attrs_equal(input_xr, compare_xr):
         """check attrubutes that matter"""
-        if isinstance(input_xr, xarray.Dataset):
-            assert "creation_date" in input_xr.attrs
-
         for attr in compare_xr.attrs:
             if attr == "transform":
                 assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr][:6])
