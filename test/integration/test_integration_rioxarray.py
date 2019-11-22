@@ -17,6 +17,7 @@ from rioxarray.exceptions import (
     MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
+    RioXarrayError,
 )
 from rioxarray.rioxarray import _make_coords
 from test.conftest import (
@@ -781,6 +782,36 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
     # test roundtrip
     with rioxarray.open_rasterio(str(tmp_raster)) as rds:
         assert rds.attrs["long_name"] == "green"
+
+
+def test_to_raster__custom_description(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        xds = mda.green.fillna(mda.green.rio.encoded_nodata)
+        xds.attrs["long_name"] = ("one", "two")
+        xds.rio.to_raster(str(tmp_raster))
+        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
+        assert rds.descriptions == ("one", "two")
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.attrs["long_name"] == ("one", "two")
+
+
+def test_to_raster__custom_description__wrong(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        xds = mda.green.fillna(mda.green.rio.encoded_nodata)
+        xds.attrs["long_name"] = ("one", "two", "three")
+        with pytest.raises(RioXarrayError):
+            xds.rio.to_raster(str(tmp_raster))
 
 
 @pytest.mark.xfail(reason="Precision issues with windowed writing on python 3.6")
