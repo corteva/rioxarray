@@ -1,5 +1,4 @@
 import os
-import sys
 from functools import partial
 
 import numpy
@@ -17,6 +16,7 @@ from rioxarray.exceptions import (
     MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
+    RioXarrayError,
 )
 from rioxarray.rioxarray import _make_coords
 from test.conftest import (
@@ -147,10 +147,7 @@ def test_clip_box(modis_clip):
             maxx=xdi.x[6].values,
             maxy=xdi.y[4].values,
         )
-        if isinstance(xdc, xarray.Dataset):
-            xdc.attrs["creation_date"] = clipped_ds.attrs["creation_date"]
         _assert_xarrays_equal(clipped_ds, xdc)
-
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -166,9 +163,6 @@ def test_clip_box__auto_expand(modis_clip):
             maxy=xdi.y[5].values,
             auto_expand=True,
         )
-
-        if isinstance(xdc, xarray.Dataset):
-            xdc.attrs["creation_date"] = clipped_ds.attrs["creation_date"]
 
         _assert_xarrays_equal(clipped_ds, xdc)
         # make sure it safely writes to netcdf
@@ -747,6 +741,7 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
             tags=test_tags,
         )
         xds = mda.copy().squeeze()
+        xds_attrs = {key: str(value) for key, value in mda.attrs.items()}
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.count == 1
@@ -755,7 +750,7 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
         assert_array_equal(rds.nodata, xds.rio.encoded_nodata)
         assert_array_equal(rds.read(1), xds.fillna(xds.rio.encoded_nodata).values)
         assert rds.count == 1
-        assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags, **xds_attrs}
 
 
 @pytest.mark.parametrize(
@@ -773,12 +768,49 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         xds.rio.to_raster(str(tmp_raster), windowed=windowed)
+        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs
         assert_array_equal(rds.transform, xds.rio.transform())
         assert_array_equal(rds.nodata, xds.rio.nodata)
         assert_array_equal(rds.read(), xds.values)
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
+        assert rds.descriptions == ("green", "green")
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.attrs["long_name"] == "green"
+
+
+def test_to_raster__custom_description(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        xds = mda.green.fillna(mda.green.rio.encoded_nodata)
+        xds.attrs["long_name"] = ("one", "two")
+        xds.rio.to_raster(str(tmp_raster))
+        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
+        assert rds.descriptions == ("one", "two")
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.attrs["long_name"] == ("one", "two")
+
+
+def test_to_raster__custom_description__wrong(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        xds = mda.green.fillna(mda.green.rio.encoded_nodata)
+        xds.attrs["long_name"] = ("one", "two", "three")
+        with pytest.raises(RioXarrayError):
+            xds.rio.to_raster(str(tmp_raster))
 
 
 @pytest.mark.xfail(reason="Precision issues with windowed writing on python 3.6")

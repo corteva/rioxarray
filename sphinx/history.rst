@@ -4,6 +4,8 @@ History
 0.0.18
 ------
 - Fixed windowed writing to require tiled output raster (pull #66)
+- Write data array attributes using `rio.to_raster` (issue #64)
+- Write variable name to descriptions if possible in `rio.to_raster` (issue #64)
 
 0.0.17
 ------
