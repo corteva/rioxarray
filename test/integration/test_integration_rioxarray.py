@@ -1,4 +1,5 @@
 import os
+from functools import partial
 
 import numpy
 import pytest
@@ -677,13 +678,12 @@ def test_load_in_geographic_dimensions():
         assert mda.red.rio.crs.to_epsg() == 4326
 
 
-@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
-def test_geographic_reproject(request):
+def test_geographic_reproject():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm.nc")
-    with request.param(sentinel_2_geographic) as mda, request.param(
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
         sentinel_2_utm
     ) as mdc:
         mds_repr = mda.rio.reproject("+init=epsg:32721")
@@ -692,15 +692,14 @@ def test_geographic_reproject(request):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
-def test_geographic_reproject__missing_nodata(request):
+def test_geographic_reproject__missing_nodata():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
     )
-    with request.param(sentinel_2_geographic) as mda, request.param(
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
         sentinel_2_utm
     ) as mdc:
         mda.red.attrs.pop("nodata")
@@ -711,15 +710,14 @@ def test_geographic_reproject__missing_nodata(request):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
-def test_geographic_resample_integer(request):
+def test_geographic_resample_integer():
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_interp = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_interpolate_na.nc"
     )
-    with request.param(sentinel_2_geographic) as mda, request.param(
+    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
         sentinel_2_interp
     ) as mdc:
         mds_interp = mda.rio.interpolate_na()
@@ -728,19 +726,26 @@ def test_geographic_resample_integer(request):
         _assert_xarrays_equal(mds_interp, mdc)
 
 
-@pytest.mark.parametrize("windowed, recalc_transform", [(True, True), (False, False)])
-@pytest.fixture(params=[xarray.open_dataarray, rioxarray.open_rasterio])
-def test_to_raster(request, windowed, recalc_transform, tmpdir):
+@pytest.mark.parametrize(
+    "open_method, windowed, recalc_transform",
+    [
+        (xarray.open_dataarray, True, True),
+        (xarray.open_dataarray, False, False),
+        (partial(rioxarray.open_rasterio, masked=True), True, True),
+        (partial(rioxarray.open_rasterio, masked=True), False, False),
+    ],
+)
+def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
-    with request.param(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
+    with open_method(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
         mda.rio.to_raster(
             str(tmp_raster),
             windowed=windowed,
             recalc_transform=recalc_transform,
             tags=test_tags,
         )
-        xds = mda.copy()
+        xds = mda.copy().squeeze()
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.count == 1
@@ -752,11 +757,18 @@ def test_to_raster(request, windowed, recalc_transform, tmpdir):
         assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags}
 
 
-@pytest.mark.parametrize("windowed", [True, False])
-@pytest.fixture(params=[xarray.open_dataset, rioxarray.open_rasterio])
-def test_to_raster_3d(request, windowed, tmpdir):
+@pytest.mark.parametrize(
+    "open_method, windowed",
+    [
+        (xarray.open_dataset, True),
+        (xarray.open_dataset, False),
+        (partial(rioxarray.open_rasterio, masked=True), True),
+        (partial(rioxarray.open_rasterio, masked=True), False),
+    ],
+)
+def test_to_raster_3d(open_method, windowed, tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
-    with request.param(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
+    with open_method(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         xds.rio.to_raster(str(tmp_raster), windowed=windowed)
@@ -769,8 +781,7 @@ def test_to_raster_3d(request, windowed, tmpdir):
 
 
 @pytest.mark.parametrize("windowed", [True, False])
-@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
-def test_to_raster__preserve_profile__none_nodata(request, windowed, tmpdir):
+def test_to_raster__preserve_profile__none_nodata(windowed, tmpdir):
     tmp_raster = tmpdir.join("output_profile.tif")
     input_raster = tmpdir.join("input_profile.tif")
 
@@ -791,7 +802,7 @@ def test_to_raster__preserve_profile__none_nodata(request, windowed, tmpdir):
     ) as rds:
         rds.write(numpy.empty((1, 512, 512), dtype=numpy.float32))
 
-    with request.param(str(input_raster)) as mda:
+    with xarray.open_rasterio(str(input_raster)) as mda:
         mda.rio.to_raster(str(tmp_raster), windowed=windowed)
 
     with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
@@ -799,7 +810,7 @@ def test_to_raster__preserve_profile__none_nodata(request, windowed, tmpdir):
         assert rds.crs == rdc.crs
         assert_array_equal(rds.transform, rdc.transform)
         assert_array_equal(rds.nodata, rdc.nodata)
-        assert_array_equal(rds.read(), rdc.read())
+        assert_almost_equal(rds.read(), rdc.read())
         assert rds.profile == rdc.profile
         assert rds.nodata is None
 

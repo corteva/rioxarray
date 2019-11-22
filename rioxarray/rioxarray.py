@@ -11,6 +11,7 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
+import warnings
 from datetime import datetime
 
 import numpy as np
@@ -1119,6 +1120,8 @@ class RasterArray(XRasterBase):
             A dictionary of tags to write to the raster.
         windowed: bool, optional
             If True, it will write using the windows of the output raster.
+            This only works if the output raster is tiled. As such, if you
+            set this to True, the output raster will be tiled.
             Default is False.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
@@ -1156,7 +1159,9 @@ class RasterArray(XRasterBase):
                 "dtype",
             )
         }
-
+        if windowed and not out_profile.get("tiled"):
+            warnings.warn("Set tiled=True for windowed writing.")
+            out_profile["tiled"] = True
         with rasterio.open(
             raster_path,
             "w",

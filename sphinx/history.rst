@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.18
+------
+- Fixed windowed writing to require tiled output raster (pull #66)
+
 0.0.17
 ------
 - Renamed `descriptions` to `long_name` when opening with `open_rasterio()` (pull #63)
