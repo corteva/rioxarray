@@ -778,6 +778,10 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
         assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
         assert rds.descriptions == ("green", "green")
 
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.attrs["long_name"] == "green"
+
 
 @pytest.mark.xfail(reason="Precision issues with windowed writing on python 3.6")
 @pytest.mark.parametrize("windowed", [True, False])
