@@ -1,4 +1,5 @@
 import os
+import sys
 from functools import partial
 
 import numpy
@@ -780,6 +781,9 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
         assert_array_equal(rds.read(), xds.values)
 
 
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="precision issues with windowed writing"
+)
 @pytest.mark.parametrize("windowed", [True, False])
 def test_to_raster__preserve_profile__none_nodata(windowed, tmpdir):
     tmp_raster = tmpdir.join("output_profile.tif")
