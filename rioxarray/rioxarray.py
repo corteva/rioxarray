@@ -200,6 +200,31 @@ def _make_dst_affine(src_data_array, src_crs, dst_crs, dst_resolution=None):
     return dst_affine, dst_width, dst_height
 
 
+def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
+    """
+    Write the metadata stored in the xarray object to raster metadata
+    """
+    # write metadata to raster
+    tags = {} if tags is None else tags
+    raster_handle.update_tags(**xarray_dataset.attrs, **tags)
+
+    # write band name information
+    long_name = xarray_dataset.attrs.get("long_name")
+    if isinstance(long_name, (tuple, list)):
+        if len(long_name) != raster_handle.count:
+            raise RioXarrayError(
+                "Number of names in the 'long_name' attribute does not equal "
+                "the number of bands."
+            )
+        for iii, band_description in enumerate(long_name):
+            raster_handle.set_band_description(iii + 1, band_description)
+    else:
+        band_description = long_name or xarray_dataset.name
+        if band_description:
+            for iii in range(raster_handle.count):
+                raster_handle.set_band_description(iii + 1, band_description)
+
+
 class XRasterBase(object):
     """This is the base class for the GIS extensions for xarray"""
 
@@ -1177,25 +1202,8 @@ class RasterArray(XRasterBase):
             ),
             **out_profile,
         ) as dst:
-            # write metadata to raster
-            tags = {} if tags is None else tags
-            dst.update_tags(**self._obj.attrs, **tags)
 
-            # write band name information
-            long_name = self._obj.attrs.get("long_name")
-            if isinstance(long_name, (tuple, list)):
-                if len(long_name) != count:
-                    raise RioXarrayError(
-                        "Number of names in the 'long_name' attribute does not equal "
-                        "the number of bands."
-                    )
-                for iii, band_description in enumerate(long_name):
-                    dst.set_band_description(iii + 1, band_description)
-            else:
-                band_description = long_name or self._obj.name
-                if band_description:
-                    for iii in range(count):
-                        dst.set_band_description(iii + 1, band_description)
+            _write_metatata_to_raster(dst, self._obj, tags)
 
             # write data to raster
             if windowed:
