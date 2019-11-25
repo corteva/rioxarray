@@ -923,5 +923,5 @@ def test_no_mask_and_scale():
 
 def test_notgeoreferenced_warning():
     with create_tmp_geotiff(transform_args=None) as (tmp_file, expected):
-        with pytest.warns(NotGeoreferencedWarning): 
+        with pytest.warns(NotGeoreferencedWarning):
             rioxarray.open_rasterio(tmp_file)
