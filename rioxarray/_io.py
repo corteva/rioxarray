@@ -208,12 +208,14 @@ def _parse_envi(meta):
     return parsed_meta
 
 
-def _parse_tags(tags):
+def _parse_tags(tags, dataset_tags=False):
     def parsevec(s):
         return np.fromstring(s.strip("{}"), dtype="float", sep=",")
 
     parsed_tags = {}
     for key, value in tags.items():
+        # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
+        key = key.split("NC_GLOBAL#")[-1] if dataset_tags else key
         if value.startswith("{") and value.endswith("}"):
             new_val = parsevec(value)
             value = new_val if len(new_val) else value
@@ -361,7 +363,7 @@ def _load_subdatasets(
     """
     Load in rasterio subdatasets
     """
-    base_tags = _parse_tags(riods.tags())
+    base_tags = _parse_tags(riods.tags(), dataset_tags=True)
     dim_groups = {}
     subdataset_filter = None
     if any((group, variable)):
