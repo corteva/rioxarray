@@ -931,4 +931,4 @@ def test_ncglobal_attr_filter():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
     ) as rds:
-        assert rds.attrs == {'coordinates': 'spatial_ref'}
+        assert rds.attrs == {"coordinates": "spatial_ref"}
