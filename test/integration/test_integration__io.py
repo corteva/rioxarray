@@ -266,8 +266,8 @@ def test_open_rasterio_mask_chunk_clip():
         )
         assert attrs == {
             "grid_mapping": "spatial_ref",
-            'add_offset': 0.0,
-            'scale_factor': 1.0,
+            "add_offset": 0.0,
+            "scale_factor": 1.0,
         }
 
         # get subset for testing
