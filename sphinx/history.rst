@@ -6,6 +6,7 @@ History
 - Fixed windowed writing to require tiled output raster (pull #66)
 - Write data array attributes using `rio.to_raster` (issue #64)
 - Write variable name to descriptions if possible in `rio.to_raster` (issue #64)
+- Add `mask_and_scale` option to `rioxarray.open_rasterio()` (issue #67)
 
 0.0.17
 ------

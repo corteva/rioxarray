@@ -12,6 +12,7 @@ import pytest
 import xarray as xr
 from numpy.testing import assert_almost_equal
 from xarray import DataArray
+from xarray.coding.variables import SerializationWarning
 from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
@@ -231,10 +232,10 @@ def test_open_group_load_attrs():
         attrs = rds["sur_refl_b05_1"].attrs
         assert sorted(attrs) == [
             "_FillValue",
+            "add_offset",
             "grid_mapping",
             "long_name",
-            "offsets",
-            "scales",
+            "scale_factor",
             "transform",
             "units",
         ]
@@ -265,8 +266,8 @@ def test_open_rasterio_mask_chunk_clip():
         )
         assert attrs == {
             "grid_mapping": "spatial_ref",
-            "offsets": (0.0,),
-            "scales": (1.0,),
+            'add_offset': 0.0,
+            'scale_factor': 1.0,
         }
 
         # get subset for testing
@@ -876,3 +877,31 @@ def test_open_cog():
     assert rdsm.shape == (1, 500, 500)
     rdso = rioxarray.open_rasterio(cog_file, overview_level=0)
     assert rdso.shape == (1, 250, 250)
+
+
+def test_mask_and_scale():
+    with pytest.warns(SerializationWarning):
+        with rioxarray.open_rasterio(
+            os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), mask_and_scale=True
+        ) as rds:
+            assert np.nanmin(rds.air_temperature.values) == 248.7
+            assert np.nanmax(rds.air_temperature.values) == 302.1
+            assert rds.air_temperature.encoding == {
+                "_Unsigned": "true",
+                "add_offset": 220.0,
+                "_FillValue": 32767.0,
+                "missing_value": 32767,
+            }
+            attrs = rds.air_temperature.attrs
+            attrs.pop("transform")
+            assert attrs == {
+                "coordinates": "day",
+                "coordinate_system": "WGS84,EPSG:4326",
+                "description": "Daily Maximum Temperature",
+                "dimensions": "lon lat time",
+                "grid_mapping": "spatial_ref",
+                "long_name": "tmmx",
+                "scale_factor": 0.1,
+                "standard_name": "tmmx",
+                "units": "K",
+            }
