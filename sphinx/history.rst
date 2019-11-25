@@ -7,6 +7,7 @@ History
 - Write data array attributes using `rio.to_raster` (issue #64)
 - Write variable name to descriptions if possible in `rio.to_raster` (issue #64)
 - Add `mask_and_scale` option to `rioxarray.open_rasterio()` (issue #67)
+- Hide NotGeoreferencedWarning warning when subdatasets are present using open_rasterio (issue #65)
 
 0.0.17
 ------
