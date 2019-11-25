@@ -5,12 +5,18 @@ import pickle
 import shutil
 import sys
 import tempfile
+import warnings
 
+import dask.array as da
 import mock
 import numpy as np
 import pytest
+import rasterio
 import xarray as xr
+from affine import Affine
 from numpy.testing import assert_almost_equal
+from rasterio.transform import from_origin
+from rasterio.warp import calculate_default_transform
 from xarray import DataArray
 from xarray.coding.variables import SerializationWarning
 from xarray.testing import assert_allclose, assert_equal, assert_identical
@@ -338,9 +344,6 @@ def create_tmp_geotiff(
     additional_attrs=None,
 ):
     # yields a temporary geotiff file and a corresponding expected DataArray
-    import rasterio
-    from rasterio.transform import from_origin
-
     if open_kwargs is None:
         open_kwargs = {}
 
@@ -424,8 +427,6 @@ class TestRasterio:
                 assert "y" not in rioda.coords
 
     def test_non_rectilinear(self):
-        from rasterio.transform import from_origin
-
         # Create a geotiff file with 2d coordinates
         with create_tmp_geotiff(
             transform=from_origin(0, 3, 1, 1).rotation(45), crs=None
@@ -474,9 +475,6 @@ class TestRasterio:
 
     def test_notransform(self):
         # regression test for https://github.com/pydata/xarray/issues/1686
-        import rasterio
-        import warnings
-
         # Create a geotiff file
         with warnings.catch_warnings():
             # rasterio throws a NotGeoreferencedWarning here, which is
@@ -662,9 +660,6 @@ class TestRasterio:
         ) as (tmp_file, expected):
             # Chunk at open time
             with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-
-                import dask.array as da
-
                 assert isinstance(actual.data, da.Array)
                 assert "open_rasterio" in actual.data.name
 
@@ -686,9 +681,6 @@ class TestRasterio:
                     assert_equal(actual, rioda)
 
     def test_ENVI_tags(self):
-        rasterio = pytest.importorskip("rasterio", minversion="1.0a")
-        from rasterio.transform import from_origin
-
         # Create an ENVI file with some tags in the ENVI namespace
         # this test uses a custom driver, so we can't use create_tmp_geotiff
         with create_tmp_file(suffix=".dat") as tmp_file:
@@ -756,8 +748,6 @@ class TestRasterio:
         ) as (tmp_file, expected):
             with mock.patch("os.path.getmtime", side_effect=OSError):
                 with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-                    import dask.array as da
-
                     assert isinstance(actual.data, da.Array)
                     assert_allclose(actual, expected)
 
@@ -770,13 +760,9 @@ class TestRasterio:
             assert actual.shape == (1, 512, 512)
         # make sure chunking works
         with xr.open_rasterio(url, chunks=(1, 256, 256)) as actual:
-            import dask.array as da
-
             assert isinstance(actual.data, da.Array)
 
     def test_rasterio_environment(self):
-        import rasterio
-
         with create_tmp_geotiff() as (tmp_file, expected):
             # Should fail with error since suffix not allowed
             with pytest.raises(Exception):
@@ -784,9 +770,11 @@ class TestRasterio:
                     with xr.open_rasterio(tmp_file) as actual:
                         assert_allclose(actual, expected)
 
+    @pytest.mark.xfail(
+        rasterio.__version__ == "1.1.1",
+        reason="https://github.com/mapbox/rasterio/issues/1833",
+    )
     def test_rasterio_vrt(self):
-        import rasterio
-
         # tmp_file default crs is UTM: CRS({'init': 'epsg:32618'}
         with create_tmp_geotiff() as (tmp_file, expected):
             with rasterio.open(tmp_file) as src:
@@ -811,10 +799,6 @@ class TestRasterio:
     def test_rasterio_vrt_with_transform_and_size(self):
         # Test open_rasterio() support of WarpedVRT with transform, width and
         # height (issue #2864)
-        import rasterio
-        from rasterio.warp import calculate_default_transform
-        from affine import Affine
-
         with create_tmp_geotiff() as (tmp_file, expected):
             with rasterio.open(tmp_file) as src:
                 # Estimate the transform, width and height
@@ -839,8 +823,6 @@ class TestRasterio:
 
     @pytest.mark.xfail(reason="Network could be problematic")
     def test_rasterio_vrt_network(self):
-        import rasterio
-
         url = "https://storage.googleapis.com/\
         gcp-public-data-landsat/LC08/01/047/027/\
         LC08_L1TP_047027_20130421_20170310_01_T1/\
