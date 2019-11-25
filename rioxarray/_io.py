@@ -584,11 +584,11 @@ def open_rasterio(
             stacklevel=3,
         )
 
-    da_name = attrs.pop("NETCDF_VARNAME", default_name)
     unsigned = False
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
+    da_name = attrs.pop("NETCDF_VARNAME", default_name)
     data = indexing.LazilyOuterIndexedArray(
         RasterioArrayWrapper(
             manager,
