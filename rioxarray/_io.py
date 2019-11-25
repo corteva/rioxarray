@@ -14,6 +14,7 @@ from distutils.version import LooseVersion
 
 import numpy as np
 import rasterio
+from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
 from xarray import DataArray, Dataset
 from xarray.backends.common import BackendArray
@@ -534,10 +535,19 @@ def open_rasterio(
     # ensure default for sharing is False
     # ref https://github.com/mapbox/rasterio/issues/1504
     open_kwargs["sharing"] = open_kwargs.get("sharing", False)
-    manager = CachingFileManager(
-        rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
-    )
-    riods = manager.acquire()
+    with warnings.catch_warnings(record=True) as rio_warnings:
+        manager = CachingFileManager(
+            rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
+        )
+        riods = manager.acquire()
+        captured_warnings = rio_warnings.copy()
+    # raise the NotGeoreferencedWarning if applicable
+    for rio_warning in captured_warnings:
+        if not riods.subdatasets or not isinstance(
+            rio_warning.message, NotGeoreferencedWarning
+        ):
+            warnings.warn(str(rio_warning.message), type(rio_warning.message))
+
     # open the subdatasets if they exist
     if riods.subdatasets:
         return _load_subdatasets(

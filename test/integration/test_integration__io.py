@@ -15,6 +15,7 @@ import rasterio
 import xarray as xr
 from affine import Affine
 from numpy.testing import assert_almost_equal
+from rasterio.errors import NotGeoreferencedWarning
 from rasterio.transform import from_origin
 from rasterio.warp import calculate_default_transform
 from xarray import DataArray
@@ -356,7 +357,7 @@ def create_tmp_geotiff(
             data_shape = nz, ny, nx
             write_kwargs = {}
         data = np.arange(nz * ny * nx, dtype=rasterio.float32).reshape(*data_shape)
-        if transform is None:
+        if transform is None and transform_args is not None:
             transform = from_origin(*transform_args)
         if additional_attrs is None:
             additional_attrs = {
@@ -379,8 +380,12 @@ def create_tmp_geotiff(
                 setattr(s, attr, val)
             s.write(data, **write_kwargs)
             dx, dy = s.res[0], -s.res[1]
+            tt = s.transform
 
-        a, b, c, d = transform_args
+        if not transform_args:
+            a, b, c, d = tt.c, tt.f, -tt.e, tt.a
+        else:
+            a, b, c, d = transform_args
         data = data[np.newaxis, ...] if nz == 1 else data
         expected = DataArray(
             data,
@@ -914,3 +919,9 @@ def test_no_mask_and_scale():
             "standard_name": "tmmx",
             "units": "K",
         }
+
+
+def test_notgeoreferenced_warning():
+    with create_tmp_geotiff(transform_args=None) as (tmp_file, expected):
+        with pytest.warns(NotGeoreferencedWarning): 
+            rioxarray.open_rasterio(tmp_file)
