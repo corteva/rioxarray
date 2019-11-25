@@ -889,6 +889,7 @@ def test_mask_and_scale():
             assert rds.air_temperature.encoding == {
                 "_Unsigned": "true",
                 "add_offset": 220.0,
+                "scale_factor": 0.1,
                 "_FillValue": 32767.0,
                 "missing_value": 32767,
             }
@@ -901,7 +902,33 @@ def test_mask_and_scale():
                 "dimensions": "lon lat time",
                 "grid_mapping": "spatial_ref",
                 "long_name": "tmmx",
-                "scale_factor": 0.1,
                 "standard_name": "tmmx",
                 "units": "K",
             }
+
+
+def test_no_mask_and_scale():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), masked=True
+    ) as rds:
+        assert np.nanmin(rds.air_temperature.values) == 287
+        assert np.nanmax(rds.air_temperature.values) == 821
+        assert rds.air_temperature.encoding == {
+            "_FillValue": 32767.0,
+            "missing_value": 32767,
+        }
+        attrs = rds.air_temperature.attrs
+        attrs.pop("transform")
+        assert attrs == {
+            "_Unsigned": "true",
+            "add_offset": 220.0,
+            "coordinates": "day",
+            "coordinate_system": "WGS84,EPSG:4326",
+            "description": "Daily Maximum Temperature",
+            "dimensions": "lon lat time",
+            "grid_mapping": "spatial_ref",
+            "long_name": "tmmx",
+            "scale_factor": 0.1,
+            "standard_name": "tmmx",
+            "units": "K",
+        }

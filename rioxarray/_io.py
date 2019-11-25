@@ -64,9 +64,9 @@ class RasterioArrayWrapper(BackendArray):
 
         dtype = np.dtype(dtypes[0])
         # handle unsigned case
-        if unsigned and dtype.kind == "i":
+        if mask_and_scale and unsigned and dtype.kind == "i":
             self._dtype = np.dtype("u%s" % dtype.itemsize)
-        elif unsigned:
+        elif mask_and_scale and unsigned:
             warnings.warn(
                 "variable %r has _Unsigned attribute but is not "
                 "of integer type. Ignoring attribute." % name,
@@ -586,7 +586,7 @@ def open_rasterio(
 
     da_name = attrs.pop("NETCDF_VARNAME", default_name)
     unsigned = False
-    if "_Unsigned" in attrs:
+    if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
     data = indexing.LazilyOuterIndexedArray(
@@ -617,7 +617,7 @@ def open_rasterio(
 
     # handle encoding
     if mask_and_scale:
-        if "scale_facor" in result.attrs:
+        if "scale_factor" in result.attrs:
             variables.pop_to(
                 result.attrs, result.encoding, "scale_factor", name=da_name
             )
