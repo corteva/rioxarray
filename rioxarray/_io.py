@@ -163,8 +163,8 @@ class RasterioArrayWrapper(BackendArray):
                     for band in band_key:
                         band_iii = band - 1
                         out[band_iii] = (
-                            out[band_iii] * riods.scales[band_iii - 1]
-                            + riods.offsets[band_iii - 1]
+                            out[band_iii] * riods.scales[band_iii]
+                            + riods.offsets[band_iii]
                         )
 
         if squeeze_axis:
@@ -611,7 +611,7 @@ def open_rasterio(
     )
     result.encoding = encoding
 
-    # make sure the _FillValue is correct
+    # make sure the _FillValue is correct dtype
     if "_FillValue" in attrs:
         attrs["_FillValue"] = result.dtype.type(attrs["_FillValue"])
 
