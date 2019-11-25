@@ -19,6 +19,7 @@ from xarray import DataArray, Dataset
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager
 from xarray.backends.locks import SerializableLock
+from xarray.coding import variables
 from xarray.core import indexing
 from xarray.core.utils import is_scalar
 
@@ -32,12 +33,22 @@ RASTERIO_LOCK = SerializableLock()
 class RasterioArrayWrapper(BackendArray):
     """A wrapper around rasterio dataset objects"""
 
-    def __init__(self, manager, lock, vrt_params=None, masked=False):
+    def __init__(
+        self,
+        manager,
+        lock,
+        name,
+        vrt_params=None,
+        masked=False,
+        mask_and_scale=False,
+        unsigned=False,
+    ):
         from rasterio.vrt import WarpedVRT
 
         self.manager = manager
         self.lock = lock
-        self.masked = masked
+        self.masked = masked or mask_and_scale
+        self.mask_and_scale = mask_and_scale
 
         # cannot save riods as an attribute: this would break pickleability
         riods = manager.acquire()
@@ -46,11 +57,24 @@ class RasterioArrayWrapper(BackendArray):
         self.vrt_params = vrt_params
         self._shape = (riods.count, riods.height, riods.width)
 
+        self._dtype = None
         dtypes = riods.dtypes
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
 
-        self._dtype = np.dtype("float64") if self.masked else np.dtype(dtypes[0])
+        dtype = np.dtype(dtypes[0])
+        # handle unsigned case
+        if mask_and_scale and unsigned and dtype.kind == "i":
+            self._dtype = np.dtype("u%s" % dtype.itemsize)
+        elif mask_and_scale and unsigned:
+            warnings.warn(
+                "variable %r has _Unsigned attribute but is not "
+                "of integer type. Ignoring attribute." % name,
+                variables.SerializationWarning,
+                stacklevel=3,
+            )
+        if self._dtype is None:
+            self._dtype = np.dtype("float64") if self.masked else dtype
 
     @property
     def dtype(self):
@@ -135,6 +159,13 @@ class RasterioArrayWrapper(BackendArray):
                 out = riods.read(band_key, window=window, masked=self.masked)
                 if self.masked:
                     out = np.ma.filled(out.astype(self.dtype), np.nan)
+                if self.mask_and_scale:
+                    for band in band_key:
+                        band_iii = band - 1
+                        out[band_iii] = (
+                            out[band_iii] * riods.scales[band_iii]
+                            + riods.offsets[band_iii]
+                        )
 
         if squeeze_axis:
             out = np.squeeze(out, axis=squeeze_axis)
@@ -246,7 +277,7 @@ def _rio_transform(riods):
         return riods.affine  # rasterio < 1.0
 
 
-def _get_rasterio_attrs(riods, masked):
+def _get_rasterio_attrs(riods):
     """
     Get rasterio specific attributes/encoding
     """
@@ -261,16 +292,27 @@ def _get_rasterio_attrs(riods, masked):
     attrs["transform"] = tuple(_rio_transform(riods))[:6]
     if hasattr(riods, "nodata") and riods.nodata is not None:
         # The nodata values for the raster bands
-        if masked:
-            encoding["_FillValue"] = riods.nodata
-        else:
-            attrs["_FillValue"] = riods.nodata
+        attrs["_FillValue"] = riods.nodata
     if hasattr(riods, "scales"):
         # The scale values for the raster bands
-        attrs["scales"] = riods.scales
+        if len(set(riods.scales)) > 1:
+            attrs["scales"] = riods.scales
+            warnings.warn(
+                "Offsets differ across bands. The 'scale_factor' attribute will "
+                "not be added. See the 'scales' attribute."
+            )
+        else:
+            attrs["scale_factor"] = riods.scales[0]
     if hasattr(riods, "offsets"):
         # The offset values for the raster bands
-        attrs["offsets"] = riods.offsets
+        if len(set(riods.offsets)) > 1:
+            attrs["offsets"] = riods.offsets
+            warnings.warn(
+                "Offsets differ across bands. The 'add_offset' attribute will "
+                "not be added. See the 'offsets' attribute."
+            )
+        else:
+            attrs["add_offset"] = riods.offsets[0]
     if hasattr(riods, "descriptions") and any(riods.descriptions):
         if len(set(riods.descriptions)) == 1:
             attrs["long_name"] = riods.descriptions[0]
@@ -305,7 +347,15 @@ def _parse_driver_tags(riods, attrs, coords):
 
 
 def _load_subdatasets(
-    riods, group, variable, parse_coordinates, chunks, cache, lock, masked
+    riods,
+    group,
+    variable,
+    parse_coordinates,
+    chunks,
+    cache,
+    lock,
+    masked,
+    mask_and_scale,
 ):
     """
     Load in rasterio subdatasets
@@ -327,6 +377,7 @@ def _load_subdatasets(
             cache=cache,
             lock=lock,
             masked=masked,
+            mask_and_scale=mask_and_scale,
             default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
         )
         if shape not in dim_groups:
@@ -387,6 +438,7 @@ def open_rasterio(
     cache=None,
     lock=None,
     masked=False,
+    mask_and_scale=False,
     variable=None,
     group=None,
     default_name=None,
@@ -438,6 +490,10 @@ def open_rasterio(
         dask's multithreaded backend.
     masked: bool, optional
         If True, read the mask and to set values to NaN. Defaults to False.
+    mask_and_scale: bool, optional
+        Lazily scale (using scale_factor and add_offset) and mask
+        (using _FillValue). If the _Unsigned attribute is present
+        treat integer arrays as unsigned.
     variable: str or list or tuple, optional
         Variable name or names to use to filter loading.
     group: str or list or tuple, optional
@@ -453,6 +509,7 @@ def open_rasterio(
         The newly created DataArray.
     """
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
+    masked = masked or mask_and_scale
     vrt_params = None
     if isinstance(filename, rasterio.io.DatasetReader):
         filename = filename.name
@@ -492,6 +549,7 @@ def open_rasterio(
             cache=cache,
             lock=lock,
             masked=masked,
+            mask_and_scale=mask_and_scale,
         )
 
     if vrt_params is not None:
@@ -507,7 +565,7 @@ def open_rasterio(
     coords["band"] = np.asarray(riods.indexes)
 
     # parse tags
-    attrs, encoding = _get_rasterio_attrs(riods=riods, masked=masked)
+    attrs, encoding = _get_rasterio_attrs(riods=riods)
     _parse_driver_tags(riods=riods, attrs=attrs, coords=coords)
 
     # Get geospatial coordinates
@@ -526,8 +584,21 @@ def open_rasterio(
             stacklevel=3,
         )
 
+    unsigned = False
+    if mask_and_scale and "_Unsigned" in attrs:
+        unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
+
+    da_name = attrs.pop("NETCDF_VARNAME", default_name)
     data = indexing.LazilyOuterIndexedArray(
-        RasterioArrayWrapper(manager, lock, vrt_params, masked=masked)
+        RasterioArrayWrapper(
+            manager,
+            lock,
+            name=da_name,
+            vrt_params=vrt_params,
+            masked=masked,
+            mask_and_scale=mask_and_scale,
+            unsigned=unsigned,
+        )
     )
 
     # this lets you write arrays loaded with rasterio
@@ -535,12 +606,30 @@ def open_rasterio(
     if cache and chunks is None:
         data = indexing.MemoryCachedArray(data)
 
-    # create the output data array
-    da_name = attrs.pop("NETCDF_VARNAME", default_name)
     result = DataArray(
         data=data, dims=("band", "y", "x"), coords=coords, attrs=attrs, name=da_name
     )
     result.encoding = encoding
+
+    # make sure the _FillValue is correct dtype
+    if "_FillValue" in attrs:
+        attrs["_FillValue"] = result.dtype.type(attrs["_FillValue"])
+
+    # handle encoding
+    if mask_and_scale:
+        if "scale_factor" in result.attrs:
+            variables.pop_to(
+                result.attrs, result.encoding, "scale_factor", name=da_name
+            )
+        if "add_offset" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "add_offset", name=da_name)
+    if masked:
+        if "_FillValue" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "_FillValue", name=da_name)
+        if "missing_value" in result.attrs:
+            variables.pop_to(
+                result.attrs, result.encoding, "missing_value", name=da_name
+            )
 
     if hasattr(riods, "crs") and riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
