@@ -9,18 +9,17 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 import os
 import re
 import warnings
-from collections import OrderedDict
 from distutils.version import LooseVersion
 
 import numpy as np
 import rasterio
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
-from xarray import DataArray, Dataset
+from xarray import DataArray, Dataset, IndexVariable
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager
 from xarray.backends.locks import SerializableLock
-from xarray.coding import variables
+from xarray.coding import times, variables
 from xarray.core import indexing
 from xarray.core.utils import is_scalar
 
@@ -208,27 +207,96 @@ def _parse_envi(meta):
     return parsed_meta
 
 
-def _parse_tags(tags, dataset_tags=False):
-    def parsevec(s):
-        return np.fromstring(s.strip("{}"), dtype="float", sep=",")
+def _to_numeric(value):
+    """
+    Convert the value to a number
+    """
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            pass
+    return value
 
+
+def _parse_tag(key, value):
+    # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
+    key = key.split("NC_GLOBAL#")[-1]
+    if value.startswith("{") and value.endswith("}"):
+        new_val = np.fromstring(value.strip("{}"), dtype="float", sep=",")
+        value = new_val if len(new_val) else value
+    else:
+        value = _to_numeric(value)
+    return key, value
+
+
+def _parse_tags(tags):
     parsed_tags = {}
     for key, value in tags.items():
-        # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
-        key = key.split("NC_GLOBAL#")[-1] if dataset_tags else key
-        if value.startswith("{") and value.endswith("}"):
-            new_val = parsevec(value)
-            value = new_val if len(new_val) else value
-        else:
-            try:
-                value = int(value)
-            except (TypeError, ValueError):
-                try:
-                    value = float(value)
-                except (TypeError, ValueError):
-                    pass
+        key, value = _parse_tag(key, value)
         parsed_tags[key] = value
     return parsed_tags
+
+
+NETCDF_DTYPE_MAP = {
+    0: object,  # NC_NAT
+    1: np.byte,  # NC_BYTE
+    2: np.char,  # NC_CHAR
+    3: np.short,  # NC_SHORT
+    4: np.int_,  # NC_INT, NC_LONG
+    5: np.float,  # NC_FLOAT
+    6: np.double,  # NC_DOUBLE
+    7: np.ubyte,  # NC_UBYTE
+    8: np.ushort,  # NC_USHORT
+    9: np.uint,  # NC_UINT
+    10: np.int64,  # NC_INT64
+    11: np.uint64,  # NC_UINT64
+    12: object,  # NC_STRING
+}
+
+
+def _load_netcdf_attrs(tags, data_array):
+    """
+    Loads the netCDF attributes into the data array
+
+    Attributes stored in this format:
+    - variable_name#attr_name: attr_value
+    """
+    for key, value in tags.items():
+        key, value = _parse_tag(key, value)
+        key_split = key.split("#")
+        if len(key_split) != 2:
+            continue
+        variable_name, attr_name = key_split
+        if variable_name in data_array.coords:
+            data_array.coords[variable_name].attrs.update({attr_name: value})
+
+
+def _load_netcdf_1d_coords(tags):
+    """
+    Dimension information:
+        - NETCDF_DIM_EXTRA: '{time}' (comma separated list of dim names)
+        - NETCDF_DIM_time_DEF: '{2,6}' (dim size, dim dtype)
+        - NETCDF_DIM_time_VALUES: '{0,872712.659688}' (comma separated list of data)
+    """
+    dim_names = tags.get("NETCDF_DIM_EXTRA")
+    if not dim_names:
+        return {}
+    dim_names = dim_names.strip("{}").split(",")
+    coords = {}
+    for dim_name in dim_names:
+        dim_def = tags.get(f"NETCDF_DIM_{dim_name}_DEF")
+        if not dim_def:
+            continue
+        dim_size, dim_dtype = dim_def.strip("{}").split(",")
+        dim_dtype = NETCDF_DTYPE_MAP.get(int(dim_dtype), object)
+        dim_values = tags[f"NETCDF_DIM_{dim_name}_VALUES"].strip("{}")
+        coords[dim_name] = IndexVariable(
+            dim_name, np.fromstring(dim_values, dtype=dim_dtype, sep=","),
+        )
+    return coords
 
 
 def build_subdataset_filter(group_names, variable_names):
@@ -282,11 +350,10 @@ def _rio_transform(riods):
 
 def _get_rasterio_attrs(riods):
     """
-    Get rasterio specific attributes/encoding
+    Get rasterio specific attributes
     """
     # Add rasterio attributes
     attrs = _parse_tags(riods.tags(1))
-    encoding = dict()
     # Affine transformation matrix (always available)
     # This describes coefficients mapping pixel coordinates to CRS
     # For serialization store as tuple of 6 floats, the last row being
@@ -329,7 +396,49 @@ def _get_rasterio_attrs(riods):
         else:
             attrs["units"] = riods.units
 
-    return attrs, encoding
+    return attrs
+
+
+def _decode_datetime_cf(data_array):
+    """
+    Decide the datetime based on CF conventions
+    """
+    for coord in data_array.coords:
+        # stage 1: timedelta
+        if (
+            "units" in data_array[coord].attrs
+            and data_array[coord].attrs["units"] in times.TIME_UNITS
+        ):
+            units = times.pop_to(
+                data_array[coord].attrs, data_array[coord].encoding, "units"
+            )
+            new_values = times.decode_cf_timedelta(
+                data_array[coord].values, units=units
+            )
+            new_values = new_values.astype(np.dtype("timedelta64[ns]"))
+            data_array[coord].values = new_values
+        # stage 2: datetime
+        if (
+            "units" in data_array[coord].attrs
+            and "since" in data_array[coord].attrs["units"]
+        ):
+            units = times.pop_to(
+                data_array[coord].attrs, data_array[coord].encoding, "units"
+            )
+            calendar = times.pop_to(
+                data_array[coord].attrs, data_array[coord].encoding, "calendar"
+            )
+            dtype = times._decode_cf_datetime_dtype(
+                data_array[coord].values, units, calendar, True
+            )
+            new_values = times.decode_cf_datetime(
+                data_array[coord].values,
+                units=units,
+                calendar=calendar,
+                use_cftime=True,
+            )
+            new_values.astype(dtype)
+            data_array[coord].values = new_values
 
 
 def _parse_driver_tags(riods, attrs, coords):
@@ -363,7 +472,7 @@ def _load_subdatasets(
     """
     Load in rasterio subdatasets
     """
-    base_tags = _parse_tags(riods.tags(), dataset_tags=True)
+    base_tags = _parse_tags(riods.tags())
     dim_groups = {}
     subdataset_filter = None
     if any((group, variable)):
@@ -573,12 +682,19 @@ def open_rasterio(
     # Get bands
     if riods.count < 1:
         raise ValueError("Unknown dims")
-    coords = OrderedDict()
-    coords["band"] = np.asarray(riods.indexes)
 
-    # parse tags
-    attrs, encoding = _get_rasterio_attrs(riods=riods)
+    # parse tags & load alternate coords
+    attrs = _get_rasterio_attrs(riods=riods)
+    coords = _load_netcdf_1d_coords(riods.tags())
     _parse_driver_tags(riods=riods, attrs=attrs, coords=coords)
+    for coord in coords:
+        if f"NETCDF_DIM_{coord}" in attrs:
+            coord_name = coord
+            attrs.pop(f"NETCDF_DIM_{coord}")
+            break
+    else:
+        coord_name = "band"
+        coords[coord_name] = np.asarray(riods.indexes)
 
     # Get geospatial coordinates
     transform = _rio_transform(riods)
@@ -597,6 +713,7 @@ def open_rasterio(
         )
 
     unsigned = False
+    encoding = {}
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
@@ -619,9 +736,13 @@ def open_rasterio(
         data = indexing.MemoryCachedArray(data)
 
     result = DataArray(
-        data=data, dims=("band", "y", "x"), coords=coords, attrs=attrs, name=da_name
+        data=data, dims=(coord_name, "y", "x"), coords=coords, attrs=attrs, name=da_name
     )
     result.encoding = encoding
+
+    # update attributes from NetCDF attributess
+    _load_netcdf_attrs(riods.tags(), result)
+    _decode_datetime_cf(result)
 
     # make sure the _FillValue is correct dtype
     if "_FillValue" in attrs:

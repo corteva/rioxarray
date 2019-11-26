@@ -927,8 +927,17 @@ def test_notgeoreferenced_warning():
             rioxarray.open_rasterio(tmp_file)
 
 
-def test_ncglobal_attr_filter():
+def test_nc_attr_loading():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
     ) as rds:
+        assert rds.dims == {'y': 10, 'x': 10, 'time': 2}
         assert rds.attrs == {"coordinates": "spatial_ref"}
+        assert rds.y.attrs["units"] == "metre"
+        assert rds.x.attrs["units"] == "metre"
+        assert rds.time.encoding == {
+            "units": "seconds since 2016-12-19T10:27:29.687763",
+            "calendar": "proleptic_gregorian",
+        }
+        assert str(rds.time.values[0]) == '2016-12-19 10:27:29'
+        assert str(rds.time.values[1]) == '2016-12-29 12:52:41.659696'
