@@ -9,7 +9,7 @@ History
 - Add `mask_and_scale` option to `rioxarray.open_rasterio()` (issue #67)
 - Hide NotGeoreferencedWarning warning when subdatasets are present using open_rasterio (issue #65)
 - Add support for loading in 1D variables in `xarray.open_rasterio()` (issue #43)
-- Load in netCDF metadata on the variable level (pull #72)
+- Load in netCDF metadata on the variable level (pull #73)
 
 0.0.17
 ------
