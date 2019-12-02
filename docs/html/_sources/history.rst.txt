@@ -1,6 +1,16 @@
 History
 =======
 
+0.0.18
+------
+- Fixed windowed writing to require tiled output raster (pull #66)
+- Write data array attributes using `rio.to_raster` (issue #64)
+- Write variable name to descriptions if possible in `rio.to_raster` (issue #64)
+- Add `mask_and_scale` option to `rioxarray.open_rasterio()` (issue #67)
+- Hide NotGeoreferencedWarning warning when subdatasets are present using open_rasterio (issue #65)
+- Add support for loading in 1D variables in `xarray.open_rasterio()` (issue #43)
+- Load in netCDF metadata on the variable level (pull #73)
+
 0.0.17
 ------
 - Renamed `descriptions` to `long_name` when opening with `open_rasterio()` (pull #63)

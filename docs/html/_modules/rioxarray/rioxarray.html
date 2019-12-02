@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.17 documentation</title>
+  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.18 documentation</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -58,7 +59,7 @@
             
             
               <div class="version">
-                0.0.17
+                0.0.18
               </div>
             
           
@@ -167,7 +168,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
@@ -185,6 +186,7 @@
     <span class="n">MissingCRS</span><span class="p">,</span>
     <span class="n">NoDataInBounds</span><span class="p">,</span>
     <span class="n">OneDimensionalRaster</span><span class="p">,</span>
+    <span class="n">RioXarrayError</span><span class="p">,</span>
     <span class="n">TooManyDimensions</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -353,6 +355,31 @@
         <span class="n">src_crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">src_width</span><span class="p">,</span> <span class="n">src_height</span><span class="p">,</span> <span class="o">*</span><span class="n">src_bounds</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">dst_resolution</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span>
+
+
+<span class="k">def</span> <span class="nf">_write_metatata_to_raster</span><span class="p">(</span><span class="n">raster_handle</span><span class="p">,</span> <span class="n">xarray_dataset</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the metadata stored in the xarray object to raster metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># write metadata to raster</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tags</span>
+    <span class="n">raster_handle</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">tags</span><span class="p">)</span>
+
+    <span class="c1"># write band name information</span>
+    <span class="n">long_name</span> <span class="o">=</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">long_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">long_name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+                <span class="s2">&quot;Number of names in the &#39;long_name&#39; attribute does not equal &quot;</span>
+                <span class="s2">&quot;the number of bands.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">band_description</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">long_name</span><span class="p">):</span>
+            <span class="n">raster_handle</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="n">iii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">band_description</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">band_description</span> <span class="o">=</span> <span class="n">long_name</span> <span class="ow">or</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">band_description</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">iii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span><span class="p">):</span>
+                <span class="n">raster_handle</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="n">iii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">band_description</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -1275,6 +1302,8 @@
 <span class="sd">            A dictionary of tags to write to the raster.</span>
 <span class="sd">        windowed: bool, optional</span>
 <span class="sd">            If True, it will write using the windows of the output raster.</span>
+<span class="sd">            This only works if the output raster is tiled. As such, if you</span>
+<span class="sd">            set this to True, the output raster will be tiled.</span>
 <span class="sd">            Default is False.</span>
 <span class="sd">        **profile_kwargs</span>
 <span class="sd">            Additional keyword arguments to pass into writing the raster. The</span>
@@ -1312,7 +1341,9 @@
                 <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">}</span>
-
+        <span class="k">if</span> <span class="n">windowed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">out_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tiled&quot;</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Set tiled=True for windowed writing.&quot;</span><span class="p">)</span>
+            <span class="n">out_profile</span><span class="p">[</span><span class="s2">&quot;tiled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
             <span class="n">raster_path</span><span class="p">,</span>
             <span class="s2">&quot;w&quot;</span><span class="p">,</span>
@@ -1328,6 +1359,10 @@
             <span class="p">),</span>
             <span class="o">**</span><span class="n">out_profile</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
+
+            <span class="n">_write_metatata_to_raster</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+
+            <span class="c1"># write data to raster</span>
             <span class="k">if</span> <span class="n">windowed</span><span class="p">:</span>
                 <span class="n">window_iter</span> <span class="o">=</span> <span class="n">dst</span><span class="o">.</span><span class="n">block_windows</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1343,9 +1378,7 @@
                 <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">dst</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">tags</span><span class="p">)</span></div></div>
+                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="RasterDataset"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
@@ -1419,7 +1452,6 @@
                 <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="n">dst_affine_width_height</span><span class="p">,</span>
                 <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">resampled_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span></div>
 
 <div class="viewcode-block" id="RasterDataset.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
@@ -1452,7 +1484,6 @@
             <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span>
                 <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span>
             <span class="p">)</span>
-        <span class="n">resampled_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span></div>
 
 <div class="viewcode-block" id="RasterDataset.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
@@ -1492,7 +1523,6 @@
                 <span class="n">auto_expand</span><span class="o">=</span><span class="n">auto_expand</span><span class="p">,</span>
                 <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span></div>
 
 <div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1546,7 +1576,6 @@
             <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
                 <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span>
             <span class="p">)</span>
-        <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span></div>
 
 <div class="viewcode-block" id="RasterDataset.interpolate_na"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.interpolate_na">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
@@ -1566,7 +1595,6 @@
         <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
             <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
-        <span class="n">interpolated_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">interpolated_dataset</span></div></div>
 </pre></div>
 

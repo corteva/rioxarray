@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray package &mdash; rioxarray 0.0.17 documentation</title>
+  <title>rioxarray package &mdash; rioxarray 0.0.18 documentation</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                0.0.17
+                0.0.18
               </div>
             
           
@@ -173,13 +174,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -198,7 +199,7 @@
 <h2>rioxarray.open_rasterio<a class="headerlink" href="#rioxarray-open-rasterio" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="rioxarray.open_rasterio">
-<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em>, <em>variable=None</em>, <em>group=None</em>, <em>default_name=None</em>, <em>**open_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em>, <em>mask_and_scale=False</em>, <em>variable=None</em>, <em>group=None</em>, <em>default_name=None</em>, <em>**open_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a file with rasterio (experimental).</p>
 <p>This should work with any file that rasterio can open (most often:
 geoTIFF). The x and y coordinates are generated automatically from the
@@ -238,6 +239,9 @@ argument to use dask, in which case it defaults to False.</li>
 used to avoid issues with concurrent access to the same file when using
 dask’s multithreaded backend.</li>
 <li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and to set values to NaN. Defaults to False.</li>
+<li><strong>mask_and_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Lazily scale (using scale_factor and add_offset) and mask
+(using _FillValue). If the _Unsigned attribute is present
+treat integer arrays as unsigned.</li>
 <li><strong>variable</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Variable name or names to use to filter loading.</li>
 <li><strong>group</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Group name or names to use to filter loading.</li>
 <li><strong>default_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the data array if none exists. Default is None.</li>
@@ -563,6 +567,8 @@ Default is “GTiff”.</li>
 <li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
 <li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
 <li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
+This only works if the output raster is tiled. As such, if you
+set this to True, the output raster will be tiled.
 Default is False.</li>
 <li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
 nodata, transform, crs, count, width, and height attributes
