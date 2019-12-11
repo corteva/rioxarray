@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from numpy.testing import assert_almost_equal
 
 from rioxarray import open_rasterio
@@ -87,6 +88,7 @@ def test_merge_arrays__res():
     assert_almost_equal(merged.sum(), -688844800)
 
 
+@pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
 def test_merge_datasets():
     dem_test = os.path.join(
         TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
@@ -142,6 +144,7 @@ def test_merge_datasets():
     assert_almost_equal(merged[data_var].sum(), 4539265823591471)
 
 
+@pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
 def test_merge_datasets__res():
     dem_test = os.path.join(
         TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
