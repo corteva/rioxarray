@@ -11,6 +11,7 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
+import math
 import warnings
 
 import numpy as np
@@ -164,14 +165,12 @@ def _warp_spatial_coords(data_array, affine, width, height):
     }
 
 
-def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
-    """Generate the coordinates of the new projected `xarray.DataArray`"""
-    # step 1: collect old nonspatial coordinates
+def _get_nonspatial_coords(src_data_array):
     coords = {}
     for coord in set(src_data_array.coords) - {
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
-        "spatial_ref",
+        DEFAULT_GRID_MAP,
     }:
         if src_data_array[coord].dims:
             coords[coord] = xarray.IndexVariable(
@@ -185,6 +184,12 @@ def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
                 src_data_array[coord].values,
                 src_data_array[coord].attrs,
             )
+    return coords
+
+
+def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
+    """Generate the coordinates of the new projected `xarray.DataArray`"""
+    coords = _get_nonspatial_coords(src_data_array)
     new_coords = _warp_spatial_coords(src_data_array, dst_affine, dst_width, dst_height)
     new_coords.update(coords)
     return add_xy_grid_meta(new_coords)
@@ -498,6 +503,7 @@ class RasterArray(XRasterBase):
         super(RasterArray, self).__init__(xarray_obj)
         # properties
         self._nodata = None
+        self._count = None
 
     def set_nodata(self, input_nodata, inplace=True):
         """
@@ -653,6 +659,16 @@ class RasterArray(XRasterBase):
                 "to reorder your dimensions.".format((self.y_dim, self.x_dim))
             )
         return extra_dims[0] if extra_dims else None
+
+    @property
+    def count(self):
+        if self._count is not None:
+            return self._count
+        extra_dim = self._check_dimensions()
+        self._count = 1
+        if extra_dim is not None:
+            self._count = self._obj[extra_dim].size
+        return self._count
 
     def bounds(self, recalc=False):
         """Determine the bounds of the `xarray.DataArray`
@@ -1038,7 +1054,9 @@ class RasterArray(XRasterBase):
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
         """
-        row_slice, col_slice = window.toslices()
+        (row_start, row_stop), (col_start, col_stop) = window.toranges()
+        row_slice = slice(int(math.floor(row_start)), int(math.ceil(row_stop)))
+        col_slice = slice(int(math.floor(col_start)), int(math.ceil(col_stop)))
         return self._obj.isel({self.x_dim: row_slice, self.y_dim: col_slice})
 
     def _interpolate_na(self, src_data, method="nearest"):
@@ -1155,11 +1173,6 @@ class RasterArray(XRasterBase):
 
         """
         dtype = str(self._obj.dtype) if dtype is None else dtype
-        extra_dim = self._check_dimensions()
-        count = 1
-        if extra_dim is not None:
-            count = self._obj[extra_dim].size
-
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
         try:
@@ -1193,7 +1206,7 @@ class RasterArray(XRasterBase):
             driver=driver,
             height=int(self.height),
             width=int(self.width),
-            count=count,
+            count=int(self.count),
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
