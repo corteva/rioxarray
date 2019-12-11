@@ -176,16 +176,17 @@ def merge_datasets(
     Dataset: The geospatually merged data.
     """
 
-    input_kwargs = dict(
-        bounds=bounds, res=res, nodata=nodata, precision=precision, method=method,
-    )
     representative_ds = datasets[0]
     merged_data = {}
     for data_var in representative_ds.data_vars:
         merged_data[data_var] = merge_arrays(
             [dataset[data_var] for dataset in datasets],
+            bounds=bounds,
+            res=res,
+            nodata=nodata,
+            precision=precision,
+            method=method,
             parse_coordinates=False,
-            **input_kwargs,
         )
     data_var = list(representative_ds.data_vars)[0]
     xds = Dataset(
