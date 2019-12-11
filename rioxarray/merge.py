@@ -54,7 +54,7 @@ class RasterioDatasetDuck:
         if numpy.isnan(nodata):
             mask = numpy.isnan(data_window)
         elif nodata is not None:
-            mask = data_window != nodata
+            mask = data_window == nodata
             fill_value = nodata
 
         return numpy.ma.array(

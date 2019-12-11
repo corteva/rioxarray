@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from numpy import nansum
 from numpy.testing import assert_almost_equal
 
 from rioxarray import open_rasterio
@@ -50,12 +51,12 @@ def test_merge_arrays():
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
-    assert_almost_equal(merged.sum(), -1158377472)
+    assert_almost_equal(merged.sum(), 11368261)
 
 
 def test_merge_arrays__res():
     dem_test = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
-    with open_rasterio(dem_test) as rds:
+    with open_rasterio(dem_test, masked=True) as rds:
         rds.attrs = {
             "_FillValue": rds.rio.nodata,
             "grid_mapping": "spatial_ref",
@@ -85,7 +86,7 @@ def test_merge_arrays__res():
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
-    assert_almost_equal(merged.sum(), -688844800)
+    assert_almost_equal(nansum(merged), 13767944)
 
 
 @pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
@@ -187,4 +188,4 @@ def test_merge_datasets__res():
     base_attrs = dict(rds.attrs)
     base_attrs["grid_mapping"] = "spatial_ref"
     assert merged.attrs == base_attrs
-    assert_almost_equal(merged[data_var].sum(), 973667940761024)
+    assert_almost_equal(merged[data_var].sum(), 974565970607345)
