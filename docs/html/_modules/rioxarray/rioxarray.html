@@ -168,6 +168,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -321,14 +322,12 @@
     <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_make_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Generate the coordinates of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
-    <span class="c1"># step 1: collect old nonspatial coordinates</span>
+<span class="k">def</span> <span class="nf">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">):</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span>
         <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span>
         <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span>
-        <span class="s2">&quot;spatial_ref&quot;</span><span class="p">,</span>
+        <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
     <span class="p">}:</span>
         <span class="k">if</span> <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
             <span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span>
@@ -342,6 +341,12 @@
                 <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                 <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
             <span class="p">)</span>
+    <span class="k">return</span> <span class="n">coords</span>
+
+
+<span class="k">def</span> <span class="nf">_make_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate the coordinates of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
     <span class="n">new_coords</span> <span class="o">=</span> <span class="n">_warp_spatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">)</span>
     <span class="n">new_coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">add_xy_grid_meta</span><span class="p">(</span><span class="n">new_coords</span><span class="p">)</span>
@@ -655,6 +660,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">RasterArray</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span>
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="RasterArray.set_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.set_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -810,6 +816,16 @@
                 <span class="s2">&quot;to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">extra_dims</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+        <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">extra_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
 
 <div class="viewcode-block" id="RasterArray.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the bounds of the `xarray.DataArray`</span>
@@ -1195,7 +1211,9 @@
 <span class="sd">        -------</span>
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">row_slice</span><span class="p">,</span> <span class="n">col_slice</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toslices</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">row_stop</span><span class="p">),</span> <span class="p">(</span><span class="n">col_start</span><span class="p">,</span> <span class="n">col_stop</span><span class="p">)</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toranges</span><span class="p">()</span>
+        <span class="n">row_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)))</span>
+        <span class="n">col_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">})</span></div>
 
     <span class="k">def</span> <span class="nf">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
@@ -1312,11 +1330,6 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dtype</span>
-        <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
-        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">extra_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-
         <span class="c1"># get the output profile from the rasterio object</span>
         <span class="c1"># if opened with xarray.open_rasterio()</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1350,7 +1363,7 @@
             <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
             <span class="n">height</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
-            <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+            <span class="n">count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">),</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">),</span>

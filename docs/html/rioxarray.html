@@ -93,6 +93,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">rioxarray</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rioxarray package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-open-rasterio">rioxarray.open_rasterio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray-merge-module">rioxarray.merge module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.rioxarray">rioxarray.rioxarray module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.crs">rioxarray.crs module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a></li>
@@ -260,6 +261,86 @@ treat integer arrays as unsigned.</li>
 </dd></dl>
 
 </div>
+<div class="section" id="rioxarray-merge-module">
+<h2>rioxarray.merge module<a class="headerlink" href="#rioxarray-merge-module" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rioxarray.merge.merge_arrays">
+<code class="descclassname">rioxarray.merge.</code><code class="descname">merge_arrays</code><span class="sig-paren">(</span><em>dataarrays: Iterable[xarray.core.dataarray.DataArray], bounds: Optional[Tuple] = None, res: Optional[Tuple] = None, nodata: Optional[float] = None, precision: Optional[float] = None, method: Union[str, Callable, None] = None, parse_coordinates: bool = True</em><span class="sig-paren">)</span> &#x2192; xarray.core.dataarray.DataArray<a class="reference internal" href="_modules/rioxarray/merge.html#merge_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge data arrays geospatially.</p>
+<dl class="docutils">
+<dt>Uses rasterio.merge.merge:</dt>
+<dd><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge">https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</a></dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataarrays</strong> (<em>list</em>) – List of xarray.DataArray’s with all geo attributes.
+The first one is assumed to have the same
+CRS, dtype, and dimensions as the others in the array.</li>
+<li><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
+If not set, bounds are determined from bounds of input DataArrays.</li>
+<li><strong>res</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Output resolution in units of coordinate reference system.
+If not set, the resolution of the first DataArray is used.
+If a single value is passed, output pixels will be square.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – nodata value to use in output file.
+If not set, uses the nodata value in the first input DataArray.</li>
+<li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
+<li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
+<li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, it will disable loading spatial coordinates.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">The geospatially merged data.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rioxarray.merge.merge_datasets">
+<code class="descclassname">rioxarray.merge.</code><code class="descname">merge_datasets</code><span class="sig-paren">(</span><em>datasets: Iterable[xarray.core.dataset.Dataset], bounds: Optional[Tuple] = None, res: Optional[Tuple] = None, nodata: Optional[float] = None, precision: Optional[float] = None, method: Union[str, Callable, None] = None</em><span class="sig-paren">)</span> &#x2192; xarray.core.dataarray.DataArray<a class="reference internal" href="_modules/rioxarray/merge.html#merge_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge datasets geospatially.</p>
+<dl class="docutils">
+<dt>Uses rasterio.merge.merge:</dt>
+<dd><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge">https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</a></dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>datasets</strong> (<em>list</em>) – List of xarray.Dataset’s with all geo attributes.
+The first one is assumed to have the same
+CRS, dtype, dimensions, and data_vars as the others in the array.</li>
+<li><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
+If not set, bounds are determined from bounds of input Dataset.</li>
+<li><strong>res</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Output resolution in units of coordinate reference system.
+If not set, the resolution of the first Dataset is used.
+If a single value is passed, output pixels will be square.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – nodata value to use in output file.
+If not set, uses the nodata value in the first input Dataset.</li>
+<li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
+<li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Dataset</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">The geospatially merged data.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-rioxarray.rioxarray">
 <span id="rioxarray-rioxarray-module"></span><h2>rioxarray.rioxarray module<a class="headerlink" href="#module-rioxarray.rioxarray" title="Permalink to this headline">¶</a></h2>
 <p>This module is an extension for xarray to provide rasterio capabilities
@@ -368,6 +449,11 @@ an exception.</li>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.RasterArray.count">
+<code class="descname">count</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.RasterArray.encoded_nodata">

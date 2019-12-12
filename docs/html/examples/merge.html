@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Coordinate Reference System Management &mdash; rioxarray 0.0.18 documentation</title>
+  <title>Example - Merge &mdash; rioxarray 0.0.18 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Clip" href="clip_geom.html" />
-    <link rel="prev" title="Usage Examples" href="examples.html" /> 
+    <link rel="next" title="Example - Interpolate Missing Data" href="interpolate_na.html" />
+    <link rel="prev" title="Example - Reproject Match" href="reproject_match.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,20 +90,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Coordinate Reference System Management</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Accessing-the-CRS-object">Accessing the CRS object</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):">Search order for the CRS (DataArray and Dataset):</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-for-Dataset:">Search order for the CRS for Dataset:</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#Setting-the-CRS-of-the-Dataset">Setting the CRS of the Dataset</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
-<li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Merge</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-dataset">Load in xarray dataset</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
@@ -162,13 +157,13 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Coordinate Reference System Management</li>
+      <li>Example - Merge</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/examples/crs_management.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/merge.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -403,38 +398,38 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Coordinate-Reference-System-Management">
-<h1>Coordinate Reference System Management<a class="headerlink" href="#Coordinate-Reference-System-Management" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Accessing-the-CRS-object">
-<h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Permalink to this headline">¶</a></h2>
-<p>If you have opened up a dataset and the Coordinate Reference System (CRS) is able to be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.crs</span></code> accessor.</p>
-<div class="section" id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
-<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic simple">
-<li>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> and second for <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code>. This is in line with the Climate and Forecast (CF) conventions for storing the CRS.</li>
-<li>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there.</li>
-</ol>
-<p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
-</div>
-<div class="section" id="Search-order-for-the-CRS-for-Dataset:">
-<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline">¶</a></h3>
-<p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
+<div class="section" id="Example---Merge">
+<h1>Example - Merge<a class="headerlink" href="#Example---Merge" title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
+<span></span><span class="kn">import</span> <span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">from</span> <span class="nn">rioxarray.merge</span> <span class="k">import</span> <span class="n">merge_arrays</span>
+<span class="c1"># Note: You can merge datasets with the merge_datasets method</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
+<div class="section" id="Load-in-xarray-dataset">
+<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">)</span>
+<span></span><span class="n">dem_test</span> <span class="o">=</span> <span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;</span>
+<span class="k">with</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">dem_test</span><span class="p">)</span> <span class="k">as</span> <span class="n">rds</span><span class="p">:</span>
+    <span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">)),</span>
+        <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)),</span>
+        <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)),</span>
+        <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">)),</span>
+    <span class="p">]</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">merge_arrays</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -443,215 +438,41 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span>
+<span></span><span class="n">rds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rds</span><span class="o">!=</span><span class="n">rds</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.Dataset&gt;
-Dimensions:      (time: 2, x: 10, y: 10)
-Coordinates:
-    spatial_ref  int64 ...
-  * x            (x) float64 4.663e+05 4.663e+05 ... 4.663e+05 4.663e+05
-  * time         (time) datetime64[ns] 2016-12-19T10:27:29.687763 2016-12-29T12:52:42.347451
-  * y            (y) float64 8.085e+06 8.085e+06 ... 8.085e+06 8.085e+06
-Data variables:
-    blue         (time, y, x) float64 ...
-    green        (time, y, x) float64 ...
-</pre></div></div>
+<img alt="../_images/examples_merge_4_0.png" src="../_images/examples_merge_4_0.png" />
+</div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">attrs</span>
+<span></span><span class="n">merged</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">merged</span><span class="o">!=</span><span class="n">merged</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-OrderedDict([(&#39;units&#39;, &#39;DN&#39;),
-             (&#39;nodata&#39;, 0.0),
-             (&#39;grid_mapping&#39;, &#39;spatial_ref&#39;)])
+&lt;matplotlib.collections.QuadMesh at 0x7fb8d27c0908&gt;
 </pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">spatial_ref</span>
-</pre></div>
-</div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray &#39;spatial_ref&#39; ()&gt;
-array(0)
-Coordinates:
-    spatial_ref  int64 0
-Attributes:
-    spatial_ref:  PROJCS[&#34;WGS 84 / UTM zone 22S&#34;,GEOGCS[&#34;WGS 84&#34;,DATUM[&#34;WGS_1...
-</pre></div></div>
+<img alt="../_images/examples_merge_5_1.png" src="../_images/examples_merge_5_1.png" />
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CRS.from_epsg(32722)
-</pre></div></div>
-</div>
-</div>
-</div>
-<div class="section" id="Setting-the-CRS-of-the-Dataset">
-<h2>Setting the CRS of the Dataset<a class="headerlink" href="#Setting-the-CRS-of-the-Dataset" title="Permalink to this headline">¶</a></h2>
-<p>Currently, you can use the <code class="docutils literal notranslate"><span class="pre">rio.set_crs</span></code> and <code class="docutils literal notranslate"><span class="pre">rio.write_crs</span></code> methods to set the CRS on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>.</p>
-<p>This sets the CRS on the <code class="docutils literal notranslate"><span class="pre">rio</span></code> accessor without modifying the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">xds</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray ()&gt;
-array(1)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
-<span class="n">xds</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray ()&gt;
-array(1)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CRS.from_epsg(4326)
-</pre></div></div>
-</div>
-<p>This modifies the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> and sets the CRS in a CF compliant manner.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xda</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">xda</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray ()&gt;
-array(1)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xda</span> <span class="o">=</span> <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
-<span class="n">xda</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray ()&gt;
-array(1)
-Coordinates:
-    spatial_ref  int64 0
-Attributes:
-    grid_mapping:  spatial_ref
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CRS.from_epsg(4326)
-</pre></div></div>
 </div>
 </div>
 </div>
@@ -664,10 +485,10 @@ CRS.from_epsg(4326)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="clip_geom.html" class="btn btn-neutral float-right" title="Example - Clip" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="interpolate_na.html" class="btn btn-neutral float-right" title="Example - Interpolate Missing Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="examples.html" class="btn btn-neutral float-left" title="Usage Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="reproject_match.html" class="btn btn-neutral float-left" title="Example - Reproject Match" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
