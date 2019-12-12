@@ -72,6 +72,8 @@ def merge_arrays(
     parse_coordinates: bool = True,
 ) -> DataArray:
     """
+    Merge data arrays geospatially.
+
     Uses rasterio.merge.merge:
         https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
 
@@ -100,7 +102,7 @@ def merge_arrays(
 
     Returns
     -------
-    DataArray: The geospatually merged data.
+    DataArray: The geospatially merged data.
     """
 
     input_kwargs = dict(
@@ -147,6 +149,8 @@ def merge_datasets(
     method: Union[str, Callable, None] = None,
 ) -> DataArray:
     """
+    Merge datasets geospatially.
+
     Uses rasterio.merge.merge:
         https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
 
@@ -173,7 +177,7 @@ def merge_datasets(
 
     Returns
     -------
-    Dataset: The geospatually merged data.
+    Dataset: The geospatially merged data.
     """
 
     representative_ds = datasets[0]
