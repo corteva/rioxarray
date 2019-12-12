@@ -14,6 +14,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    clip_box.ipynb
    reproject.ipynb
    reproject_match.ipynb
+   merge.ipynb
    interpolate_na.ipynb
    transform_bounds.ipynb
    convert_to_raster.ipynb
