@@ -374,7 +374,7 @@ def create_tmp_geotiff(
             crs=crs,
             transform=transform,
             dtype=rasterio.float32,
-            **open_kwargs
+            **open_kwargs,
         ) as s:
             for attr, val in additional_attrs.items():
                 setattr(s, attr, val)

@@ -55,9 +55,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"rioxarray"
-copyright = u"2019, rioxarray Contributors"
-author = u"rioxarray Contributors"
+project = "rioxarray"
+copyright = "2019, rioxarray Contributors"
+author = "rioxarray Contributors"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -136,8 +136,8 @@ latex_documents = [
     (
         master_doc,
         "rioxarray.tex",
-        u"rioxarray Documentation",
-        u"rioxarray Contributors",
+        "rioxarray Documentation",
+        "rioxarray Contributors",
         "manual",
     )
 ]
@@ -147,7 +147,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "rioxarray", u"rioxarray Documentation", [author], 1)]
+man_pages = [(master_doc, "rioxarray", "rioxarray Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -159,7 +159,7 @@ texinfo_documents = [
     (
         master_doc,
         "rioxarray",
-        u"rioxarray Documentation",
+        "rioxarray Documentation",
         author,
         "rioxarray",
         "One line description of project.",
