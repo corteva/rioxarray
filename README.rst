@@ -4,8 +4,6 @@ rioxarray README
 
 rasterio xarray extension.
 
-Documentation: https://corteva.github.io/rioxarray.
-
 
 .. image:: https://badges.gitter.im/rioxarray/community.svg
    :alt: Join the chat at https://gitter.im/rioxarray/community
@@ -32,6 +30,13 @@ Documentation: https://corteva.github.io/rioxarray.
 
 .. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
     :target: https://coveralls.io/github/corteva/rioxarray?branch=master
+
+
+Documentation
+-------------
+
+- Stable: https://corteva.github.io/rioxarray/stable/
+- Latest: https://corteva.github.io/rioxarray/latest/
 
 
 Credits
