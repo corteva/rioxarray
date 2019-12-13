@@ -70,12 +70,14 @@ test: ## run tests quickly with the default Python
 	py.test
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	# rm -f sphinx/rioxarray*.rst
-	# rm -f sphinx/modules.rst
-	# sphinx-apidoc -o sphinx/ rioxarray
-	$(MAKE) -C sphinx clean
-	$(MAKE) -C sphinx html
-	$(BROWSER) docs/html/index.html
+	# rm -f docs/rioxarray*.rst
+	# rm -f docs/modules.rst
+	# sphinx-apidoc -o docs/ rioxarray
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+
+docs-browser: ## generate Sphinx HTML documentation, including API docs
+	$(BROWSER) docs/_build/html/index.html
 
 release: dist ## package and upload a release
 	twine upload dist/*
