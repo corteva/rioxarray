@@ -294,7 +294,7 @@ def _load_netcdf_1d_coords(tags):
         dim_dtype = NETCDF_DTYPE_MAP.get(int(dim_dtype), object)
         dim_values = tags[f"NETCDF_DIM_{dim_name}_VALUES"].strip("{}")
         coords[dim_name] = IndexVariable(
-            dim_name, np.fromstring(dim_values, dtype=dim_dtype, sep=","),
+            dim_name, np.fromstring(dim_values, dtype=dim_dtype, sep=",")
         )
     return coords
 

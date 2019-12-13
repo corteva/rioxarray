@@ -447,11 +447,11 @@ class XRasterBase(object):
             if in_x_dim in obj.dims:
                 obj.rio._x_dim = x_dim
             else:
-                raise DimensionError("x dimension not found: {}".format(x_dim))
+                raise DimensionError(f"x dimension not found: {x_dim}")
             if y_dim in obj.dims:
                 obj.rio._y_dim = y_dim
             else:
-                raise DimensionError("y dimension not found: {}".format(y_dim))
+                raise DimensionError(f"y dimension not found: {y_dim}")
 
         data_obj = self._get_obj(inplace=inplace)
         set_dims(data_obj, x_dim, y_dim)

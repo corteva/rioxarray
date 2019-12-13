@@ -58,7 +58,7 @@ class RasterioDatasetDuck:
             fill_value = nodata
 
         return numpy.ma.array(
-            data_window, mask=mask, fill_value=fill_value, dtype=self._xds.dtype,
+            data_window, mask=mask, fill_value=fill_value, dtype=self._xds.dtype
         )
 
 
@@ -106,7 +106,7 @@ def merge_arrays(
     """
 
     input_kwargs = dict(
-        bounds=bounds, res=res, nodata=nodata, precision=precision, method=method,
+        bounds=bounds, res=res, nodata=nodata, precision=precision, method=method
     )
     merged_data, merged_transform = _rio_merge(
         [RasterioDatasetDuck(dataarray) for dataarray in dataarrays],
