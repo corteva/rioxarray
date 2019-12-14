@@ -8,7 +8,7 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=python -msphinx
 )
 set SOURCEDIR=.
-set BUILDDIR=..\docs
+set BUILDDIR=_build
 set SPHINXPROJ=rioxarray
 
 if "%1" == "" goto help
