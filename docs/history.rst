@@ -1,6 +1,11 @@
 History
 =======
 
+0.0.19
+-------
+- Add support for writing scales & offsets to raster (pull #79)
+- Don't write standard raster metadata to raster tags (issue #78)
+
 0.0.18
 ------
 - Fixed windowed writing to require tiled output raster (pull #66)
