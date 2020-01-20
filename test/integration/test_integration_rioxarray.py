@@ -741,7 +741,20 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
             tags=test_tags,
         )
         xds = mda.copy().squeeze()
-        xds_attrs = {key: str(value) for key, value in mda.attrs.items()}
+        xds_attrs = {
+            key: str(value)
+            for key, value in mda.attrs.items()
+            if key
+            not in (
+                "add_offset",
+                "crs",
+                "is_tiled",
+                "nodata",
+                "res",
+                "scale_factor",
+                "transform",
+            )
+        }
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.count == 1
@@ -768,7 +781,11 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         xds.rio.to_raster(str(tmp_raster), windowed=windowed)
-        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
+        xds_attrs = {
+            key: str(value)
+            for key, value in xds.attrs.items()
+            if key not in ("add_offset", "nodata", "scale_factor", "transform")
+        }
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs
@@ -781,6 +798,7 @@ def test_to_raster_3d(open_method, windowed, tmpdir):
     # test roundtrip
     with rioxarray.open_rasterio(str(tmp_raster)) as rds:
         assert rds.attrs["long_name"] == "green"
+        assert numpy.isnan(rds.rio.nodata)
 
 
 def test_to_raster__custom_description(tmpdir):
@@ -791,7 +809,9 @@ def test_to_raster__custom_description(tmpdir):
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.attrs["long_name"] = ("one", "two")
         xds.rio.to_raster(str(tmp_raster))
-        xds_attrs = {key: str(value) for key, value in xds.attrs.items()}
+        xds_attrs = {
+            key: str(value) for key, value in xds.attrs.items() if key != "nodata"
+        }
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.tags() == {"AREA_OR_POINT": "Area", **xds_attrs}
@@ -800,6 +820,55 @@ def test_to_raster__custom_description(tmpdir):
     # test roundtrip
     with rioxarray.open_rasterio(str(tmp_raster)) as rds:
         assert rds.attrs["long_name"] == ("one", "two")
+        assert rds.rio.nodata == 0.0
+
+
+def test_to_raster__scale_factor_and_add_offset(tmpdir):
+    tmp_raster = tmpdir.join("air_temp_offset.tif")
+
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    ) as rds:
+        assert rds.air_temperature.scale_factor == 0.1
+        assert rds.air_temperature.add_offset == 220.0
+        rds.air_temperature.rio.to_raster(str(tmp_raster))
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.scales == (0.1,)
+        assert rds.offsets == (220.0,)
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.scale_factor == 0.1
+        assert rds.add_offset == 220.0
+        assert rds.rio.nodata == 32767.0
+
+
+def test_to_raster__offsets_and_scales(tmpdir):
+    tmp_raster = tmpdir.join("air_temp_offset.tif")
+
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    ) as rds:
+        attrs = dict(rds.air_temperature.attrs)
+        attrs["scales"] = [0.1]
+        attrs["offsets"] = [220.0]
+        attrs.pop("scale_factor")
+        attrs.pop("add_offset")
+        rds.air_temperature.attrs = attrs
+        assert rds.air_temperature.scales == [0.1]
+        assert rds.air_temperature.offsets == [220.0]
+        rds.air_temperature.rio.to_raster(str(tmp_raster))
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.scales == (0.1,)
+        assert rds.offsets == (220.0,)
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster)) as rds:
+        assert rds.scale_factor == 0.1
+        assert rds.add_offset == 220.0
+        assert rds.rio.nodata == 32767.0
 
 
 def test_to_raster__custom_description__wrong(tmpdir):

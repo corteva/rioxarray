@@ -209,9 +209,32 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     """
     Write the metadata stored in the xarray object to raster metadata
     """
-    # write metadata to raster
-    tags = {} if tags is None else tags
-    raster_handle.update_tags(**xarray_dataset.attrs, **tags)
+    tags = xarray_dataset.attrs if tags is None else {**xarray_dataset.attrs, **tags}
+
+    # write scales and offsets
+    try:
+        raster_handle.scales = tags["scales"]
+    except KeyError:
+        try:
+            raster_handle.scales = (tags["scale_factor"],) * raster_handle.count
+        except KeyError:
+            pass
+    try:
+        raster_handle.offsets = tags["offsets"]
+    except KeyError:
+        try:
+            raster_handle.offsets = (tags["add_offset"],) * raster_handle.count
+        except KeyError:
+            pass
+
+    # filter out attributes that should be written in a different location
+    skip_tags = (
+        UNWANTED_RIO_ATTRS
+        + FILL_VALUE_NAMES
+        + ("transform", "scales", "scale_factor", "add_offset", "offsets")
+    )
+    tags = {key: value for key, value in tags.items() if key not in skip_tags}
+    raster_handle.update_tags(**tags)
 
     # write band name information
     long_name = xarray_dataset.attrs.get("long_name")
