@@ -366,9 +366,32 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write the metadata stored in the xarray object to raster metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># write metadata to raster</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tags</span>
-    <span class="n">raster_handle</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">tags</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span> <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="o">**</span><span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">tags</span><span class="p">}</span>
+
+    <span class="c1"># write scales and offsets</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">raster_handle</span><span class="o">.</span><span class="n">scales</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raster_handle</span><span class="o">.</span><span class="n">scales</span> <span class="o">=</span> <span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">],)</span> <span class="o">*</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">raster_handle</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raster_handle</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;add_offset&quot;</span><span class="p">],)</span> <span class="o">*</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># filter out attributes that should be written in a different location</span>
+    <span class="n">skip_tags</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">UNWANTED_RIO_ATTRS</span>
+        <span class="o">+</span> <span class="n">FILL_VALUE_NAMES</span>
+        <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">,</span> <span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip_tags</span><span class="p">}</span>
+    <span class="n">raster_handle</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">tags</span><span class="p">)</span>
 
     <span class="c1"># write band name information</span>
     <span class="n">long_name</span> <span class="o">=</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">)</span>
