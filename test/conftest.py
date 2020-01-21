@@ -15,14 +15,18 @@ def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
         """check attrubutes that matter"""
         for attr in compare_xr.attrs:
             if attr == "transform":
-                assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr][:6])
+                assert_almost_equal(
+                    input_xr.attrs[attr], compare_xr.attrs[attr][:6], decimal=precision
+                )
             elif (
                 attr != "_FillValue"
                 and attr not in UNWANTED_RIO_ATTRS
                 and attr != "creation_date"
             ):
                 try:
-                    assert_almost_equal(input_xr.attrs[attr], compare_xr.attrs[attr])
+                    assert_almost_equal(
+                        input_xr.attrs[attr], compare_xr.attrs[attr], decimal=precision
+                    )
                 except (TypeError, ValueError):
                     assert input_xr.attrs[attr] == compare_xr.attrs[attr]
 
@@ -32,7 +36,9 @@ def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
         for coord in input_xarray.coords:
             if coord in "xy":
                 assert_almost_equal(
-                    input_xarray[coord].values, compare_xarray[coord].values
+                    input_xarray[coord].values,
+                    compare_xarray[coord].values,
+                    decimal=precision,
                 )
             else:
                 assert (
