@@ -684,7 +684,7 @@ def test_geographic_reproject():
         mds_repr = mda.rio.reproject("+init=epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
-        _assert_xarrays_equal(mds_repr, mdc)
+        _assert_xarrays_equal(mds_repr, mdc, precision=4)
 
 
 def test_geographic_reproject__missing_nodata():
@@ -702,7 +702,7 @@ def test_geographic_reproject__missing_nodata():
         mds_repr = mda.rio.reproject("+init=epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
-        _assert_xarrays_equal(mds_repr, mdc)
+        _assert_xarrays_equal(mds_repr, mdc, precision=4)
 
 
 def test_geographic_resample_integer():

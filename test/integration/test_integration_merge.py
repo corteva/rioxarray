@@ -1,8 +1,10 @@
 import os
+from distutils.version import LooseVersion
 
 import pytest
 from numpy import nansum
 from numpy.testing import assert_almost_equal
+from rasterio import gdal_version
 
 from rioxarray import open_rasterio
 from rioxarray.merge import merge_arrays, merge_datasets
@@ -86,7 +88,10 @@ def test_merge_arrays__res():
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
-    assert_almost_equal(nansum(merged), 13767944)
+    if LooseVersion(gdal_version()) >= LooseVersion("2.4.4"):
+        assert_almost_equal(nansum(merged), 13754521.430030823)
+    else:
+        assert_almost_equal(nansum(merged), 13767944)
 
 
 @pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
@@ -188,4 +193,7 @@ def test_merge_datasets__res():
     base_attrs = dict(rds.attrs)
     base_attrs["grid_mapping"] = "spatial_ref"
     assert merged.attrs == base_attrs
-    assert_almost_equal(merged[data_var].sum(), 974565970607345)
+    if LooseVersion(gdal_version()) >= LooseVersion("2.4.4"):
+        assert_almost_equal(merged[data_var].sum(), 974565505482489)
+    else:
+        assert_almost_equal(merged[data_var].sum(), 974565970607345)
