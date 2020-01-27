@@ -11,18 +11,7 @@
    "cell_type": "code",
    "execution_count": 1,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/dask/config.py:168: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.\n",
-      "  data = yaml.load(f.read()) or {}\n",
-      "/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/distributed/config.py:20: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.\n",
-      "  defaults = yaml.load(f)\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "import rioxarray # for the extension to load\n",
     "import xarray\n",
@@ -118,7 +107,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Fill misssing with interpolate_na"
+    "## Fill misssing with interpolate_na\n",
+    "\n",
+    "API Reference:\n",
+    "\n",
+    "- DataArray: [rio.interpolate_na()](../rioxarray.rst#rioxarray.rioxarray.RasterArray.interpolate_na)\n",
+    "- Dataset: [rio.interpolate_na()](../rioxarray.rst#rioxarray.rioxarray.RasterDataset.interpolate_na)"
    ]
   },
   {
@@ -218,5 +212,5 @@
   }
  },
  "nbformat": 4,
- "nbformat_minor": 2
+ "nbformat_minor": 4
 }

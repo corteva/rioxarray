@@ -105,6 +105,10 @@
 <li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357"> Extracting data within geometry (shape)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357"> Converting NetCDF dataset array to GeoTiff</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357"> How do I add projection to this NetCDF file? (Satellite)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/346899/144357"> Create a new raster TIFF file which is masked based on the GeoJSON file</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
@@ -401,7 +405,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Example---Clip-Box">
 <h1>Example - Clip Box<a class="headerlink" href="#Example---Clip-Box" title="Permalink to this headline">¶</a></h1>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -413,17 +417,6 @@ import xarray
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/dask/config.py:168: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  data = yaml.load(f.read()) or {}
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/distributed/config.py:20: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  defaults = yaml.load(f)
-</pre></div></div>
-</div>
 <div class="section" id="Load-in-xarray-dataset">
 <h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
@@ -431,7 +424,7 @@ import xarray
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;MODIS_ARRAY.nc&quot;)
+<span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
 </pre></div>
 </div>
 </div>
@@ -448,9 +441,8 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (y: 200, x: 200)&gt;
+<div class="output_area rendered_html docutils container">
+<pre>&lt;xarray.DataArray (y: 200, x: 200)&gt;
 array([[ nan,  nan,  nan, ..., 656., 656., 554.],
        [ nan,  nan,  nan, ..., 694., 694., 642.],
        [ nan,  nan,  nan, ..., 456., 575., 642.],
@@ -466,8 +458,7 @@ Attributes:
     res:        [231.65635826 231.65635826]
     is_tiled:   0
     nodata:     -28672.0
-    transform:  [ 2.31656358e+02  0.00000000e+00 -7.27400965e+06  0.00000000e...
-</pre></div></div>
+    transform:  [ 2.31656358e+02  0.00000000e+00 -7.27400965e+06  0.00000000e...</pre></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -484,7 +475,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6a17ea1358&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f43a8868b70&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -497,6 +488,11 @@ Attributes:
 </div>
 <div class="section" id="Clip-using-a-bounding-box">
 <h2>Clip using a bounding box<a class="headerlink" href="#Clip-using-a-bounding-box" title="Permalink to this headline">¶</a></h2>
+<p>See docs for <code class="docutils literal notranslate"><span class="pre">rio.clip_box</span></code>:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.clip_box"><span class="std std-ref">DataArray.clip_box</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip_box"><span class="std std-ref">Dataset.clip_box</span></a></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -524,9 +520,8 @@ Attributes:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (y: 3, x: 3)&gt;
+<div class="output_area rendered_html docutils container">
+<pre>&lt;xarray.DataArray (y: 3, x: 3)&gt;
 array([[245., 331., 331.],
        [221., 500., 500.],
        [490., 490., 670.]], dtype=float32)
@@ -536,8 +531,7 @@ Coordinates:
     spatial_ref  int64 0
 Attributes:
     transform:     (231.656358263921, 0.0, -7273083.024053236, 0.0, -231.6563...
-    grid_mapping:  spatial_ref
-</pre></div></div>
+    grid_mapping:  spatial_ref</pre></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -554,7 +548,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6a17e1e278&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f43a688d1d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

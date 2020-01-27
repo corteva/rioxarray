@@ -15,7 +15,6 @@ latest/_images/examples_reproject_match_5_1.png
 latest/_images/examples_reproject_match_7_1.png
 latest/_modules/index.html
 latest/_modules/rioxarray/_io.html
-latest/_modules/rioxarray/crs.html
 latest/_modules/rioxarray/exceptions.html
 latest/_modules/rioxarray/merge.html
 latest/_modules/rioxarray/rioxarray.html
