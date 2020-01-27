@@ -101,6 +101,10 @@
 <li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357"> Extracting data within geometry (shape)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357"> Converting NetCDF dataset array to GeoTiff</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357"> How do I add projection to this NetCDF file? (Satellite)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/346899/144357"> Create a new raster TIFF file which is masked based on the GeoJSON file</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
@@ -397,7 +401,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Example---Transform-Bounds">
 <h1>Example - Transform Bounds<a class="headerlink" href="#Example---Transform-Bounds" title="Permalink to this headline">¶</a></h1>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -408,17 +412,6 @@ import xarray
 %matplotlib inline
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/dask/config.py:168: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  data = yaml.load(f.read()) or {}
-/home/snowal/miniconda3/envs/geocube/lib/python3.6/site-packages/distributed/config.py:20: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  defaults = yaml.load(f)
-</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -447,6 +440,7 @@ import xarray
 (-7274009.649486291, 5003777.3385, -7227678.3778335, 5050108.61015275)
 </pre></div></div>
 </div>
+<p>API Reference: <a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.transform_bounds"><span class="std std-ref">rio.transform_bounds()</span></a></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -492,15 +486,6 @@ import xarray
 <div class="highlight"><pre>
 (-93.19331639028637, 44.99999999595885, -91.92388153951472, 45.41666666258786)
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
-</div>
 </div>
 </div>
 

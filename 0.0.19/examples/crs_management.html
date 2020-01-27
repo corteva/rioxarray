@@ -94,6 +94,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Accessing-the-CRS-object">Accessing the CRS object</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):">Search order for the CRS (DataArray and Dataset):</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-for-Dataset:">Search order for the CRS for Dataset:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#API-Documentation">API Documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#Setting-the-CRS-of-the-Dataset">Setting the CRS of the Dataset</a></li>
@@ -109,6 +110,10 @@
 <li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357"> Extracting data within geometry (shape)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357"> Converting NetCDF dataset array to GeoTiff</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357"> How do I add projection to this NetCDF file? (Satellite)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/346899/144357"> Create a new raster TIFF file which is masked based on the GeoJSON file</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
@@ -419,6 +424,21 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Search-order-for-the-CRS-for-Dataset:">
 <h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline">¶</a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
+</div>
+<div class="section" id="API-Documentation">
+<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h3>
+<p>Links to DataArray methods/attributes used:</p>
+<ul class="simple">
+<li>rio.set_crs()</li>
+<li>rio.write_crs()</li>
+<li>rio.crs</li>
+</ul>
+<p>Links to Dataset methods/attributes used:</p>
+<ul class="simple">
+<li>rio.set_crs()</li>
+<li>rio.write_crs()</li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.crs"><span class="std std-ref">rio.crs</span></a></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>

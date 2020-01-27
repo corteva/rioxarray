@@ -23,13 +23,6 @@ rioxarray.rioxarray module
     :undoc-members:
     :show-inheritance:
 
-rioxarray.crs module
---------------------
-
-.. automodule:: rioxarray.crs
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 rioxarray.exceptions module
 ---------------------------
