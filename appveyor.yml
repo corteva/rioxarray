@@ -4,7 +4,7 @@
 
 environment:
   matrix:
-    - PYTHON_VERSION: "3.6"
+    - PYTHON_VERSION: "3.7"
       MINICONDA: "C:\\Miniconda3-x64"
 
 install:
@@ -22,12 +22,12 @@ install:
 #-------------------------------------------------------------------------------
 # Install rioxarray
 #-------------------------------------------------------------------------------
-  - pip install -e .[all]
+  - python -m pip install -e .[all]
 
 build: false
 
 test_script:
-  - pytest --cov-report term-missing --cov=rioxarray
+  - python -m pytest --cov-report term-missing --cov=rioxarray
   - flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
   - flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
   - black --check .
