@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.20
+------
+- BUG: ensure band_key is list when iterating over bands for mask and scale (pull #87)
+
 0.0.19
 -------
 - Add support for writing scales & offsets to raster (pull #79)
