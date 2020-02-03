@@ -160,7 +160,7 @@ class RasterioArrayWrapper(BackendArray):
                 if self.masked:
                     out = np.ma.filled(out.astype(self.dtype), np.nan)
                 if self.mask_and_scale:
-                    for band in band_key:
+                    for band in np.atleast_1d(band_key):
                         band_iii = band - 1
                         out[band_iii] = (
                             out[band_iii] * riods.scales[band_iii]
