@@ -918,6 +918,73 @@ def test_to_raster__preserve_profile__none_nodata(windowed, tmpdir):
         assert rds.nodata is None
 
 
+def test_to_raster__dataset(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        mda.isel(time=0).rio.to_raster(str(tmp_raster))
+
+    with rioxarray.open_rasterio(str(tmp_raster)) as rdscompare:
+        assert rdscompare.scale_factor == 1.0
+        assert rdscompare.add_offset == 0.0
+        assert rdscompare.long_name == ("blue", "green")
+        assert rdscompare.rio.crs == mda.rio.crs
+        assert numpy.isnan(rdscompare.rio.nodata)
+
+
+def test_to_raster__dataset__mask_and_scale(tmpdir):
+    output_raster = tmpdir.join("tmmx_20190121.tif")
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    ) as rds:
+        rds.isel(band=0).rio.to_raster(str(output_raster))
+
+    with rioxarray.open_rasterio(str(output_raster)) as rdscompare:
+        assert rdscompare.scale_factor == 0.1
+        assert rdscompare.add_offset == 220.0
+        assert rdscompare.long_name == "air_temperature"
+        assert rdscompare.rio.crs == rds.rio.crs
+        assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
+
+
+def test_to_raster__dataset__different_crs(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    ) as mda:
+        rds = mda.isel(time=0)
+        attrs = rds.green.attrs
+        attrs["crs"] = "EPSG:4326"
+        attrs.pop("grid_mapping")
+        rds.green.attrs = attrs
+        attrs = rds.blue.attrs
+        attrs["crs"] = "EPSG:32722"
+        attrs.pop("grid_mapping")
+        rds.blue.attrs = attrs
+        rds = rds.drop_vars("spatial_ref")
+        with pytest.raises(
+            RioXarrayError, match="All CRS must be the same when exporting to raster."
+        ):
+            rds.rio.to_raster(str(tmp_raster))
+
+
+def test_to_raster__dataset__different_nodata(tmpdir):
+    tmp_raster = tmpdir.join("planet_3d_raster.tif")
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
+        mask_and_scale=False,
+    ) as mda:
+        rds = mda.isel(time=0)
+        rds.green.rio.write_nodata(1234, inplace=True)
+        rds.blue.rio.write_nodata(2345, inplace=True)
+        with pytest.raises(
+            RioXarrayError,
+            match="All nodata values must be the same when exporting to raster.",
+        ):
+            rds.rio.to_raster(str(tmp_raster))
+
+
 def test_missing_spatial_dimensions():
     test_ds = xarray.Dataset()
     with pytest.raises(DimensionError):

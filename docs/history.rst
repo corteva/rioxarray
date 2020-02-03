@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.21
+-------
+- ENH: Added to_raster method for Datasets (issue #76)
+
 0.0.20
 ------
 - BUG: ensure band_key is list when iterating over bands for mask and scale (pull #87)
