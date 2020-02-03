@@ -146,6 +146,7 @@ class RasterioArrayWrapper(BackendArray):
         from rasterio.vrt import WarpedVRT
 
         band_key, window, squeeze_axis, np_inds = self._get_indexer(key)
+
         if not band_key or any(start == stop for (start, stop) in window):
             # no need to do IO
             shape = (len(band_key),) + tuple(stop - start for (start, stop) in window)
