@@ -51,6 +51,7 @@ clean-test: ## remove test and coverage artifacts
 
 clean-docs: ## remove builds
 	rm -fr docs/_build/
+	rm -fr docs/examples/.ipynb_checkpoints/
 
 lint: ## check style with flake8
 	flake8 rioxarray test --max-line-length 88
