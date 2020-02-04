@@ -13,6 +13,7 @@ datacube is licensed under the Apache License, Version 2.0:
 import copy
 import math
 import warnings
+from uuid import uuid4
 
 import numpy as np
 import rasterio.warp
@@ -233,6 +234,10 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
         + FILL_VALUE_NAMES
         + ("transform", "scales", "scale_factor", "add_offset", "offsets")
     )
+    # this is for when multiple values are used
+    # in this case, it will be stored in the raster description
+    if not isinstance(tags.get("long_name"), str):
+        skip_tags += ("long_name",)
     tags = {key: value for key, value in tags.items() if key not in skip_tags}
     raster_handle.update_tags(**tags)
 
@@ -1475,3 +1480,84 @@ class RasterDataset(XRasterBase):
         for var in self.vars:
             interpolated_dataset[var] = self._obj[var].rio.interpolate_na(method=method)
         return interpolated_dataset
+
+    def to_raster(
+        self,
+        raster_path,
+        driver="GTiff",
+        dtype=None,
+        tags=None,
+        windowed=False,
+        recalc_transform=True,
+        **profile_kwargs,
+    ):
+        """
+        Export the Dataset to a raster file. Only works with 2D data.
+
+        Parameters
+        ----------
+        raster_path: str
+            The path to output the raster to.
+        driver: str, optional
+            The name of the GDAL/rasterio driver to use to export the raster.
+            Default is "GTiff".
+        dtype: str, optional
+            The data type to write the raster to. Default is the datasets dtype.
+        tags: dict, optional
+            A dictionary of tags to write to the raster.
+        windowed: bool, optional
+            If True, it will write using the windows of the output raster.
+            This only works if the output raster is tiled. As such, if you
+            set this to True, the output raster will be tiled.
+            Default is False.
+        **profile_kwargs
+            Additional keyword arguments to pass into writing the raster. The
+            nodata, transform, crs, count, width, and height attributes
+            are ignored.
+
+        """
+        variable_dim = "band_{}".format(uuid4())
+        data_array = self._obj.to_array(dim=variable_dim)
+        # write data array names to raster
+        data_array.attrs["long_name"] = data_array[variable_dim].values.tolist()
+        # ensure raster metadata preserved
+        scales = []
+        offsets = []
+        nodatavals = []
+        crs_list = []
+        for data_var in data_array[variable_dim].values:
+            scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
+            offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
+            nodatavals.append(self._obj[data_var].rio.nodata)
+            crs_list.append(self._obj[data_var].rio.crs)
+        data_array.attrs["scales"] = scales
+        data_array.attrs["offsets"] = offsets
+        nodata = nodatavals[0]
+        if (
+            all(nodataval == nodata for nodataval in nodatavals)
+            or np.isnan(nodatavals).all()
+        ):
+            data_array.rio.write_nodata(nodata, inplace=True)
+        else:
+            raise RioXarrayError(
+                "All nodata values must be the same when exporting to raster. "
+                "Current values: {}".format(nodatavals)
+            )
+        crs = crs_list[0]
+        if all(crs_i == crs for crs_i in crs_list):
+            data_array.rio.write_crs(crs, inplace=True)
+        else:
+            raise RioXarrayError(
+                "All CRS must be the same when exporting to raster. "
+                "Current values: {}".format(crs_list)
+            )
+        # write it to a raster
+        data_array.rio.to_raster(
+            raster_path=raster_path,
+            driver=driver,
+            dtype=dtype,
+            tags=tags,
+            windowed=windowed,
+            recalc_transform=recalc_transform,
+            **profile_kwargs,
+        )

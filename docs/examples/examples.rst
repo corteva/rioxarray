@@ -10,6 +10,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    :caption: Notebooks:
 
    crs_management.ipynb
+   manage_information_loss.ipynb
    clip_geom.ipynb
    clip_box.ipynb
    reproject.ipynb
