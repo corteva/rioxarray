@@ -27,6 +27,7 @@ latest/_sources/examples/convert_to_raster.ipynb.txt
 latest/_sources/examples/crs_management.ipynb.txt
 latest/_sources/examples/examples.rst.txt
 latest/_sources/examples/interpolate_na.ipynb.txt
+latest/_sources/examples/manage_information_loss.ipynb.txt
 latest/_sources/examples/merge.ipynb.txt
 latest/_sources/examples/reproject.ipynb.txt
 latest/_sources/examples/reproject_match.ipynb.txt
@@ -114,6 +115,8 @@ latest/examples/crs_management.ipynb
 latest/examples/examples.html
 latest/examples/interpolate_na.html
 latest/examples/interpolate_na.ipynb
+latest/examples/manage_information_loss.html
+latest/examples/manage_information_loss.ipynb
 latest/examples/merge.html
 latest/examples/merge.ipynb
 latest/examples/reproject.html

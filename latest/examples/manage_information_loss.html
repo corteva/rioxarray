@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Example - Clip &mdash; rioxarray 0.0.20 documentation</title>
+  <title>Managing Information Loss with xarray operations &mdash; rioxarray 0.0.20 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Clip Box" href="clip_box.html" />
-    <link rel="prev" title="Managing Information Loss with xarray operations" href="manage_information_loss.html" /> 
+    <link rel="next" title="Example - Clip" href="clip_geom.html" />
+    <link rel="prev" title="Coordinate Reference System Management" href="crs_management.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,13 +91,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Clip</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-dataset">Load in xarray dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Clip-using-a-geometry">Clip using a geometry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Clip-using-a-GeoDataFrame">Clip using a GeoDataFrame</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Managing Information Loss with xarray operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
@@ -164,13 +159,13 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Example - Clip</li>
+      <li>Managing Information Loss with xarray operations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/examples/clip_geom.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/manage_information_loss.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -425,46 +420,46 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Clip">
-<h1>Example - Clip<a class="headerlink" href="#Example---Clip" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Managing-Information-Loss-with-xarray-operations">
+<h1>Managing Information Loss with xarray operations<a class="headerlink" href="#Managing-Information-Loss-with-xarray-operations" title="Permalink to this headline">¶</a></h1>
+<p>Sometimes, you can lose important information from your dataset when performing operations. You will likely want to keep track of the attributes, <code class="docutils literal notranslate"><span class="pre">nodata</span></code>, and <code class="docutils literal notranslate"><span class="pre">CRS</span></code>.</p>
+<p>API Reference:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs"><span class="std std-ref">rio.update_attrs()</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>import rioxarray
-
-%matplotlib inline
 </pre></div>
 </div>
 </div>
-<div class="section" id="Load-in-xarray-dataset">
-<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
 <p>See docs for <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
-<p>Notes:</p>
-<ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">chunks=True</span></code> only works if you have a dask installed. Otherwise, you can skip this.</li>
-<li><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</li>
-</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-    masked=True,
-    chunks=True,
+<span></span>rds = rioxarray.open_rasterio(
+    &quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;,
+    variable=[&quot;green&quot;],
 )
 </pre></div>
 </div>
 </div>
+<p>Notice the original data:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds
+<span></span>rds.green.attrs, rds.green.rio.crs, rds.green.rio.nodata
 </pre></div>
 </div>
 </div>
@@ -474,79 +469,73 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;xarray.DataArray (band: 1, y: 245, x: 574)&gt;
-dask.array&lt;shape=(1, 245, 574), dtype=float64, chunksize=(1, 245, 574)&gt;
-Coordinates:
-  * band         (band) int64 1
-  * y            (y) float64 4.616e+06 4.616e+06 ... 4.615e+06 4.615e+06
-  * x            (x) float64 4.25e+05 4.251e+05 ... 4.268e+05 4.268e+05
-    spatial_ref  int64 0
-Attributes:
-    transform:     (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387)
-    scales:        (1.0,)
-    offsets:       (0.0,)
-    grid_mapping:  spatial_ref
+({&#39;grid_mapping&#39;: &#39;spatial_ref&#39;,
+  &#39;nodata&#39;: 0,
+  &#39;units&#39;: (&#39;DN&#39;, &#39;DN&#39;),
+  &#39;_FillValue&#39;: nan,
+  &#39;transform&#39;: (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0),
+  &#39;scale_factor&#39;: 1.0,
+  &#39;add_offset&#39;: 0.0},
+ CRS.from_epsg(32722),
+ nan)
 </pre></div></div>
 </div>
+<p>Notice how information is lost in the operation:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.plot()
+<span></span>new_ds = rds.green + rds.green
+new_ds.attrs, new_ds.rio.crs, new_ds.rio.nodata
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f1c4807acc0&gt;
+({}, CRS.from_epsg(32722), None)
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_clip_geom_5_1.png" src="../_images/examples_clip_geom_5_1.png" />
-</div>
-</div>
-</div>
-<div class="section" id="Clip-using-a-geometry">
-<h2>Clip using a geometry<a class="headerlink" href="#Clip-using-a-geometry" title="Permalink to this headline">¶</a></h2>
-<p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.clip</span></code>:</p>
-<ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.clip"><span class="std std-ref">DataArray.clip</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip"><span class="std std-ref">Dataset.clip</span></a></li>
-</ul>
-<div class="nbinput nblast docutils container">
+<p>The solution is to save the original attributes and then copy them over once the operation is complete:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>geometries = [
-    {
-        &#39;type&#39;: &#39;Polygon&#39;,
-        &#39;coordinates&#39;: [[
-            [425499.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615331.540546387]
-        ]]
-    }
-]
+<span></span>new_ds = rds.green + rds.green
+new_ds.rio.write_crs(rds.green.rio.crs, inplace=True)
+new_ds.rio.update_attrs(rds.green.attrs, inplace=True)
+new_ds.attrs, new_ds.rio.crs, new_ds.rio.nodata
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+({&#39;grid_mapping&#39;: &#39;spatial_ref&#39;,
+  &#39;nodata&#39;: 0,
+  &#39;units&#39;: (&#39;DN&#39;, &#39;DN&#39;),
+  &#39;_FillValue&#39;: nan,
+  &#39;transform&#39;: (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0),
+  &#39;scale_factor&#39;: 1.0,
+  &#39;add_offset&#39;: 0.0},
+ CRS.from_epsg(32722),
+ nan)
+</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped = xds.rio.clip(geometries, xds.rio.crs)
+<span></span>new_ds.rio.to_raster(&quot;combination_keep_attrs.tif&quot;)
 </pre></div>
 </div>
 </div>
@@ -555,139 +544,17 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped
+<span></span>!rio info combination_keep_attrs.tif
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (band: 1, y: 49, x: 9)&gt;
-dask.array&lt;shape=(1, 49, 9), dtype=float64, chunksize=(1, 49, 9)&gt;
-Coordinates:
-  * band         (band) int64 1
-  * y            (y) float64 4.615e+06 4.615e+06 ... 4.615e+06 4.615e+06
-  * x            (x) float64 4.255e+05 4.255e+05 ... 4.255e+05 4.255e+05
-    spatial_ref  int64 0
-Attributes:
-    transform:     (3.0, 0.0, 425500.68381405267, 0.0, -3.0, 4615477.04054638...
-    scales:        (1.0,)
-    offsets:       (0.0,)
-    grid_mapping:  spatial_ref
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped.plot()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f1c39904400&gt;
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_clip_geom_10_1.png" src="../_images/examples_clip_geom_10_1.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped.rio.to_raster(&quot;clipped.tif&quot;, compress=&#39;LZMA&#39;, tiled=True, dtype=&quot;int32&quot;)
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="Clip-using-a-GeoDataFrame">
-<h2>Clip using a GeoDataFrame<a class="headerlink" href="#Clip-using-a-GeoDataFrame" title="Permalink to this headline">¶</a></h2>
-<p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.clip</span></code>:</p>
-<ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.clip"><span class="std std-ref">DataArray.clip</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip"><span class="std std-ref">Dataset.clip</span></a></li>
-</ul>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import geopandas
-from shapely.geometry import box, mapping
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>geodf = geopandas.GeoDataFrame(
-    geometry=[
-        box(425499.18381405267, 4615331.540546387, 425526.18381405267, 4615478.540546387)
-    ],
-    crs=xds.rio.crs.to_dict()
-)
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped = xds.rio.clip(geodf.geometry.apply(mapping), geodf.crs, drop=False, invert=True)
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped.plot()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f1c3938fcf8&gt;
+{&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [&#34;green&#34;, &#34;green&#34;], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_clip_geom_16_1.png" src="../_images/examples_clip_geom_16_1.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped.rio.to_raster(&quot;clipped_invert.tif&quot;, compress=&#39;LZMA&#39;, tiled=True, dtype=&quot;int32&quot;)
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 
@@ -699,10 +566,10 @@ from shapely.geometry import box, mapping
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="clip_box.html" class="btn btn-neutral float-right" title="Example - Clip Box" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="clip_geom.html" class="btn btn-neutral float-right" title="Example - Clip" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="manage_information_loss.html" class="btn btn-neutral float-left" title="Managing Information Loss with xarray operations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="crs_management.html" class="btn btn-neutral float-left" title="Coordinate Reference System Management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

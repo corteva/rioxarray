@@ -170,6 +170,7 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
@@ -390,6 +391,10 @@
         <span class="o">+</span> <span class="n">FILL_VALUE_NAMES</span>
         <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">,</span> <span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">)</span>
     <span class="p">)</span>
+    <span class="c1"># this is for when multiple values are used</span>
+    <span class="c1"># in this case, it will be stored in the raster description</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">skip_tags</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">,)</span>
     <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip_tags</span><span class="p">}</span>
     <span class="n">raster_handle</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">tags</span><span class="p">)</span>
 
@@ -1631,7 +1636,88 @@
         <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
             <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">interpolated_dataset</span></div></div>
+        <span class="k">return</span> <span class="n">interpolated_dataset</span></div>
+
+<div class="viewcode-block" id="RasterDataset.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">raster_path</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">recalc_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the Dataset to a raster file. Only works with 2D data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        raster_path: str</span>
+<span class="sd">            The path to output the raster to.</span>
+<span class="sd">        driver: str, optional</span>
+<span class="sd">            The name of the GDAL/rasterio driver to use to export the raster.</span>
+<span class="sd">            Default is &quot;GTiff&quot;.</span>
+<span class="sd">        dtype: str, optional</span>
+<span class="sd">            The data type to write the raster to. Default is the datasets dtype.</span>
+<span class="sd">        tags: dict, optional</span>
+<span class="sd">            A dictionary of tags to write to the raster.</span>
+<span class="sd">        windowed: bool, optional</span>
+<span class="sd">            If True, it will write using the windows of the output raster.</span>
+<span class="sd">            This only works if the output raster is tiled. As such, if you</span>
+<span class="sd">            set this to True, the output raster will be tiled.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        **profile_kwargs</span>
+<span class="sd">            Additional keyword arguments to pass into writing the raster. The</span>
+<span class="sd">            nodata, transform, crs, count, width, and height attributes</span>
+<span class="sd">            are ignored.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">variable_dim</span> <span class="o">=</span> <span class="s2">&quot;band_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">variable_dim</span><span class="p">)</span>
+        <span class="c1"># write data array names to raster</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_array</span><span class="p">[</span><span class="n">variable_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># ensure raster metadata preserved</span>
+        <span class="n">scales</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodatavals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">crs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data_var</span> <span class="ow">in</span> <span class="n">data_array</span><span class="p">[</span><span class="n">variable_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+            <span class="n">nodatavals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+            <span class="n">crs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scales</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offsets</span>
+        <span class="n">nodata</span> <span class="o">=</span> <span class="n">nodatavals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">all</span><span class="p">(</span><span class="n">nodataval</span> <span class="o">==</span> <span class="n">nodata</span> <span class="k">for</span> <span class="n">nodataval</span> <span class="ow">in</span> <span class="n">nodatavals</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodatavals</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+                <span class="s2">&quot;All nodata values must be the same when exporting to raster. &quot;</span>
+                <span class="s2">&quot;Current values: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodatavals</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">crs_i</span> <span class="o">==</span> <span class="n">crs</span> <span class="k">for</span> <span class="n">crs_i</span> <span class="ow">in</span> <span class="n">crs_list</span><span class="p">):</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+                <span class="s2">&quot;All CRS must be the same when exporting to raster. &quot;</span>
+                <span class="s2">&quot;Current values: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crs_list</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># write it to a raster</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+            <span class="n">raster_path</span><span class="o">=</span><span class="n">raster_path</span><span class="p">,</span>
+            <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
+            <span class="n">windowed</span><span class="o">=</span><span class="n">windowed</span><span class="p">,</span>
+            <span class="n">recalc_transform</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
            </div>

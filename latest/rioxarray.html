@@ -919,6 +919,34 @@ reprojected to match match_data_array.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.to_raster">
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver='GTiff'</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the Dataset to a raster file. Only works with 2D data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>raster_path</strong> (<em>str</em>) – The path to output the raster to.</li>
+<li><strong>driver</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the GDAL/rasterio driver to use to export the raster.
+Default is “GTiff”.</li>
+<li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
+<li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
+<li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
+This only works if the output raster is tiled. As such, if you
+set this to True, the output raster will be tiled.
+Default is False.</li>
+<li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
+nodata, transform, crs, count, width, and height attributes
+are ignored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.RasterDataset.vars">
 <code class="descname">vars</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.vars" title="Permalink to this definition">¶</a></dt>
