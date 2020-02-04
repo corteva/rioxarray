@@ -810,7 +810,9 @@ def test_to_raster__custom_description(tmpdir):
         xds.attrs["long_name"] = ("one", "two")
         xds.rio.to_raster(str(tmp_raster))
         xds_attrs = {
-            key: str(value) for key, value in xds.attrs.items() if key != "nodata"
+            key: str(value)
+            for key, value in xds.attrs.items()
+            if key not in ("nodata", "long_name")
         }
 
     with rasterio.open(str(tmp_raster)) as rds:
