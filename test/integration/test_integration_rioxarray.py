@@ -972,8 +972,7 @@ def test_to_raster__dataset__different_crs(tmpdir):
 def test_to_raster__dataset__different_nodata(tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with xarray.open_dataset(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
-        mask_and_scale=False,
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), mask_and_scale=False,
     ) as mda:
         rds = mda.isel(time=0)
         rds.green.rio.write_nodata(1234, inplace=True)
