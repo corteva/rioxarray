@@ -15,12 +15,13 @@ import numpy as np
 import rasterio
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
-from xarray import DataArray, Dataset, IndexVariable
+from xarray import Dataset, IndexVariable
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager
 from xarray.backends.locks import SerializableLock
 from xarray.coding import times, variables
 from xarray.core import indexing
+from xarray.core.dataarray import DataArray
 from xarray.core.utils import is_scalar
 
 from rioxarray.exceptions import RioXarrayError
