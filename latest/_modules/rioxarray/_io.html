@@ -172,12 +172,13 @@
 <span class="kn">import</span> <span class="nn">rasterio</span>
 <span class="kn">from</span> <span class="nn">rasterio.errors</span> <span class="kn">import</span> <span class="n">NotGeoreferencedWarning</span>
 <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="kn">import</span> <span class="n">WarpedVRT</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">IndexVariable</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">IndexVariable</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.common</span> <span class="kn">import</span> <span class="n">BackendArray</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.file_manager</span> <span class="kn">import</span> <span class="n">CachingFileManager</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.locks</span> <span class="kn">import</span> <span class="n">SerializableLock</span>
 <span class="kn">from</span> <span class="nn">xarray.coding</span> <span class="kn">import</span> <span class="n">times</span><span class="p">,</span> <span class="n">variables</span>
 <span class="kn">from</span> <span class="nn">xarray.core</span> <span class="kn">import</span> <span class="n">indexing</span>
+<span class="kn">from</span> <span class="nn">xarray.core.dataarray</span> <span class="kn">import</span> <span class="n">DataArray</span>
 <span class="kn">from</span> <span class="nn">xarray.core.utils</span> <span class="kn">import</span> <span class="n">is_scalar</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">RioXarrayError</span>
