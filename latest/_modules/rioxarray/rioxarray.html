@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.21 documentation</title>
+  <title>rioxarray.rioxarray &mdash; rioxarray 0.0.22 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.0.21
+                0.0.22
               </div>
             
           
@@ -496,9 +496,7 @@
 <span class="sd">        Dataset with crs attribute.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="s2">&quot;wkt&quot;</span><span class="p">):</span>
-            <span class="n">input_crs</span> <span class="o">=</span> <span class="n">input_crs</span><span class="o">.</span><span class="n">wkt</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">input_crs</span><span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">input_crs</span><span class="p">))</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
         <span class="k">return</span> <span class="n">obj</span></div>
@@ -536,7 +534,9 @@
             <span class="k">pass</span>
 
         <span class="k">if</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span><span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
+                <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
+            <span class="p">)</span>
         <span class="c1"># add grid mapping coordinate</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">crs_wkt</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
@@ -956,6 +956,10 @@
 <span class="sd">        :class:`xarray.DataArray`: A reprojected DataArray.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
+                <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
+            <span class="p">)</span>
         <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dst_affine_width_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">dst_affine_width_height</span>
@@ -1189,10 +1193,16 @@
 <span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
 <span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">geometry</span> <span class="ow">in</span> <span class="n">geometries</span>
-        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
+                <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">crs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">dst_crs</span><span class="p">:</span>
+            <span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">geometry</span> <span class="ow">in</span> <span class="n">geometries</span>
+            <span class="p">]</span>
 
         <span class="n">clip_mask_arr</span> <span class="o">=</span> <span class="n">geometry_mask</span><span class="p">(</span>
             <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
