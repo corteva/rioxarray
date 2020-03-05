@@ -339,9 +339,7 @@ class XRasterBase(object):
         Dataset with crs attribute.
 
         """
-        if hasattr(input_crs, "wkt"):
-            input_crs = input_crs.wkt
-        crs = CRS.from_user_input(input_crs)
+        crs = CRS.from_user_input(crs_to_wkt(input_crs))
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
         return obj
@@ -379,7 +377,9 @@ class XRasterBase(object):
             pass
 
         if data_obj.rio.crs is None:
-            raise MissingCRS("CRS not found. Please set the CRS with 'set_crs()'.")
+            raise MissingCRS(
+                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+            )
         # add grid mapping coordinate
         data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
         crs_wkt = crs_to_wkt(data_obj.rio.crs)
@@ -799,6 +799,10 @@ class RasterArray(XRasterBase):
         :class:`xarray.DataArray`: A reprojected DataArray.
 
         """
+        if self.crs is None:
+            raise MissingCRS(
+                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+            )
         src_affine = self.transform()
         if dst_affine_width_height is not None:
             dst_affine, dst_width, dst_height = dst_affine_width_height
@@ -1032,10 +1036,16 @@ class RasterArray(XRasterBase):
             >>> xds = xarray.open_rasterio('cool_raster.tif')
             >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
         """
-        geometries = [
-            rasterio.warp.transform_geom(CRS.from_user_input(crs), self.crs, geometry)
-            for geometry in geometries
-        ]
+        if self.crs is None:
+            raise MissingCRS(
+                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+            )
+        dst_crs = CRS.from_user_input(crs_to_wkt(crs))
+        if self.crs != dst_crs:
+            geometries = [
+                rasterio.warp.transform_geom(dst_crs, self.crs, geometry)
+                for geometry in geometries
+            ]
 
         clip_mask_arr = geometry_mask(
             geometries=geometries,

@@ -7,6 +7,7 @@ import rasterio
 import xarray
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
+from pyproj import CRS as pCRS
 from rasterio.crs import CRS
 from rasterio.windows import Window
 
@@ -1172,6 +1173,26 @@ def test_crs_writer__missing():
         test_da.to_dataset(name="test").rio.write_crs()
 
 
+def test_clip_missing_crs():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    with pytest.raises(MissingCRS):
+        test_da.rio.clip({}, 4326)
+
+
+def test_reproject_missing_crs():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    with pytest.raises(MissingCRS):
+        test_da.rio.reproject(4326)
+
+
 class CustomCRS(object):
     @property
     def wkt(self):
@@ -1188,9 +1209,9 @@ def test_crs_get_custom():
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
         attrs={"crs": CustomCRS()},
     )
-    assert test_da.rio.crs.wkt == CustomCRS().wkt
+    assert test_da.rio.crs.to_epsg() == 4326
     test_ds = xarray.Dataset({"test": test_da})
-    assert test_ds.rio.crs.wkt == CustomCRS().wkt
+    assert test_ds.rio.crs.to_epsg() == 4326
 
 
 def test_get_crs_dataset():
@@ -1301,3 +1322,10 @@ def test_isel_window():
             mda.rio.isel_window(Window.from_slices(slice(10, 12), slice(10, 12)))
             == mda.isel(x=slice(10, 12), y=slice(10, 12))
         ).all()
+
+
+def test_write_pyproj_crs_dataset():
+    test_ds = xarray.Dataset()
+    test_ds = test_ds.rio.write_crs(pCRS(4326))
+    assert test_ds.attrs["grid_mapping"] == "spatial_ref"
+    assert test_ds.rio.crs.to_epsg() == 4326

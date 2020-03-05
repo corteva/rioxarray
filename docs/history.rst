@@ -1,6 +1,11 @@
 History
 =======
 
+0.0.22
+-------
+- ENH: Use pyproj.CRS internally to manage GDAL 2/3 transition (issue #92)
+- ENH: Add MissingCRS exceptions for 'rio.clip' and 'rio.reproject' (pull #93)
+
 0.0.21
 -------
 - ENH: Added to_raster method for Datasets (issue #76)
