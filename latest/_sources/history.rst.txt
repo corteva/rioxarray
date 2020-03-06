@@ -4,6 +4,7 @@ History
 0.0.23
 ------
 - BUG: Fix 'rio.set_spatial_dims' so information saved with 'rio' accesors (issue #94)
+- ENH: Make 'rio.isel_window' available for datasets (pull #95)
 
 0.0.22
 -------
