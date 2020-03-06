@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.23
+------
+- BUG: Fix 'rio.set_spatial_dims' so information saved with 'rio' accesors (issue #94)
+
 0.0.22
 -------
 - ENH: Use pyproj.CRS internally to manage GDAL 2/3 transition (issue #92)

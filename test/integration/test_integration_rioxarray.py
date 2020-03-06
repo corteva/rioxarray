@@ -1,3 +1,4 @@
+import json
 import os
 from functools import partial
 
@@ -1329,3 +1330,145 @@ def test_write_pyproj_crs_dataset():
     test_ds = test_ds.rio.write_crs(pCRS(4326))
     assert test_ds.attrs["grid_mapping"] == "spatial_ref"
     assert test_ds.rio.crs.to_epsg() == 4326
+
+
+def test_nonstandard_dims_clip__dataset():
+    with open(os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim_geom.json")) as ndj:
+        geom = json.load(ndj)
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        clipped = (
+            xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.clip([geom], "EPSG:4326")
+        )
+        assert clipped.rio.width == 6
+        assert clipped.rio.height == 5
+
+
+def test_nonstandard_dims_clip__array():
+    with open(os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim_geom.json")) as ndj:
+        geom = json.load(ndj)
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        clipped = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.clip([geom], "EPSG:4326")
+        )
+        assert clipped.rio.width == 6
+        assert clipped.rio.height == 5
+
+
+def test_nonstandard_dims_clip_box__dataset():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        clipped = (
+            xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.clip_box(
+                -70.51367964678269,
+                -23.780199727400767,
+                -70.44589567737998,
+                -23.71896017814794,
+            )
+        )
+        assert clipped.rio.width == 7
+        assert clipped.rio.height == 7
+
+
+def test_nonstandard_dims_clip_box_array():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        clipped = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.clip_box(
+                -70.51367964678269,
+                -23.780199727400767,
+                -70.44589567737998,
+                -23.71896017814794,
+            )
+        )
+        assert clipped.rio.width == 7
+        assert clipped.rio.height == 7
+
+
+def test_nonstandard_dims_reproject__dataset():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        xds = xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.write_crs(
+            "EPSG:4326"
+        )
+        reprojected = xds.rio.reproject("epsg:3857")
+        assert reprojected.rio.width == 11
+        assert reprojected.rio.height == 11
+        assert reprojected.rio.crs.to_epsg() == 3857
+
+
+def test_nonstandard_dims_reproject__array():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        reprojected = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.reproject("epsg:3857")
+        )
+        assert reprojected.rio.width == 11
+        assert reprojected.rio.height == 11
+        assert reprojected.rio.crs.to_epsg() == 3857
+
+
+def test_nonstandard_dims_interpolate_na__dataset():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        reprojected = (
+            xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.interpolate_na()
+        )
+        assert reprojected.rio.width == 11
+        assert reprojected.rio.height == 11
+
+
+def test_nonstandard_dims_interpolate_na__array():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        reprojected = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.interpolate_na()
+        )
+        assert reprojected.rio.width == 11
+        assert reprojected.rio.height == 11
+
+
+def test_nonstandard_dims_write_nodata__array():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        reprojected = xds.analysed_sst.rio.set_spatial_dims(
+            x_dim="lon", y_dim="lat"
+        ).rio.write_nodata(-999)
+        assert reprojected.rio.width == 11
+        assert reprojected.rio.height == 11
+        assert reprojected.rio.nodata == -999
+
+
+def test_nonstandard_dims_isel_window():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        reprojected = xds.rio.set_spatial_dims(
+            x_dim="lon", y_dim="lat"
+        ).rio.isel_window(Window.from_slices(slice(5), slice(5)))
+        assert reprojected.rio.width == 5
+        assert reprojected.rio.height == 5

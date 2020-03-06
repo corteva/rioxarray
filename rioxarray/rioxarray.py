@@ -135,6 +135,12 @@ def add_spatial_ref(in_ds, dst_crs, grid_map_name):
 
 def _add_attrs_proj(new_data_array, src_data_array):
     """Make sure attributes and projection correct"""
+    # make sure dimension information is preserved
+    if new_data_array.rio._x_dim is None:
+        new_data_array.rio._x_dim = src_data_array.rio.x_dim
+    if new_data_array.rio._y_dim is None:
+        new_data_array.rio._y_dim = src_data_array.rio.y_dim
+
     # make sure attributes preserved
     new_attrs = _generate_attrs(
         src_data_array, new_data_array.rio.transform(recalc=True), None
@@ -319,7 +325,14 @@ class XRasterBase(object):
         """
         if inplace:
             return self._obj
-        return self._obj.copy(deep=True)
+        obj_copy = self._obj.copy(deep=True)
+        # preserve attribute information
+        obj_copy.rio._x_dim = self._x_dim
+        obj_copy.rio._y_dim = self._y_dim
+        obj_copy.rio._width = self._width
+        obj_copy.rio._height = self._height
+        obj_copy.rio._crs = self._crs
+        return obj_copy
 
     def set_crs(self, input_crs, inplace=True):
         """
@@ -399,9 +412,12 @@ class XRasterBase(object):
                 ):
                     data_obj[var].rio.update_attrs(
                         dict(grid_mapping=grid_mapping_name), inplace=True
+                    ).rio.set_spatial_dims(
+                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
                     )
-        data_obj.rio.update_attrs(dict(grid_mapping=grid_mapping_name), inplace=True)
-        return data_obj
+        return data_obj.rio.update_attrs(
+            dict(grid_mapping=grid_mapping_name), inplace=True
+        )
 
     def set_attrs(self, new_attrs, inplace=False):
         """
@@ -423,7 +439,8 @@ class XRasterBase(object):
         data_obj = self._get_obj(inplace=inplace)
         # set the attributes
         data_obj.attrs = new_attrs
-        # reset rioxarray properties
+        # reset rioxarray properties depending
+        # on attributes to be generated
         data_obj.rio._nodata = None
         data_obj.rio._crs = None
         return data_obj
@@ -521,6 +538,26 @@ class XRasterBase(object):
     def shape(self):
         """tuple: Returns the shape (width, height)"""
         return (self.width, self.height)
+
+    def isel_window(self, window):
+        """
+        Use a rasterio.window.Window to select a subset of the data.
+
+        Parameters
+        ----------
+        window: :class:`rasterio.window.Window`
+            The window of the dataset to read.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
+        """
+        (row_start, row_stop), (col_start, col_stop) = window.toranges()
+        row_slice = slice(int(math.floor(row_start)), int(math.ceil(row_stop)))
+        col_slice = slice(int(math.floor(col_start)), int(math.ceil(col_stop)))
+        return self._obj.isel(
+            {self.x_dim: row_slice, self.y_dim: col_slice}
+        ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
 
 
 @xarray.register_dataarray_accessor("rio")
@@ -930,7 +967,9 @@ class RasterArray(XRasterBase):
         else:
             x_slice = slice(minx, maxx)
 
-        return self._obj.sel({self.x_dim: x_slice, self.y_dim: y_slice})
+        return self._obj.sel(
+            {self.x_dim: x_slice, self.y_dim: y_slice}
+        ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.DataArray` by a bounding box.
@@ -1078,24 +1117,6 @@ class RasterArray(XRasterBase):
         _add_attrs_proj(cropped_ds, self._obj)
 
         return cropped_ds
-
-    def isel_window(self, window):
-        """
-        Use a rasterio.window.Window to select a subset of the data.
-
-        Parameters
-        ----------
-        window: :class:`rasterio.window.Window`
-            The window of the dataset to read.
-
-        Returns
-        -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
-        """
-        (row_start, row_stop), (col_start, col_stop) = window.toranges()
-        row_slice = slice(int(math.floor(row_start)), int(math.ceil(row_stop)))
-        col_slice = slice(int(math.floor(col_start)), int(math.ceil(col_stop)))
-        return self._obj.isel({self.x_dim: row_slice, self.y_dim: col_slice})
 
     def _interpolate_na(self, src_data, method="nearest"):
         """
@@ -1340,11 +1361,15 @@ class RasterDataset(XRasterBase):
         """
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            resampled_dataset[var] = self._obj[var].rio.reproject(
-                dst_crs,
-                resolution=resolution,
-                dst_affine_width_height=dst_affine_width_height,
-                resampling=resampling,
+            resampled_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.reproject(
+                    dst_crs,
+                    resolution=resolution,
+                    dst_affine_width_height=dst_affine_width_height,
+                    resampling=resampling,
+                )
             )
         return resampled_dataset
 
@@ -1375,10 +1400,14 @@ class RasterDataset(XRasterBase):
         """
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            resampled_dataset[var] = self._obj[var].rio.reproject_match(
-                match_data_array, resampling=resampling
+            resampled_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.reproject_match(match_data_array, resampling=resampling)
             )
-        return resampled_dataset
+        return resampled_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.Dataset` by a bounding box.
@@ -1409,15 +1438,21 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            clipped_dataset[var] = self._obj[var].rio.clip_box(
-                minx,
-                miny,
-                maxx,
-                maxy,
-                auto_expand=auto_expand,
-                auto_expand_limit=auto_expand_limit,
+            clipped_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.clip_box(
+                    minx,
+                    miny,
+                    maxx,
+                    maxy,
+                    auto_expand=auto_expand,
+                    auto_expand_limit=auto_expand_limit,
+                )
             )
-        return clipped_dataset
+        return clipped_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
 
     def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
         """
@@ -1467,10 +1502,20 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            clipped_dataset[var] = self._obj[var].rio.clip(
-                geometries, crs=crs, all_touched=all_touched, drop=drop, invert=invert
+            clipped_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.clip(
+                    geometries,
+                    crs=crs,
+                    all_touched=all_touched,
+                    drop=drop,
+                    invert=invert,
+                )
             )
-        return clipped_dataset
+        return clipped_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
 
     def interpolate_na(self, method="nearest"):
         """
@@ -1488,8 +1533,14 @@ class RasterDataset(XRasterBase):
         """
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            interpolated_dataset[var] = self._obj[var].rio.interpolate_na(method=method)
-        return interpolated_dataset
+            interpolated_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.interpolate_na(method=method)
+            )
+        return interpolated_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
 
     def to_raster(
         self,
