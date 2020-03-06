@@ -13,9 +13,29 @@ http://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports
 
 #### Expected Output
 
-#### Output of ``rioxarray --version``
+#### Output of ``pip show rioxarray``
 
 <details>
-# Paste the output from rioxarray --version here
+# Paste the output from pip show rioxarray here
 
 </details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
