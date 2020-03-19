@@ -264,6 +264,16 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
                 raster_handle.set_band_description(iii + 1, band_description)
 
 
+def _get_data_var_message(obj):
+    """
+    Get message for named data variables.
+    """
+    try:
+        return f" Data variable: {obj.name}" if obj.name else ""
+    except AttributeError:
+        return ""
+
+
 class XRasterBase(object):
     """This is the base class for the GIS extensions for xarray"""
 
@@ -492,11 +502,15 @@ class XRasterBase(object):
             if in_x_dim in obj.dims:
                 obj.rio._x_dim = x_dim
             else:
-                raise DimensionError(f"x dimension not found: {x_dim}")
+                raise DimensionError(
+                    f"x dimension ({x_dim}) not found.{_get_data_var_message(obj)}"
+                )
             if y_dim in obj.dims:
                 obj.rio._y_dim = y_dim
             else:
-                raise DimensionError(f"y dimension not found: {y_dim}")
+                raise DimensionError(
+                    f"y dimension ({x_dim}) not found.{_get_data_var_message(obj)}"
+                )
 
         data_obj = self._get_obj(inplace=inplace)
         set_dims(data_obj, x_dim, y_dim)
@@ -508,6 +522,7 @@ class XRasterBase(object):
             return self._x_dim
         raise DimensionError(
             "x dimension not found. 'set_spatial_dims()' can address this."
+            f"{_get_data_var_message(self._obj)}"
         )
 
     @property
@@ -516,6 +531,7 @@ class XRasterBase(object):
             return self._y_dim
         raise DimensionError(
             "x dimension not found. 'set_spatial_dims()' can address this."
+            f"{_get_data_var_message(self._obj)}"
         )
 
     @property
@@ -682,6 +698,7 @@ class RasterArray(XRasterBase):
             if self.width == 1 or self.height == 1:
                 raise OneDimensionalRaster(
                     "Only 1 dimenional array found. Cannot calculate the resolution."
+                    f"{_get_data_var_message(self._obj)}"
                 )
 
             resolution_x = (right - left) / (self.width - 1)
@@ -708,7 +725,10 @@ class RasterArray(XRasterBase):
         """
         extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
         if len(extra_dims) > 1:
-            raise TooManyDimensions("Only 2D and 3D data arrays supported.")
+            raise TooManyDimensions(
+                "Only 2D and 3D data arrays supported."
+                f"{_get_data_var_message(self._obj)}"
+            )
         elif extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
             raise InvalidDimensionOrder(
                 "Invalid dimension order. Expected order: {0}. "
@@ -716,12 +736,14 @@ class RasterArray(XRasterBase):
                 " to reorder your dimensions.".format(
                     (extra_dims[0], self.y_dim, self.x_dim)
                 )
+                + f"{_get_data_var_message(self._obj)}"
             )
         elif not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
             raise InvalidDimensionOrder(
                 "Invalid dimension order. Expected order: {0}"
                 "You can use `DataArray.transpose{0}` "
                 "to reorder your dimensions.".format((self.y_dim, self.x_dim))
+                + f"{_get_data_var_message(self._obj)}"
             )
         return extra_dims[0] if extra_dims else None
 
@@ -839,6 +861,7 @@ class RasterArray(XRasterBase):
         if self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+                f"{_get_data_var_message(self._obj)}"
             )
         src_affine = self.transform()
         if dst_affine_width_height is not None:
@@ -998,6 +1021,7 @@ class RasterArray(XRasterBase):
         if self.width == 1 or self.height == 1:
             raise OneDimensionalRaster(
                 "At least one of the raster x,y coordinates has only one point."
+                f"{_get_data_var_message(self._obj)}"
             )
 
         resolution_x, resolution_y = self.resolution()
@@ -1010,7 +1034,9 @@ class RasterArray(XRasterBase):
         cl_array = self.slice_xy(clip_minx, clip_miny, clip_maxx, clip_maxy)
 
         if cl_array.rio.width < 1 or cl_array.rio.height < 1:
-            raise NoDataInBounds("No data found in bounds.")
+            raise NoDataInBounds(
+                f"No data found in bounds.{_get_data_var_message(self._obj)}"
+            )
 
         if cl_array.rio.width == 1 or cl_array.rio.height == 1:
             if auto_expand and auto_expand < auto_expand_limit:
@@ -1025,6 +1051,7 @@ class RasterArray(XRasterBase):
             raise OneDimensionalRaster(
                 "At least one of the clipped raster x,y coordinates"
                 " has only one point."
+                f"{_get_data_var_message(self._obj)}"
             )
 
         # make sure correct attributes preserved & projection added
@@ -1078,6 +1105,7 @@ class RasterArray(XRasterBase):
         if self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+                f"{_get_data_var_message(self._obj)}"
             )
         dst_crs = CRS.from_user_input(crs_to_wkt(crs))
         if self.crs != dst_crs:
@@ -1111,7 +1139,9 @@ class RasterArray(XRasterBase):
             cropped_ds.coords[self.x_dim].size < 1
             or cropped_ds.coords[self.y_dim].size < 1
         ):
-            raise NoDataInBounds("No data found in bounds.")
+            raise NoDataInBounds(
+                f"No data found in bounds.{_get_data_var_message(self._obj)}"
+            )
 
         # make sure correct attributes preserved & projection added
         _add_attrs_proj(cropped_ds, self._obj)
