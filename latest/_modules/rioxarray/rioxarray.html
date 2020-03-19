@@ -421,6 +421,16 @@
                 <span class="n">raster_handle</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="n">iii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">band_description</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">_get_data_var_message</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get message for named data variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot; Data variable: </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
 <div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
 
@@ -649,11 +659,15 @@
             <span class="k">if</span> <span class="n">in_x_dim</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">x_dim</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x dimension not found: </span><span class="si">{x_dim}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;x dimension (</span><span class="si">{</span><span class="n">x_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">y_dim</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">y_dim</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;y dimension not found: </span><span class="si">{y_dim}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;y dimension (</span><span class="si">{</span><span class="n">x_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">set_dims</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">)</span>
@@ -665,6 +679,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span>
         <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
             <span class="s2">&quot;x dimension not found. &#39;set_spatial_dims()&#39; can address this.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -673,6 +688,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span>
         <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
             <span class="s2">&quot;x dimension not found. &#39;set_spatial_dims()&#39; can address this.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -839,6 +855,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
                     <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
             <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -865,7 +882,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">extra_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">TooManyDimensions</span><span class="p">(</span><span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">TooManyDimensions</span><span class="p">(</span>
+                <span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
                 <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">. &quot;</span>
@@ -873,12 +893,14 @@
                 <span class="s2">&quot; to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
                 <span class="p">)</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
                 <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{0}</span><span class="s2">` &quot;</span>
                 <span class="s2">&quot;to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">extra_dims</span> <span class="k">else</span> <span class="kc">None</span>
 
@@ -996,6 +1018,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dst_affine_width_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1155,6 +1178,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
                 <span class="s2">&quot;At least one of the raster x,y coordinates has only one point.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
@@ -1167,7 +1191,9 @@
         <span class="n">cl_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_xy</span><span class="p">(</span><span class="n">clip_minx</span><span class="p">,</span> <span class="n">clip_miny</span><span class="p">,</span> <span class="n">clip_maxx</span><span class="p">,</span> <span class="n">clip_maxy</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span><span class="s2">&quot;No data found in bounds.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">auto_expand</span> <span class="ow">and</span> <span class="n">auto_expand</span> <span class="o">&lt;</span> <span class="n">auto_expand_limit</span><span class="p">:</span>
@@ -1182,6 +1208,7 @@
             <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
                 <span class="s2">&quot;At least one of the clipped raster x,y coordinates&quot;</span>
                 <span class="s2">&quot; has only one point.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># make sure correct attributes preserved &amp; projection added</span>
@@ -1235,6 +1262,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">crs</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">dst_crs</span><span class="p">:</span>
@@ -1268,7 +1296,9 @@
             <span class="n">cropped_ds</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span>
             <span class="ow">or</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span><span class="s2">&quot;No data found in bounds.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># make sure correct attributes preserved &amp; projection added</span>
         <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">cropped_ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>

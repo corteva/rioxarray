@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.24
+------
+- ENH: Add variable names to error messages for clarity (pull #99)
+
 0.0.23
 ------
 - BUG: Fix 'rio.set_spatial_dims' so information saved with 'rio' accesors (issue #94)
