@@ -3,7 +3,7 @@ History
 
 0.0.24
 ------
-- ENH: Add variable names to error messages for clarity.
+- ENH: Add variable names to error messages for clarity (pull #99)
 
 0.0.23
 ------
