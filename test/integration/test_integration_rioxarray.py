@@ -173,7 +173,12 @@ def test_clip_box__auto_expand(modis_clip):
 
 def test_clip_box__nodata_error(modis_clip):
     with modis_clip["open"](modis_clip["input"]) as xdi:
-        with pytest.raises(NoDataInBounds):
+        var_match = ""
+        if hasattr(xdi, "name") and xdi.name:
+            var_match = " Data variable: __xarray_dataarray_variable__"
+        with pytest.raises(
+            NoDataInBounds, match=f"No data found in bounds.{var_match}"
+        ):
             xdi.rio.clip_box(
                 minx=xdi.x[5].values,
                 miny=xdi.y[7].values,
@@ -184,8 +189,17 @@ def test_clip_box__nodata_error(modis_clip):
 
 def test_clip_box__one_dimension_error(modis_clip):
     with modis_clip["open"](modis_clip["input"]) as xdi:
+        var_match = ""
+        if hasattr(xdi, "name") and xdi.name:
+            var_match = " Data variable: __xarray_dataarray_variable__"
         # test exception after raster clipped
-        with pytest.raises(OneDimensionalRaster):
+        with pytest.raises(
+            OneDimensionalRaster,
+            match=(
+                "At least one of the clipped raster x,y coordinates has "
+                f"only one point.{var_match}"
+            ),
+        ):
             xdi.rio.clip_box(
                 minx=xdi.x[5].values,
                 miny=xdi.y[5].values,
@@ -1472,3 +1486,37 @@ def test_nonstandard_dims_isel_window():
         ).rio.isel_window(Window.from_slices(slice(5), slice(5)))
         assert reprojected.rio.width == 5
         assert reprojected.rio.height == 5
+
+
+def test_nonstandard_dims_error_msg():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        with pytest.raises(
+            DimensionError, match="x dimension not found",
+        ):
+            xds.rio.width
+        with pytest.raises(
+            DimensionError, match="Data variable: analysed_sst",
+        ):
+            xds.analysed_sst.rio.width
+
+
+def test_missing_crs_error_msg():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        xds = xds.drop_vars("spatial_ref")
+        xds.attrs.pop("grid_mapping")
+        with pytest.raises(
+            MissingCRS, match="Data variable: analysed_sst",
+        ):
+            xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.reproject(
+                "EPSG:4326"
+            )
+        with pytest.raises(
+            MissingCRS, match="Data variable: analysed_sst",
+        ):
+            xds.rio.set_spatial_dims(
+                x_dim="lon", y_dim="lat"
+            ).analysed_sst.rio.reproject("EPSG:4326")
