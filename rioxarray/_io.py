@@ -416,8 +416,17 @@ def _decode_datetime_cf(data_array):
             new_values = times.decode_cf_timedelta(
                 data_array[coord].values, units=units
             )
-            new_values = new_values.astype(np.dtype("timedelta64[ns]"))
-            data_array[coord].values = new_values
+            data_array = data_array.assign_coords(
+                {
+                    coord: IndexVariable(
+                        dims=data_array[coord].dims,
+                        data=new_values.astype(np.dtype("timedelta64[ns]")),
+                        attrs=data_array[coord].attrs,
+                        encoding=data_array[coord].encoding,
+                    )
+                }
+            )
+
         # stage 2: datetime
         if (
             "units" in data_array[coord].attrs
@@ -438,8 +447,17 @@ def _decode_datetime_cf(data_array):
                 calendar=calendar,
                 use_cftime=True,
             )
-            new_values.astype(dtype)
-            data_array[coord].values = new_values
+            data_array = data_array.assign_coords(
+                {
+                    coord: IndexVariable(
+                        dims=data_array[coord].dims,
+                        data=new_values.astype(dtype),
+                        attrs=data_array[coord].attrs,
+                        encoding=data_array[coord].encoding,
+                    )
+                }
+            )
+    return data_array
 
 
 def _parse_driver_tags(riods, attrs, coords):
@@ -743,7 +761,7 @@ def open_rasterio(
 
     # update attributes from NetCDF attributess
     _load_netcdf_attrs(riods.tags(), result)
-    _decode_datetime_cf(result)
+    result = _decode_datetime_cf(result)
 
     # make sure the _FillValue is correct dtype
     if "_FillValue" in attrs:

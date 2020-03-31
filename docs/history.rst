@@ -4,6 +4,7 @@ History
 0.0.24
 ------
 - ENH: Add variable names to error messages for clarity (pull #99)
+- BUG: Use assign_coords in _decode_datetime_cf (issue #101)
 
 0.0.23
 ------
