@@ -32,5 +32,9 @@ class OneDimensionalRaster(DimensionError):
     """This is an error when you have a 1 dimensional raster."""
 
 
+class DimensionMissingCoordingateError(RioXarrayError):
+    """This is raised when the dimension does not have the supporting coordinate."""
+
+
 class MissingCRS(RioXarrayError):
     """Missing the CRS in the dataset."""
