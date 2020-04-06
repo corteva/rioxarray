@@ -226,8 +226,11 @@ def _parse_tag(key, value):
     # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
     key = key.split("NC_GLOBAL#")[-1]
     if value.startswith("{") and value.endswith("}"):
-        new_val = np.fromstring(value.strip("{}"), dtype="float", sep=",")
-        value = new_val if len(new_val) else value
+        try:
+            new_val = np.fromstring(value.strip("{}"), dtype="float", sep=",")
+            value = new_val if len(new_val) else _to_numeric(value)
+        except ValueError:
+            value = _to_numeric(value)
     else:
         value = _to_numeric(value)
     return key, value
