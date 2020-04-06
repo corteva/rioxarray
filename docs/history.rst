@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.25
+------
+- BUG: Use recalc=True when using transform internally & ensure stable when coordinates unavailable. (issue #97)
+
 0.0.24
 ------
 - ENH: Add variable names to error messages for clarity (pull #99)

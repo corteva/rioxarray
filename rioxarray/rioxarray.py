@@ -27,6 +27,7 @@ from scipy.interpolate import griddata
 from rioxarray.crs import crs_to_wkt
 from rioxarray.exceptions import (
     DimensionError,
+    DimensionMissingCoordinateError,
     InvalidDimensionOrder,
     MissingCRS,
     NoDataInBounds,
@@ -672,6 +673,16 @@ class RasterArray(XRasterBase):
 
         return self._nodata
 
+    def _cached_transform(self):
+        """
+        Get the transform from attrs or property.
+        """
+        try:
+            return Affine(*self._obj.attrs["transform"][:6])
+        except KeyError:
+            pass
+        return None
+
     def resolution(self, recalc=False):
         """Determine the resolution of the `xarray.DataArray`
 
@@ -682,32 +693,42 @@ class RasterArray(XRasterBase):
             transform attribute.
 
         """
-        if not recalc or self.width == 1 or self.height == 1:
-            try:
-                # get resolution from xarray rasterio
-                data_transform = Affine(*self._obj.attrs["transform"][:6])
-                resolution_x = data_transform.a
-                resolution_y = data_transform.e
-                recalc = False
-            except KeyError:
-                recalc = True
+        transform = self._cached_transform()
 
-        if recalc:
+        if (
+            not recalc or self.width == 1 or self.height == 1
+        ) and transform is not None:
+            resolution_x = transform.a
+            resolution_y = transform.e
+            return resolution_x, resolution_y
+
+        # if the coordinates of the spatial dimensions are missing
+        # use the cached transform resolution
+        try:
             left, bottom, right, top = self._internal_bounds()
+        except DimensionMissingCoordinateError:
+            if transform is None:
+                raise
+            resolution_x = transform.a
+            resolution_y = transform.e
+            return resolution_x, resolution_y
 
-            if self.width == 1 or self.height == 1:
-                raise OneDimensionalRaster(
-                    "Only 1 dimenional array found. Cannot calculate the resolution."
-                    f"{_get_data_var_message(self._obj)}"
-                )
+        if self.width == 1 or self.height == 1:
+            raise OneDimensionalRaster(
+                "Only 1 dimenional array found. Cannot calculate the resolution."
+                f"{_get_data_var_message(self._obj)}"
+            )
 
-            resolution_x = (right - left) / (self.width - 1)
-            resolution_y = (bottom - top) / (self.height - 1)
-
+        resolution_x = (right - left) / (self.width - 1)
+        resolution_y = (bottom - top) / (self.height - 1)
         return resolution_x, resolution_y
 
     def _internal_bounds(self):
         """Determine the internal bounds of the `xarray.DataArray`"""
+        if self.x_dim not in self._obj.coords:
+            raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
+        elif self.y_dim not in self._obj.coords:
+            raise DimensionMissingCoordinateError(f"{self.y_dim} missing coordinates.")
         left = float(self._obj[self.x_dim][0])
         right = float(self._obj[self.x_dim][-1])
         top = float(self._obj[self.y_dim][0])
@@ -771,12 +792,22 @@ class RasterArray(XRasterBase):
         left, bottom, right, top: float
             Outermost coordinates.
         """
-        left, bottom, right, top = self._internal_bounds()
-        src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
-        left -= src_resolution_x / 2.0
-        right += src_resolution_x / 2.0
-        top -= src_resolution_y / 2.0
-        bottom += src_resolution_y / 2.0
+        resolution_x, resolution_y = self.resolution(recalc=recalc)
+
+        try:
+            # attempt to get bounds from xarray coordinate values
+            left, bottom, right, top = self._internal_bounds()
+            left -= resolution_x / 2.0
+            right += resolution_x / 2.0
+            top -= resolution_y / 2.0
+            bottom += resolution_y / 2.0
+        except DimensionMissingCoordinateError:
+            transform = self._cached_transform()
+            left = transform.c
+            top = transform.f
+            right = left + resolution_x * self.width
+            bottom = top + resolution_y * self.height
+
         return left, bottom, right, top
 
     def transform_bounds(self, dst_crs, densify_pts=21, recalc=False):
@@ -810,14 +841,7 @@ class RasterArray(XRasterBase):
 
     def transform(self, recalc=False):
         """Determine the affine of the `xarray.DataArray`"""
-        if not recalc:
-            try:
-                # get affine from xarray rasterio
-                return Affine(*self._obj.attrs["transform"][:6])
-            except KeyError:
-                pass
-        src_bounds = self.bounds(recalc=recalc)
-        src_left, _, _, src_top = src_bounds
+        src_left, _, _, src_top = self.bounds(recalc=recalc)
         src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
         return Affine.translation(src_left, src_top) * Affine.scale(
             src_resolution_x, src_resolution_y
@@ -863,7 +887,7 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        src_affine = self.transform()
+        src_affine = self.transform(recalc=True)
         if dst_affine_width_height is not None:
             dst_affine, dst_width, dst_height = dst_affine_width_height
         else:
@@ -950,7 +974,7 @@ class RasterArray(XRasterBase):
 
         """
         dst_crs = crs_to_wkt(match_data_array.rio.crs)
-        dst_affine = match_data_array.rio.transform()
+        dst_affine = match_data_array.rio.transform(recalc=True)
         dst_width, dst_height = match_data_array.rio.shape
 
         return self.reproject(
@@ -990,9 +1014,11 @@ class RasterArray(XRasterBase):
         else:
             x_slice = slice(minx, maxx)
 
-        return self._obj.sel(
+        subset = self._obj.sel(
             {self.x_dim: x_slice, self.y_dim: y_slice}
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+        subset.attrs["transform"] = tuple(self.transform(recalc=True))
+        return subset
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.DataArray` by a bounding box.
@@ -1117,7 +1143,7 @@ class RasterArray(XRasterBase):
         clip_mask_arr = geometry_mask(
             geometries=geometries,
             out_shape=(int(self.height), int(self.width)),
-            transform=self.transform(),
+            transform=self.transform(recalc=True),
             invert=not invert,
             all_touched=all_touched,
         )
