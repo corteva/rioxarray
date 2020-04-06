@@ -184,6 +184,7 @@
 <span class="kn">from</span> <span class="nn">rioxarray.crs</span> <span class="kn">import</span> <span class="n">crs_to_wkt</span>
 <span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DimensionError</span><span class="p">,</span>
+    <span class="n">DimensionMissingCoordinateError</span><span class="p">,</span>
     <span class="n">InvalidDimensionOrder</span><span class="p">,</span>
     <span class="n">MissingCRS</span><span class="p">,</span>
     <span class="n">NoDataInBounds</span><span class="p">,</span>
@@ -829,6 +830,16 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span>
 
+    <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the transform from attrs or property.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
 <div class="viewcode-block" id="RasterArray.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the resolution of the `xarray.DataArray`</span>
 
@@ -839,32 +850,42 @@
 <span class="sd">            transform attribute.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">recalc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># get resolution from xarray rasterio</span>
-                <span class="n">data_transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
-                <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">data_transform</span><span class="o">.</span><span class="n">a</span>
-                <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">data_transform</span><span class="o">.</span><span class="n">e</span>
-                <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">recalc</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">recalc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">recalc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
+            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
+
+        <span class="c1"># if the coordinates of the spatial dimensions are missing</span>
+        <span class="c1"># use the cached transform resolution</span>
+        <span class="k">try</span><span class="p">:</span>
             <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
+            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
-                    <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
+                <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
-            <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
+        <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
 
     <span class="k">def</span> <span class="nf">_internal_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the internal bounds of the `xarray.DataArray`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
         <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -928,12 +949,22 @@
 <span class="sd">        left, bottom, right, top: float</span>
 <span class="sd">            Outermost coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
-        <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-        <span class="n">left</span> <span class="o">-=</span> <span class="n">src_resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">right</span> <span class="o">+=</span> <span class="n">src_resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">top</span> <span class="o">-=</span> <span class="n">src_resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">bottom</span> <span class="o">+=</span> <span class="n">src_resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># attempt to get bounds from xarray coordinate values</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+            <span class="n">left</span> <span class="o">-=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">right</span> <span class="o">+=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">top</span> <span class="o">-=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">bottom</span> <span class="o">+=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">top</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+
         <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span></div>
 
 <div class="viewcode-block" id="RasterArray.transform_bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.transform_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">densify_pts</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -967,14 +998,7 @@
 
 <div class="viewcode-block" id="RasterArray.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the affine of the `xarray.DataArray`&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">recalc</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># get affine from xarray rasterio</span>
-                <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span>
-        <span class="n">src_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-        <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="n">src_bounds</span>
+        <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
         <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
             <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
@@ -1020,7 +1044,7 @@
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
+        <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dst_affine_width_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">dst_affine_width_height</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1107,7 +1131,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
+        <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
@@ -1147,9 +1171,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span>
+        <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span>
             <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">}</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">subset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">subset</span></div>
 
 <div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.DataArray` by a bounding box.</span>
@@ -1274,7 +1300,7 @@
         <span class="n">clip_mask_arr</span> <span class="o">=</span> <span class="n">geometry_mask</span><span class="p">(</span>
             <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
             <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)),</span>
-            <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">invert</span><span class="o">=</span><span class="ow">not</span> <span class="n">invert</span><span class="p">,</span>
             <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
         <span class="p">)</span>
