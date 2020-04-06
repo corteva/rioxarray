@@ -27,7 +27,7 @@ from scipy.interpolate import griddata
 from rioxarray.crs import crs_to_wkt
 from rioxarray.exceptions import (
     DimensionError,
-    DimensionMissingCoordingateError,
+    DimensionMissingCoordinateError,
     InvalidDimensionOrder,
     MissingCRS,
     NoDataInBounds,
@@ -706,7 +706,7 @@ class RasterArray(XRasterBase):
         # use the cached transform resolution
         try:
             left, bottom, right, top = self._internal_bounds()
-        except DimensionMissingCoordingateError:
+        except DimensionMissingCoordinateError:
             if transform is None:
                 raise
             resolution_x = transform.a
@@ -726,9 +726,9 @@ class RasterArray(XRasterBase):
     def _internal_bounds(self):
         """Determine the internal bounds of the `xarray.DataArray`"""
         if self.x_dim not in self._obj.coords:
-            raise DimensionMissingCoordingateError(f"{self.x_dim} missing coordinates.")
+            raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
         elif self.y_dim not in self._obj.coords:
-            raise DimensionMissingCoordingateError(f"{self.y_dim} missing coordinates.")
+            raise DimensionMissingCoordinateError(f"{self.y_dim} missing coordinates.")
         left = float(self._obj[self.x_dim][0])
         right = float(self._obj[self.x_dim][-1])
         top = float(self._obj[self.y_dim][0])
@@ -801,7 +801,7 @@ class RasterArray(XRasterBase):
             right += resolution_x / 2.0
             top -= resolution_y / 2.0
             bottom += resolution_y / 2.0
-        except DimensionMissingCoordingateError:
+        except DimensionMissingCoordinateError:
             transform = self._cached_transform()
             left = transform.c
             top = transform.f

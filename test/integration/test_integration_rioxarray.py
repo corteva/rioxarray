@@ -15,7 +15,7 @@ from rasterio.windows import Window
 import rioxarray
 from rioxarray.exceptions import (
     DimensionError,
-    DimensionMissingCoordingateError,
+    DimensionMissingCoordinateError,
     MissingCRS,
     NoDataInBounds,
     OneDimensionalRaster,
@@ -1576,7 +1576,7 @@ def test_missing_transform_bounds():
         parse_coordinates=False,
     )
     xds.attrs.pop("transform")
-    with pytest.raises(DimensionMissingCoordingateError):
+    with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.bounds()
 
 
@@ -1586,5 +1586,5 @@ def test_missing_transform_resolution():
         parse_coordinates=False,
     )
     xds.attrs.pop("transform")
-    with pytest.raises(DimensionMissingCoordingateError):
+    with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.resolution()
