@@ -11,7 +11,7 @@ Stable release
 1. Use pip to install package from `PyPI <https://pypi.org/project/rioxarray/>`__:
 
   .. code-block:: bash
-    
+
       pip install rioxarray
 
 

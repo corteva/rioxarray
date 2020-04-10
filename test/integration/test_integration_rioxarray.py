@@ -146,7 +146,7 @@ def _del_attr(input_xr, attr):
 
 
 @pytest.fixture(
-    params=[xarray.open_dataset, xarray.open_dataarray, rioxarray.open_rasterio,]
+    params=[xarray.open_dataset, xarray.open_dataarray, rioxarray.open_rasterio]
 )
 def modis_clip(request, tmpdir):
     return dict(
