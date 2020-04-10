@@ -38,6 +38,12 @@ Documentation
 - Stable: https://corteva.github.io/rioxarray/stable/
 - Latest: https://corteva.github.io/rioxarray/latest/
 
+Bugs/Questions
+--------------
+
+- Report bugs/ask questions: https://github.com/corteva/rioxarray/issues
+- Ask developer questions: https://gitter.im/rioxarray/community
+- Ask the community: https://gis.stackexchange.com/questions/tagged/rioxarray
 
 Credits
 -------

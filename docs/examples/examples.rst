@@ -31,3 +31,4 @@ This page contains links to a collection of examples of how to use rioxarray.
     Converting NetCDF dataset array to GeoTiff <https://gis.stackexchange.com/a/329141/144357>
     How do I add projection to this NetCDF file? (Satellite) <https://gis.stackexchange.com/a/345697/144357>
     Create a new raster TIFF file which is masked based on the GeoJSON file <https://gis.stackexchange.com/a/346899/144357>
+    How to mask NetCDF time series data from a shapefile in Python? <https://gis.stackexchange.com/a/354798/144357>

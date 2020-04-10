@@ -2,4 +2,4 @@
 
  - [ ] Closes #xxxx
  - [ ] Tests added
- - [ ] Fully documented, including `whats-new.rst` for all changes and `api.rst` for new API
+ - [ ] Fully documented, including `docs/history.rst` for all changes and `docs/rioxarray.rst` for new API
