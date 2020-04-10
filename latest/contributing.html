@@ -254,7 +254,13 @@ are welcome :)</li>
 <li><p class="first">Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ python -m venv rioxarray_env
 $ <span class="nb">cd</span> rioxarray/
-$ python setup.py develop
+$ pip install -e .<span class="o">[</span>dev<span class="o">]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Setup pre-commit hooks:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pre-commit install
+$ pre-commit autoupdate
 </pre></div>
 </div>
 </li>
@@ -266,12 +272,17 @@ $ python setup.py develop
 </li>
 <li><p class="first">When you’re done making changes, check that your changes pass flake8, are black formatter,
 and the tests pass:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ flake8 rioxarray <span class="nb">test</span>
-$ black --check .
-$ python setup.py <span class="nb">test</span> or py.test
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ make check
+$ make <span class="nb">test</span>
 </pre></div>
 </div>
-<p>To get flake8 and black, just pip install them into your virtualenv.</p>
+<p>Or, if you cannot run makefile commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ flake8 --ignore<span class="o">=</span>E731,W503,W504 --exclude --max-complexity <span class="m">10</span> --max-line-length <span class="m">88</span> rioxarray/
+$ flake8 --max-line-length <span class="m">88</span> tests/unit/ tests/functional/ tests/integration
+$ black --target-version py36 --check .
+$ py.test
+</pre></div>
+</div>
 </li>
 <li><p class="first">Commit your changes and push your branch to GitLab:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git add .
