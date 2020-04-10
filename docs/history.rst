@@ -1,6 +1,10 @@
 History
 =======
 
+0.0.26
+------
+- ENH: Added :func:`rioxarray.show_versions` (issue #106)
+
 0.0.25
 ------
 - BUG: Use recalc=True when using transform internally & ensure stable when coordinates unavailable. (issue #97)
