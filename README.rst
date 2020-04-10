@@ -19,6 +19,9 @@ rasterio xarray extension.
 .. image:: https://img.shields.io/pypi/v/rioxarray.svg
     :target: https://pypi.python.org/pypi/rioxarray
 
+.. image:: https://pepy.tech/badge/rioxarray
+    :target: https://pepy.tech/project/rioxarray
+
 .. image:: https://img.shields.io/conda/vn/conda-forge/rioxarray.svg
     :target: https://anaconda.org/conda-forge/rioxarray
 
@@ -30,6 +33,12 @@ rasterio xarray extension.
 
 .. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
     :target: https://coveralls.io/github/corteva/rioxarray?branch=master
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    :target: https://github.com/pre-commit/pre-commit
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/python/black
 
 
 Documentation
