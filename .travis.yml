@@ -27,14 +27,13 @@ notifications:
 before_install:
 # Install minconda
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    wget -O miniconda.sh http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh;
+    wget -O miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    curl -o miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh;
+    curl -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-MacOSX-x86_64.sh;
   fi
 - bash miniconda.sh -b -p $HOME/miniconda
-- source $HOME/miniconda/etc/profile.d/conda.sh
-- conda activate
+- source $HOME/miniconda/bin/activate
 # make sure setup.py works before dependencies installed
 - python setup.py --version
 - conda config --set always_yes True
@@ -44,7 +43,7 @@ before_install:
 - conda config --set channel_priority strict
 # Create conda environment
 - conda create -n test python=$PYTHON_VERSION pillow rasterio scipy xarray netcdf4 dask pandoc
-- source activate test
+- source $HOME/miniconda/bin/activate test
 
 install:
 - pip install .[all]
