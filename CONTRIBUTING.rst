@@ -68,30 +68,39 @@ Ready to contribute? Here's how to set up `rioxarray` for local development.
 
     $ python -m venv rioxarray_env
     $ cd rioxarray/
-    $ python setup.py develop
+    $ pip install -e .[dev]
 
-4. Create a branch for local development::
+4. Setup pre-commit hooks::
+
+   $ pre-commit install
+   $ pre-commit autoupdate
+
+5. Create a branch for local development::
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8, are black formatter,
+6. When you're done making changes, check that your changes pass flake8, are black formatter,
    and the tests pass::
 
-    $ flake8 rioxarray test
-    $ black --check .
-    $ python setup.py test or py.test
+    $ make check
+    $ make test
 
-   To get flake8 and black, just pip install them into your virtualenv.
+   Or, if you cannot run makefile commands::
 
-6. Commit your changes and push your branch to GitLab::
+    $ flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
+    $ flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
+    $ black --target-version py36 --check .
+    $ py.test
+
+7. Commit your changes and push your branch to GitLab::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+8. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------

@@ -51,4 +51,3 @@ This Code of Conduct is adapted from the Contributor Covenant_, version 1.4, ava
 
 .. _Contributor Covenant:  http://contributor-covenant.org
 .. _version:  http://contributor-covenant.org/version/1/4/
- 
