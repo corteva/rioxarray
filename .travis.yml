@@ -36,7 +36,7 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     source $HOME/miniconda/etc/profile.d/conda.sh;
   else
-    export PATH=$HOME/miniconda/bin:$PATH
+    export PATH=$HOME/miniconda/bin:$PATH;
   fi
 - conda activate
 # make sure setup.py works before dependencies installed
