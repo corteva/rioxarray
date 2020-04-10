@@ -23,6 +23,12 @@ http://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports
 
 
 #### Environment Information
+
+<!-- Only works with rioxarray >= 0.0.25 -->
+ - `python -c "import rioxarray; rioxarray.show_versions()"`
+
+<!-- For rioxarray < 0.0.25 -->
+
  - rioxarray version (`python -c "import rioxarray; print(rioxarray.__version__)"`)
  - rasterio version (`rio --version`)
  - GDAL version (`rio --gdal-version`)
