@@ -1256,6 +1256,17 @@ def test_reproject_missing_crs():
         test_da.rio.reproject(4326)
 
 
+def test_reproject_resolution_and_shape():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+        attrs={'crs': '+init=epsg:3857'}
+    )
+    with pytest.raises(RioXarrayError):
+        test_da.rio.reproject(4326, resolution=1, shape=(1, 1))
+
+
 class CustomCRS(object):
     @property
     def wkt(self):
