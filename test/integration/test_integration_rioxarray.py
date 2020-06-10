@@ -1261,7 +1261,7 @@ def test_reproject_resolution_and_shape():
         numpy.zeros((5, 5)),
         dims=("y", "x"),
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
-        attrs={'crs': '+init=epsg:3857'}
+        attrs={"crs": "+init=epsg:3857"},
     )
     with pytest.raises(RioXarrayError):
         test_da.rio.reproject(4326, resolution=1, shape=(1, 1))

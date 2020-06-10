@@ -211,13 +211,17 @@ def _make_dst_affine(
     src_width, src_height = src_data_array.rio.shape
     resolution_or_width_height = {}
     if dst_resolution is not None:
-        resolution_or_width_height['resolution'] = dst_resolution
+        resolution_or_width_height["resolution"] = dst_resolution
     if dst_shape is not None:
-        resolution_or_width_height['dst_height'] = dst_shape[0]
-        resolution_or_width_height['dst_width'] = dst_shape[1]
+        resolution_or_width_height["dst_height"] = dst_shape[0]
+        resolution_or_width_height["dst_width"] = dst_shape[1]
     dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-        src_crs, dst_crs, src_width, src_height, *src_bounds,
-        **resolution_or_width_height
+        src_crs,
+        dst_crs,
+        src_width,
+        src_height,
+        *src_bounds,
+        **resolution_or_width_height,
     )
     return dst_affine, dst_width, dst_height
 
@@ -895,9 +899,7 @@ class RasterArray(XRasterBase):
 
         """
         if resolution is not None and shape is not None:
-            raise RioXarrayError(
-                "resolution and shape cannot be used together."
-            )
+            raise RioXarrayError("resolution and shape cannot be used together.")
         if self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
