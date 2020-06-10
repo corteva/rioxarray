@@ -1,6 +1,11 @@
 History
 =======
 
+Unreleased
+----------
+
+- ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
+
 0.0.26
 ------
 - ENH: Added :func:`rioxarray.show_versions` (issue #106)
