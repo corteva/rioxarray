@@ -9,6 +9,7 @@ Unreleased
 0.0.26
 ------
 - ENH: Added :func:`rioxarray.show_versions` (issue #106)
+- Fix ``RasterioDeprecationWarning`` (pull #117)
 
 0.0.25
 ------
