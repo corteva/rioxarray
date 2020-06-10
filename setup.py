@@ -35,7 +35,7 @@ extras_require = {
         "nbsphinx",
         "sphinx_rtd_theme",
         "black",
-        "flake8",
+        "flake8==3.7",
         "pylint",
         "isort",
         "pre-commit",
