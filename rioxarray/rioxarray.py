@@ -203,18 +203,21 @@ def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
     return add_xy_grid_meta(new_coords)
 
 
-def _make_dst_affine(src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None):
+def _make_dst_affine(
+    src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None
+):
     """Determine the affine of the new projected `xarray.DataArray`"""
     src_bounds = src_data_array.rio.bounds()
     src_width, src_height = src_data_array.rio.shape
     resolution_or_width_height = {}
     if dst_resolution is not None:
-        resolution_or_width_height['resolution'] = des_resolution
+        resolution_or_width_height['resolution'] = dst_resolution
     if dst_shape is not None:
         resolution_or_width_height['dst_height'] = dst_shape[0]
         resolution_or_width_height['dst_width'] = dst_shape[1]
     dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-        src_crs, dst_crs, src_width, src_height, *src_bounds, **resolution_or_width_height
+        src_crs, dst_crs, src_width, src_height, *src_bounds,
+        **resolution_or_width_height
     )
     return dst_affine, dst_width, dst_height
 
