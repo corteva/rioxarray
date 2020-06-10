@@ -203,12 +203,18 @@ def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
     return add_xy_grid_meta(new_coords)
 
 
-def _make_dst_affine(src_data_array, src_crs, dst_crs, dst_resolution=None):
+def _make_dst_affine(src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None):
     """Determine the affine of the new projected `xarray.DataArray`"""
     src_bounds = src_data_array.rio.bounds()
     src_width, src_height = src_data_array.rio.shape
+    resolution_or_width_height = {}
+    if dst_resolution is not None:
+        resolution_or_width_height['resolution'] = des_resolution
+    if dst_shape is not None:
+        resolution_or_width_height['dst_height'] = dst_shape[0]
+        resolution_or_width_height['dst_width'] = dst_shape[1]
     dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-        src_crs, dst_crs, src_width, src_height, *src_bounds, resolution=dst_resolution
+        src_crs, dst_crs, src_width, src_height, *src_bounds, **resolution_or_width_height
     )
     return dst_affine, dst_width, dst_height
 
@@ -851,6 +857,7 @@ class RasterArray(XRasterBase):
         self,
         dst_crs,
         resolution=None,
+        shape=None,
         dst_affine_width_height=None,
         resampling=Resampling.nearest,
     ):
@@ -871,6 +878,8 @@ class RasterArray(XRasterBase):
         resolution: float or tuple(float, float), optional
             Size of a destination pixel in destination projection units
             (e.g. degrees or metres).
+        shape: tuple(int, int), optional
+            Shape of the destination in pixels. Cannot be used together with resolution.
         dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
             Tuple with the destination affine, width, and height.
         resampling: Resampling method, optional
@@ -882,6 +891,10 @@ class RasterArray(XRasterBase):
         :class:`xarray.DataArray`: A reprojected DataArray.
 
         """
+        if resolution is not None and shape is not None:
+            raise RioXarrayError(
+                "resolution and shape cannot be used together."
+            )
         if self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
@@ -892,7 +905,7 @@ class RasterArray(XRasterBase):
             dst_affine, dst_width, dst_height = dst_affine_width_height
         else:
             dst_affine, dst_width, dst_height = _make_dst_affine(
-                self._obj, self.crs, dst_crs, resolution
+                self._obj, self.crs, dst_crs, resolution, shape
             )
         extra_dim = self._check_dimensions()
         if extra_dim:
@@ -1385,6 +1398,7 @@ class RasterDataset(XRasterBase):
         self,
         dst_crs,
         resolution=None,
+        shape=None,
         dst_affine_width_height=None,
         resampling=Resampling.nearest,
     ):
@@ -1404,6 +1418,8 @@ class RasterDataset(XRasterBase):
         resolution: float or tuple(float, float), optional
             Size of a destination pixel in destination projection units
             (e.g. degrees or metres).
+        shape: tuple(int, int), optional
+            Shape of the destination in pixels. Cannot be used together with resolution.
         dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
             Tuple with the destination affine, width, and height.
         resampling: Resampling method, optional
@@ -1423,6 +1439,7 @@ class RasterDataset(XRasterBase):
                 .rio.reproject(
                     dst_crs,
                     resolution=resolution,
+                    shape=shape,
                     dst_affine_width_height=dst_affine_width_height,
                     resampling=resampling,
                 )
