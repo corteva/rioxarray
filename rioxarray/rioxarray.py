@@ -209,12 +209,16 @@ def _make_dst_affine(
     """Determine the affine of the new projected `xarray.DataArray`"""
     src_bounds = src_data_array.rio.bounds()
     src_width, src_height = src_data_array.rio.shape
-    resolution_or_width_height = {}
-    if dst_resolution is not None:
-        resolution_or_width_height["resolution"] = dst_resolution
-    if dst_shape is not None:
-        resolution_or_width_height["dst_height"] = dst_shape[0]
-        resolution_or_width_height["dst_width"] = dst_shape[1]
+    dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
+    resolution_or_width_height = {
+        k: v
+        for k, v in [
+            ("resolution", dst_resolution),
+            ("dst_height", dst_height),
+            ("dst_width", dst_width),
+        ]
+        if v is not None
+    }
     dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
         src_crs,
         dst_crs,
