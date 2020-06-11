@@ -208,7 +208,7 @@ def _make_dst_affine(
 ):
     """Determine the affine of the new projected `xarray.DataArray`"""
     src_bounds = src_data_array.rio.bounds()
-    src_width, src_height = src_data_array.rio.shape
+    src_height, src_width = src_data_array.rio.shape
     dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
     resolution_or_width_height = {
         k: v
@@ -570,8 +570,8 @@ class XRasterBase(object):
 
     @property
     def shape(self):
-        """tuple: Returns the shape (width, height)"""
-        return (self.width, self.height)
+        """tuple(int, int): Returns the shape (height, width)"""
+        return (self.height, self.width)
 
     def isel_window(self, window):
         """
@@ -1000,7 +1000,7 @@ class RasterArray(XRasterBase):
         """
         dst_crs = crs_to_wkt(match_data_array.rio.crs)
         dst_affine = match_data_array.rio.transform(recalc=True)
-        dst_width, dst_height = match_data_array.rio.shape
+        dst_height, dst_width = match_data_array.rio.shape
 
         return self.reproject(
             dst_crs,
