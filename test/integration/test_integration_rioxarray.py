@@ -348,6 +348,25 @@ def test_transform_bounds():
         )
 
 
+def test_reproject_with_shape(modis_reproject):
+    new_shape = (9, 10)
+    mask_args = (
+        dict(masked=False)
+        if "open_rasterio" in str(modis_reproject["open"])
+        else dict(mask_and_scale=False)
+    )
+    with modis_reproject["open"](
+        modis_reproject["input"], **mask_args
+    ) as mda:
+        mds_repr = mda.rio.reproject(modis_reproject["to_proj"], shape=new_shape)
+        # test
+        if hasattr(mds_repr, "variables"):
+            for var in mds_repr.rio.vars:
+                assert mds_repr[var].shape == new_shape
+        else:
+            assert mds_repr.shape == new_shape
+
+
 def test_reproject(modis_reproject):
     mask_args = (
         dict(masked=False)

@@ -878,6 +878,8 @@ class RasterArray(XRasterBase):
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
+        .. versionadded:: 0.0.27 shape
+
         Parameters
         ----------
         dst_crs: str
@@ -886,7 +888,8 @@ class RasterArray(XRasterBase):
             Size of a destination pixel in destination projection units
             (e.g. degrees or metres).
         shape: tuple(int, int), optional
-            Shape of the destination in pixels. Cannot be used together with resolution.
+            Shape of the destination in pixels (dst_height, dst_width). Cannot be used
+            together with resolution.
         dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
             Tuple with the destination affine, width, and height.
         resampling: Resampling method, optional
@@ -1415,6 +1418,7 @@ class RasterDataset(XRasterBase):
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
+        .. versionadded:: 0.0.27 shape
 
         Parameters
         ----------
@@ -1424,7 +1428,8 @@ class RasterDataset(XRasterBase):
             Size of a destination pixel in destination projection units
             (e.g. degrees or metres).
         shape: tuple(int, int), optional
-            Shape of the destination in pixels. Cannot be used together with resolution.
+            Shape of the destination in pixels (dst_height, dst_width). Cannot be used
+            together with resolution.
         dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
             Tuple with the destination affine, width, and height.
         resampling: Resampling method, optional
