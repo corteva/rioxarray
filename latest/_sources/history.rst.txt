@@ -1,10 +1,11 @@
 History
 =======
 
-Unreleased
-----------
+0.0.27
+------
 
 - ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
+- Fix ``RasterioDeprecationWarning`` (pull #117)
 
 0.0.26
 ------
