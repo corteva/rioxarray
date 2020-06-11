@@ -1,15 +1,15 @@
 History
 =======
 
-Unreleased
-----------
+0.0.27
+------
 
 - ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
+- Fix ``RasterioDeprecationWarning`` (pull #117)
 
 0.0.26
 ------
 - ENH: Added :func:`rioxarray.show_versions` (issue #106)
-- Fix ``RasterioDeprecationWarning`` (pull #117)
 
 0.0.25
 ------
