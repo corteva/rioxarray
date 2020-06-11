@@ -365,7 +365,7 @@
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Determine the affine of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
     <span class="n">src_bounds</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
-    <span class="n">src_width</span><span class="p">,</span> <span class="n">src_height</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">src_height</span><span class="p">,</span> <span class="n">src_width</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">dst_shape</span> <span class="k">if</span> <span class="n">dst_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">resolution_or_width_height</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
@@ -727,8 +727,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;tuple: Returns the shape (width, height)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;tuple(int, int): Returns the shape (height, width)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
 
 <div class="viewcode-block" id="XRasterBase.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1157,7 +1157,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">dst_crs</span><span class="p">,</span>

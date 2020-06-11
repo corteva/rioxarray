@@ -6,6 +6,7 @@ History
 
 - ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
 - Fix ``RasterioDeprecationWarning`` (pull #117)
+- BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)
 
 0.0.26
 ------
