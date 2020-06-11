@@ -857,6 +857,19 @@ class TestRasterio:
                         assert_equal(actual_res, expected_res)
                         assert_equal(expected_val, actual_val)
 
+    def test_rasterio_vrt_with_src_crs(self):
+        # Test open_rasterio() support of WarpedVRT with specified src_crs
+        import rasterio
+
+        # create geotiff with no CRS and specify it manually
+        with create_tmp_geotiff(crs=None) as (tmp_file, expected):
+            src_crs = rasterio.crs.CRS.from_epsg(32618)
+            with rasterio.open(tmp_file) as src:
+                assert src.crs is None
+                with rasterio.vrt.WarpedVRT(src, src_crs=src_crs) as vrt:
+                    with rioxarray.open_rasterio(vrt) as da:
+                        assert da.rio.crs == src_crs
+
 
 def test_open_cog():
     cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")

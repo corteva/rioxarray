@@ -651,14 +651,17 @@ def open_rasterio(
         vrt = filename
         filename = vrt.src_dataset.name
         vrt_params = dict(
+            src_crs=vrt.src_crs.to_string(),
             crs=vrt.crs.to_string(),
             resampling=vrt.resampling,
+            tolerance=vrt.tolerance,
             src_nodata=vrt.src_nodata,
             nodata=vrt.nodata,
-            tolerance=vrt.tolerance,
-            transform=vrt.transform,
             width=vrt.width,
             height=vrt.height,
+            src_transform=vrt.src_transform,
+            transform=vrt.transform,
+            dtype=vrt.working_dtype,
             warp_extras=vrt.warp_extras,
         )
 
