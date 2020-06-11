@@ -97,6 +97,16 @@
         "test",
         "ideas"
       ]
+    },
+    {
+      "login": "cheginit",
+      "name": "Taher Chegini",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/13016644?v=4",
+      "profile": "https://github.com/cheginit",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

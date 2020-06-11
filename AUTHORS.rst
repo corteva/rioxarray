@@ -22,6 +22,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/davidbrochart"><img src="https://avatars2.githubusercontent.com/u/4711805?v=4" width="100px;" alt="David Brochart"/><br /><sub><b>David Brochart</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=davidbrochart" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=davidbrochart" title="Tests">⚠️</a> <a href="#ideas-davidbrochart" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/cheginit"><img src="https://avatars2.githubusercontent.com/u/13016644?v=4" width="100px;" alt="Taher Chegini"/><br /><sub><b>Taher Chegini</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=cheginit" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/issues?q=author%3Acheginit" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
