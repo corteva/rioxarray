@@ -1616,3 +1616,8 @@ def test_missing_transform_resolution():
     xds.attrs.pop("transform")
     with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.resolution()
+
+
+def test_shape_order():
+    rds = rioxarray.open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"))
+    assert rds.air_temperature.rio.shape == (585, 1386)
