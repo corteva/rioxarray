@@ -16,6 +16,7 @@ import warnings
 from uuid import uuid4
 
 import numpy as np
+import pyproj
 import rasterio.warp
 import xarray
 from affine import Affine
@@ -325,10 +326,12 @@ class XRasterBase(object):
             # look in grid_mapping
             grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
             try:
-                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["spatial_ref"]
-            except KeyError:
-                crs_wkt = self._obj.coords[grid_mapping_coord].attrs["crs_wkt"]
-            self.set_crs(crs_wkt, inplace=True)
+                self.set_crs(
+                    pyproj.CRS.from_cf(self._obj.coords[grid_mapping_coord].attrs),
+                    inplace=True,
+                )
+            except pyproj.exceptions.CRSError:
+                pass
         except KeyError:
             try:
                 # look in attrs for 'crs'
@@ -423,11 +426,10 @@ class XRasterBase(object):
             )
         # add grid mapping coordinate
         data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+        grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
+        # spatial_ref is for compatibility with GDAL
         crs_wkt = crs_to_wkt(data_obj.rio.crs)
-        grid_map_attrs = dict()
         grid_map_attrs["spatial_ref"] = crs_wkt
-        # http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#appendix-grid-mappings
-        # http://desktop.arcgis.com/en/arcmap/10.3/manage-data/netcdf/spatial-reference-for-netcdf-data.htm
         grid_map_attrs["crs_wkt"] = crs_wkt
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
 
