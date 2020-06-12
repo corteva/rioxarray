@@ -214,6 +214,7 @@
 <h2>Latest<a class="headerlink" href="#latest" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>rio.reproject: change input kwarg dst_affine_width_height -&gt; shape &amp; transform (#125)</li>
+<li>ENH: Use pyproj.CRS to read/write CF parameters (issue #124)</li>
 </ul>
 </div>
 <div class="section" id="id1">
@@ -222,7 +223,7 @@
 <li>ENH: Added optional <cite>shape</cite> argument to <cite>rio.reproject</cite> (pull #116)</li>
 <li>Fix <code class="docutils literal notranslate"><span class="pre">RasterioDeprecationWarning</span></code> (pull #117)</li>
 <li>BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)</li>
-<li>Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 &amp; pull 120)</li>
+<li>Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 &amp; pull #120)</li>
 <li>BUG: Use internal reprojection as engine for resampling window in merge (pull #123)</li>
 </ul>
 </div>

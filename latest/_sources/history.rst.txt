@@ -4,6 +4,7 @@ History
 Latest
 -------
 - rio.reproject: change input kwarg dst_affine_width_height -> shape & transform (#125)
+- ENH: Use pyproj.CRS to read/write CF parameters (issue #124)
 
 0.0.27
 ------
@@ -11,7 +12,7 @@ Latest
 - ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
 - Fix ``RasterioDeprecationWarning`` (pull #117)
 - BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)
-- Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 & pull 120)
+- Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 & pull #120)
 - BUG: Use internal reprojection as engine for resampling window in merge (pull #123)
 
 0.0.26
