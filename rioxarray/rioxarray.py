@@ -906,8 +906,8 @@ class RasterArray(XRasterBase):
         :class:`xarray.DataArray`: A reprojected DataArray.
 
         """
-        if resolution is not None and shape is not None:
-            raise RioXarrayError("resolution and shape cannot be used together.")
+        if resolution is not None and (shape is not None or transform is not None):
+            raise RioXarrayError("resolution cannot be used with shape or transform.")
         if self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."

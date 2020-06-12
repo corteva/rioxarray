@@ -1273,15 +1273,20 @@ def test_reproject_missing_crs():
         test_da.rio.reproject(4326)
 
 
-def test_reproject_resolution_and_shape():
+def test_reproject_resolution_and_shape_transform():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("y", "x"),
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
         attrs={"crs": "epsg:3857"},
     )
+    affine = Affine.from_gdal(0, 0.005, 0, 0, 0, 0.005)
     with pytest.raises(RioXarrayError):
         test_da.rio.reproject(4326, resolution=1, shape=(1, 1))
+    with pytest.raises(RioXarrayError):
+        test_da.rio.reproject(4326, resolution=1, transform=affine)
+    with pytest.raises(RioXarrayError):
+        test_da.rio.reproject(4326, resolution=1, shape=(1, 1), transform=affine)
 
 
 def test_reproject_transform_missing_shape():
