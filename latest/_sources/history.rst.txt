@@ -3,12 +3,15 @@ History
 
 Latest
 -------
+
+
+0.0.28
+-------
 - rio.reproject: change input kwarg dst_affine_width_height -> shape & transform (#125)
 - ENH: Use pyproj.CRS to read/write CF parameters (issue #124)
 
 0.0.27
 ------
-
 - ENH: Added optional `shape` argument to `rio.reproject` (pull #116)
 - Fix ``RasterioDeprecationWarning`` (pull #117)
 - BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)
