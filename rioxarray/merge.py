@@ -130,7 +130,8 @@ def merge_arrays(
         dims=tuple(representative_array.dims),
         attrs=out_attrs,
     )
-    xda.rio.write_nodata(representative_array.rio.nodata, inplace=True)
+    out_nodata = nodata if nodata is not None else representative_array.rio.nodata
+    xda.rio.write_nodata(out_nodata, inplace=True)
     xda.rio.write_crs(representative_array.rio.crs, inplace=True)
     return xda
 
