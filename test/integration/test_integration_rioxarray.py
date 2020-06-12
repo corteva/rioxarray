@@ -1278,10 +1278,21 @@ def test_reproject_resolution_and_shape():
         numpy.zeros((5, 5)),
         dims=("y", "x"),
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
-        attrs={"crs": "+init=epsg:3857"},
+        attrs={"crs": "epsg:3857"},
     )
     with pytest.raises(RioXarrayError):
         test_da.rio.reproject(4326, resolution=1, shape=(1, 1))
+
+
+def test_reproject_transform_missing_shape():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+        attrs={"crs": "epsg:3857"},
+    )
+    with pytest.raises(RioXarrayError):
+        test_da.rio.reproject(4326, transform=test_da.rio.transform())
 
 
 class CustomCRS(object):

@@ -869,7 +869,7 @@ class RasterArray(XRasterBase):
         dst_crs,
         resolution=None,
         shape=None,
-        dst_affine_width_height=None,
+        transform=None,
         resampling=Resampling.nearest,
     ):
         """
@@ -883,6 +883,7 @@ class RasterArray(XRasterBase):
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
         .. versionadded:: 0.0.27 shape
+        .. versionadded:: 0.0.28 transform
 
         Parameters
         ----------
@@ -894,8 +895,8 @@ class RasterArray(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
-            Tuple with the destination affine, width, and height.
+        transform, optional
+            The destination transform. shape is required if included.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
 
@@ -913,12 +914,16 @@ class RasterArray(XRasterBase):
                 f"{_get_data_var_message(self._obj)}"
             )
         src_affine = self.transform(recalc=True)
-        if dst_affine_width_height is not None:
-            dst_affine, dst_width, dst_height = dst_affine_width_height
-        else:
+        if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
                 self._obj, self.crs, dst_crs, resolution, shape
             )
+        elif transform is not None and shape is not None:
+            dst_affine = transform
+            dst_height, dst_width = shape
+        else:
+            raise RioXarrayError("shape is required if transform is set.")
+
         extra_dim = self._check_dimensions()
         if extra_dim:
             dst_data = np.zeros(
@@ -999,12 +1004,10 @@ class RasterArray(XRasterBase):
 
         """
         dst_crs = crs_to_wkt(match_data_array.rio.crs)
-        dst_affine = match_data_array.rio.transform(recalc=True)
-        dst_height, dst_width = match_data_array.rio.shape
-
         return self.reproject(
             dst_crs,
-            dst_affine_width_height=(dst_affine, dst_width, dst_height),
+            transform=match_data_array.rio.transform(recalc=True),
+            shape=match_data_array.rio.shape,
             resampling=resampling,
         )
 
@@ -1411,7 +1414,7 @@ class RasterDataset(XRasterBase):
         dst_crs,
         resolution=None,
         shape=None,
-        dst_affine_width_height=None,
+        transform=None,
         resampling=Resampling.nearest,
     ):
         """
@@ -1423,6 +1426,7 @@ class RasterDataset(XRasterBase):
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
         .. versionadded:: 0.0.27 shape
+        .. versionadded:: 0.0.28 transform
 
         Parameters
         ----------
@@ -1434,8 +1438,8 @@ class RasterDataset(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional
-            Tuple with the destination affine, width, and height.
+        transform, optional
+            The destination transform. shape is required if included.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
 
@@ -1454,7 +1458,7 @@ class RasterDataset(XRasterBase):
                     dst_crs,
                     resolution=resolution,
                     shape=shape,
-                    dst_affine_width_height=dst_affine_width_height,
+                    transform=transform,
                     resampling=resampling,
                 )
             )
