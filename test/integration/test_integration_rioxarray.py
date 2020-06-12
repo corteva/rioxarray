@@ -1330,6 +1330,26 @@ def test_get_crs_dataset():
     assert test_ds.rio.crs.to_epsg() == 4326
 
 
+def test_write_crs_cf():
+    test_da = xarray.DataArray(1)
+    test_da = test_da.rio.write_crs(4326)
+    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.rio.crs.to_epsg() == 4326
+    assert "spatial_ref" in test_da.spatial_ref.attrs
+    assert "crs_wkt" in test_da.spatial_ref.attrs
+    assert test_da.spatial_ref.attrs["grid_mapping_name"] == "latitude_longitude"
+
+
+def test_read_crs_cf():
+    test_da = xarray.DataArray(1)
+    test_da = test_da.rio.write_crs(4326)
+    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    attrs = test_da.spatial_ref.attrs
+    attrs.pop("spatial_ref")
+    attrs.pop("crs_wkt")
+    assert test_da.rio.crs.to_epsg() == 4326
+
+
 def test_get_crs_dataset__nonstandard_grid_mapping():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(4326, grid_mapping_name="frank")
