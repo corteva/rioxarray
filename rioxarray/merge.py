@@ -40,7 +40,8 @@ class RasterioDatasetDuck:
                 out_height, out_width = out_shape
             data_window = self._xds.rio.reproject(
                 self._xds.rio.crs,
-                dst_affine_width_height=(self.transform, out_width, out_height),
+                transform=self.transform,
+                shape=(out_height, out_width),
             )
 
         nodata = self.nodatavals[0]
