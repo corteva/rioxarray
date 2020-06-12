@@ -1,7 +1,6 @@
 from typing import Callable, Iterable, Tuple, Union
 
 import numpy
-from PIL import Image
 from rasterio.merge import merge as _rio_merge
 from xarray import DataArray, Dataset
 
@@ -30,35 +29,31 @@ class RasterioDatasetDuck:
         """
         This method is meant to be used by the rasterio.merge.merge function.
         """
-        data_window = self._xds.rio.isel_window(window).values
+        data_window = self._xds.rio.isel_window(window)
         if data_window.shape != out_shape:
             # in this section, the data is geographically the same
             # however it is not the same dimensions as requested
-            # so need to resample to the reqwuested shape
-            if len(data_window.shape) == 3:
-                new_data = numpy.empty(out_shape, dtype=data_window.dtype)
-                count, height, width = out_shape
-                for iii in range(data_window.shape[0]):
-                    new_data[iii] = numpy.array(
-                        Image.fromarray(data_window[iii]).resize((width, height))
-                    )
-                data_window = new_data
+            # so need to resample to the requested shape
+            if len(out_shape) == 3:
+                _, out_height, out_width = out_shape
             else:
-                data_window = numpy.array(
-                    Image.fromarray(data_window).resize(out_shape)
-                )
+                out_height, out_width = out_shape
+            data_window = self._xds.rio.reproject(
+                self._xds.rio.crs,
+                dst_affine_width_height=(self.transform, out_width, out_height),
+            )
 
         nodata = self.nodatavals[0]
         mask = False
         fill_value = None
-        if numpy.isnan(nodata):
+        if nodata is not None and numpy.isnan(nodata):
             mask = numpy.isnan(data_window)
         elif nodata is not None:
             mask = data_window == nodata
             fill_value = nodata
 
         return numpy.ma.array(
-            data_window, mask=mask, fill_value=fill_value, dtype=self._xds.dtype
+            data_window, mask=mask, fill_value=fill_value, dtype=self.dtypes[0]
         )
 
 
@@ -135,7 +130,8 @@ def merge_arrays(
         dims=tuple(representative_array.dims),
         attrs=out_attrs,
     )
-    xda.rio.write_nodata(representative_array.rio.nodata, inplace=True)
+    out_nodata = nodata if nodata is not None else representative_array.rio.nodata
+    xda.rio.write_nodata(out_nodata, inplace=True)
     xda.rio.write_crs(representative_array.rio.crs, inplace=True)
     return xda
 

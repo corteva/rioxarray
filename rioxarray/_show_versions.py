@@ -52,8 +52,7 @@ def _get_deps_info():
     deps_info: dict
         version information on relevant Python libraries
     """
-    # Note: PIL is the module name, howerver pillow is the dependency
-    deps = ["PIL", "scipy", "pyproj"]
+    deps = ["scipy", "pyproj"]
 
     def get_version(module):
         try:
@@ -70,8 +69,6 @@ def _get_deps_info():
             else:
                 mod = importlib.import_module(modname)
             ver = get_version(mod)
-            # use PIL only to get version information
-            modname = "pillow" if modname == "PIL" else modname
             deps_info[modname] = ver
         except ImportError:
             deps_info[modname] = None

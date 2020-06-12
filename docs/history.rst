@@ -8,6 +8,7 @@ History
 - Fix ``RasterioDeprecationWarning`` (pull #117)
 - BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)
 - Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 & pull 120)
+- BUG: Use internal reprojection as engine for resampling window in merge (pull #123)
 
 0.0.26
 ------

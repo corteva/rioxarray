@@ -24,7 +24,6 @@ def test_get_sys_info():
 def test_get_deps_info():
     deps_info = _get_deps_info()
 
-    assert "pillow" in deps_info
     assert "scipy" in deps_info
     assert "pyproj" in deps_info
 
