@@ -24,7 +24,7 @@ def get_version():
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = ["pillow", "rasterio", "scipy", "xarray", "pyproj>=2.2"]
+requirements = ["rasterio", "scipy", "xarray", "pyproj>=2.2"]
 
 test_requirements = ["pytest>=3.6", "pytest-cov", "mock"]
 
