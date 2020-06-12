@@ -209,8 +209,7 @@
 <span class="sd">    deps_info: dict</span>
 <span class="sd">        version information on relevant Python libraries</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Note: PIL is the module name, howerver pillow is the dependency</span>
-    <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PIL&quot;</span><span class="p">,</span> <span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;pyproj&quot;</span><span class="p">]</span>
+    <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;pyproj&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">get_version</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -227,8 +226,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">modname</span><span class="p">)</span>
             <span class="n">ver</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
-            <span class="c1"># use PIL only to get version information</span>
-            <span class="n">modname</span> <span class="o">=</span> <span class="s2">&quot;pillow&quot;</span> <span class="k">if</span> <span class="n">modname</span> <span class="o">==</span> <span class="s2">&quot;PIL&quot;</span> <span class="k">else</span> <span class="n">modname</span>
             <span class="n">deps_info</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">ver</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="n">deps_info</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
