@@ -859,8 +859,6 @@ class TestRasterio:
 
     def test_rasterio_vrt_with_src_crs(self):
         # Test open_rasterio() support of WarpedVRT with specified src_crs
-        import rasterio
-
         # create geotiff with no CRS and specify it manually
         with create_tmp_geotiff(crs=None) as (tmp_file, expected):
             src_crs = rasterio.crs.CRS.from_epsg(32618)
