@@ -896,7 +896,7 @@ class RasterArray(XRasterBase):
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
         transform, optional
-            The destination transform. shape is required if included.
+            The destination transform.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
 
@@ -918,11 +918,12 @@ class RasterArray(XRasterBase):
             dst_affine, dst_width, dst_height = _make_dst_affine(
                 self._obj, self.crs, dst_crs, resolution, shape
             )
-        elif transform is not None and shape is not None:
-            dst_affine = transform
-            dst_height, dst_width = shape
         else:
-            raise RioXarrayError("shape is required if transform is set.")
+            dst_affine = transform
+            if shape is not None:
+                dst_height, dst_width = shape
+            else:
+                dst_height, dst_width = self.shape
 
         extra_dim = self._check_dimensions()
         if extra_dim:
@@ -1439,7 +1440,7 @@ class RasterDataset(XRasterBase):
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
         transform, optional
-            The destination transform. shape is required if included.
+            The destination transform.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
 

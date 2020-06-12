@@ -1291,8 +1291,10 @@ def test_reproject_transform_missing_shape():
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
         attrs={"crs": "epsg:3857"},
     )
-    with pytest.raises(RioXarrayError):
-        test_da.rio.reproject(4326, transform=test_da.rio.transform())
+    affine = Affine.from_gdal(0, 0.005, 0, 0, 0, 0.005)
+    reprojected = test_da.rio.reproject(4326, transform=affine)
+    assert reprojected.rio.shape == (5, 5)
+    assert reprojected.rio.transform() == affine
 
 
 class CustomCRS(object):
