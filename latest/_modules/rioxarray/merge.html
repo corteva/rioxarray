@@ -197,7 +197,8 @@
                 <span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span> <span class="o">=</span> <span class="n">out_shape</span>
             <span class="n">data_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-                <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">out_width</span><span class="p">,</span> <span class="n">out_height</span><span class="p">),</span>
+                <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span><span class="p">),</span>
             <span class="p">)</span>
 
         <span class="n">nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodatavals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>

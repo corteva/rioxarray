@@ -501,7 +501,7 @@ an exception.</li>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.reproject">
-<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>dst_affine_width_height=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects</p>
 <p>Powered by <cite>rasterio.warp.reproject</cite></p>
 <div class="admonition note">
@@ -514,6 +514,9 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.0.27: </span>shape</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -524,7 +527,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 (e.g. degrees or metres).</li>
 <li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
 together with resolution.</li>
-<li><strong>dst_affine_width_height</strong> (<em>tuple</em><em>(</em><em>dst_affine</em><em>, </em><em>dst_width</em><em>, </em><em>dst_height</em><em>)</em><em>, </em><em>optional</em>) – Tuple with the destination affine, width, and height.</li>
+<li><strong>optional</strong> (<em>transform</em><em>,</em>) – The destination transform.</li>
 <li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
 </ul>
 </td>
@@ -856,7 +859,7 @@ an exception.</li>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterDataset.reproject">
-<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>dst_affine_width_height=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> objects</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -868,6 +871,9 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.0.27: </span>shape</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -878,7 +884,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 (e.g. degrees or metres).</li>
 <li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
 together with resolution.</li>
-<li><strong>dst_affine_width_height</strong> (<em>tuple</em><em>(</em><em>dst_affine</em><em>, </em><em>dst_width</em><em>, </em><em>dst_height</em><em>)</em><em>, </em><em>optional</em>) – Tuple with the destination affine, width, and height.</li>
+<li><strong>optional</strong> (<em>transform</em><em>,</em>) – The destination transform.</li>
 <li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
 </ul>
 </td>

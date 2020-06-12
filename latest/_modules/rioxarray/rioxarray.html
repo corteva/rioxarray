@@ -1026,7 +1026,7 @@
         <span class="n">dst_crs</span><span class="p">,</span>
         <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1040,6 +1040,7 @@
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
 
 <span class="sd">        .. versionadded:: 0.0.27 shape</span>
+<span class="sd">        .. versionadded:: 0.0.28 transform</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1051,8 +1052,8 @@
 <span class="sd">        shape: tuple(int, int), optional</span>
 <span class="sd">            Shape of the destination in pixels (dst_height, dst_width). Cannot be used</span>
 <span class="sd">            together with resolution.</span>
-<span class="sd">        dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional</span>
-<span class="sd">            Tuple with the destination affine, width, and height.</span>
+<span class="sd">        transform, optional</span>
+<span class="sd">            The destination transform.</span>
 <span class="sd">        resampling: Resampling method, optional</span>
 <span class="sd">            See rasterio.warp.reproject for more details.</span>
 
@@ -1062,20 +1063,25 @@
 <span class="sd">        :class:`xarray.DataArray`: A reprojected DataArray.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;resolution and shape cannot be used together.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;resolution cannot be used with shape or transform.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dst_affine_width_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">dst_affine_width_height</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">shape</span>
             <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">transform</span>
+            <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">shape</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+
         <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">extra_dim</span><span class="p">:</span>
             <span class="n">dst_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -1156,12 +1162,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">dst_crs</span><span class="p">,</span>
-            <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -1568,7 +1572,7 @@
         <span class="n">dst_crs</span><span class="p">,</span>
         <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1580,6 +1584,7 @@
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
 
 <span class="sd">        .. versionadded:: 0.0.27 shape</span>
+<span class="sd">        .. versionadded:: 0.0.28 transform</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1591,8 +1596,8 @@
 <span class="sd">        shape: tuple(int, int), optional</span>
 <span class="sd">            Shape of the destination in pixels (dst_height, dst_width). Cannot be used</span>
 <span class="sd">            together with resolution.</span>
-<span class="sd">        dst_affine_width_height: tuple(dst_affine, dst_width, dst_height), optional</span>
-<span class="sd">            Tuple with the destination affine, width, and height.</span>
+<span class="sd">        transform, optional</span>
+<span class="sd">            The destination transform.</span>
 <span class="sd">        resampling: Resampling method, optional</span>
 <span class="sd">            See rasterio.warp.reproject for more details.</span>
 
@@ -1611,7 +1616,7 @@
                     <span class="n">dst_crs</span><span class="p">,</span>
                     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
                     <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-                    <span class="n">dst_affine_width_height</span><span class="o">=</span><span class="n">dst_affine_width_height</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
                     <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>

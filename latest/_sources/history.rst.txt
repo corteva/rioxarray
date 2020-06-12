@@ -3,7 +3,7 @@ History
 
 Latest
 -------
-
+- rio.reproject: change input kwarg dst_affine_width_height -> shape & transform (#125)
 
 0.0.27
 ------
