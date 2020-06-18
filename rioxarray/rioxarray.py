@@ -23,6 +23,7 @@ from affine import Affine
 from rasterio.crs import CRS
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
+from rasterio.windows import get_data_window
 from scipy.interpolate import griddata
 
 from rioxarray.crs import crs_to_wkt
@@ -592,7 +593,7 @@ class XRasterBase(object):
         row_slice = slice(int(math.floor(row_start)), int(math.ceil(row_stop)))
         col_slice = slice(int(math.floor(col_start)), int(math.ceil(col_stop)))
         return self._obj.isel(
-            {self.x_dim: row_slice, self.y_dim: col_slice}
+            {self.y_dim: row_slice, self.x_dim: col_slice}
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
 
 
@@ -1186,7 +1187,14 @@ class RasterArray(XRasterBase):
             },
             dims=(self.y_dim, self.x_dim),
         )
-        cropped_ds = self._obj.where(clip_mask_xray, drop=drop)
+        cropped_ds = self._obj.where(clip_mask_xray)
+        if drop:
+            cropped_ds.rio.set_spatial_dims(
+                x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+            )
+            cropped_ds = cropped_ds.rio.isel_window(
+                get_data_window(np.ma.masked_array(clip_mask_arr, ~clip_mask_arr))
+            )
         if self.nodata is not None and not np.isnan(self.nodata):
             cropped_ds = cropped_ds.fillna(self.nodata)
 
