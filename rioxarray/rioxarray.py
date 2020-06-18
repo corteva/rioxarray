@@ -12,7 +12,6 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import math
-import warnings
 from uuid import uuid4
 
 import numpy as np
@@ -1351,9 +1350,6 @@ class RasterArray(XRasterBase):
                 "dtype",
             )
         }
-        if windowed and not out_profile.get("tiled"):
-            warnings.warn("Set tiled=True for windowed writing.")
-            out_profile["tiled"] = True
         with rasterio.open(
             raster_path,
             "w",
