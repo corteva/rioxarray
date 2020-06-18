@@ -1448,8 +1448,8 @@ def test_isel_window():
         os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
     ) as mda:
         assert (
-            mda.rio.isel_window(Window.from_slices(slice(10, 12), slice(10, 12)))
-            == mda.isel(x=slice(10, 12), y=slice(10, 12))
+            mda.rio.isel_window(Window.from_slices(slice(9, 12), slice(10, 12)))
+            == mda.isel(x=slice(10, 12), y=slice(9, 12))
         ).all()
 
 
@@ -1597,9 +1597,9 @@ def test_nonstandard_dims_isel_window():
     ) as xds:
         reprojected = xds.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
-        ).rio.isel_window(Window.from_slices(slice(5), slice(5)))
+        ).rio.isel_window(Window.from_slices(slice(4), slice(5)))
         assert reprojected.rio.width == 5
-        assert reprojected.rio.height == 5
+        assert reprojected.rio.height == 4
 
 
 def test_nonstandard_dims_error_msg():
