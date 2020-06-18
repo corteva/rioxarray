@@ -172,7 +172,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1511,9 +1510,6 @@
                 <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="n">windowed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">out_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tiled&quot;</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Set tiled=True for windowed writing.&quot;</span><span class="p">)</span>
-            <span class="n">out_profile</span><span class="p">[</span><span class="s2">&quot;tiled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
             <span class="n">raster_path</span><span class="p">,</span>
             <span class="s2">&quot;w&quot;</span><span class="p">,</span>
