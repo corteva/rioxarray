@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -30,10 +35,6 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -49,7 +50,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> rioxarray
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> rioxarray
           
 
           
@@ -76,6 +77,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,6 +99,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -135,7 +138,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -180,6 +183,7 @@
 <span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
 <span class="kn">from</span> <span class="nn">rasterio.features</span> <span class="kn">import</span> <span class="n">geometry_mask</span>
+<span class="kn">from</span> <span class="nn">rasterio.windows</span> <span class="kn">import</span> <span class="n">get_data_window</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray.crs</span> <span class="kn">import</span> <span class="n">crs_to_wkt</span>
@@ -749,7 +753,7 @@
         <span class="n">row_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)))</span>
         <span class="n">col_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
-            <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">}</span>
+            <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">}</span>
         <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
 
 
@@ -1343,7 +1347,14 @@
             <span class="p">},</span>
             <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clip_mask_xray</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">)</span>
+        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clip_mask_xray</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drop</span><span class="p">:</span>
+            <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span>
+                <span class="n">get_data_window</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">))</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
             <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
 
@@ -1885,11 +1896,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019, rioxarray Contributors
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1900,7 +1919,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

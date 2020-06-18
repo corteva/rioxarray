@@ -3,7 +3,8 @@ History
 
 Latest
 -------
-
+- BUG: Fix order of axis in `rio.isel_window` (pull #133)
+- BUG: Allow clipping with disjoint geometries (issue #132)
 
 0.0.28
 -------
