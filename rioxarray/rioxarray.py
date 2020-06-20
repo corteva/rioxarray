@@ -948,7 +948,7 @@ class RasterArray(XRasterBase):
             self.nodata if self.nodata is not None else dst_nodata
         )
         rasterio.warp.reproject(
-            source=np.copy(self._obj.load().data),
+            source=self._obj.values,
             destination=dst_data,
             src_transform=src_affine,
             src_crs=self.crs,
@@ -1226,7 +1226,7 @@ class RasterArray(XRasterBase):
         :class:`numpy.ndarray`: An interpolated :class:`numpy.ndarray`.
 
         """
-        src_data_flat = np.copy(src_data).flatten()
+        src_data_flat = src_data.flatten()
         try:
             data_isnan = np.isnan(self.nodata)
         except TypeError:
