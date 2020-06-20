@@ -172,6 +172,50 @@ def test_clip_box(modis_clip):
         clipped_ds.to_netcdf(modis_clip["output"])
 
 
+def test_clip_box__allow_padding(modis_clip):
+    with modis_clip["open"](modis_clip["input"]) as xdi:
+        if hasattr(xdi, "variables"):
+            var = xdi.rio.vars[0]
+            dx, dy = xdi[var].rio.resolution()
+        else:
+            dx, dy = xdi.rio.resolution()
+        # first, clip
+        clipped_ds = xdi.rio.clip_box(
+            minx=xdi.x[4].values,
+            miny=xdi.y[6].values,
+            maxx=xdi.x[6].values,
+            maxy=xdi.y[4].values,
+        )
+        # then, extend back to original
+        padded_ds = clipped_ds.rio.clip_box(
+            minx=xdi.x[0].values - dx / 2,
+            miny=xdi.y[-1].values + dy / 2,
+            maxx=xdi.x[-1].values + dx / 2,
+            maxy=xdi.y[0].values - dy / 2,
+            allow_padding=True,
+        )
+        # finally, clip again
+        clipped_ds2 = padded_ds.rio.clip_box(
+            minx=xdi.x[4].values,
+            miny=xdi.y[6].values,
+            maxx=xdi.x[6].values,
+            maxy=xdi.y[4].values,
+        )
+        _assert_xarrays_equal(clipped_ds, clipped_ds2)
+        # padded data should have the same size as original data
+        if hasattr(xdi, "variables"):
+            for var in xdi.rio.vars:
+                for padded_size, original_size in zip(
+                    padded_ds[var].shape, xdi[var].shape
+                ):
+                    assert padded_size == original_size
+        else:
+            for padded_size, original_size in zip(padded_ds.shape, xdi.shape):
+                assert padded_size == original_size
+        # make sure it safely writes to netcdf
+        padded_ds.to_netcdf(modis_clip["output"])
+
+
 def test_clip_box__auto_expand(modis_clip):
     with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
         modis_clip["compare"]
