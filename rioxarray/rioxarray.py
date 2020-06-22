@@ -1629,12 +1629,7 @@ class RasterDataset(XRasterBase):
             padded_dataset[var] = (
                 self._obj[var]
                 .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.pad_box(
-                    minx,
-                    miny,
-                    maxx,
-                    maxy,
-                )
+                .rio.pad_box(minx, miny, maxx, maxy,)
             )
         return padded_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
