@@ -1051,7 +1051,7 @@ class RasterArray(XRasterBase):
         subset.attrs["transform"] = tuple(self.transform(recalc=True))
         return subset
 
-    def pad_xy(self, minx, miny, maxx, maxy, resolution_x, resolution_y):
+    def pad_xy(self, minx, miny, maxx, maxy):
         """Pad the array to x,y bounds.
 
         Parameters
@@ -1064,10 +1064,6 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
-        resolution_x: float
-            Resolution of x coordinate.
-        resolution_y: float
-            Resolution of y coordinate.
 
 
         Returns
@@ -1076,6 +1072,7 @@ class RasterArray(XRasterBase):
 
         """
         left, bottom, right, top = self._internal_bounds()
+        resolution_x, resolution_y = self.resolution()
         y_before = y_after = 0
         x_before = x_after = 0
         y_coord = self._obj[self.y_dim]
@@ -1112,20 +1109,45 @@ class RasterArray(XRasterBase):
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
         superset[self.x_dim] = x_coord
         superset[self.y_dim] = y_coord
-        superset.attrs["transform"] = tuple(self.transform(recalc=True))
+        superset.attrs["transform"] = tuple(superset.rio.transform(recalc=True))
         return superset
 
-    def clip_box(
-        self,
-        minx,
-        miny,
-        maxx,
-        maxy,
-        auto_expand=False,
-        auto_expand_limit=3,
-        allow_padding=False,
-    ):
-        """Clip the :class:`xarray.DataArray` by a bounding box with optional padding
+    def pad_box(self, minx, miny, maxx, maxy):
+        """Pad the :class:`xarray.DataArray` to a bounding box
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+
+
+        Returns
+        -------
+        DataArray: A padded :class:`xarray.DataArray` object.
+
+        """
+        resolution_x, resolution_y = self.resolution()
+
+        pad_minx = minx - abs(resolution_x) / 2.0
+        pad_miny = miny - abs(resolution_y) / 2.0
+        pad_maxx = maxx + abs(resolution_x) / 2.0
+        pad_maxy = maxy + abs(resolution_y) / 2.0
+
+        pd_array = self.pad_xy(pad_minx, pad_miny, pad_maxx, pad_maxy)
+
+        # make sure correct attributes preserved & projection added
+        _add_attrs_proj(pd_array, self._obj)
+
+        return pd_array
+
+    def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
+        """Clip the :class:`xarray.DataArray` by a bounding box.
 
         Parameters
         ----------
@@ -1142,16 +1164,13 @@ class RasterArray(XRasterBase):
         auto_expand_limit: int
             maximum number of times the clip will be retried before raising
             an exception.
-        allow_padding: bool
-            If True, padding will be applied if the bounding box is bigger than the
-            original one (default: False).
 
         Returns
         -------
         DataArray: A clipped :class:`xarray.DataArray` object.
 
         """
-        if not allow_padding and (self.width == 1 or self.height == 1):
+        if self.width == 1 or self.height == 1:
             raise OneDimensionalRaster(
                 "At least one of the raster x,y coordinates has only one point."
                 f"{_get_data_var_message(self._obj)}"
@@ -1165,8 +1184,6 @@ class RasterArray(XRasterBase):
         clip_maxy = maxy + abs(resolution_y) / 2.0
 
         cl_array = self.slice_xy(clip_minx, clip_miny, clip_maxx, clip_maxy)
-        if allow_padding:
-            cl_array = self.pad_xy(minx, miny, maxx, maxy, resolution_x, resolution_y)
 
         if cl_array.rio.width < 1 or cl_array.rio.height < 1:
             raise NoDataInBounds(
@@ -1182,7 +1199,6 @@ class RasterArray(XRasterBase):
                     clip_maxy,
                     auto_expand=int(auto_expand) + 1,
                     auto_expand_limit=auto_expand_limit,
-                    allow_padding=allow_padding,
                 )
             raise OneDimensionalRaster(
                 "At least one of the clipped raster x,y coordinates"
@@ -1586,16 +1602,45 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def clip_box(
-        self,
-        minx,
-        miny,
-        maxx,
-        maxy,
-        auto_expand=False,
-        auto_expand_limit=3,
-        allow_padding=False,
-    ):
+    def pad_box(self, minx, miny, maxx, maxy):
+        """Pad the :class:`xarray.Dataset` to a bounding box.
+
+        .. warning:: Only works if all variables in the dataset have the
+                     same coordinates.
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+
+        Returns
+        -------
+        DataArray: A padded :class:`xarray.Dataset` object.
+
+        """
+        padded_dataset = xarray.Dataset(attrs=self._obj.attrs)
+        for var in self.vars:
+            padded_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.pad_box(
+                    minx,
+                    miny,
+                    maxx,
+                    maxy,
+                )
+            )
+        return padded_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
+
+    def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.Dataset` by a bounding box.
 
         .. warning:: Only works if all variables in the dataset have the
@@ -1616,9 +1661,6 @@ class RasterDataset(XRasterBase):
         auto_expand_limit: int
             maximum number of times the clip will be retried before raising
             an exception.
-        allow_padding: bool
-            If True, padding will be applied if the bounding box is bigger than the
-            original one (default: False).
 
         Returns
         -------
@@ -1637,7 +1679,6 @@ class RasterDataset(XRasterBase):
                     maxy,
                     auto_expand=auto_expand,
                     auto_expand_limit=auto_expand_limit,
-                    allow_padding=allow_padding,
                 )
             )
         return clipped_dataset.rio.set_spatial_dims(

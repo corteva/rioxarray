@@ -6,7 +6,7 @@ Latest
 - BUG: Fix order of axis in `rio.isel_window` (pull #133)
 - BUG: Allow clipping with disjoint geometries (issue #132)
 - BUG: Remove automatically setting tiled=True for windowed writing (pull #134)
-- ENH: Added optional `allow_padding` argument to `rio.clip_box` (pull #138)
+- ENH: Add `rio.pad_box` (pull #138)
 
 0.0.28
 -------
