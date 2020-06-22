@@ -1051,7 +1051,7 @@ class RasterArray(XRasterBase):
         subset.attrs["transform"] = tuple(self.transform(recalc=True))
         return subset
 
-    def pad_xy(self, minx, miny, maxx, maxy):
+    def pad_xy(self, minx, miny, maxx, maxy, constant_values):
         """Pad the array to x,y bounds.
 
         .. versionadded:: 0.0.29
@@ -1066,6 +1066,9 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
+        constant_values: scalar
+            The value used for padding. If None, nodata will be used if it is
+            set, and np.nan otherwise.
 
 
         Returns
@@ -1102,19 +1105,26 @@ class RasterArray(XRasterBase):
             x_coord = new_x_coord
             right = x_coord[-1]
 
+        if constant_values is None:
+            constant_values = (
+                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+            )
+        if constant_values is None:
+            constant_values = np.nan
+
         superset = self._obj.pad(
             pad_width={
                 self.x_dim: (x_before, x_after),
                 self.y_dim: (y_before, y_after),
             },
-            constant_values=np.nan,
+            constant_values=constant_values,
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
         superset[self.x_dim] = x_coord
         superset[self.y_dim] = y_coord
         superset.attrs["transform"] = tuple(superset.rio.transform(recalc=True))
         return superset
 
-    def pad_box(self, minx, miny, maxx, maxy):
+    def pad_box(self, minx, miny, maxx, maxy, constant_values=None):
         """Pad the :class:`xarray.DataArray` to a bounding box
 
         .. versionadded:: 0.0.29
@@ -1129,6 +1139,9 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
+        constant_values: scalar
+            The value used for padding. If None, nodata will be used if it is
+            set, and np.nan otherwise.
 
 
         Returns
@@ -1143,7 +1156,7 @@ class RasterArray(XRasterBase):
         pad_maxx = maxx + abs(resolution_x) / 2.0
         pad_maxy = maxy + abs(resolution_y) / 2.0
 
-        pd_array = self.pad_xy(pad_minx, pad_miny, pad_maxx, pad_maxy)
+        pd_array = self.pad_xy(pad_minx, pad_miny, pad_maxx, pad_maxy, constant_values)
 
         # make sure correct attributes preserved & projection added
         _add_attrs_proj(pd_array, self._obj)
