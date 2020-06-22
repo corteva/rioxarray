@@ -1054,6 +1054,8 @@ class RasterArray(XRasterBase):
     def pad_xy(self, minx, miny, maxx, maxy):
         """Pad the array to x,y bounds.
 
+        .. versionadded:: 0.0.29
+
         Parameters
         ----------
         minx: float
@@ -1114,6 +1116,8 @@ class RasterArray(XRasterBase):
 
     def pad_box(self, minx, miny, maxx, maxy):
         """Pad the :class:`xarray.DataArray` to a bounding box
+
+        .. versionadded:: 0.0.29
 
         Parameters
         ----------
