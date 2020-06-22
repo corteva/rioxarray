@@ -9,7 +9,7 @@ rasterio xarray extension.
    :alt: Join the chat at https://gitter.im/rioxarray/community
    :target: https://gitter.im/rioxarray/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-.. image:: https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square
+.. image:: https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square
     :alt: All Contributors
     :target: https://github.com/corteva/rioxarray/blob/master/AUTHORS.rst
 

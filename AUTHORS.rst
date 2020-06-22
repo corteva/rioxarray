@@ -23,6 +23,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
     <tr>
       <td align="center"><a href="https://github.com/davidbrochart"><img src="https://avatars2.githubusercontent.com/u/4711805?v=4" width="100px;" alt="David Brochart"/><br /><sub><b>David Brochart</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=davidbrochart" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=davidbrochart" title="Tests">⚠️</a> <a href="#ideas-davidbrochart" title="Ideas, Planning, & Feedback">🤔</a></td>
       <td align="center"><a href="https://github.com/cheginit"><img src="https://avatars2.githubusercontent.com/u/13016644?v=4" width="100px;" alt="Taher Chegini"/><br /><sub><b>Taher Chegini</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=cheginit" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/issues?q=author%3Acheginit" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="http://joehamman.com"><img src="https://avatars3.githubusercontent.com/u/2443309?v=4" width="100px;" alt="Joe Hamman"/><br /><sub><b>Joe Hamman</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=jhamman" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/issues?q=author%3Ajhamman" title="Bug reports">🐛</a></td>
     </tr>
   </table>
 
