@@ -1108,7 +1108,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dst_nodata</span>
         <span class="p">)</span>
         <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
-            <span class="n">source</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">destination</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
             <span class="n">src_transform</span><span class="o">=</span><span class="n">src_affine</span><span class="p">,</span>
             <span class="n">src_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
@@ -1386,7 +1386,7 @@
 <span class="sd">        :class:`numpy.ndarray`: An interpolated :class:`numpy.ndarray`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">src_data_flat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">src_data</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">src_data_flat</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data_isnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>

@@ -3,6 +3,7 @@ History
 
 Latest
 -------
+- BUG: Remove unnecessary memory copies in reproject method (pull #136)
 - BUG: Fix order of axis in `rio.isel_window` (pull #133)
 - BUG: Allow clipping with disjoint geometries (issue #132)
 - BUG: Remove automatically setting tiled=True for windowed writing (pull #134)
