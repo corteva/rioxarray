@@ -173,6 +173,26 @@ def test_pad_box(modis_clip):
             maxx=xdi.x[-1].values,
             maxy=xdi.y[0].values,
         )
+        # check the nodata value
+        try:
+            nodata = padded_ds[padded_ds.rio.vars[0]].rio.nodata
+            if nodata is not None and not numpy.isnan(nodata):
+                assert all(
+                    [padded_ds[padded_ds.rio.vars[0]].isel(x=0, y=0).values == nodata]
+                )
+            else:
+                assert all(
+                    numpy.isnan(
+                        [padded_ds[padded_ds.rio.vars[0]].isel(x=0, y=0).values]
+                    )
+                )
+        except AttributeError:
+            if padded_ds.rio.nodata is not None and not numpy.isnan(
+                padded_ds.rio.nodata
+            ):
+                assert all([padded_ds.isel(x=0, y=0).values == padded_ds.rio.nodata])
+            else:
+                assert all(numpy.isnan([padded_ds.isel(x=0, y=0).values]))
         # finally, clip again
         clipped_ds2 = padded_ds.rio.clip_box(
             minx=xdi.x[4].values,
