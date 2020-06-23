@@ -1051,6 +1051,118 @@ class RasterArray(XRasterBase):
         subset.attrs["transform"] = tuple(self.transform(recalc=True))
         return subset
 
+    def pad_xy(self, minx, miny, maxx, maxy, constant_values):
+        """Pad the array to x,y bounds.
+
+        .. versionadded:: 0.0.29
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+        constant_values: scalar
+            The value used for padding. If None, nodata will be used if it is
+            set, and np.nan otherwise.
+
+
+        Returns
+        -------
+        DataArray: A padded :class:`xarray.DataArray` object.
+
+        """
+        left, bottom, right, top = self._internal_bounds()
+        resolution_x, resolution_y = self.resolution()
+        y_before = y_after = 0
+        x_before = x_after = 0
+        y_coord = self._obj[self.y_dim]
+        x_coord = self._obj[self.x_dim]
+
+        if top - resolution_y < maxy:
+            new_y_coord = np.arange(bottom, maxy, -resolution_y)[::-1]
+            y_before = len(new_y_coord) - len(y_coord)
+            y_coord = new_y_coord
+            top = y_coord[0]
+        if bottom + resolution_y > miny:
+            new_y_coord = np.arange(top, miny, resolution_y)
+            y_after = len(new_y_coord) - len(y_coord)
+            y_coord = new_y_coord
+            bottom = y_coord[-1]
+
+        if left - resolution_x > minx:
+            new_x_coord = np.arange(right, minx, -resolution_x)[::-1]
+            x_before = len(new_x_coord) - len(x_coord)
+            x_coord = new_x_coord
+            left = x_coord[0]
+        if right + resolution_x < maxx:
+            new_x_coord = np.arange(left, maxx, resolution_x)
+            x_after = len(new_x_coord) - len(x_coord)
+            x_coord = new_x_coord
+            right = x_coord[-1]
+
+        if constant_values is None:
+            constant_values = (
+                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+            )
+        if constant_values is None:
+            constant_values = np.nan
+
+        superset = self._obj.pad(
+            pad_width={
+                self.x_dim: (x_before, x_after),
+                self.y_dim: (y_before, y_after),
+            },
+            constant_values=constant_values,
+        ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+        superset[self.x_dim] = x_coord
+        superset[self.y_dim] = y_coord
+        superset.attrs["transform"] = tuple(superset.rio.transform(recalc=True))
+        return superset
+
+    def pad_box(self, minx, miny, maxx, maxy, constant_values=None):
+        """Pad the :class:`xarray.DataArray` to a bounding box
+
+        .. versionadded:: 0.0.29
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+        constant_values: scalar
+            The value used for padding. If None, nodata will be used if it is
+            set, and np.nan otherwise.
+
+
+        Returns
+        -------
+        DataArray: A padded :class:`xarray.DataArray` object.
+
+        """
+        resolution_x, resolution_y = self.resolution()
+
+        pad_minx = minx - abs(resolution_x) / 2.0
+        pad_miny = miny - abs(resolution_y) / 2.0
+        pad_maxx = maxx + abs(resolution_x) / 2.0
+        pad_maxy = maxy + abs(resolution_y) / 2.0
+
+        pd_array = self.pad_xy(pad_minx, pad_miny, pad_maxx, pad_maxy, constant_values)
+
+        # make sure correct attributes preserved & projection added
+        _add_attrs_proj(pd_array, self._obj)
+
+        return pd_array
+
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.DataArray` by a bounding box.
 
@@ -1504,6 +1616,39 @@ class RasterDataset(XRasterBase):
                 .rio.reproject_match(match_data_array, resampling=resampling)
             )
         return resampled_dataset.rio.set_spatial_dims(
+            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        )
+
+    def pad_box(self, minx, miny, maxx, maxy):
+        """Pad the :class:`xarray.Dataset` to a bounding box.
+
+        .. warning:: Only works if all variables in the dataset have the
+                     same coordinates.
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+
+        Returns
+        -------
+        DataArray: A padded :class:`xarray.Dataset` object.
+
+        """
+        padded_dataset = xarray.Dataset(attrs=self._obj.attrs)
+        for var in self.vars:
+            padded_dataset[var] = (
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.pad_box(minx, miny, maxx, maxy,)
+            )
+        return padded_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
