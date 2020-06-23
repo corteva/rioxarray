@@ -1106,11 +1106,7 @@ class RasterArray(XRasterBase):
             right = x_coord[-1]
 
         if constant_values is None:
-            constant_values = (
-                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
-            )
-        if constant_values is None:
-            constant_values = np.nan
+            constant_values = np.nan if self.nodata is None else self.nodata
 
         superset = self._obj.pad(
             pad_width={

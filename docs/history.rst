@@ -3,6 +3,8 @@ History
 
 Latest
 ------
+- BUG: Fix assigning fill value in `rio.pad_box` (pull #139)
+
 
 0.0.29
 -------
