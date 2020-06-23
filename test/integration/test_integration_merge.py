@@ -43,9 +43,7 @@ def test_merge_arrays():
             1.0,
         ),
     )
-    assert_almost_equal(
-        merged.attrs.pop("transform"), tuple(merged.rio.transform())[:6]
-    )
+    assert merged.rio._cached_transform() == merged.rio.transform()
     assert merged.rio.shape == (201, 201)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
@@ -78,9 +76,7 @@ def test_merge_arrays__res():
         tuple(merged.rio.transform()),
         (300.0, 0.0, -7274009.649486291, 0.0, -300.0, 5050108.61015275, 0.0, 0.0, 1.0),
     )
-    assert_almost_equal(
-        merged.attrs.pop("transform"), tuple(merged.rio.transform())[:6]
-    )
+    assert merged.rio._cached_transform() == merged.rio.transform()
     assert merged.rio.shape == (155, 155)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]

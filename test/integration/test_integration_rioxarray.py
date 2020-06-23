@@ -204,11 +204,18 @@ def test_pad_box(modis_clip):
         # padded data should have the same size as original data
         if hasattr(xdi, "variables"):
             for var in xdi.rio.vars:
+                assert_almost_equal(
+                    xdi[var].rio._cached_transform(),
+                    padded_ds[var].rio._cached_transform(),
+                )
                 for padded_size, original_size in zip(
                     padded_ds[var].shape, xdi[var].shape
                 ):
                     assert padded_size == original_size
         else:
+            assert_almost_equal(
+                xdi.rio._cached_transform(), padded_ds.rio._cached_transform()
+            )
             for padded_size, original_size in zip(padded_ds.shape, xdi.shape):
                 assert padded_size == original_size
         # make sure it safely writes to netcdf
@@ -226,6 +233,7 @@ def test_clip_box(modis_clip):
             maxy=xdi.y[4].values,
         )
         _assert_xarrays_equal(clipped_ds, xdc)
+        assert xdi.rio._cached_transform() != clipped_ds.rio._cached_transform()
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -253,7 +261,8 @@ def test_clip_box__nodata_error(modis_clip):
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
         with pytest.raises(
-            NoDataInBounds, match=f"No data found in bounds.{var_match}"
+            NoDataInBounds,
+            match=f"Unable to determine bounds from coordinates.{var_match}",
         ):
             xdi.rio.clip_box(
                 minx=xdi.x[5].values,
@@ -1699,7 +1708,7 @@ def test_missing_transform_bounds():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
     )
-    xds.attrs.pop("transform")
+    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
     with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.bounds()
 
@@ -1709,7 +1718,7 @@ def test_missing_transform_resolution():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
     )
-    xds.attrs.pop("transform")
+    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
     with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.resolution()
 
@@ -1717,3 +1726,15 @@ def test_missing_transform_resolution():
 def test_shape_order():
     rds = rioxarray.open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"))
     assert rds.air_temperature.rio.shape == (585, 1386)
+
+
+def test_write_transform(tmp_path):
+    xds = rioxarray.open_rasterio(
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
+        parse_coordinates=False,
+    )
+    out_file = tmp_path / "test_geotransform.nc"
+    xds.to_netcdf(out_file)
+    xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
+    assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
+    assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform

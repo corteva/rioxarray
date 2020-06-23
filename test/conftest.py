@@ -15,7 +15,7 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
     for attr in compare_xr.attrs:
         if attr == "transform":
             assert_almost_equal(
-                input_xr.attrs[attr],
+                tuple(input_xr.rio._cached_transform())[:6],
                 compare_xr.attrs[attr][:6],
                 decimal=decimal_precision,
             )
