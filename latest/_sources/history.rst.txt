@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.0.29
 -------
 - BUG: Remove unnecessary memory copies in reproject method (pull #136)
 - BUG: Fix order of axis in `rio.isel_window` (pull #133)
