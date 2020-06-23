@@ -1211,6 +1211,118 @@
         <span class="n">subset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">subset</span></div>
 
+<div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pad the array to x,y bounds.</span>
+
+<span class="sd">        .. versionadded:: 0.0.29</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+<span class="sd">        constant_values: scalar</span>
+<span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
+<span class="sd">            set, and np.nan otherwise.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataArray: A padded :class:`xarray.DataArray` object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
+        <span class="n">y_before</span> <span class="o">=</span> <span class="n">y_after</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">x_before</span> <span class="o">=</span> <span class="n">x_after</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">y_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
+        <span class="n">x_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">top</span> <span class="o">-</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="n">maxy</span><span class="p">:</span>
+            <span class="n">new_y_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_y</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_y_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
+            <span class="n">y_coord</span> <span class="o">=</span> <span class="n">new_y_coord</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">&gt;</span> <span class="n">miny</span><span class="p">:</span>
+            <span class="n">new_y_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">resolution_y</span><span class="p">)</span>
+            <span class="n">y_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_y_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
+            <span class="n">y_coord</span> <span class="o">=</span> <span class="n">new_y_coord</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">left</span> <span class="o">-</span> <span class="n">resolution_x</span> <span class="o">&gt;</span> <span class="n">minx</span><span class="p">:</span>
+            <span class="n">new_x_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_x</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">x_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
+            <span class="n">x_coord</span> <span class="o">=</span> <span class="n">new_x_coord</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">x_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">right</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="n">maxx</span><span class="p">:</span>
+            <span class="n">new_x_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">resolution_x</span><span class="p">)</span>
+            <span class="n">x_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
+            <span class="n">x_coord</span> <span class="o">=</span> <span class="n">new_x_coord</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">x_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">constant_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">constant_values</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">constant_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">constant_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="n">superset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+            <span class="n">pad_width</span><span class="o">=</span><span class="p">{</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">x_before</span><span class="p">,</span> <span class="n">x_after</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">y_before</span><span class="p">,</span> <span class="n">y_after</span><span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_coord</span>
+        <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_coord</span>
+        <span class="n">superset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">superset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">superset</span></div>
+
+<div class="viewcode-block" id="RasterArray.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pad the :class:`xarray.DataArray` to a bounding box</span>
+
+<span class="sd">        .. versionadded:: 0.0.29</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+<span class="sd">        constant_values: scalar</span>
+<span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
+<span class="sd">            set, and np.nan otherwise.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataArray: A padded :class:`xarray.DataArray` object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
+
+        <span class="n">pad_minx</span> <span class="o">=</span> <span class="n">minx</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">pad_miny</span> <span class="o">=</span> <span class="n">miny</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">pad_maxx</span> <span class="o">=</span> <span class="n">maxx</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">pad_maxy</span> <span class="o">=</span> <span class="n">maxy</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+        <span class="n">pd_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_xy</span><span class="p">(</span><span class="n">pad_minx</span><span class="p">,</span> <span class="n">pad_miny</span><span class="p">,</span> <span class="n">pad_maxx</span><span class="p">,</span> <span class="n">pad_maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">)</span>
+
+        <span class="c1"># make sure correct attributes preserved &amp; projection added</span>
+        <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">pd_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd_array</span></div>
+
 <div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.DataArray` by a bounding box.</span>
 
@@ -1664,6 +1776,39 @@
                 <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pad the :class:`xarray.Dataset` to a bounding box.</span>
+
+<span class="sd">        .. warning:: Only works if all variables in the dataset have the</span>
+<span class="sd">                     same coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataArray: A padded :class:`xarray.Dataset` object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">padded_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">padded_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 

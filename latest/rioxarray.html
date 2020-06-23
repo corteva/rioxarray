@@ -503,6 +503,68 @@ an exception.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.pad_box">
+<code class="descname">pad_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>constant_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> to a bounding box</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.29.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>constant_values</strong> (<em>scalar</em>) – The value used for padding. If None, nodata will be used if it is
+set, and np.nan otherwise.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A padded <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.pad_xy">
+<code class="descname">pad_xy</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>constant_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the array to x,y bounds.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.29.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>constant_values</strong> (<em>scalar</em>) – The value used for padding. If None, nodata will be used if it is
+set, and np.nan otherwise.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A padded <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.reproject">
 <code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects</p>
@@ -855,6 +917,37 @@ an exception.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>:class:`xarray.DataArray`</strong></td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">An interpolated <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.pad_box">
+<code class="descname">pad_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.pad_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> to a bounding box.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only works if all variables in the dataset have the
+same coordinates.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>DataArray</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A padded <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> object.</p>
+</td>
 </tr>
 </tbody>
 </table>

@@ -8,6 +8,8 @@ latest/_images/examples_interpolate_na_5_1.png
 latest/_images/examples_interpolate_na_9_1.png
 latest/_images/examples_merge_4_0.png
 latest/_images/examples_merge_5_1.png
+latest/_images/examples_pad_box_5_1.png
+latest/_images/examples_pad_box_9_1.png
 latest/_images/examples_reproject_5_1.png
 latest/_images/examples_reproject_9_1.png
 latest/_images/examples_reproject_match_11_1.png
@@ -30,6 +32,7 @@ latest/_sources/examples/examples.rst.txt
 latest/_sources/examples/interpolate_na.ipynb.txt
 latest/_sources/examples/manage_information_loss.ipynb.txt
 latest/_sources/examples/merge.ipynb.txt
+latest/_sources/examples/pad_box.ipynb.txt
 latest/_sources/examples/reproject.ipynb.txt
 latest/_sources/examples/reproject_match.ipynb.txt
 latest/_sources/examples/transform_bounds.ipynb.txt
@@ -150,6 +153,8 @@ latest/examples/manage_information_loss.html
 latest/examples/manage_information_loss.ipynb
 latest/examples/merge.html
 latest/examples/merge.ipynb
+latest/examples/pad_box.html
+latest/examples/pad_box.ipynb
 latest/examples/reproject.html
 latest/examples/reproject.ipynb
 latest/examples/reproject_match.html
