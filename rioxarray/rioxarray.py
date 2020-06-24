@@ -475,11 +475,11 @@ class XRasterBase(object):
         self, transform=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
     ):
         """
+        .. versionadded:: 0.0.30
+
         Write the GeoTransform to the dataset where GDAL can read it in.
 
         https://gdal.org/drivers/raster/netcdf.html#georeference
-
-        .. versionadded:: 0.0.30
 
         Parameters
         ----------
@@ -493,8 +493,7 @@ class XRasterBase(object):
         Returns
         -------
         xarray.Dataset or xarray.DataArray:
-        Modified dataset with Geo Transform written.
-
+            Modified dataset with Geo Transform written.
         """
         transform = transform or self.transform(recalc=True)
         data_obj = self._get_obj(inplace=inplace)
@@ -600,6 +599,7 @@ class XRasterBase(object):
 
     @property
     def x_dim(self):
+        """str: The dimension for the X-axis."""
         if self._x_dim is not None:
             return self._x_dim
         raise DimensionError(
@@ -609,6 +609,7 @@ class XRasterBase(object):
 
     @property
     def y_dim(self):
+        """str: The dimension for the Y-axis."""
         if self._y_dim is not None:
             return self._y_dim
         raise DimensionError(
@@ -917,7 +918,17 @@ class RasterArray(XRasterBase):
         )
 
     def transform(self, recalc=False):
-        """affine.Afffine: The affine of the `xarray.DataArray`"""
+        """
+        Parameters
+        ----------
+        recalc: bool, optional
+            If True, it will re-calculate the transform instead of using
+            the cached transform.
+
+        Returns
+        -------
+        affine.Afffine: The affine of the `xarray.DataArray`
+        """
         try:
             src_left, _, _, src_top = self.bounds(recalc=recalc)
             src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
@@ -1588,6 +1599,12 @@ class RasterDataset(XRasterBase):
     def transform(self, recalc=False):
         """
         .. versionadded:: 0.0.30
+
+        Parameters
+        ----------
+        recalc: bool, optional
+            If True, it will re-calculate the transform instead of using
+            the cached transform.
 
         Returns
         -------
