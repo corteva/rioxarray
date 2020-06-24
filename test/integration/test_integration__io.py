@@ -243,7 +243,6 @@ def test_open_group_load_attrs():
             "grid_mapping",
             "long_name",
             "scale_factor",
-            "transform",
             "units",
         ]
         assert attrs["long_name"] == "500m Surface Reflectance Band 5 - first layer"
@@ -268,7 +267,7 @@ def test_open_rasterio_mask_chunk_clip():
         assert xdi.encoding == {"_FillValue": 0.0}
         attrs = dict(xdi.attrs)
         assert_almost_equal(
-            attrs.pop("transform"),
+            tuple(xdi.rio._cached_transform())[:6],
             (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387),
         )
         assert attrs == {
@@ -281,7 +280,7 @@ def test_open_rasterio_mask_chunk_clip():
         subset = xdi.isel(x=slice(150, 160), y=slice(100, 150))
         comp_subset = subset.isel(x=slice(1, None), y=slice(1, None))
         # add transform for test
-        comp_subset.attrs["transform"] = tuple(comp_subset.rio.transform(recalc=True))
+        comp_subset.rio.write_transform()
 
         geometries = [
             {
@@ -420,8 +419,7 @@ class TestRasterio:
                 assert isinstance(rioda.attrs["crs"], str)
                 assert isinstance(rioda.attrs["res"], tuple)
                 assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.attrs["transform"], tuple)
-                assert len(rioda.attrs["transform"]) == 6
+                assert isinstance(rioda.rio._cached_transform(), Affine)
                 np.testing.assert_array_equal(
                     rioda.attrs["nodatavals"], [np.NaN, np.NaN, np.NaN]
                 )
@@ -447,8 +445,7 @@ class TestRasterio:
                 assert rioda.attrs["units"] == ("u1", "u2", "u3")
                 assert isinstance(rioda.attrs["res"], tuple)
                 assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.attrs["transform"], tuple)
-                assert len(rioda.attrs["transform"]) == 6
+                assert isinstance(rioda.rio._cached_transform(), Affine)
 
             # See if a warning is raised if we force it
             with pytest.warns(Warning, match="transformation isn't rectilinear"):
@@ -474,8 +471,7 @@ class TestRasterio:
                 assert isinstance(rioda.attrs["crs"], str)
                 assert isinstance(rioda.attrs["res"], tuple)
                 assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.attrs["transform"], tuple)
-                assert len(rioda.attrs["transform"]) == 6
+                assert isinstance(rioda.rio._cached_transform(), Affine)
                 np.testing.assert_array_equal(rioda.attrs["nodatavals"], [-9765.0])
 
     def test_notransform(self):
@@ -526,8 +522,7 @@ class TestRasterio:
                     assert rioda.attrs["units"] == ("cm", "m", "km")
                     assert isinstance(rioda.attrs["res"], tuple)
                     assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                    assert isinstance(rioda.attrs["transform"], tuple)
-                    assert len(rioda.attrs["transform"]) == 6
+                    assert isinstance(rioda.rio._cached_transform(), Affine)
 
     def test_indexing(self):
         with create_tmp_geotiff(
@@ -734,8 +729,7 @@ class TestRasterio:
                 assert isinstance(rioda.attrs["crs"], str)
                 assert isinstance(rioda.attrs["res"], tuple)
                 assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.attrs["transform"], tuple)
-                assert len(rioda.attrs["transform"]) == 6
+                assert isinstance(rioda.rio._cached_transform(), Affine)
                 # from ENVI tags
                 assert isinstance(rioda.attrs["description"], str)
                 assert isinstance(rioda.attrs["map_info"], str)
@@ -892,7 +886,6 @@ def test_mask_and_scale():
                 "missing_value": 32767,
             }
             attrs = rds.air_temperature.attrs
-            attrs.pop("transform")
             assert attrs == {
                 "coordinates": "day",
                 "coordinate_system": "WGS84,EPSG:4326",
@@ -916,7 +909,6 @@ def test_no_mask_and_scale():
             "missing_value": 32767,
         }
         attrs = rds.air_temperature.attrs
-        attrs.pop("transform")
         assert attrs == {
             "_Unsigned": "true",
             "add_offset": 220.0,

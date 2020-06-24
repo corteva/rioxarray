@@ -123,7 +123,6 @@ def merge_arrays(
         coords = _get_nonspatial_coords(representative_array)
 
     out_attrs = representative_array.attrs
-    out_attrs["transform"] = tuple(merged_transform)[:6]
     xda = DataArray(
         name=dataarrays[0].name,
         data=merged_data,
@@ -134,6 +133,7 @@ def merge_arrays(
     out_nodata = nodata if nodata is not None else representative_array.rio.nodata
     xda.rio.write_nodata(out_nodata, inplace=True)
     xda.rio.write_crs(representative_array.rio.crs, inplace=True)
+    xda.rio.write_transform(merged_transform, inplace=True)
     return xda
 
 

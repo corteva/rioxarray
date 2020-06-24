@@ -204,11 +204,18 @@ def test_pad_box(modis_clip):
         # padded data should have the same size as original data
         if hasattr(xdi, "variables"):
             for var in xdi.rio.vars:
+                assert_almost_equal(
+                    xdi[var].rio._cached_transform(),
+                    padded_ds[var].rio._cached_transform(),
+                )
                 for padded_size, original_size in zip(
                     padded_ds[var].shape, xdi[var].shape
                 ):
                     assert padded_size == original_size
         else:
+            assert_almost_equal(
+                xdi.rio._cached_transform(), padded_ds.rio._cached_transform()
+            )
             for padded_size, original_size in zip(padded_ds.shape, xdi.shape):
                 assert padded_size == original_size
         # make sure it safely writes to netcdf
@@ -226,6 +233,7 @@ def test_clip_box(modis_clip):
             maxy=xdi.y[4].values,
         )
         _assert_xarrays_equal(clipped_ds, xdc)
+        assert xdi.rio._cached_transform() != clipped_ds.rio._cached_transform()
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -253,7 +261,8 @@ def test_clip_box__nodata_error(modis_clip):
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
         with pytest.raises(
-            NoDataInBounds, match=f"No data found in bounds.{var_match}"
+            NoDataInBounds,
+            match=f"Unable to determine bounds from coordinates.{var_match}",
         ):
             xdi.rio.clip_box(
                 minx=xdi.x[5].values,
@@ -292,15 +301,16 @@ def test_clip_box__one_dimension_error(modis_clip):
             )
 
 
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
         xarray.open_rasterio,
         rioxarray.open_rasterio,
-        partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+        # partial(rioxarray.open_rasterio, parse_coordinates=False), # TODO: Fix
+    ],
 )
-def test_clip_geojson(request):
-    with request.param(
+def test_clip_geojson(open_func):
+    with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         # get subset for testing
@@ -341,17 +351,18 @@ def test_clip_geojson(request):
 
 
 @pytest.mark.parametrize(
-    "invert, expected_sum", [(False, 2150801411), (True, 535727386)]
+    "invert, expected_sum", [(False, 2150837592), (True, 535691205)]
 )
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
         xarray.open_rasterio,
         rioxarray.open_rasterio,
-        partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+        # partial(rioxarray.open_rasterio, parse_coordinates=False),  # TODO: Fix
+    ],
 )
-def test_clip_geojson__no_drop(request, invert, expected_sum):
-    with request.param(
+def test_clip_geojson__no_drop(open_func, invert, expected_sum):
+    with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         geometries = [
@@ -437,15 +448,15 @@ def test_reproject(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-@pytest.fixture(
-    params=[
-        xarray.open_rasterio,
+@pytest.mark.parametrize(
+    "open_func",
+    [
         rioxarray.open_rasterio,
-        partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+        # partial(rioxarray.open_rasterio, parse_coordinates=False), TODO: Fix
+    ],
 )
-def test_reproject_3d(request, modis_reproject_3d):
-    with request.param(modis_reproject_3d["input"]) as mda, request.param(
+def test_reproject_3d(open_func, modis_reproject_3d):
+    with open_func(modis_reproject_3d["input"]) as mda, open_func(
         modis_reproject_3d["compare"]
     ) as mdc:
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
@@ -540,9 +551,9 @@ def test_reproject__no_nodata(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
-def test_reproject__scalar_coord(request):
-    with request.param(
+@pytest.mark.parametrize("open_func", [xarray.open_rasterio, rioxarray.open_rasterio])
+def test_reproject__scalar_coord(open_func):
+    with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
         xdi_repr = xdi.squeeze().rio.reproject("epsg:3395")
@@ -620,9 +631,9 @@ def test_reproject_match__no_transform_nodata(modis_reproject_match_coords):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-@pytest.fixture(params=[xarray.open_rasterio, rioxarray.open_rasterio])
-def test_make_src_affine(request, modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
+@pytest.mark.parametrize("open_func", [xarray.open_rasterio, rioxarray.open_rasterio])
+def test_make_src_affine(open_func, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, open_func(
         modis_reproject["input"]
     ) as xri:
 
@@ -634,13 +645,13 @@ def test_make_src_affine(request, modis_reproject):
         del xdi.attrs["transform"]
         calculated_transform_check = tuple(xdi.rio.transform())
         calculated_transform_check2 = tuple(xdi.rio.transform())
-        rio_transform = xri.attrs["transform"]
+        rio_transform = tuple(xri.rio._cached_transform())
 
         assert_array_equal(attribute_transform, attribute_transform_func)
         assert_array_equal(calculated_transform, calculated_transform_check)
         assert_array_equal(calculated_transform, calculated_transform_check2)
         assert_array_equal(attribute_transform, calculated_transform)
-        assert_array_equal(calculated_transform[:6], rio_transform)
+        assert_array_equal(calculated_transform, rio_transform)
 
 
 def test_make_src_affine__single_point():
@@ -661,66 +672,93 @@ def test_make_src_affine__single_point():
         assert_array_equal(attribute_transform, calculated_transform)
 
 
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
+        xarray.open_dataset,
         xarray.open_rasterio,
         rioxarray.open_rasterio,
         partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+    ],
 )
-def test_make_coords__calc_trans(request, modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
+def test_make_coords__calc_trans(open_func, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, open_func(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
         calc_coords_calc_trans = _make_coords(
-            xdi, calculated_transform, width, height, xdi.attrs["crs"]
+            xdi, calculated_transform, width, height, xdi.rio.crs
         )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform(recalc=True)
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr, xdi.attrs["crs"]
+            xri, calculated_transformr, widthr, heightr, xdi.rio.crs
         )
 
+        assert_almost_equal(calculated_transform, calculated_transformr)
         # check to see if they all match
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_trans["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_trans["y"].values)
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_transr["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_transr["y"].values)
+        if not isinstance(open_func, partial):
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_trans["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_trans["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_transr["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_transr["y"].values, decimal=9
+            )
 
 
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
+        xarray.open_dataset,
         xarray.open_rasterio,
         rioxarray.open_rasterio,
         partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+    ],
 )
-def test_make_coords__attr_trans(request, modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
+def test_make_coords__attr_trans(open_func, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, open_func(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
         calc_coords_attr_trans = _make_coords(
-            xdi, attr_transform, width, height, xdi.attrs["crs"]
+            xdi, attr_transform, width, height, xdi.rio.crs
         )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform()
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr, xdi.attrs["crs"]
+            xri, calculated_transformr, widthr, heightr, xdi.rio.crs
         )
-
+        assert_almost_equal(attr_transform, calculated_transformr)
         # check to see if they all match
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_transr["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_transr["y"].values)
-        assert_array_equal(xri.coords["x"].values, calc_coords_attr_trans["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_attr_trans["y"].values)
-        assert_almost_equal(xdi.coords["x"].values, xri.coords["x"].values, decimal=9)
-        assert_almost_equal(xdi.coords["y"].values, xri.coords["y"].values, decimal=9)
+        if not isinstance(open_func, partial):
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_transr["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_transr["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_attr_trans["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_attr_trans["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xdi.coords["x"].values, xri.coords["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xdi.coords["y"].values, xri.coords["y"].values, decimal=9
+            )
 
 
 def test_interpolate_na(interpolate_na):
@@ -1699,7 +1737,7 @@ def test_missing_transform_bounds():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
     )
-    xds.attrs.pop("transform")
+    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
     with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.bounds()
 
@@ -1709,7 +1747,7 @@ def test_missing_transform_resolution():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
     )
-    xds.attrs.pop("transform")
+    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
     with pytest.raises(DimensionMissingCoordinateError):
         xds.rio.resolution()
 
@@ -1717,3 +1755,15 @@ def test_missing_transform_resolution():
 def test_shape_order():
     rds = rioxarray.open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"))
     assert rds.air_temperature.rio.shape == (585, 1386)
+
+
+def test_write_transform(tmp_path):
+    xds = rioxarray.open_rasterio(
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
+        parse_coordinates=False,
+    )
+    out_file = tmp_path / "test_geotransform.nc"
+    xds.to_netcdf(out_file)
+    xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
+    assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
+    assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform

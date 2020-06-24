@@ -78,7 +78,7 @@ def _get_grid_map_name(src_data_array):
         return DEFAULT_GRID_MAP
 
 
-def _generate_attrs(src_data_array, dst_affine, dst_nodata):
+def _generate_attrs(src_data_array, dst_nodata):
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
     # remove all nodata information
@@ -95,7 +95,6 @@ def _generate_attrs(src_data_array, dst_affine, dst_nodata):
         new_attrs["_FillValue"] = fill_value
 
     # add raster spatial information
-    new_attrs["transform"] = tuple(dst_affine)[:6]
     new_attrs["grid_mapping"] = _get_grid_map_name(src_data_array)
 
     return new_attrs
@@ -144,9 +143,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
         new_data_array.rio._y_dim = src_data_array.rio.y_dim
 
     # make sure attributes preserved
-    new_attrs = _generate_attrs(
-        src_data_array, new_data_array.rio.transform(recalc=True), None
-    )
+    new_attrs = _generate_attrs(src_data_array, None)
     # remove fill value if it already exists in the encoding
     # this is for data arrays pulling the encoding from a
     # source data array instead of being generated anew.
@@ -160,6 +157,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_data_array = add_spatial_ref(
         new_data_array, src_data_array.rio.crs, _get_grid_map_name(src_data_array)
     )
+    new_data_array.rio.write_transform(inplace=True)
     # make sure encoding added
     new_data_array.encoding = src_data_array.encoding.copy()
     return new_data_array
@@ -322,17 +320,14 @@ class XRasterBase(object):
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
+        # look in grid_mapping
+        grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
         try:
-            # look in grid_mapping
-            grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
-            try:
-                self.set_crs(
-                    pyproj.CRS.from_cf(self._obj.coords[grid_mapping_coord].attrs),
-                    inplace=True,
-                )
-            except pyproj.exceptions.CRSError:
-                pass
-        except KeyError:
+            self.set_crs(
+                pyproj.CRS.from_cf(self._obj.coords[grid_mapping_coord].attrs),
+                inplace=True,
+            )
+        except (KeyError, pyproj.exceptions.CRSError):
             try:
                 # look in attrs for 'crs'
                 self.set_crs(self._obj.attrs["crs"], inplace=True)
@@ -414,6 +409,8 @@ class XRasterBase(object):
         else:
             data_obj = self._get_obj(inplace=inplace)
 
+        # get original transform
+        transform = self._cached_transform()
         # remove old grid maping coordinate if exists
         try:
             del data_obj.coords[grid_mapping_name]
@@ -431,6 +428,10 @@ class XRasterBase(object):
         crs_wkt = crs_to_wkt(data_obj.rio.crs)
         grid_map_attrs["spatial_ref"] = crs_wkt
         grid_map_attrs["crs_wkt"] = crs_wkt
+        if transform is not None:
+            grid_map_attrs["GeoTransform"] = " ".join(
+                [str(item) for item in transform.to_gdal()]
+            )
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
 
         # add grid mapping attribute to variables
@@ -448,6 +449,66 @@ class XRasterBase(object):
         return data_obj.rio.update_attrs(
             dict(grid_mapping=grid_mapping_name), inplace=True
         )
+
+    def _cached_transform(self):
+        """
+        Get the transform from:
+        1. The GeoTransform metatada property in the grid mapping
+        2. The transform attribute.
+        """
+        try:
+            # look in grid_mapping
+            grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
+            return Affine.from_gdal(
+                *np.fromstring(
+                    self._obj.coords[grid_mapping_coord].attrs["GeoTransform"], sep=" "
+                )
+            )
+        except KeyError:
+            try:
+                return Affine(*self._obj.attrs["transform"][:6])
+            except KeyError:
+                pass
+        return None
+
+    def write_transform(
+        self, transform=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
+    ):
+        """
+        .. versionadded:: 0.0.30
+
+        Write the GeoTransform to the dataset where GDAL can read it in.
+
+        https://gdal.org/drivers/raster/netcdf.html#georeference
+
+        Parameters
+        ----------
+        transform: affine.Affine, optional
+            The transform of the dataset. If not provided, it will be calculated.
+        grid_mapping_name: str, optional
+            Name of the coordinate to store the CRS information in.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        xarray.Dataset or xarray.DataArray:
+            Modified dataset with Geo Transform written.
+        """
+        transform = transform or self.transform(recalc=True)
+        data_obj = self._get_obj(inplace=inplace)
+        # delete the old attribute to prevent confusion
+        data_obj.attrs.pop("transform", None)
+        try:
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+        except KeyError:
+            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+        grid_map_attrs["GeoTransform"] = " ".join(
+            [str(item) for item in transform.to_gdal()]
+        )
+        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
+        return data_obj
 
     def set_attrs(self, new_attrs, inplace=False):
         """
@@ -538,6 +599,7 @@ class XRasterBase(object):
 
     @property
     def x_dim(self):
+        """str: The dimension for the X-axis."""
         if self._x_dim is not None:
             return self._x_dim
         raise DimensionError(
@@ -547,6 +609,7 @@ class XRasterBase(object):
 
     @property
     def y_dim(self):
+        """str: The dimension for the Y-axis."""
         if self._y_dim is not None:
             return self._y_dim
         raise DimensionError(
@@ -692,16 +755,6 @@ class RasterArray(XRasterBase):
 
         return self._nodata
 
-    def _cached_transform(self):
-        """
-        Get the transform from attrs or property.
-        """
-        try:
-            return Affine(*self._obj.attrs["transform"][:6])
-        except KeyError:
-            pass
-        return None
-
     def resolution(self, recalc=False):
         """Determine the resolution of the `xarray.DataArray`
 
@@ -748,10 +801,16 @@ class RasterArray(XRasterBase):
             raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
         elif self.y_dim not in self._obj.coords:
             raise DimensionMissingCoordinateError(f"{self.y_dim} missing coordinates.")
-        left = float(self._obj[self.x_dim][0])
-        right = float(self._obj[self.x_dim][-1])
-        top = float(self._obj[self.y_dim][0])
-        bottom = float(self._obj[self.y_dim][-1])
+        try:
+            left = float(self._obj[self.x_dim][0])
+            right = float(self._obj[self.x_dim][-1])
+            top = float(self._obj[self.y_dim][0])
+            bottom = float(self._obj[self.y_dim][-1])
+        except IndexError:
+            raise NoDataInBounds(
+                "Unable to determine bounds from coordinates."
+                f"{_get_data_var_message(self._obj)}"
+            )
         return left, bottom, right, top
 
     def _check_dimensions(self):
@@ -859,9 +918,22 @@ class RasterArray(XRasterBase):
         )
 
     def transform(self, recalc=False):
-        """Determine the affine of the `xarray.DataArray`"""
-        src_left, _, _, src_top = self.bounds(recalc=recalc)
-        src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
+        """
+        Parameters
+        ----------
+        recalc: bool, optional
+            If True, it will re-calculate the transform instead of using
+            the cached transform.
+
+        Returns
+        -------
+        affine.Afffine: The affine of the `xarray.DataArray`
+        """
+        try:
+            src_left, _, _, src_top = self.bounds(recalc=recalc)
+            src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
+        except DimensionMissingCoordinateError:
+            return Affine.identity()
         return Affine.translation(src_left, src_top) * Affine.scale(
             src_resolution_x, src_resolution_y
         )
@@ -959,7 +1031,7 @@ class RasterArray(XRasterBase):
             resampling=resampling,
         )
         # add necessary attributes
-        new_attrs = _generate_attrs(self._obj, dst_affine, dst_nodata)
+        new_attrs = _generate_attrs(self._obj, dst_nodata)
         # make sure dimensions with coordinates renamed to x,y
         dst_dims = []
         for dim in self._obj.dims:
@@ -977,6 +1049,7 @@ class RasterArray(XRasterBase):
             attrs=new_attrs,
         )
         xda.encoding = self._obj.encoding
+        xda.rio.write_transform(dst_affine, inplace=True)
         return add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
 
     def reproject_match(self, match_data_array, resampling=Resampling.nearest):
@@ -1045,10 +1118,12 @@ class RasterArray(XRasterBase):
         else:
             x_slice = slice(minx, maxx)
 
-        subset = self._obj.sel(
-            {self.x_dim: x_slice, self.y_dim: y_slice}
-        ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-        subset.attrs["transform"] = tuple(self.transform(recalc=True))
+        subset = (
+            self._obj.sel({self.x_dim: x_slice, self.y_dim: y_slice})
+            .copy()  # this is to prevent sharing coordinates with the original dataset
+            .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+            .rio.write_transform(inplace=True)
+        )
         return subset
 
     def pad_xy(self, minx, miny, maxx, maxy, constant_values):
@@ -1117,7 +1192,7 @@ class RasterArray(XRasterBase):
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
         superset[self.x_dim] = x_coord
         superset[self.y_dim] = y_coord
-        superset.attrs["transform"] = tuple(superset.rio.transform(recalc=True))
+        superset.rio.write_transform(inplace=True)
         return superset
 
     def pad_box(self, minx, miny, maxx, maxy, constant_values=None):
@@ -1195,9 +1270,7 @@ class RasterArray(XRasterBase):
         clip_miny = miny - abs(resolution_y) / 2.0
         clip_maxx = maxx + abs(resolution_x) / 2.0
         clip_maxy = maxy + abs(resolution_y) / 2.0
-
         cl_array = self.slice_xy(clip_minx, clip_miny, clip_maxx, clip_maxy)
-
         if cl_array.rio.width < 1 or cl_array.rio.height < 1:
             raise NoDataInBounds(
                 f"No data found in bounds.{_get_data_var_message(self._obj)}"
@@ -1221,7 +1294,6 @@ class RasterArray(XRasterBase):
 
         # make sure correct attributes preserved & projection added
         _add_attrs_proj(cl_array, self._obj)
-
         return cl_array
 
     def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
@@ -1523,6 +1595,36 @@ class RasterDataset(XRasterBase):
             self._crs = False
             return None
         return self._crs
+
+    def transform(self, recalc=False):
+        """
+        .. versionadded:: 0.0.30
+
+        Parameters
+        ----------
+        recalc: bool, optional
+            If True, it will re-calculate the transform instead of using
+            the cached transform.
+
+        Returns
+        -------
+        affine.Afffine: The affine of the `xarray.Dataset`
+        """
+        transform_list = []
+        for var in self.vars:
+            transform_list.append(
+                self._obj[var]
+                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                .rio.transform(recalc=recalc)
+            )
+        if not transform_list:
+            return Affine.identity()
+        transform = transform_list[0]
+        if all(transform_i == transform for transform_i in transform_list):
+            return transform
+        raise RioXarrayError(
+            "Not all transforms are the same in the dataset: {}".format(transform_list)
+        )
 
     def reproject(
         self,

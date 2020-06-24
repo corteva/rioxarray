@@ -358,12 +358,6 @@ def _get_rasterio_attrs(riods):
     """
     # Add rasterio attributes
     attrs = _parse_tags(riods.tags(1))
-    # Affine transformation matrix (always available)
-    # This describes coefficients mapping pixel coordinates to CRS
-    # For serialization store as tuple of 6 floats, the last row being
-    # always (0, 0, 1) per definition (see
-    # https://github.com/sgillies/affine)
-    attrs["transform"] = tuple(_rio_transform(riods))[:6]
     if hasattr(riods, "nodata") and riods.nodata is not None:
         # The nodata values for the raster bands
         attrs["_FillValue"] = riods.nodata
@@ -789,6 +783,12 @@ def open_rasterio(
                 result.attrs, result.encoding, "missing_value", name=da_name
             )
 
+    # Affine transformation matrix (always available)
+    # This describes coefficients mapping pixel coordinates to CRS
+    # For serialization store as tuple of 6 floats, the last row being
+    # always (0, 0, 1) per definition (see
+    # https://github.com/sgillies/affine)
+    result.rio.write_transform(riods.transform, inplace=True)
     if hasattr(riods, "crs") and riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
 
