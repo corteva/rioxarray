@@ -34,17 +34,20 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
                 assert input_xr.attrs[attr] == compare_xr.attrs[attr]
 
 
-def _assert_xarrays_equal(input_xarray, compare_xarray, precision=7):
+def _assert_xarrays_equal(
+    input_xarray, compare_xarray, precision=7, skip_xy_check=False
+):
     _assert_attrs_equal(input_xarray, compare_xarray, precision)
     if hasattr(input_xarray, "variables"):
         # check coordinates
         for coord in input_xarray.coords:
             if coord in "xy":
-                assert_almost_equal(
-                    input_xarray[coord].values,
-                    compare_xarray[coord].values,
-                    decimal=precision,
-                )
+                if not skip_xy_check:
+                    assert_almost_equal(
+                        input_xarray[coord].values,
+                        compare_xarray[coord].values,
+                        decimal=precision,
+                    )
             else:
                 assert (
                     input_xarray[coord].values == compare_xarray[coord].values
