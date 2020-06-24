@@ -6,6 +6,8 @@ Latest
 - BUG: Fix assigning fill value in `rio.pad_box` (pull #140)
 - ENH: Add `rio.write_transform` to store cache in GDAL location (issue #129 & #139)
 - ENH: Use rasterio windows for `rio.clip_box` (issue #142)
+- BUG: Add support for negative indexes in rio.isel_window (pull #145)
+- BUG: Write transform based on window in rio.isel_window (pull #145)
 
 0.0.29
 -------
