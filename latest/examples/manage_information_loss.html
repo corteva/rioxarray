@@ -447,10 +447,12 @@ div.rendered_html tbody tr:hover {
 <ul class="simple">
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></li>
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs"><span class="std std-ref">rio.update_attrs()</span></a></li>
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></li>
 </ul>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">write_transform</span></code> is only needed if you are not saving the x,y coordinates. It is for GDAL to be able to read in the transform without needing the original coordinates and is useful if you read in the file with <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -493,7 +495,6 @@ div.rendered_html tbody tr:hover {
   &#39;nodata&#39;: 0,
   &#39;units&#39;: (&#39;DN&#39;, &#39;DN&#39;),
   &#39;_FillValue&#39;: nan,
-  &#39;transform&#39;: (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0),
   &#39;scale_factor&#39;: 1.0,
   &#39;add_offset&#39;: 0.0},
  CRS.from_epsg(32722),
@@ -543,7 +544,6 @@ new_ds.attrs, new_ds.rio.crs, new_ds.rio.nodata
   &#39;nodata&#39;: 0,
   &#39;units&#39;: (&#39;DN&#39;, &#39;DN&#39;),
   &#39;_FillValue&#39;: nan,
-  &#39;transform&#39;: (3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0),
   &#39;scale_factor&#39;: 1.0,
   &#39;add_offset&#39;: 0.0},
  CRS.from_epsg(32722),

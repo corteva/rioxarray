@@ -238,7 +238,7 @@
         <span class="k">return</span> <span class="n">DEFAULT_GRID_MAP</span>
 
 
-<span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">):</span>
     <span class="c1"># add original attributes</span>
     <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
     <span class="c1"># remove all nodata information</span>
@@ -255,7 +255,6 @@
         <span class="n">new_attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill_value</span>
 
     <span class="c1"># add raster spatial information</span>
-    <span class="n">new_attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">)[:</span><span class="mi">6</span><span class="p">]</span>
     <span class="n">new_attrs</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_grid_map_name</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_attrs</span>
@@ -304,9 +303,7 @@
         <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
 
     <span class="c1"># make sure attributes preserved</span>
-    <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span>
-        <span class="n">src_data_array</span><span class="p">,</span> <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="kc">None</span>
-    <span class="p">)</span>
+    <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="c1"># remove fill value if it already exists in the encoding</span>
     <span class="c1"># this is for data arrays pulling the encoding from a</span>
     <span class="c1"># source data array instead of being generated anew.</span>
@@ -320,6 +317,7 @@
     <span class="n">new_data_array</span> <span class="o">=</span> <span class="n">add_spatial_ref</span><span class="p">(</span>
         <span class="n">new_data_array</span><span class="p">,</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">_get_grid_map_name</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
     <span class="p">)</span>
+    <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># make sure encoding added</span>
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">new_data_array</span>
@@ -482,17 +480,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
+        <span class="c1"># look in grid_mapping</span>
+        <span class="n">grid_mapping_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># look in grid_mapping</span>
-            <span class="n">grid_mapping_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
-                    <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
-                    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CRSError</span><span class="p">:</span>
-                <span class="k">pass</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+                <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CRSError</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># look in attrs for &#39;crs&#39;</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -574,6 +569,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
 
+        <span class="c1"># get original transform</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
         <span class="c1"># remove old grid maping coordinate if exists</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span>
@@ -591,6 +588,10 @@
         <span class="n">crs_wkt</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
         <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;crs_wkt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
+            <span class="p">)</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># add grid mapping attribute to variables</span>
@@ -608,6 +609,66 @@
         <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span>
             <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the transform from:</span>
+<span class="sd">        1. The GeoTransform metatada property in the grid mapping</span>
+<span class="sd">        2. The transform attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># look in grid_mapping</span>
+            <span class="n">grid_mapping_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="XRasterBase.write_transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>    <span class="k">def</span> <span class="nf">write_transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. versionadded:: 0.0.30</span>
+
+<span class="sd">        Write the GeoTransform to the dataset where GDAL can read it in.</span>
+
+<span class="sd">        https://gdal.org/drivers/raster/netcdf.html#georeference</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transform: affine.Affine, optional</span>
+<span class="sd">            The transform of the dataset. If not provided, it will be calculated.</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the coordinate to store the CRS information in.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
+<span class="sd">            Modified dataset with Geo Transform written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># delete the old attribute to prevent confusion</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
+        <span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
 
 <div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -698,6 +759,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;str: The dimension for the X-axis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span>
         <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
@@ -707,6 +769,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">y_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;str: The dimension for the Y-axis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span>
         <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
@@ -852,16 +915,6 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span>
 
-    <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the transform from attrs or property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
 <div class="viewcode-block" id="RasterArray.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the resolution of the `xarray.DataArray`</span>
 
@@ -908,10 +961,16 @@
             <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
-        <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to determine bounds from coordinates.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
 
     <span class="k">def</span> <span class="nf">_check_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1019,9 +1078,22 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterArray.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Determine the affine of the `xarray.DataArray`&quot;&quot;&quot;</span>
-        <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-        <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            If True, it will re-calculate the transform instead of using</span>
+<span class="sd">            the cached transform.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        affine.Afffine: The affine of the `xarray.DataArray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
             <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
         <span class="p">)</span></div>
@@ -1119,7 +1191,7 @@
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># add necessary attributes</span>
-        <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">)</span>
+        <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">)</span>
         <span class="c1"># make sure dimensions with coordinates renamed to x,y</span>
         <span class="n">dst_dims</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
@@ -1137,6 +1209,7 @@
             <span class="n">attrs</span><span class="o">=</span><span class="n">new_attrs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span>
+        <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">add_spatial_ref</span><span class="p">(</span><span class="n">xda</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
@@ -1205,10 +1278,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
 
-        <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span>
-            <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">}</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">subset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">subset</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">subset</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
@@ -1277,7 +1352,7 @@
         <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_coord</span>
         <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_coord</span>
-        <span class="n">superset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">superset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">superset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">superset</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1355,9 +1430,7 @@
         <span class="n">clip_miny</span> <span class="o">=</span> <span class="n">miny</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
         <span class="n">clip_maxx</span> <span class="o">=</span> <span class="n">maxx</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
         <span class="n">clip_maxy</span> <span class="o">=</span> <span class="n">maxy</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-
         <span class="n">cl_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_xy</span><span class="p">(</span><span class="n">clip_minx</span><span class="p">,</span> <span class="n">clip_miny</span><span class="p">,</span> <span class="n">clip_maxx</span><span class="p">,</span> <span class="n">clip_maxy</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -1381,7 +1454,6 @@
 
         <span class="c1"># make sure correct attributes preserved &amp; projection added</span>
         <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">cl_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">cl_array</span></div>
 
 <div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1683,6 +1755,36 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+<div class="viewcode-block" id="RasterDataset.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. versionadded:: 0.0.30</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            If True, it will re-calculate the transform instead of using</span>
+<span class="sd">            the cached transform.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        affine.Afffine: The affine of the `xarray.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="n">transform_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">transform_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">transform_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">transform_i</span> <span class="o">==</span> <span class="n">transform</span> <span class="k">for</span> <span class="n">transform_i</span> <span class="ow">in</span> <span class="n">transform_list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">transform</span>
+        <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+            <span class="s2">&quot;Not all transforms are the same in the dataset: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transform_list</span><span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterDataset.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

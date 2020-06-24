@@ -738,7 +738,19 @@ are ignored.</li>
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.transform">
 <code class="descname">transform</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine the affine of the <cite>xarray.DataArray</cite></p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will re-calculate the transform instead of using
+the cached transform.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>affine.Afffine</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">The affine of the <cite>xarray.DataArray</cite></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1056,6 +1068,27 @@ are ignored.</li>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.transform" title="Permalink to this definition">¶</a></dt>
+<dd><div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.30.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will re-calculate the transform instead of using
+the cached transform.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>affine.Afffine</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">The affine of the <cite>xarray.Dataset</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.RasterDataset.vars">
 <code class="descname">vars</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.vars" title="Permalink to this definition">¶</a></dt>
@@ -1281,15 +1314,62 @@ rioxarray properties to re-search for them.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_transform">
+<code class="descname">write_transform</code><span class="sig-paren">(</span><em>transform=None</em>, <em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_transform" title="Permalink to this definition">¶</a></dt>
+<dd><div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.30.</span></p>
+</div>
+<p>Write the GeoTransform to the dataset where GDAL can read it in.</p>
+<p><a class="reference external" href="https://gdal.org/drivers/raster/netcdf.html#georeference">https://gdal.org/drivers/raster/netcdf.html#georeference</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>transform</strong> (<em>affine.Affine</em><em>, </em><em>optional</em>) – The transform of the dataset. If not provided, it will be calculated.</li>
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the coordinate to store the CRS information in.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with Geo Transform written.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xarray.Dataset or xarray.DataArray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.XRasterBase.x_dim">
 <code class="descname">x_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.x_dim" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The dimension for the X-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.XRasterBase.y_dim">
 <code class="descname">y_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.y_dim" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The dimension for the Y-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
