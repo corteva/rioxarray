@@ -670,66 +670,93 @@ def test_make_src_affine__single_point():
         assert_array_equal(attribute_transform, calculated_transform)
 
 
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
+        xarray.open_dataset,
         xarray.open_rasterio,
         rioxarray.open_rasterio,
         partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+    ],
 )
-def test_make_coords__calc_trans(request, modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
+def test_make_coords__calc_trans(open_func, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, open_func(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
         calc_coords_calc_trans = _make_coords(
-            xdi, calculated_transform, width, height, xdi.attrs["crs"]
+            xdi, calculated_transform, width, height, xdi.rio.crs
         )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform(recalc=True)
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr, xdi.attrs["crs"]
+            xri, calculated_transformr, widthr, heightr, xdi.rio.crs
         )
 
+        assert_almost_equal(calculated_transform, calculated_transformr)
         # check to see if they all match
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_trans["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_trans["y"].values)
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_transr["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_transr["y"].values)
+        if not isinstance(open_func, partial):
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_trans["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_trans["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_transr["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_transr["y"].values, decimal=9
+            )
 
 
-@pytest.fixture(
-    params=[
+@pytest.mark.parametrize(
+    "open_func",
+    [
+        xarray.open_dataset,
         xarray.open_rasterio,
         rioxarray.open_rasterio,
         partial(rioxarray.open_rasterio, parse_coordinates=False),
-    ]
+    ],
 )
-def test_make_coords__attr_trans(request, modis_reproject):
-    with xarray.open_dataarray(modis_reproject["input"]) as xdi, request.param(
+def test_make_coords__attr_trans(open_func, modis_reproject):
+    with xarray.open_dataarray(modis_reproject["input"]) as xdi, open_func(
         modis_reproject["input"]
     ) as xri:
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
         calc_coords_attr_trans = _make_coords(
-            xdi, attr_transform, width, height, xdi.attrs["crs"]
+            xdi, attr_transform, width, height, xdi.rio.crs
         )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform()
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr, xdi.attrs["crs"]
+            xri, calculated_transformr, widthr, heightr, xdi.rio.crs
         )
-
+        assert_almost_equal(attr_transform, calculated_transformr)
         # check to see if they all match
-        assert_array_equal(xri.coords["x"].values, calc_coords_calc_transr["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_calc_transr["y"].values)
-        assert_array_equal(xri.coords["x"].values, calc_coords_attr_trans["x"].values)
-        assert_array_equal(xri.coords["y"].values, calc_coords_attr_trans["y"].values)
-        assert_almost_equal(xdi.coords["x"].values, xri.coords["x"].values, decimal=9)
-        assert_almost_equal(xdi.coords["y"].values, xri.coords["y"].values, decimal=9)
+        if not isinstance(open_func, partial):
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_calc_transr["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_calc_transr["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["x"].values, calc_coords_attr_trans["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xri.coords["y"].values, calc_coords_attr_trans["y"].values, decimal=9
+            )
+            assert_almost_equal(
+                xdi.coords["x"].values, xri.coords["x"].values, decimal=9
+            )
+            assert_almost_equal(
+                xdi.coords["y"].values, xri.coords["y"].values, decimal=9
+            )
 
 
 def test_interpolate_na(interpolate_na):
