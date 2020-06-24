@@ -1,10 +1,12 @@
 import json
 import os
+from distutils.version import LooseVersion
 from functools import partial
 
 import numpy
 import pytest
 import rasterio
+import scipy
 import xarray
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
@@ -778,6 +780,10 @@ def test_interpolate_na(interpolate_na):
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
+@pytest.mark.xfail(
+    LooseVersion(scipy.__version__) < LooseVersion("1.5.0"),
+    reason="griddata behaves differently across versions",
+)
 def test_interpolate_na_veris(interpolate_na_veris):
     with xarray.open_dataset(interpolate_na_veris["input"]) as mda, xarray.open_dataset(
         interpolate_na_veris["compare"]
