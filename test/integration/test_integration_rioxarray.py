@@ -146,18 +146,29 @@ def _del_attr(input_xr, attr):
 
 
 @pytest.fixture(
-    params=[xarray.open_dataset, xarray.open_dataarray, rioxarray.open_rasterio]
+    params=[
+        xarray.open_dataset,
+        xarray.open_dataarray,
+        rioxarray.open_rasterio,
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
+    ]
 )
 def modis_clip(request, tmpdir):
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_CLIP.nc"),
+        compare_expand=os.path.join(
+            TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_CLIP_EXPAND.nc"
+        ),
         open=request.param,
         output=str(tmpdir.join("MODIS_CLIP_DUMP.nc")),
     )
 
 
 def test_pad_box(modis_clip):
+    if isinstance(modis_clip["open"], partial):
+        # SKIP: parse_coodinates=False is not supported
+        return
     with modis_clip["open"](modis_clip["input"]) as xdi:
         # first, clip
         clipped_ds = xdi.rio.clip_box(
@@ -227,30 +238,50 @@ def test_clip_box(modis_clip):
         modis_clip["compare"]
     ) as xdc:
         clipped_ds = xdi.rio.clip_box(
-            minx=xdi.x[4].values,
-            miny=xdi.y[6].values,
-            maxx=xdi.x[6].values,
-            maxy=xdi.y[4].values,
+            minx=-7272967.195874103,  # xdi.x[4].values,
+            miny=5048602.8438240355,  # xdi.y[6].values,
+            maxx=-7272503.8831575755,  # xdi.x[6].values,
+            maxy=5049066.156540562,  # xdi.y[4].values,
         )
-        _assert_xarrays_equal(clipped_ds, xdc)
         assert xdi.rio._cached_transform() != clipped_ds.rio._cached_transform()
+        var = "__xarray_dataarray_variable__"
+        try:
+            clipped_ds_values = clipped_ds[var].values
+        except KeyError:
+            clipped_ds_values = clipped_ds.values
+        try:
+            xdc_values = xdc[var].values
+        except KeyError:
+            xdc_values = xdc.values
+        assert_almost_equal(clipped_ds_values, xdc_values)
+        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
 
 def test_clip_box__auto_expand(modis_clip):
     with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
-        modis_clip["compare"]
+        modis_clip["compare_expand"]
     ) as xdc:
         clipped_ds = xdi.rio.clip_box(
-            minx=xdi.x[5].values,
-            miny=xdi.y[5].values,
-            maxx=xdi.x[5].values,
-            maxy=xdi.y[5].values,
+            minx=-7272735.53951584,  # xdi.x[5].values
+            miny=5048834.500182299,  # xdi.y[5].values
+            maxx=-7272735.53951584,  # xdi.x[5].values
+            maxy=5048834.500182299,  # xdi.y[5].values
             auto_expand=True,
         )
-
-        _assert_xarrays_equal(clipped_ds, xdc)
+        assert xdi.rio._cached_transform() != clipped_ds.rio._cached_transform()
+        var = "__xarray_dataarray_variable__"
+        try:
+            clipped_ds_values = clipped_ds[var].values
+        except KeyError:
+            clipped_ds_values = clipped_ds.values
+        try:
+            xdc_values = xdc[var].values
+        except KeyError:
+            xdc_values = xdc.values
+        assert_almost_equal(clipped_ds_values, xdc_values)
+        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -261,14 +292,13 @@ def test_clip_box__nodata_error(modis_clip):
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
         with pytest.raises(
-            NoDataInBounds,
-            match=f"Unable to determine bounds from coordinates.{var_match}",
+            NoDataInBounds, match=var_match,
         ):
             xdi.rio.clip_box(
-                minx=xdi.x[5].values,
-                miny=xdi.y[7].values,
-                maxx=xdi.x[4].values,
-                maxy=xdi.y[5].values,
+                minx=-8272735.53951584,  # xdi.x[5].values
+                miny=8048371.187465771,  # xdi.y[7].values
+                maxx=-8272967.195874103,  # xdi.x[4].values
+                maxy=8048834.500182299,  # xdi.y[5].values
             )
 
 
@@ -286,18 +316,18 @@ def test_clip_box__one_dimension_error(modis_clip):
             ),
         ):
             xdi.rio.clip_box(
-                minx=xdi.x[5].values,
-                miny=xdi.y[5].values,
-                maxx=xdi.x[5].values,
-                maxy=xdi.y[5].values,
+                minx=-7272735.53951584,  # xdi.x[5].values
+                miny=5048834.500182299,  # xdi.y[5].values
+                maxx=-7272735.53951584,  # xdi.x[5].values
+                maxy=5048834.500182299,  # xdi.y[5].values
             )
         # test exception before raster clipped
         with pytest.raises(OneDimensionalRaster):
             xdi.isel(x=slice(5, 6), y=slice(5, 6)).rio.clip_box(
-                minx=xdi.x[5].values,
-                miny=xdi.y[7].values,
-                maxx=xdi.x[7].values,
-                maxy=xdi.y[5].values,
+                minx=-7272735.53951584,  # xdi.x[5].values
+                miny=5048371.187465771,  # xdi.y[7].values
+                maxx=-7272272.226799311,  # xdi.y[7].values
+                maxy=5048834.500182299,  # xdi.y[5].values
             )
 
 
