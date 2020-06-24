@@ -306,7 +306,7 @@ def test_clip_box__one_dimension_error(modis_clip):
     [
         xarray.open_rasterio,
         rioxarray.open_rasterio,
-        # partial(rioxarray.open_rasterio, parse_coordinates=False), # TODO: Fix
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
 def test_clip_geojson(open_func):
@@ -317,7 +317,7 @@ def test_clip_geojson(open_func):
         subset = xdi.isel(x=slice(150, 160), y=slice(100, 150))
         comp_subset = subset.isel(x=slice(1, None), y=slice(1, None))
         # add transform for test
-        comp_subset.attrs["transform"] = tuple(comp_subset.rio.transform(recalc=True))
+        comp_subset.rio.write_transform(inplace=True)
         # add grid mapping for test
         comp_subset.rio.write_crs(subset.rio.crs, inplace=True)
         # make sure nodata exists for test
@@ -328,16 +328,15 @@ def test_clip_geojson(open_func):
                 "type": "Polygon",
                 "coordinates": [
                     [
-                        [subset.x.values[0], subset.y.values[-1]],
-                        [subset.x.values[0], subset.y.values[0]],
-                        [subset.x.values[-1], subset.y.values[0]],
-                        [subset.x.values[-1], subset.y.values[-1]],
-                        [subset.x.values[0], subset.y.values[-1]],
+                        [425499.18381405267, 4615331.540546387],
+                        [425499.18381405267, 4615478.540546387],
+                        [425526.18381405267, 4615478.540546387],
+                        [425526.18381405267, 4615331.540546387],
+                        [425499.18381405267, 4615331.540546387],
                     ]
                 ],
             }
         ]
-
         # test data array
         clipped = xdi.rio.clip(geometries, comp_subset.rio.crs)
         _assert_xarrays_equal(clipped, comp_subset)
@@ -347,7 +346,11 @@ def test_clip_geojson(open_func):
             geometries, subset.rio.crs
         )
         comp_subset_ds = comp_subset.to_dataset(name="test_data")
-        _assert_xarrays_equal(clipped_ds, comp_subset_ds)
+        # This coordinate checking is skipped when parse_coordinates=False
+        # as the auto-generated coordinates differ and can be ignored
+        _assert_xarrays_equal(
+            clipped_ds, comp_subset_ds, skip_xy_check=isinstance(open_func, partial)
+        )
 
 
 @pytest.mark.parametrize(
@@ -358,7 +361,7 @@ def test_clip_geojson(open_func):
     [
         xarray.open_rasterio,
         rioxarray.open_rasterio,
-        # partial(rioxarray.open_rasterio, parse_coordinates=False),  # TODO: Fix
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
 def test_clip_geojson__no_drop(open_func, invert, expected_sum):
