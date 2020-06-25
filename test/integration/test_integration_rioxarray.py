@@ -1918,7 +1918,7 @@ def test_shape_order():
     assert rds.air_temperature.rio.shape == (585, 1386)
 
 
-def test_write_transform(tmp_path):
+def test_write_transform__from_read(tmp_path):
     xds = rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
@@ -1928,6 +1928,20 @@ def test_write_transform(tmp_path):
     xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
     assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
     assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform
+
+
+def test_write_transform():
+    test_affine = Affine.from_gdal(425047, 3.0, 0.0, 4615780, 0.0, -3.0)
+    ds = xarray.Dataset()
+    ds.rio.write_transform(test_affine, inplace=True)
+    assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
+    assert ds.rio._cached_transform() == test_affine
+    assert ds.grid_mapping == "spatial_ref"
+    da = xarray.DataArray(1)
+    da.rio.write_transform(test_affine, inplace=True)
+    assert da.rio._cached_transform() == test_affine
+    assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
+    assert da.grid_mapping == "spatial_ref"
 
 
 def test_missing_transform():
@@ -2025,3 +2039,39 @@ def test_nonstandard_dims_write_coordinate_system__no_crs():
         assert cs_array.coords[cs_array.rio.y_dim].attrs == {
             "axis": "Y",
         }
+
+
+@pytest.mark.parametrize(
+    "open_func",
+    [partial(xarray.open_dataset, mask_and_scale=False), rioxarray.open_rasterio],
+)
+def test_grid_mapping__pre_existing(open_func):
+    with open_func(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")) as xdi:
+        assert xdi.rio.grid_mapping == "crs"
+        assert xdi.air_temperature.rio.grid_mapping == "crs"
+
+
+@pytest.mark.parametrize(
+    "open_func",
+    [partial(xarray.open_dataset, mask_and_scale=False), rioxarray.open_rasterio],
+)
+def test_grid_mapping__change(open_func):
+    with open_func(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")) as xdi:
+        # part 1: check changing the data var grid mapping
+        xdi["dummy"] = xdi.air_temperature.copy()
+        xdi.dummy.rio.write_grid_mapping("different_crs", inplace=True)
+        assert xdi.air_temperature.rio.grid_mapping == "crs"
+        assert xdi.dummy.rio.grid_mapping == "different_crs"
+        # part 2: ensure error raised when multiple exist
+        with pytest.raises(RioXarrayError, match="Multiple grid mappings exist."):
+            xdi.rio.grid_mapping
+        # part 3: ensure that writing the grid mapping on the dataset fixes it
+        xdi.rio.write_grid_mapping("final_crs", inplace=True)
+        assert xdi.air_temperature.rio.grid_mapping == "final_crs"
+        assert xdi.dummy.rio.grid_mapping == "final_crs"
+        assert xdi.rio.grid_mapping == "final_crs"
+
+
+def test_grid_mapping_default():
+    xarray.Dataset().rio.grid_mapping == "spatial_ref"
+    xarray.DataArray().rio.grid_mapping == "spatial_ref"

@@ -71,14 +71,6 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     return {y_dim: y_coords, x_dim: x_coords}
 
 
-def _get_grid_map_name(src_data_array):
-    """Get the grid map name of the variable."""
-    try:
-        return src_data_array.attrs["grid_mapping"]
-    except KeyError:
-        return DEFAULT_GRID_MAP
-
-
 def _generate_attrs(src_data_array, dst_nodata):
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
@@ -96,7 +88,7 @@ def _generate_attrs(src_data_array, dst_nodata):
         new_attrs["_FillValue"] = fill_value
 
     # add raster spatial information
-    new_attrs["grid_mapping"] = _get_grid_map_name(src_data_array)
+    new_attrs["grid_mapping"] = src_data_array.rio.grid_mapping
 
     return new_attrs
 
@@ -131,9 +123,9 @@ def add_xy_grid_meta(coords, crs=None):
     return coords
 
 
-def add_spatial_ref(in_ds, dst_crs, grid_map_name):
+def add_spatial_ref(in_ds, dst_crs, grid_mapping_name):
     in_ds.rio.write_crs(
-        input_crs=dst_crs, grid_mapping_name=grid_map_name, inplace=True
+        input_crs=dst_crs, grid_mapping_name=grid_mapping_name, inplace=True
     )
     return in_ds
 
@@ -158,7 +150,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
 
     # make sure projection added
     new_data_array = add_spatial_ref(
-        new_data_array, src_data_array.rio.crs, _get_grid_map_name(src_data_array)
+        new_data_array, src_data_array.rio.crs, src_data_array.rio.grid_mapping
     )
     new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
@@ -343,10 +335,9 @@ class XRasterBase(object):
             return None if self._crs is False else self._crs
 
         # look in grid_mapping
-        grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
         try:
             self.set_crs(
-                pyproj.CRS.from_cf(self._obj.coords[grid_mapping_coord].attrs),
+                pyproj.CRS.from_cf(self._obj.coords[self.grid_mapping].attrs),
                 inplace=True,
             )
         except (KeyError, pyproj.exceptions.CRSError):
@@ -404,9 +395,66 @@ class XRasterBase(object):
         obj.rio._crs = crs
         return obj
 
-    def write_crs(
-        self, input_crs=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
-    ):
+    @property
+    def grid_mapping(self):
+        """
+        str: The CF grid_mapping attribute. 'spatial_ref' is the default.
+        """
+        try:
+            return self._obj.attrs["grid_mapping"]
+        except KeyError:
+            pass
+        grid_mapping = DEFAULT_GRID_MAP
+        # search the dataset for the grid mapping name
+        if hasattr(self._obj, "data_vars"):
+            grid_mappings = set()
+            for var in self._obj.data_vars:
+                if (
+                    self.x_dim in self._obj[var].dims
+                    and self.y_dim in self._obj[var].dims
+                ):
+                    try:
+                        grid_mapping = self._obj[var].attrs["grid_mapping"]
+                        grid_mappings.add(grid_mapping)
+                    except KeyError:
+                        pass
+            if len(grid_mappings) > 1:
+                raise RioXarrayError("Multiple grid mappings exist.")
+        return grid_mapping
+
+    def write_grid_mapping(self, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False):
+        """
+        Write the CF grid_mapping attribute.
+
+        Parameters
+        ----------
+        grid_mapping_name: str, optional
+            Name of the grid_mapping coordinate.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with CF compliant CRS information.
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        if hasattr(data_obj, "data_vars"):
+            for var in data_obj.data_vars:
+                if (
+                    self.x_dim in data_obj[var].dims
+                    and self.y_dim in data_obj[var].dims
+                ):
+                    data_obj[var].rio.update_attrs(
+                        dict(grid_mapping=grid_mapping_name), inplace=True
+                    ).rio.set_spatial_dims(
+                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+                    )
+        return data_obj.rio.update_attrs(
+            dict(grid_mapping=grid_mapping_name), inplace=True
+        )
+
+    def write_crs(self, input_crs=None, grid_mapping_name=None, inplace=False):
         """
         Write the CRS to the dataset in a CF compliant manner.
 
@@ -415,7 +463,8 @@ class XRasterBase(object):
         input_crs: object
             Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
-            Name of the coordinate to store the CRS information in.
+            Name of the grid_mapping coordinate to store the CRS information in.
+            Default is the grid_mapping name of the dataset.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
@@ -432,6 +481,9 @@ class XRasterBase(object):
         # get original transform
         transform = self._cached_transform()
         # remove old grid maping coordinate if exists
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
         try:
             del data_obj.coords[grid_mapping_name]
         except KeyError:
@@ -454,20 +506,8 @@ class XRasterBase(object):
             )
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
 
-        # add grid mapping attribute to variables
-        if hasattr(data_obj, "data_vars"):
-            for var in data_obj.data_vars:
-                if (
-                    self.x_dim in data_obj[var].dims
-                    and self.y_dim in data_obj[var].dims
-                ):
-                    data_obj[var].rio.update_attrs(
-                        dict(grid_mapping=grid_mapping_name), inplace=True
-                    ).rio.set_spatial_dims(
-                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-                    )
-        return data_obj.rio.update_attrs(
-            dict(grid_mapping=grid_mapping_name), inplace=True
+        return data_obj.rio.write_grid_mapping(
+            grid_mapping_name=grid_mapping_name, inplace=True
         )
 
     def _cached_transform(self):
@@ -478,10 +518,9 @@ class XRasterBase(object):
         """
         try:
             # look in grid_mapping
-            grid_mapping_coord = self._obj.attrs.get("grid_mapping", DEFAULT_GRID_MAP)
             return Affine.from_gdal(
                 *np.fromstring(
-                    self._obj.coords[grid_mapping_coord].attrs["GeoTransform"], sep=" "
+                    self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" ",
                 )
             )
         except KeyError:
@@ -491,9 +530,7 @@ class XRasterBase(object):
                 pass
         return None
 
-    def write_transform(
-        self, transform=None, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False
-    ):
+    def write_transform(self, transform=None, grid_mapping_name=None, inplace=False):
         """
         .. versionadded:: 0.0.30
 
@@ -506,7 +543,8 @@ class XRasterBase(object):
         transform: affine.Affine, optional
             The transform of the dataset. If not provided, it will be calculated.
         grid_mapping_name: str, optional
-            Name of the coordinate to store the CRS information in.
+            Name of the grid_mapping coordinate to store the transform information in.
+            Default is the grid_mapping name of the dataset.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
@@ -519,6 +557,9 @@ class XRasterBase(object):
         data_obj = self._get_obj(inplace=inplace)
         # delete the old attribute to prevent confusion
         data_obj.attrs.pop("transform", None)
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
         try:
             grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
         except KeyError:
@@ -528,7 +569,9 @@ class XRasterBase(object):
             [str(item) for item in transform.to_gdal()]
         )
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
-        return data_obj
+        return data_obj.rio.write_grid_mapping(
+            grid_mapping_name=grid_mapping_name, inplace=True
+        )
 
     def transform(self, recalc=False):
         """
