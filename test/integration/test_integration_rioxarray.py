@@ -1667,6 +1667,8 @@ def test_nonstandard_dims_clip__dataset():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         clipped = (
             xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
             .rio.write_crs("EPSG:4326")
@@ -1682,9 +1684,16 @@ def test_nonstandard_dims_clip__array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         clipped = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.clip([geom], "EPSG:4326")
+        clipped = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.clip([geom], "EPSG:4326")
+        )
         assert clipped.rio.width == 6
         assert clipped.rio.height == 5
 
@@ -1693,6 +1702,8 @@ def test_nonstandard_dims_clip_box__dataset():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         clipped = xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.clip_box(
             -70.51367964678269,
             -23.780199727400767,
@@ -1707,6 +1718,8 @@ def test_nonstandard_dims_clip_box_array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         clipped = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.clip_box(
@@ -1723,6 +1736,8 @@ def test_nonstandard_dims_slice_xy_array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         clipped = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.slice_xy(
@@ -1739,6 +1754,8 @@ def test_nonstandard_dims_reproject__dataset():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         xds = xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
         reprojected = xds.rio.reproject("epsg:3857")
         assert reprojected.rio.width == 11
@@ -1750,6 +1767,8 @@ def test_nonstandard_dims_reproject__array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         reprojected = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.reproject("epsg:3857")
@@ -1762,6 +1781,8 @@ def test_nonstandard_dims_interpolate_na__dataset():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         reprojected = xds.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.interpolate_na()
@@ -1773,6 +1794,8 @@ def test_nonstandard_dims_interpolate_na__array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         reprojected = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.interpolate_na()
@@ -1784,6 +1807,8 @@ def test_nonstandard_dims_write_nodata__array():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         reprojected = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.write_nodata(-999)
@@ -1796,6 +1821,8 @@ def test_nonstandard_dims_isel_window():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         reprojected = xds.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
         ).rio.isel_window(Window.from_slices(slice(4), slice(5)))
@@ -1807,6 +1834,8 @@ def test_nonstandard_dims_error_msg():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
         with pytest.raises(
             DimensionError, match="x dimension not found",
         ):
@@ -1815,6 +1844,44 @@ def test_nonstandard_dims_error_msg():
             DimensionError, match="Data variable: analysed_sst",
         ):
             xds.analysed_sst.rio.width
+
+
+def test_nonstandard_dims_find_dims():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        assert xds.rio.x_dim == "lon"
+        assert xds.rio.y_dim == "lat"
+
+
+def test_nonstandard_dims_find_dims__standard_name():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        xds.coords["lon"].attrs = {"standard_name": "longitude"}
+        xds.coords["lat"].attrs = {"standard_name": "latitude"}
+        assert xds.rio.x_dim == "lon"
+        assert xds.rio.y_dim == "lat"
+
+
+def test_nonstandard_dims_find_dims__standard_name__projected():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        xds.coords["lon"].attrs = {"standard_name": "projection_x_coordinate"}
+        xds.coords["lat"].attrs = {"standard_name": "projection_y_coordinate"}
+        assert xds.rio.x_dim == "lon"
+        assert xds.rio.y_dim == "lat"
+
+
+def test_nonstandard_dims_find_dims__axis():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        xds.coords["lon"].attrs = {"axis": "X"}
+        xds.coords["lat"].attrs = {"axis": "Y"}
+        assert xds.rio.x_dim == "lon"
+        assert xds.rio.y_dim == "lat"
 
 
 def test_missing_crs_error_msg():
