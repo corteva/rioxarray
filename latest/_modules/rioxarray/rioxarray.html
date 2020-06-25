@@ -468,8 +468,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
 
         <span class="c1"># properties</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
@@ -507,7 +508,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
@@ -534,9 +535,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
-<span class="sd">        Dataset with crs attribute.</span>
-
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Dataset with crs attribute.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">input_crs</span><span class="p">))</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
@@ -560,9 +560,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
-<span class="sd">        Modified dataset with CF compliant CRS information.</span>
-
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with CF compliant CRS information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">input_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
@@ -652,7 +651,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
 <span class="sd">            Modified dataset with Geo Transform written.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -670,6 +669,28 @@
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
+<div class="viewcode-block" id="XRasterBase.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            If True, it will re-calculate the transform instead of using</span>
+<span class="sd">            the cached transform.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`affine.Afffine`:</span>
+<span class="sd">            The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DimensionMissingCoordinateError</span><span class="p">,</span> <span class="n">DimensionError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the attributes of the dataset/dataarray and reset</span>
@@ -684,8 +705,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
-<span class="sd">        Modified dataset with new attributes.</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with new attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="c1"># set the attributes</span>
@@ -710,9 +731,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
-<span class="sd">        Modified dataset with updated attributes.</span>
-
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with updated attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="n">data_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_attrs</span><span class="p">)</span>
@@ -734,9 +754,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.Dataset or xarray.DataArray:</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
 <span class="sd">            Dataset with spatial dimensions set.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">set_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">in_x_dim</span><span class="p">,</span> <span class="n">in_y_dim</span><span class="p">):</span>
@@ -798,6 +817,142 @@
         <span class="sd">&quot;&quot;&quot;tuple(int, int): Returns the shape (height, width)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_check_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function validates that the dimensions 2D/3D and</span>
+<span class="sd">        they are are in the proper order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or None: Name extra dimension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extra_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooManyDimensions</span><span class="p">(</span>
+                <span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{0}</span><span class="s2">`&quot;</span>
+                <span class="s2">&quot; to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{0}</span><span class="s2">` &quot;</span>
+                <span class="s2">&quot;to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">extra_dims</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the band count (z dimension size)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+        <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">extra_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+
+    <span class="k">def</span> <span class="nf">_internal_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine the internal bounds of the `xarray.DataArray`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to determine bounds from coordinates.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+<div class="viewcode-block" id="XRasterBase.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the resolution to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x_resolution, y_resolution: float</span>
+<span class="sd">            The resolution of the `xarray.DataArray` | `xarray.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">recalc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
+            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
+
+        <span class="c1"># if the coordinates of the spatial dimensions are missing</span>
+        <span class="c1"># use the cached transform resolution</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
+            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
+                <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
+
+<div class="viewcode-block" id="XRasterBase.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># attempt to get bounds from xarray coordinate values</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+            <span class="n">left</span> <span class="o">-=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">right</span> <span class="o">+=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">top</span> <span class="o">-=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">bottom</span> <span class="o">+=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">top</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span></div>
+
 <div class="viewcode-block" id="XRasterBase.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use a rasterio.window.Window to select a subset of the data.</span>
@@ -811,7 +966,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The data in the window.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">row_stop</span><span class="p">),</span> <span class="p">(</span><span class="n">col_start</span><span class="p">,</span> <span class="n">col_stop</span><span class="p">)</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toranges</span><span class="p">()</span>
         <span class="n">row_start</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_start</span><span class="p">)</span> <span class="k">if</span> <span class="n">row_start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)</span>
@@ -836,18 +992,85 @@
                 <span class="p">),</span>
                 <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.slice_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.slice_xy">[docs]</a>    <span class="k">def</span> <span class="nf">slice_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Slice the array by x,y bounds.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The data in the slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">top</span> <span class="o">&gt;</span> <span class="n">bottom</span><span class="p">:</span>
+            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxy</span><span class="p">,</span> <span class="n">miny</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">minx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
+
+        <span class="n">subset</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">subset</span></div>
+
+<div class="viewcode-block" id="XRasterBase.transform_bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">densify_pts</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform bounds from src_crs to dst_crs.</span>
+
+<span class="sd">        Optionally densifying the edges (to account for nonlinear transformations</span>
+<span class="sd">        along these edges) and extracting the outermost bounds.</span>
+
+<span class="sd">        Note: this does not account for the antimeridian.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dst_crs: str, :obj:`rasterio.crs.CRS`, or dict</span>
+<span class="sd">            Target coordinate reference system.</span>
+<span class="sd">        densify_pts: uint, optional</span>
+<span class="sd">            Number of points to add to each edge to account for nonlinear</span>
+<span class="sd">            edges produced by the transform process.  Large numbers will produce</span>
+<span class="sd">            worse performance.  Default: 21 (gdal default).</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the transform</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates in target coordinate reference system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span> <span class="n">densify_pts</span><span class="o">=</span><span class="n">densify_pts</span>
         <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="RasterArray"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">RasterArray</span><span class="p">(</span><span class="n">XRasterBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This is the GIS extension for :class:`xarray.DataArray`&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This is the GIS extension for :obj:`xarray.DataArray`&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">RasterArray</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span>
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="RasterArray.set_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.set_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -863,7 +1086,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.DataArray: Dataset with nodata attribute set.</span>
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            Dataset with nodata attribute set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="n">input_nodata</span>
@@ -883,8 +1107,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        xarray.DataArray: Modified DataArray with CF compliant nodata information.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified DataArray with CF compliant nodata information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">input_nodata</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">input_nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_nodata</span>
@@ -935,189 +1159,6 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span>
 
-<div class="viewcode-block" id="RasterArray.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Determine the resolution of the `xarray.DataArray`</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        recalc: bool, optional</span>
-<span class="sd">            Will force the resolution to be recalculated instead of using the</span>
-<span class="sd">            transform attribute.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="n">recalc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="p">)</span> <span class="ow">and</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
-            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
-            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
-
-        <span class="c1"># if the coordinates of the spatial dimensions are missing</span>
-        <span class="c1"># use the cached transform resolution</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
-        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span>
-            <span class="n">resolution_x</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">a</span>
-            <span class="n">resolution_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">e</span>
-            <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
-                <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
-
-    <span class="k">def</span> <span class="nf">_internal_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Determine the internal bounds of the `xarray.DataArray`&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">bottom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
-                <span class="s2">&quot;Unable to determine bounds from coordinates.&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
-
-    <span class="k">def</span> <span class="nf">_check_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This function validates that the dimensions 2D/3D and</span>
-<span class="sd">        they are are in the proper order.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str or None: Name extra dimension.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">extra_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]))</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">TooManyDimensions</span><span class="p">(</span>
-                <span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{0}</span><span class="s2">`&quot;</span>
-                <span class="s2">&quot; to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{0}</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{0}</span><span class="s2">` &quot;</span>
-                <span class="s2">&quot;to reorder your dimensions.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">extra_dims</span> <span class="k">else</span> <span class="kc">None</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
-        <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">extra_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
-
-<div class="viewcode-block" id="RasterArray.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Determine the bounds of the `xarray.DataArray`</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        recalc: bool, optional</span>
-<span class="sd">            Will force the bounds to be recalculated instead of using the</span>
-<span class="sd">            transform attribute.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        left, bottom, right, top: float</span>
-<span class="sd">            Outermost coordinates.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># attempt to get bounds from xarray coordinate values</span>
-            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
-            <span class="n">left</span> <span class="o">-=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
-            <span class="n">right</span> <span class="o">+=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
-            <span class="n">top</span> <span class="o">-=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
-            <span class="n">bottom</span> <span class="o">+=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
-            <span class="n">left</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span>
-            <span class="n">top</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
-            <span class="n">bottom</span> <span class="o">=</span> <span class="n">top</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
-
-        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span></div>
-
-<div class="viewcode-block" id="RasterArray.transform_bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.transform_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">densify_pts</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Transform bounds from src_crs to dst_crs.</span>
-
-<span class="sd">        Optionally densifying the edges (to account for nonlinear transformations</span>
-<span class="sd">        along these edges) and extracting the outermost bounds.</span>
-
-<span class="sd">        Note: this does not account for the antimeridian.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        dst_crs: str, :obj:`rasterio.crs.CRS`, or dict</span>
-<span class="sd">            Target coordinate reference system.</span>
-<span class="sd">        densify_pts: uint, optional</span>
-<span class="sd">            Number of points to add to each edge to account for nonlinear</span>
-<span class="sd">            edges produced by the transform process.  Large numbers will produce</span>
-<span class="sd">            worse performance.  Default: 21 (gdal default).</span>
-<span class="sd">        recalc: bool, optional</span>
-<span class="sd">            Will force the bounds to be recalculated instead of using the transform</span>
-<span class="sd">            attribute.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        left, bottom, right, top: float</span>
-<span class="sd">            Outermost coordinates in target coordinate reference system.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span> <span class="n">densify_pts</span><span class="o">=</span><span class="n">densify_pts</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="RasterArray.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        recalc: bool, optional</span>
-<span class="sd">            If True, it will re-calculate the transform instead of using</span>
-<span class="sd">            the cached transform.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        affine.Afffine: The affine of the `xarray.DataArray`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
-            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
-        <span class="p">)</span></div>
-
 <div class="viewcode-block" id="RasterArray.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dst_crs</span><span class="p">,</span>
@@ -1127,7 +1168,7 @@
         <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reproject :class:`xarray.DataArray` objects</span>
+<span class="sd">        Reproject :obj:`xarray.DataArray` objects</span>
 
 <span class="sd">        Powered by `rasterio.warp.reproject`</span>
 
@@ -1157,8 +1198,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :class:`xarray.DataArray`: A reprojected DataArray.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            The reprojected DataArray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;resolution cannot be used with shape or transform.&quot;</span><span class="p">)</span>
@@ -1254,10 +1295,9 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
-<span class="sd">        :obj:`xarray.DataArray`</span>
+<span class="sd">        :obj:`xarray.DataArray`:</span>
 <span class="sd">            Contains the data from the src_data_array, reprojected to match</span>
 <span class="sd">            match_data_array.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
@@ -1266,45 +1306,6 @@
             <span class="n">shape</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
         <span class="p">)</span></div>
-
-<div class="viewcode-block" id="RasterArray.slice_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.slice_xy">[docs]</a>    <span class="k">def</span> <span class="nf">slice_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Slice the array by x,y bounds.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        minx: float</span>
-<span class="sd">            Minimum bound for x coordinate.</span>
-<span class="sd">        miny: float</span>
-<span class="sd">            Minimum bound for y coordinate.</span>
-<span class="sd">        maxx: float</span>
-<span class="sd">            Maximum bound for x coordinate.</span>
-<span class="sd">        maxy: float</span>
-<span class="sd">            Maximum bound for y coordinate.</span>
-
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        DataArray: A sliced :class:`xarray.DataArray` object.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">top</span> <span class="o">&gt;</span> <span class="n">bottom</span><span class="p">:</span>
-            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxy</span><span class="p">,</span> <span class="n">miny</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
-            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">minx</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
-
-        <span class="n">subset</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">})</span>
-            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
-            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">subset</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Pad the array to x,y bounds.</span>
@@ -1328,8 +1329,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A padded :class:`xarray.DataArray` object.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            The padded object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
@@ -1376,7 +1377,7 @@
         <span class="k">return</span> <span class="n">superset</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Pad the :class:`xarray.DataArray` to a bounding box</span>
+        <span class="sd">&quot;&quot;&quot;Pad the :obj:`xarray.DataArray` to a bounding box</span>
 
 <span class="sd">        .. versionadded:: 0.0.29</span>
 
@@ -1397,8 +1398,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A padded :class:`xarray.DataArray` object.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            The padded object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
 
@@ -1415,7 +1416,7 @@
         <span class="k">return</span> <span class="n">pd_array</span></div>
 
 <div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.DataArray` by a bounding box.</span>
+        <span class="sd">&quot;&quot;&quot;Clip the :obj:`xarray.DataArray` by a bounding box.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1435,8 +1436,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A clipped :class:`xarray.DataArray` object.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
@@ -1501,9 +1502,23 @@
 
 <div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Crops a :class:`xarray.DataArray` by geojson like geometry dicts.</span>
+<span class="sd">        Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.</span>
 
 <span class="sd">        Powered by `rasterio.features.geometry_mask`.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; geometry = &#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="sd">            ...                 &quot;coordinates&quot;: [</span>
+<span class="sd">            ...                 [[-94.07955380199459, 41.69085871273774],</span>
+<span class="sd">            ...                 [-94.06082436942204, 41.69103313774798],</span>
+<span class="sd">            ...                 [-94.06063203899649, 41.67932439500822],</span>
+<span class="sd">            ...                 [-94.07935807746362, 41.679150041277325],</span>
+<span class="sd">            ...                 [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
+<span class="sd">            &gt;&gt;&gt; cropping_geometries = [geojson.loads(geometry)]</span>
+<span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
+
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1526,21 +1541,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A clipped :class:`xarray.DataArray` object.</span>
-
-
-<span class="sd">        Examples:</span>
-
-<span class="sd">            &gt;&gt;&gt; geometry = &#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
-<span class="sd">            ...                 &quot;coordinates&quot;: [</span>
-<span class="sd">            ...                 [[-94.07955380199459, 41.69085871273774],</span>
-<span class="sd">            ...                 [-94.06082436942204, 41.69103313774798],</span>
-<span class="sd">            ...                 [-94.06063203899649, 41.67932439500822],</span>
-<span class="sd">            ...                 [-94.07935807746362, 41.679150041277325],</span>
-<span class="sd">            ...                 [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
-<span class="sd">            &gt;&gt;&gt; cropping_geometries = [geojson.loads(geometry)]</span>
-<span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
-<span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
@@ -1608,8 +1610,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :class:`numpy.ndarray`: An interpolated :class:`numpy.ndarray`.</span>
-
+<span class="sd">        :class:`numpy.ndarray`:</span>
+<span class="sd">            An interpolated :class:`numpy.ndarray`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">src_data_flat</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1647,8 +1649,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :class:`xarray.DataArray`: An interpolated :class:`xarray.DataArray` object.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">            An interpolated :obj:`xarray.DataArray` object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">extra_dim</span><span class="p">:</span>
@@ -1800,36 +1802,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
-
-<div class="viewcode-block" id="RasterDataset.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        .. versionadded:: 0.0.30</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        recalc: bool, optional</span>
-<span class="sd">            If True, it will re-calculate the transform instead of using</span>
-<span class="sd">            the cached transform.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        affine.Afffine: The affine of the `xarray.Dataset`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">transform_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">transform_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">transform_list</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="n">transform_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">transform_i</span> <span class="o">==</span> <span class="n">transform</span> <span class="k">for</span> <span class="n">transform_i</span> <span class="ow">in</span> <span class="n">transform_list</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">transform</span>
-        <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
-            <span class="s2">&quot;Not all transforms are the same in the dataset: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transform_list</span><span class="p">)</span>
-        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterDataset.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2074,7 +2046,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :class:`xarray.DataArray`: An interpolated :class:`xarray.DataArray` object.</span>
+<span class="sd">        :obj:`xarray.DataArray`: An interpolated :obj:`xarray.DataArray` object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>

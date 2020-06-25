@@ -17,6 +17,7 @@
     "- [rio.update_attrs()](../rioxarray.rst#rioxarray.rioxarray.XRasterBase.update_attrs)\n",
     "- [rio.crs](../rioxarray.rst#rioxarray.rioxarray.XRasterBase.crs)\n",
     "- [rio.nodata](../rioxarray.rst#rioxarray.rioxarray.RasterArray.nodata)\n",
+    "- [rio.transform()](../rioxarray.rst#rioxarray.rioxarray.XRasterBase.transform)\n",
     "\n",
     "Note that `write_transform` is only needed if you are not saving the x,y coordinates. It is for\n",
     "GDAL to  be able to read in the transform without needing the original coordinates and is useful\n",
