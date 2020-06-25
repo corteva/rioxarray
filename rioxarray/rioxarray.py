@@ -17,12 +17,12 @@ from uuid import uuid4
 import numpy as np
 import pyproj
 import rasterio.warp
+import rasterio.windows
 import xarray
 from affine import Affine
 from rasterio.crs import CRS
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
-from rasterio.windows import get_data_window
 from scipy.interpolate import griddata
 
 from rioxarray.crs import crs_to_wkt
@@ -642,6 +642,8 @@ class XRasterBase(object):
         """
         Use a rasterio.window.Window to select a subset of the data.
 
+        .. warning:: Float indices are converted to integers.
+
         Parameters
         ----------
         window: :class:`rasterio.window.Window`
@@ -652,11 +654,29 @@ class XRasterBase(object):
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
         """
         (row_start, row_stop), (col_start, col_stop) = window.toranges()
-        row_slice = slice(int(math.floor(row_start)), int(math.ceil(row_stop)))
-        col_slice = slice(int(math.floor(col_start)), int(math.ceil(col_stop)))
-        return self._obj.isel(
-            {self.y_dim: row_slice, self.x_dim: col_slice}
-        ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+        row_start = math.ceil(row_start) if row_start < 0 else math.floor(row_start)
+        row_stop = math.floor(row_stop) if row_stop < 0 else math.ceil(row_stop)
+        col_start = math.ceil(col_start) if col_start < 0 else math.floor(col_start)
+        col_stop = math.floor(col_stop) if col_stop < 0 else math.ceil(col_stop)
+        row_slice = slice(int(row_start), int(row_stop))
+        col_slice = slice(int(col_start), int(col_stop))
+        return (
+            self._obj.isel({self.y_dim: row_slice, self.x_dim: col_slice})
+            .copy()  # this is to prevent sharing coordinates with the original dataset
+            .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+            .rio.write_transform(
+                transform=rasterio.windows.transform(
+                    rasterio.windows.Window.from_slices(
+                        rows=row_slice,
+                        cols=col_slice,
+                        width=self.width,
+                        height=self.height,
+                    ),
+                    self.transform(recalc=True),
+                ),
+                inplace=True,
+            )
+        )
 
 
 @xarray.register_dataarray_accessor("rio")
@@ -1264,33 +1284,56 @@ class RasterArray(XRasterBase):
                 f"{_get_data_var_message(self._obj)}"
             )
 
+        # make sure that if the coordinates are
+        # in reverse order that it still works
         resolution_x, resolution_y = self.resolution()
+        if resolution_y < 0:
+            top = maxy
+            bottom = miny
+        else:
+            top = miny
+            bottom = maxy
+        if resolution_x < 0:
+            left = maxx
+            right = minx
+        else:
+            left = minx
+            right = maxx
 
-        clip_minx = minx - abs(resolution_x) / 2.0
-        clip_miny = miny - abs(resolution_y) / 2.0
-        clip_maxx = maxx + abs(resolution_x) / 2.0
-        clip_maxy = maxy + abs(resolution_y) / 2.0
-        cl_array = self.slice_xy(clip_minx, clip_miny, clip_maxx, clip_maxy)
-        if cl_array.rio.width < 1 or cl_array.rio.height < 1:
-            raise NoDataInBounds(
-                f"No data found in bounds.{_get_data_var_message(self._obj)}"
-            )
+        # pull the data out
+        window = rasterio.windows.from_bounds(
+            left=np.array(left).item(),
+            bottom=np.array(bottom).item(),
+            right=np.array(right).item(),
+            top=np.array(top).item(),
+            transform=self.transform(recalc=True),
+            width=self.width,
+            height=self.height,
+        )
+        cl_array = self.isel_window(window)
 
-        if cl_array.rio.width == 1 or cl_array.rio.height == 1:
+        # check that the window has data in it
+        if cl_array.rio.width <= 1 or cl_array.rio.height <= 1:
             if auto_expand and auto_expand < auto_expand_limit:
+                resolution_x, resolution_y = self.resolution()
                 return self.clip_box(
-                    clip_minx,
-                    clip_miny,
-                    clip_maxx,
-                    clip_maxy,
+                    minx=minx - abs(resolution_x) / 2.0,
+                    miny=miny - abs(resolution_y) / 2.0,
+                    maxx=maxx + abs(resolution_x) / 2.0,
+                    maxy=maxy + abs(resolution_y) / 2.0,
                     auto_expand=int(auto_expand) + 1,
                     auto_expand_limit=auto_expand_limit,
                 )
-            raise OneDimensionalRaster(
-                "At least one of the clipped raster x,y coordinates"
-                " has only one point."
-                f"{_get_data_var_message(self._obj)}"
-            )
+            if cl_array.rio.width < 1 or cl_array.rio.height < 1:
+                raise NoDataInBounds(
+                    f"No data found in bounds.{_get_data_var_message(self._obj)}"
+                )
+            elif cl_array.rio.width == 1 or cl_array.rio.height == 1:
+                raise OneDimensionalRaster(
+                    "At least one of the clipped raster x,y coordinates"
+                    " has only one point."
+                    f"{_get_data_var_message(self._obj)}"
+                )
 
         # make sure correct attributes preserved & projection added
         _add_attrs_proj(cl_array, self._obj)
@@ -1372,7 +1415,9 @@ class RasterArray(XRasterBase):
                 x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
             )
             cropped_ds = cropped_ds.rio.isel_window(
-                get_data_window(np.ma.masked_array(clip_mask_arr, ~clip_mask_arr))
+                rasterio.windows.get_data_window(
+                    np.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
+                )
             )
         if self.nodata is not None and not np.isnan(self.nodata):
             cropped_ds = cropped_ds.fillna(self.nodata)
