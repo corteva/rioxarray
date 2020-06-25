@@ -399,13 +399,11 @@ def test_clip_geojson(open_func):
             }
         ]
         # test data array
-        clipped = xdi.rio.clip(geometries, comp_subset.rio.crs)
+        clipped = xdi.rio.clip(geometries)
         _assert_xarrays_equal(clipped, comp_subset)
 
         # test dataset
-        clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
-            geometries, subset.rio.crs
-        )
+        clipped_ds = xdi.to_dataset(name="test_data").rio.clip(geometries)
         comp_subset_ds = comp_subset.to_dataset(name="test_data")
         # This coordinate checking is skipped when parse_coordinates=False
         # as the auto-generated coordinates differ and can be ignored
@@ -1669,11 +1667,7 @@ def test_nonstandard_dims_clip__dataset():
     ) as xds:
         xds.coords["lon"].attrs = {}
         xds.coords["lat"].attrs = {}
-        clipped = (
-            xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
-            .rio.write_crs("EPSG:4326")
-            .rio.clip([geom], "EPSG:4326")
-        )
+        clipped = xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.clip([geom])
         assert clipped.rio.width == 6
         assert clipped.rio.height == 5
 
@@ -1688,12 +1682,7 @@ def test_nonstandard_dims_clip__array():
         xds.coords["lat"].attrs = {}
         clipped = xds.analysed_sst.rio.set_spatial_dims(
             x_dim="lon", y_dim="lat"
-        ).rio.clip([geom], "EPSG:4326")
-        clipped = (
-            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
-            .rio.write_crs("EPSG:4326")
-            .rio.clip([geom], "EPSG:4326")
-        )
+        ).rio.clip([geom])
         assert clipped.rio.width == 6
         assert clipped.rio.height == 5
 
