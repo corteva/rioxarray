@@ -11,7 +11,7 @@ Latest
 - ENH: Add `rio.count`, `rio.slice_xy()`, `rio.bounds()`, `rio.resolution()`, `rio.transform_bounds()` to Dataset level
 - ENH: Add `rio.write_coordinate_system()` (issue #147)
 - ENH: Search CF coordinate metadata to find coordinates (issue #147)
-- ENH: Default `rio.clip` to assume geometry has CRS of dataset
+- ENH: Default `rio.clip` to assume geometry has CRS of dataset (pull #150)
 
 0.0.29
 -------
