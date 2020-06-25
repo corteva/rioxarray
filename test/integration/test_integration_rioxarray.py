@@ -333,6 +333,35 @@ def test_clip_box__one_dimension_error(modis_clip):
             )
 
 
+def test_slice_xy(modis_clip):
+    if isinstance(modis_clip["open"], partial):
+        # SKIP: parse_coodinates=False is not supported
+        return
+    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
+        modis_clip["compare"]
+    ) as xdc:
+        clipped_ds = xdi.rio.slice_xy(
+            minx=-7272967.195874103,  # xdi.x[4].values,
+            miny=5048602.8438240355,  # xdi.y[6].values,
+            maxx=-7272503.8831575755,  # xdi.x[6].values,
+            maxy=5049297.812898826,  # xdi.y[4].values - resolution_y,
+        )
+        assert xdi.rio._cached_transform() != clipped_ds.rio._cached_transform()
+        var = "__xarray_dataarray_variable__"
+        try:
+            clipped_ds_values = clipped_ds[var].values
+        except KeyError:
+            clipped_ds_values = clipped_ds.values
+        try:
+            xdc_values = xdc[var].values
+        except KeyError:
+            xdc_values = xdc.values
+        assert_almost_equal(clipped_ds_values, xdc_values)
+        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
+        # make sure it safely writes to netcdf
+        clipped_ds.to_netcdf(modis_clip["output"])
+
+
 @pytest.mark.parametrize(
     "open_func",
     [
@@ -432,10 +461,17 @@ def test_clip_geojson__no_drop(open_func, invert, expected_sum):
         assert clipped_ds.test_data.rio.nodata == xdi.rio.nodata
 
 
-def test_transform_bounds():
-    with xarray.open_dataarray(
-        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
-    ) as xdi:
+@pytest.mark.parametrize(
+    "open_func",
+    [
+        xarray.open_dataset,
+        xarray.open_dataarray,
+        rioxarray.open_rasterio,
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
+    ],
+)
+def test_transform_bounds(open_func):
+    with open_func(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as xdi:
         bounds = xdi.rio.transform_bounds(
             "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84"
             " +datum=WGS84 +units=m +no_defs",
@@ -698,10 +734,8 @@ def test_make_src_affine__single_point():
         calculated_transform = tuple(xdi.rio.transform(recalc=True))
         # delete the transform to ensure it is not being used
         del xdi.attrs["transform"]
-        with pytest.raises(OneDimensionalRaster):
-            xdi.rio.transform(recalc=True)
-        with pytest.raises(OneDimensionalRaster):
-            xdi.rio.transform()
+        assert xdi.rio.transform(recalc=True) == Affine.identity()
+        assert xdi.rio.transform() == Affine.identity()
 
         assert_array_equal(attribute_transform, attribute_transform_func)
         assert_array_equal(attribute_transform, calculated_transform)
@@ -1661,6 +1695,24 @@ def test_nonstandard_dims_clip_box_array():
         assert clipped.rio.height == 7
 
 
+def test_nonstandard_dims_slice_xy_array():
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
+    ) as xds:
+        clipped = (
+            xds.analysed_sst.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
+            .rio.write_crs("EPSG:4326")
+            .rio.slice_xy(
+                -70.51367964678269,
+                -23.780199727400767,
+                -70.44589567737998,
+                -23.71896017814794,
+            )
+        )
+        assert clipped.rio.width == 7
+        assert clipped.rio.height == 7
+
+
 def test_nonstandard_dims_reproject__dataset():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
@@ -1806,3 +1858,10 @@ def test_write_transform(tmp_path):
     xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
     assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
     assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform
+
+
+def test_missing_transform():
+    ds = xarray.Dataset()
+    assert ds.rio.transform() == Affine.identity()
+    da = xarray.DataArray(1)
+    assert da.rio.transform() == Affine.identity()

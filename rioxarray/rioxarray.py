@@ -308,8 +308,9 @@ class XRasterBase(object):
             self._y_dim = "latitude"
 
         # properties
-        self._width = None
+        self._count = None
         self._height = None
+        self._width = None
         self._crs = None
 
     @property
@@ -510,6 +511,27 @@ class XRasterBase(object):
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
         return data_obj
 
+    def transform(self, recalc=False):
+        """
+        Parameters
+        ----------
+        recalc: bool, optional
+            If True, it will re-calculate the transform instead of using
+            the cached transform.
+
+        Returns
+        -------
+        affine.Afffine: The affine of the `xarray.DataArray`
+        """
+        try:
+            src_left, _, _, src_top = self.bounds(recalc=recalc)
+            src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
+        except (DimensionMissingCoordinateError, DimensionError):
+            return Affine.identity()
+        return Affine.translation(src_left, src_top) * Affine.scale(
+            src_resolution_x, src_resolution_y
+        )
+
     def set_attrs(self, new_attrs, inplace=False):
         """
         Set the attributes of the dataset/dataarray and reset
@@ -638,6 +660,146 @@ class XRasterBase(object):
         """tuple(int, int): Returns the shape (height, width)"""
         return (self.height, self.width)
 
+    def _check_dimensions(self):
+        """
+        This function validates that the dimensions 2D/3D and
+        they are are in the proper order.
+
+        Returns
+        -------
+        str or None: Name extra dimension.
+        """
+        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
+        if len(extra_dims) > 1:
+            raise TooManyDimensions(
+                "Only 2D and 3D data arrays supported."
+                f"{_get_data_var_message(self._obj)}"
+            )
+        elif extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
+            raise InvalidDimensionOrder(
+                "Invalid dimension order. Expected order: {0}. "
+                "You can use `DataArray.transpose{0}`"
+                " to reorder your dimensions.".format(
+                    (extra_dims[0], self.y_dim, self.x_dim)
+                )
+                + f"{_get_data_var_message(self._obj)}"
+            )
+        elif not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
+            raise InvalidDimensionOrder(
+                "Invalid dimension order. Expected order: {0}"
+                "You can use `DataArray.transpose{0}` "
+                "to reorder your dimensions.".format((self.y_dim, self.x_dim))
+                + f"{_get_data_var_message(self._obj)}"
+            )
+        return extra_dims[0] if extra_dims else None
+
+    @property
+    def count(self):
+        """int: Returns the band count (z dimension size)"""
+        if self._count is not None:
+            return self._count
+        extra_dim = self._check_dimensions()
+        self._count = 1
+        if extra_dim is not None:
+            self._count = self._obj[extra_dim].size
+        return self._count
+
+    def _internal_bounds(self):
+        """Determine the internal bounds of the `xarray.DataArray`"""
+        if self.x_dim not in self._obj.coords:
+            raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
+        elif self.y_dim not in self._obj.coords:
+            raise DimensionMissingCoordinateError(f"{self.y_dim} missing coordinates.")
+        try:
+            left = float(self._obj[self.x_dim][0])
+            right = float(self._obj[self.x_dim][-1])
+            top = float(self._obj[self.y_dim][0])
+            bottom = float(self._obj[self.y_dim][-1])
+        except IndexError:
+            raise NoDataInBounds(
+                "Unable to determine bounds from coordinates."
+                f"{_get_data_var_message(self._obj)}"
+            )
+        return left, bottom, right, top
+
+    def resolution(self, recalc=False):
+        """Determine the resolution of the `xarray.DataArray`
+
+        Parameters
+        ----------
+        recalc: bool, optional
+            Will force the resolution to be recalculated instead of using the
+            transform attribute.
+
+        Returns
+        -------
+        float:
+            X resolution
+        float:
+            Y resolution
+        """
+        transform = self._cached_transform()
+
+        if (
+            not recalc or self.width == 1 or self.height == 1
+        ) and transform is not None:
+            resolution_x = transform.a
+            resolution_y = transform.e
+            return resolution_x, resolution_y
+
+        # if the coordinates of the spatial dimensions are missing
+        # use the cached transform resolution
+        try:
+            left, bottom, right, top = self._internal_bounds()
+        except DimensionMissingCoordinateError:
+            if transform is None:
+                raise
+            resolution_x = transform.a
+            resolution_y = transform.e
+            return resolution_x, resolution_y
+
+        if self.width == 1 or self.height == 1:
+            raise OneDimensionalRaster(
+                "Only 1 dimenional array found. Cannot calculate the resolution."
+                f"{_get_data_var_message(self._obj)}"
+            )
+
+        resolution_x = (right - left) / (self.width - 1)
+        resolution_y = (bottom - top) / (self.height - 1)
+        return resolution_x, resolution_y
+
+    def bounds(self, recalc=False):
+        """Determine the bounds of the `xarray.DataArray`
+
+        Parameters
+        ----------
+        recalc: bool, optional
+            Will force the bounds to be recalculated instead of using the
+            transform attribute.
+
+        Returns
+        -------
+        left, bottom, right, top: float
+            Outermost coordinates.
+        """
+        resolution_x, resolution_y = self.resolution(recalc=recalc)
+
+        try:
+            # attempt to get bounds from xarray coordinate values
+            left, bottom, right, top = self._internal_bounds()
+            left -= resolution_x / 2.0
+            right += resolution_x / 2.0
+            top -= resolution_y / 2.0
+            bottom += resolution_y / 2.0
+        except DimensionMissingCoordinateError:
+            transform = self._cached_transform()
+            left = transform.c
+            top = transform.f
+            right = left + resolution_x * self.width
+            bottom = top + resolution_y * self.height
+
+        return left, bottom, right, top
+
     def isel_window(self, window):
         """
         Use a rasterio.window.Window to select a subset of the data.
@@ -678,6 +840,74 @@ class XRasterBase(object):
             )
         )
 
+    def slice_xy(self, minx, miny, maxx, maxy):
+        """Slice the array by x,y bounds.
+
+        Parameters
+        ----------
+        minx: float
+            Minimum bound for x coordinate.
+        miny: float
+            Minimum bound for y coordinate.
+        maxx: float
+            Maximum bound for x coordinate.
+        maxy: float
+            Maximum bound for y coordinate.
+
+
+        Returns
+        -------
+        DataArray: A sliced :class:`xarray.DataArray` object.
+
+        """
+        left, bottom, right, top = self._internal_bounds()
+        if top > bottom:
+            y_slice = slice(maxy, miny)
+        else:
+            y_slice = slice(miny, maxy)
+
+        if left > right:
+            x_slice = slice(maxx, minx)
+        else:
+            x_slice = slice(minx, maxx)
+
+        subset = (
+            self._obj.sel({self.x_dim: x_slice, self.y_dim: y_slice})
+            .copy()  # this is to prevent sharing coordinates with the original dataset
+            .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+            .rio.write_transform(inplace=True)
+        )
+        return subset
+
+    def transform_bounds(self, dst_crs, densify_pts=21, recalc=False):
+        """Transform bounds from src_crs to dst_crs.
+
+        Optionally densifying the edges (to account for nonlinear transformations
+        along these edges) and extracting the outermost bounds.
+
+        Note: this does not account for the antimeridian.
+
+        Parameters
+        ----------
+        dst_crs: str, :obj:`rasterio.crs.CRS`, or dict
+            Target coordinate reference system.
+        densify_pts: uint, optional
+            Number of points to add to each edge to account for nonlinear
+            edges produced by the transform process.  Large numbers will produce
+            worse performance.  Default: 21 (gdal default).
+        recalc: bool, optional
+            Will force the bounds to be recalculated instead of using the transform
+            attribute.
+
+        Returns
+        -------
+        left, bottom, right, top: float
+            Outermost coordinates in target coordinate reference system.
+        """
+        return rasterio.warp.transform_bounds(
+            self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
+        )
+
 
 @xarray.register_dataarray_accessor("rio")
 class RasterArray(XRasterBase):
@@ -687,7 +917,6 @@ class RasterArray(XRasterBase):
         super(RasterArray, self).__init__(xarray_obj)
         # properties
         self._nodata = None
-        self._count = None
 
     def set_nodata(self, input_nodata, inplace=True):
         """
@@ -774,189 +1003,6 @@ class RasterArray(XRasterBase):
             return None
 
         return self._nodata
-
-    def resolution(self, recalc=False):
-        """Determine the resolution of the `xarray.DataArray`
-
-        Parameters
-        ----------
-        recalc: bool, optional
-            Will force the resolution to be recalculated instead of using the
-            transform attribute.
-
-        """
-        transform = self._cached_transform()
-
-        if (
-            not recalc or self.width == 1 or self.height == 1
-        ) and transform is not None:
-            resolution_x = transform.a
-            resolution_y = transform.e
-            return resolution_x, resolution_y
-
-        # if the coordinates of the spatial dimensions are missing
-        # use the cached transform resolution
-        try:
-            left, bottom, right, top = self._internal_bounds()
-        except DimensionMissingCoordinateError:
-            if transform is None:
-                raise
-            resolution_x = transform.a
-            resolution_y = transform.e
-            return resolution_x, resolution_y
-
-        if self.width == 1 or self.height == 1:
-            raise OneDimensionalRaster(
-                "Only 1 dimenional array found. Cannot calculate the resolution."
-                f"{_get_data_var_message(self._obj)}"
-            )
-
-        resolution_x = (right - left) / (self.width - 1)
-        resolution_y = (bottom - top) / (self.height - 1)
-        return resolution_x, resolution_y
-
-    def _internal_bounds(self):
-        """Determine the internal bounds of the `xarray.DataArray`"""
-        if self.x_dim not in self._obj.coords:
-            raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
-        elif self.y_dim not in self._obj.coords:
-            raise DimensionMissingCoordinateError(f"{self.y_dim} missing coordinates.")
-        try:
-            left = float(self._obj[self.x_dim][0])
-            right = float(self._obj[self.x_dim][-1])
-            top = float(self._obj[self.y_dim][0])
-            bottom = float(self._obj[self.y_dim][-1])
-        except IndexError:
-            raise NoDataInBounds(
-                "Unable to determine bounds from coordinates."
-                f"{_get_data_var_message(self._obj)}"
-            )
-        return left, bottom, right, top
-
-    def _check_dimensions(self):
-        """
-        This function validates that the dimensions 2D/3D and
-        they are are in the proper order.
-
-        Returns
-        -------
-        str or None: Name extra dimension.
-        """
-        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
-        if len(extra_dims) > 1:
-            raise TooManyDimensions(
-                "Only 2D and 3D data arrays supported."
-                f"{_get_data_var_message(self._obj)}"
-            )
-        elif extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
-            raise InvalidDimensionOrder(
-                "Invalid dimension order. Expected order: {0}. "
-                "You can use `DataArray.transpose{0}`"
-                " to reorder your dimensions.".format(
-                    (extra_dims[0], self.y_dim, self.x_dim)
-                )
-                + f"{_get_data_var_message(self._obj)}"
-            )
-        elif not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
-            raise InvalidDimensionOrder(
-                "Invalid dimension order. Expected order: {0}"
-                "You can use `DataArray.transpose{0}` "
-                "to reorder your dimensions.".format((self.y_dim, self.x_dim))
-                + f"{_get_data_var_message(self._obj)}"
-            )
-        return extra_dims[0] if extra_dims else None
-
-    @property
-    def count(self):
-        if self._count is not None:
-            return self._count
-        extra_dim = self._check_dimensions()
-        self._count = 1
-        if extra_dim is not None:
-            self._count = self._obj[extra_dim].size
-        return self._count
-
-    def bounds(self, recalc=False):
-        """Determine the bounds of the `xarray.DataArray`
-
-        Parameters
-        ----------
-        recalc: bool, optional
-            Will force the bounds to be recalculated instead of using the
-            transform attribute.
-
-        Returns
-        -------
-        left, bottom, right, top: float
-            Outermost coordinates.
-        """
-        resolution_x, resolution_y = self.resolution(recalc=recalc)
-
-        try:
-            # attempt to get bounds from xarray coordinate values
-            left, bottom, right, top = self._internal_bounds()
-            left -= resolution_x / 2.0
-            right += resolution_x / 2.0
-            top -= resolution_y / 2.0
-            bottom += resolution_y / 2.0
-        except DimensionMissingCoordinateError:
-            transform = self._cached_transform()
-            left = transform.c
-            top = transform.f
-            right = left + resolution_x * self.width
-            bottom = top + resolution_y * self.height
-
-        return left, bottom, right, top
-
-    def transform_bounds(self, dst_crs, densify_pts=21, recalc=False):
-        """Transform bounds from src_crs to dst_crs.
-
-        Optionally densifying the edges (to account for nonlinear transformations
-        along these edges) and extracting the outermost bounds.
-
-        Note: this does not account for the antimeridian.
-
-        Parameters
-        ----------
-        dst_crs: str, :obj:`rasterio.crs.CRS`, or dict
-            Target coordinate reference system.
-        densify_pts: uint, optional
-            Number of points to add to each edge to account for nonlinear
-            edges produced by the transform process.  Large numbers will produce
-            worse performance.  Default: 21 (gdal default).
-        recalc: bool, optional
-            Will force the bounds to be recalculated instead of using the transform
-            attribute.
-
-        Returns
-        -------
-        left, bottom, right, top: float
-            Outermost coordinates in target coordinate reference system.
-        """
-        return rasterio.warp.transform_bounds(
-            self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
-        )
-
-    def transform(self, recalc=False):
-        """
-        Parameters
-        ----------
-        recalc: bool, optional
-            If True, it will re-calculate the transform instead of using
-            the cached transform.
-
-        Returns
-        -------
-        affine.Afffine: The affine of the `xarray.DataArray`
-        """
-        try:
-            src_left, _, _, src_top = self.bounds(recalc=recalc)
-            src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
-        except DimensionMissingCoordinateError:
-            return Affine.identity()
-        return Affine.translation(src_left, src_top) * Affine.scale(
-            src_resolution_x, src_resolution_y
-        )
 
     def reproject(
         self,
@@ -1106,45 +1152,6 @@ class RasterArray(XRasterBase):
             shape=match_data_array.rio.shape,
             resampling=resampling,
         )
-
-    def slice_xy(self, minx, miny, maxx, maxy):
-        """Slice the array by x,y bounds.
-
-        Parameters
-        ----------
-        minx: float
-            Minimum bound for x coordinate.
-        miny: float
-            Minimum bound for y coordinate.
-        maxx: float
-            Maximum bound for x coordinate.
-        maxy: float
-            Maximum bound for y coordinate.
-
-
-        Returns
-        -------
-        DataArray: A sliced :class:`xarray.DataArray` object.
-
-        """
-        left, bottom, right, top = self._internal_bounds()
-        if top > bottom:
-            y_slice = slice(maxy, miny)
-        else:
-            y_slice = slice(miny, maxy)
-
-        if left > right:
-            x_slice = slice(maxx, minx)
-        else:
-            x_slice = slice(minx, maxx)
-
-        subset = (
-            self._obj.sel({self.x_dim: x_slice, self.y_dim: y_slice})
-            .copy()  # this is to prevent sharing coordinates with the original dataset
-            .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-            .rio.write_transform(inplace=True)
-        )
-        return subset
 
     def pad_xy(self, minx, miny, maxx, maxy, constant_values):
         """Pad the array to x,y bounds.
@@ -1640,36 +1647,6 @@ class RasterDataset(XRasterBase):
             self._crs = False
             return None
         return self._crs
-
-    def transform(self, recalc=False):
-        """
-        .. versionadded:: 0.0.30
-
-        Parameters
-        ----------
-        recalc: bool, optional
-            If True, it will re-calculate the transform instead of using
-            the cached transform.
-
-        Returns
-        -------
-        affine.Afffine: The affine of the `xarray.Dataset`
-        """
-        transform_list = []
-        for var in self.vars:
-            transform_list.append(
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.transform(recalc=recalc)
-            )
-        if not transform_list:
-            return Affine.identity()
-        transform = transform_list[0]
-        if all(transform_i == transform for transform_i in transform_list):
-            return transform
-        raise RioXarrayError(
-            "Not all transforms are the same in the dataset: {}".format(transform_list)
-        )
 
     def reproject(
         self,
