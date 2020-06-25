@@ -8,7 +8,7 @@ Latest
 - ENH: Use rasterio windows for `rio.clip_box` (issue #142)
 - BUG: Add support for negative indexes in rio.isel_window (pull #145)
 - BUG: Write transform based on window in rio.isel_window (pull #145)
-- ENH: Add `rio.count`, `rio.slice_x()`, `rio.bounds()`, `rio.resolution()` to Dataset level
+- ENH: Add `rio.count`, `rio.slice_x()`, `rio.bounds()`, `rio.resolution()`, `rio.transform_bounds()` to Dataset level
 
 0.0.29
 -------
