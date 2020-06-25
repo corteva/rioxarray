@@ -559,7 +559,7 @@
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
 <span class="sd">            Dataset with crs attribute.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">input_crs</span><span class="p">))</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">input_crs</span><span class="p">))</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
         <span class="k">return</span> <span class="n">obj</span></div>
@@ -1578,7 +1578,7 @@
         <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">cl_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cl_array</span></div>
 
-<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.</span>
 
@@ -1602,8 +1602,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        geometries: list</span>
 <span class="sd">            A list of geojson geometry dicts.</span>
-<span class="sd">        crs: :obj:`rasterio.crs.CRS`</span>
-<span class="sd">            The CRS of the input geometries.</span>
+<span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
+<span class="sd">            The CRS of the input geometries. Default is to assume it is the same</span>
+<span class="sd">            as the dataset.</span>
 <span class="sd">        all_touched : bool, optional</span>
 <span class="sd">            If True, all pixels touched by geometries will be burned in.  If</span>
 <span class="sd">            false, only pixels whose center is within the polygon or that</span>
@@ -1627,10 +1628,10 @@
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;set_crs()&#39; or &#39;write_crs()&#39;.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">crs</span><span class="p">))</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">dst_crs</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="n">crs_to_wkt</span><span class="p">(</span><span class="n">crs</span><span class="p">))</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
             <span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
+                <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">geometry</span> <span class="ow">in</span> <span class="n">geometries</span>
             <span class="p">]</span>
 
@@ -2050,7 +2051,7 @@
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :class:`xarray.Dataset` by geojson like geometry dicts.</span>
 
@@ -2063,8 +2064,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        geometries: list</span>
 <span class="sd">            A list of geojson geometry dicts.</span>
-<span class="sd">        crs: :obj:`rasterio.crs.CRS`</span>
-<span class="sd">            The CRS of the input geometries.</span>
+<span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
+<span class="sd">            The CRS of the input geometries. Default is to assume it is the same</span>
+<span class="sd">            as the dataset.</span>
 <span class="sd">        all_touched : boolean, optional</span>
 <span class="sd">            If True, all pixels touched by geometries will be burned in.  If</span>
 <span class="sd">            false, only pixels whose center is within the polygon or that</span>

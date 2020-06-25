@@ -536,6 +536,7 @@ Attributes:
 </div>
 <div class="section" id="Clip-using-a-geometry">
 <h2>Clip using a geometry<a class="headerlink" href="#Clip-using-a-geometry" title="Permalink to this headline">¶</a></h2>
+<p>By default, it assumes that the CRS of the geometry is the same as the CRS of the dataset. If it is different, make sure to pass in the CRS of the geometry.</p>
 <p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.clip</span></code>:</p>
 <ul class="simple">
 <li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.clip"><span class="std std-ref">DataArray.clip</span></a></li>
@@ -566,7 +567,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped = xds.rio.clip(geometries, xds.rio.crs)
+<span></span>clipped = xds.rio.clip(geometries)
 </pre></div>
 </div>
 </div>

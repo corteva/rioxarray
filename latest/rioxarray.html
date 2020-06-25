@@ -374,7 +374,7 @@ datacube is licensed under the Apache License, Version 2.0:
 <p>This is the GIS extension for <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterArray.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by geojson like geometry dicts.</p>
 <p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
 <p class="rubric">Examples</p>
@@ -396,7 +396,8 @@ datacube is licensed under the Apache License, Version 2.0:
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
-<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>) – The CRS of the input geometries.</li>
+<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, optional) – The CRS of the input geometries. Default is to assume it is the same
+as the dataset.</li>
 <li><strong>all_touched</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
 false, only pixels whose center is within the polygon or that
 are selected by Bresenham’s line algorithm will be burned in.</li>
@@ -704,7 +705,7 @@ If input_nodata is None, it will remove the _FillValue attribute.</li>
 <p>This is the GIS extension for <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="method">
 <dt id="rioxarray.rioxarray.RasterDataset.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by geojson like geometry dicts.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -718,7 +719,8 @@ coordinates.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
-<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>) – The CRS of the input geometries.</li>
+<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, optional) – The CRS of the input geometries. Default is to assume it is the same
+as the dataset.</li>
 <li><strong>all_touched</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
 false, only pixels whose center is within the polygon or that
 are selected by Bresenham’s line algorithm will be burned in.</li>
