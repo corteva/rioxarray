@@ -110,14 +110,9 @@ def merge_arrays(
     )
     merged_shape = merged_data.shape
     representative_array = dataarrays[0]
-    merged_crs = representative_array.rio.crs
     if parse_coordinates:
         coords = _make_coords(
-            representative_array,
-            merged_transform,
-            merged_shape[-1],
-            merged_shape[-2],
-            merged_crs,
+            representative_array, merged_transform, merged_shape[-1], merged_shape[-2],
         )
     else:
         coords = _get_nonspatial_coords(representative_array)
@@ -197,7 +192,6 @@ def merge_datasets(
             merged_data[data_var].rio.transform(),
             merged_data[data_var].shape[-1],
             merged_data[data_var].shape[-2],
-            representative_ds.rio.crs,
         ),
         attrs=representative_ds.attrs,
     )
