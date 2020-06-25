@@ -12,6 +12,7 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import math
+import warnings
 from uuid import uuid4
 
 import numpy as np
@@ -100,9 +101,12 @@ def _generate_attrs(src_data_array, dst_nodata):
     return new_attrs
 
 
-def add_xy_grid_meta(coords):
+def add_xy_grid_meta(coords, crs=None):
     """Add x,y metadata to coordinates"""
-    # add metadata to x,y coordinates
+    warnings.warn(
+        DeprecationWarning,
+        "add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.",
+    )
     if "x" in coords:
         x_coord_attrs = dict(coords["x"].attrs)
         x_coord_attrs["long_name"] = "x coordinate of projection"
@@ -153,10 +157,10 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
-    add_xy_grid_meta(new_data_array.coords)
     new_data_array = add_spatial_ref(
         new_data_array, src_data_array.rio.crs, _get_grid_map_name(src_data_array)
     )
+    new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
     # make sure encoding added
     new_data_array.encoding = src_data_array.encoding.copy()
@@ -194,12 +198,12 @@ def _get_nonspatial_coords(src_data_array):
     return coords
 
 
-def _make_coords(src_data_array, dst_affine, dst_width, dst_height, dst_crs):
+def _make_coords(src_data_array, dst_affine, dst_width, dst_height):
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
     new_coords = _warp_spatial_coords(src_data_array, dst_affine, dst_width, dst_height)
     new_coords.update(coords)
-    return add_xy_grid_meta(new_coords)
+    return new_coords
 
 
 def _make_dst_affine(
@@ -530,6 +534,61 @@ class XRasterBase(object):
         return Affine.translation(src_left, src_top) * Affine.scale(
             src_resolution_x, src_resolution_y
         )
+
+    def write_coordinate_system(self, inplace=False):
+        """
+        Write the coordinate system CF metadata.
+
+        .. versionadded:: 0.0.30
+
+        Parameters
+        ----------
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            The dataset with the CF coordinate system attributes added.
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        # add metadata to x,y coordinates
+        is_projected = data_obj.rio.crs and data_obj.rio.crs.is_projected
+        is_geographic = data_obj.rio.crs and data_obj.rio.crs.is_geographic
+        x_coord_attrs = dict(data_obj.coords[self.x_dim].attrs)
+        x_coord_attrs["axis"] = "X"
+        y_coord_attrs = dict(data_obj.coords[self.y_dim].attrs)
+        y_coord_attrs["axis"] = "Y"
+        if is_projected:
+            units = None
+            if hasattr(data_obj.rio.crs, "linear_units_factor"):
+                unit_factor = data_obj.rio.crs.linear_units_factor[-1]
+                if unit_factor != 1:
+                    units = f"{unit_factor} metre"
+                else:
+                    units = "metre"
+            # X metadata
+            x_coord_attrs["long_name"] = "x coordinate of projection"
+            x_coord_attrs["standard_name"] = "projection_x_coordinate"
+            if units:
+                x_coord_attrs["units"] = units
+            # Y metadata
+            y_coord_attrs["long_name"] = "y coordinate of projection"
+            y_coord_attrs["standard_name"] = "projection_y_coordinate"
+            if units:
+                y_coord_attrs["units"] = units
+        elif is_geographic:
+            # X metadata
+            x_coord_attrs["long_name"] = "longitude"
+            x_coord_attrs["standard_name"] = "longitude"
+            x_coord_attrs["units"] = "degrees_east"
+            # Y metadata
+            y_coord_attrs["long_name"] = "latitude"
+            y_coord_attrs["standard_name"] = "latitude"
+            y_coord_attrs["units"] = "degrees_north"
+        data_obj.coords[self.y_dim].attrs = y_coord_attrs
+        data_obj.coords[self.x_dim].attrs = x_coord_attrs
+        return data_obj
 
     def set_attrs(self, new_attrs, inplace=False):
         """
@@ -1105,13 +1164,15 @@ class RasterArray(XRasterBase):
         xda = xarray.DataArray(
             name=self._obj.name,
             data=dst_data,
-            coords=_make_coords(self._obj, dst_affine, dst_width, dst_height, dst_crs),
+            coords=_make_coords(self._obj, dst_affine, dst_width, dst_height),
             dims=tuple(dst_dims),
             attrs=new_attrs,
         )
         xda.encoding = self._obj.encoding
         xda.rio.write_transform(dst_affine, inplace=True)
-        return add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
+        xda = add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
+        xda.rio.write_coordinate_system(inplace=True)
+        return xda
 
     def reproject_match(self, match_data_array, resampling=Resampling.nearest):
         """
