@@ -1280,6 +1280,27 @@ rioxarray properties to re-search for them.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_coordinate_system">
+<code class="descname">write_coordinate_system</code><span class="sig-paren">(</span><em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the coordinate system CF metadata.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.30.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The dataset with the CF coordinate system attributes added.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.write_crs">
 <code class="descname">write_crs</code><span class="sig-paren">(</span><em>input_crs=None</em>, <em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the CRS to the dataset in a CF compliant manner.</p>
@@ -1370,7 +1391,7 @@ rioxarray properties to re-search for them.</p>
 
 <dl class="function">
 <dt id="rioxarray.rioxarray.add_xy_grid_meta">
-<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_xy_grid_meta</code><span class="sig-paren">(</span><em>coords</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_xy_grid_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_xy_grid_meta" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_xy_grid_meta</code><span class="sig-paren">(</span><em>coords</em>, <em>crs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_xy_grid_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_xy_grid_meta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add x,y metadata to coordinates</p>
 </dd></dl>
 

@@ -172,6 +172,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -260,9 +261,12 @@
     <span class="k">return</span> <span class="n">new_attrs</span>
 
 
-<div class="viewcode-block" id="add_xy_grid_meta"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.add_xy_grid_meta">[docs]</a><span class="k">def</span> <span class="nf">add_xy_grid_meta</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+<div class="viewcode-block" id="add_xy_grid_meta"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.add_xy_grid_meta">[docs]</a><span class="k">def</span> <span class="nf">add_xy_grid_meta</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add x,y metadata to coordinates&quot;&quot;&quot;</span>
-    <span class="c1"># add metadata to x,y coordinates</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="s2">&quot;add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
         <span class="n">x_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;x coordinate of projection&quot;</span>
@@ -313,10 +317,10 @@
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># make sure projection added</span>
-    <span class="n">add_xy_grid_meta</span><span class="p">(</span><span class="n">new_data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
     <span class="n">new_data_array</span> <span class="o">=</span> <span class="n">add_spatial_ref</span><span class="p">(</span>
         <span class="n">new_data_array</span><span class="p">,</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">_get_grid_map_name</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
     <span class="p">)</span>
+    <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># make sure encoding added</span>
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -354,12 +358,12 @@
     <span class="k">return</span> <span class="n">coords</span>
 
 
-<span class="k">def</span> <span class="nf">_make_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_make_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate the coordinates of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
     <span class="n">new_coords</span> <span class="o">=</span> <span class="n">_warp_spatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">)</span>
     <span class="n">new_coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">add_xy_grid_meta</span><span class="p">(</span><span class="n">new_coords</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_coords</span>
 
 
 <span class="k">def</span> <span class="nf">_make_dst_affine</span><span class="p">(</span>
@@ -690,6 +694,61 @@
         <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
             <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.write_coordinate_system"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">write_coordinate_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the coordinate system CF metadata.</span>
+
+<span class="sd">        .. versionadded:: 0.0.30</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The dataset with the CF coordinate system attributes added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># add metadata to x,y coordinates</span>
+        <span class="n">is_projected</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_projected</span>
+        <span class="n">is_geographic</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span>
+        <span class="n">x_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="n">y_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="k">if</span> <span class="n">is_projected</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;linear_units_factor&quot;</span><span class="p">):</span>
+                <span class="n">unit_factor</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">linear_units_factor</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">unit_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">units</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">unit_factor</span><span class="si">}</span><span class="s2"> metre&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;metre&quot;</span>
+            <span class="c1"># X metadata</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;x coordinate of projection&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;projection_x_coordinate&quot;</span>
+            <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+            <span class="c1"># Y metadata</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;y coordinate of projection&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;projection_y_coordinate&quot;</span>
+            <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="k">elif</span> <span class="n">is_geographic</span><span class="p">:</span>
+            <span class="c1"># X metadata</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_east&quot;</span>
+            <span class="c1"># Y metadata</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_north&quot;</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">y_coord_attrs</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">x_coord_attrs</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
 
 <div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1265,13 +1324,15 @@
         <span class="n">xda</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
-            <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">),</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">),</span>
             <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dst_dims</span><span class="p">),</span>
             <span class="n">attrs</span><span class="o">=</span><span class="n">new_attrs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">add_spatial_ref</span><span class="p">(</span><span class="n">xda</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span></div>
+        <span class="n">xda</span> <span class="o">=</span> <span class="n">add_spatial_ref</span><span class="p">(</span><span class="n">xda</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
+        <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xda</span></div>
 
 <div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

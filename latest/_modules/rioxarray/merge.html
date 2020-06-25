@@ -270,14 +270,9 @@
     <span class="p">)</span>
     <span class="n">merged_shape</span> <span class="o">=</span> <span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">representative_array</span> <span class="o">=</span> <span class="n">dataarrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">merged_crs</span> <span class="o">=</span> <span class="n">representative_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
     <span class="k">if</span> <span class="n">parse_coordinates</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">_make_coords</span><span class="p">(</span>
-            <span class="n">representative_array</span><span class="p">,</span>
-            <span class="n">merged_transform</span><span class="p">,</span>
-            <span class="n">merged_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">merged_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
-            <span class="n">merged_crs</span><span class="p">,</span>
+            <span class="n">representative_array</span><span class="p">,</span> <span class="n">merged_transform</span><span class="p">,</span> <span class="n">merged_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">merged_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">representative_array</span><span class="p">)</span>
@@ -357,7 +352,6 @@
             <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
             <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
             <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
-            <span class="n">representative_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">attrs</span><span class="o">=</span><span class="n">representative_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
     <span class="p">)</span>
