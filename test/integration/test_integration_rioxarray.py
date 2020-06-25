@@ -326,7 +326,7 @@ def test_clip_box__one_dimension_error(modis_clip):
             xdi.isel(x=slice(5, 6), y=slice(5, 6)).rio.clip_box(
                 minx=-7272735.53951584,  # xdi.x[5].values
                 miny=5048371.187465771,  # xdi.y[7].values
-                maxx=-7272272.226799311,  # xdi.y[7].values
+                maxx=-7272272.226799311,  # xdi.x[7].values
                 maxy=5048834.500182299,  # xdi.y[5].values
             )
 
