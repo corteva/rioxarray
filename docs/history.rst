@@ -10,7 +10,7 @@ Latest
 - BUG: Write transform based on window in rio.isel_window (pull #145)
 - ENH: Add `rio.count`, `rio.slice_xy()`, `rio.bounds()`, `rio.resolution()`, `rio.transform_bounds()` to Dataset level
 - ENH: Add `rio.write_coordinate_system()` (issue #147)
-
+- ENH: Search CF coordinate metadata to find coordinates (issue #147)
 
 0.0.29
 -------

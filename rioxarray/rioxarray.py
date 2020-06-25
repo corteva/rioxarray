@@ -310,6 +310,23 @@ class XRasterBase(object):
         elif "longitude" in self._obj.dims and "latitude" in self._obj.dims:
             self._x_dim = "longitude"
             self._y_dim = "latitude"
+        else:
+            # look for coordinates with CF attributes
+            for coord in self._obj.coords:
+                # make sure to only look in 1D coordinates
+                # that has the same dimension name as the coordinate
+                if self._obj.coords[coord].dims != (coord,):
+                    continue
+                elif (self._obj.coords[coord].attrs.get("axis", "").upper() == "X") or (
+                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
+                    in ("longitude", "projection_x_coordinate")
+                ):
+                    self._x_dim = coord
+                elif (self._obj.coords[coord].attrs.get("axis", "").upper() == "Y") or (
+                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
+                    in ("latitude", "projection_y_coordinate")
+                ):
+                    self._y_dim = coord
 
         # properties
         self._count = None
