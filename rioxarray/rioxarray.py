@@ -399,7 +399,7 @@ class XRasterBase(object):
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Dataset with crs attribute.
         """
-        crs = CRS.from_user_input(crs_to_wkt(input_crs))
+        crs = CRS.from_wkt(crs_to_wkt(input_crs))
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
         return obj
@@ -1418,7 +1418,7 @@ class RasterArray(XRasterBase):
         _add_attrs_proj(cl_array, self._obj)
         return cl_array
 
-    def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
+    def clip(self, geometries, crs=None, all_touched=False, drop=True, invert=False):
         """
         Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -1442,8 +1442,9 @@ class RasterArray(XRasterBase):
         ----------
         geometries: list
             A list of geojson geometry dicts.
-        crs: :obj:`rasterio.crs.CRS`
-            The CRS of the input geometries.
+        crs: :obj:`rasterio.crs.CRS`, optional
+            The CRS of the input geometries. Default is to assume it is the same
+            as the dataset.
         all_touched : bool, optional
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
@@ -1467,10 +1468,10 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        dst_crs = CRS.from_user_input(crs_to_wkt(crs))
-        if self.crs != dst_crs:
+        crs = CRS.from_wkt(crs_to_wkt(crs)) if crs is not None else self.crs
+        if self.crs != crs:
             geometries = [
-                rasterio.warp.transform_geom(dst_crs, self.crs, geometry)
+                rasterio.warp.transform_geom(crs, self.crs, geometry)
                 for geometry in geometries
             ]
 
@@ -1890,7 +1891,7 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
+    def clip(self, geometries, crs=None, all_touched=False, drop=True, invert=False):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
@@ -1903,8 +1904,9 @@ class RasterDataset(XRasterBase):
         ----------
         geometries: list
             A list of geojson geometry dicts.
-        crs: :obj:`rasterio.crs.CRS`
-            The CRS of the input geometries.
+        crs: :obj:`rasterio.crs.CRS`, optional
+            The CRS of the input geometries. Default is to assume it is the same
+            as the dataset.
         all_touched : boolean, optional
             If True, all pixels touched by geometries will be burned in.  If
             false, only pixels whose center is within the polygon or that
