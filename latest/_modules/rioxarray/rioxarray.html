@@ -177,12 +177,12 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyproj</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
+<span class="kn">import</span> <span class="nn">rasterio.windows</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
 <span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
 <span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
 <span class="kn">from</span> <span class="nn">rasterio.features</span> <span class="kn">import</span> <span class="n">geometry_mask</span>
-<span class="kn">from</span> <span class="nn">rasterio.windows</span> <span class="kn">import</span> <span class="n">get_data_window</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray.crs</span> <span class="kn">import</span> <span class="n">crs_to_wkt</span>
@@ -802,6 +802,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use a rasterio.window.Window to select a subset of the data.</span>
 
+<span class="sd">        .. warning:: Float indices are converted to integers.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        window: :class:`rasterio.window.Window`</span>
@@ -812,11 +814,29 @@
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">row_stop</span><span class="p">),</span> <span class="p">(</span><span class="n">col_start</span><span class="p">,</span> <span class="n">col_stop</span><span class="p">)</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toranges</span><span class="p">()</span>
-        <span class="n">row_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)))</span>
-        <span class="n">col_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_start</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
-            <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">}</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+        <span class="n">row_start</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_start</span><span class="p">)</span> <span class="k">if</span> <span class="n">row_start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)</span>
+        <span class="n">row_stop</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)</span> <span class="k">if</span> <span class="n">row_stop</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)</span>
+        <span class="n">col_start</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_start</span><span class="p">)</span> <span class="k">if</span> <span class="n">col_start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_start</span><span class="p">)</span>
+        <span class="n">col_stop</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)</span> <span class="k">if</span> <span class="n">col_stop</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)</span>
+        <span class="n">row_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row_start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_stop</span><span class="p">))</span>
+        <span class="n">col_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">col_start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">col_stop</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                    <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">Window</span><span class="o">.</span><span class="n">from_slices</span><span class="p">(</span>
+                        <span class="n">rows</span><span class="o">=</span><span class="n">row_slice</span><span class="p">,</span>
+                        <span class="n">cols</span><span class="o">=</span><span class="n">col_slice</span><span class="p">,</span>
+                        <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                        <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="RasterArray"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
@@ -1424,33 +1444,56 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
+        <span class="c1"># make sure that if the coordinates are</span>
+        <span class="c1"># in reverse order that it still works</span>
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">maxy</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">miny</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">miny</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">maxy</span>
+        <span class="k">if</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">maxx</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">minx</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">minx</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">maxx</span>
 
-        <span class="n">clip_minx</span> <span class="o">=</span> <span class="n">minx</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">clip_miny</span> <span class="o">=</span> <span class="n">miny</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">clip_maxx</span> <span class="o">=</span> <span class="n">maxx</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">clip_maxy</span> <span class="o">=</span> <span class="n">maxy</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">cl_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_xy</span><span class="p">(</span><span class="n">clip_minx</span><span class="p">,</span> <span class="n">clip_miny</span><span class="p">,</span> <span class="n">clip_maxx</span><span class="p">,</span> <span class="n">clip_maxy</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+        <span class="c1"># pull the data out</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">from_bounds</span><span class="p">(</span>
+            <span class="n">left</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">bottom</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">right</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">top</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">top</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">cl_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># check that the window has data in it</span>
+        <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">auto_expand</span> <span class="ow">and</span> <span class="n">auto_expand</span> <span class="o">&lt;</span> <span class="n">auto_expand_limit</span><span class="p">:</span>
+                <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_box</span><span class="p">(</span>
-                    <span class="n">clip_minx</span><span class="p">,</span>
-                    <span class="n">clip_miny</span><span class="p">,</span>
-                    <span class="n">clip_maxx</span><span class="p">,</span>
-                    <span class="n">clip_maxy</span><span class="p">,</span>
+                    <span class="n">minx</span><span class="o">=</span><span class="n">minx</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                    <span class="n">miny</span><span class="o">=</span><span class="n">miny</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                    <span class="n">maxx</span><span class="o">=</span><span class="n">maxx</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_x</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                    <span class="n">maxy</span><span class="o">=</span><span class="n">maxy</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">resolution_y</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
                     <span class="n">auto_expand</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">auto_expand</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                     <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
-                <span class="s2">&quot;At least one of the clipped raster x,y coordinates&quot;</span>
-                <span class="s2">&quot; has only one point.&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
+                    <span class="s2">&quot;At least one of the clipped raster x,y coordinates&quot;</span>
+                    <span class="s2">&quot; has only one point.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># make sure correct attributes preserved &amp; projection added</span>
         <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">cl_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
@@ -1532,7 +1575,9 @@
                 <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span>
-                <span class="n">get_data_window</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">))</span>
+                <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
             <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>

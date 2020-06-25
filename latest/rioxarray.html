@@ -1142,6 +1142,10 @@ the cached transform.</td>
 <dt id="rioxarray.rioxarray.XRasterBase.isel_window">
 <code class="descname">isel_window</code><span class="sig-paren">(</span><em>window</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.isel_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.isel_window" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a rasterio.window.Window to select a subset of the data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Float indices are converted to integers.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
