@@ -1024,6 +1024,20 @@ transform attribute.</td>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.grid_mapping">
+<code class="descname">grid_mapping</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>The CF grid_mapping attribute. ‘spatial_ref’ is the default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rioxarray.rioxarray.XRasterBase.height">
 <code class="descname">height</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.height" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the height of the dataset (y dimension size)</p>
@@ -1304,7 +1318,7 @@ rioxarray properties to re-search for them.</p>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.write_crs">
-<code class="descname">write_crs</code><span class="sig-paren">(</span><em>input_crs=None</em>, <em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_crs</code><span class="sig-paren">(</span><em>input_crs=None</em>, <em>grid_mapping_name=None</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the CRS to the dataset in a CF compliant manner.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1312,7 +1326,32 @@ rioxarray properties to re-search for them.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
-<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the coordinate to store the CRS information in.</li>
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the CRS information in.
+Default is the grid_mapping name of the dataset.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with CF compliant CRS information.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_grid_mapping">
+<code class="descname">write_grid_mapping</code><span class="sig-paren">(</span><em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_grid_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_grid_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the CF grid_mapping attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate.</li>
 <li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
 </ul>
 </td>
@@ -1329,7 +1368,7 @@ rioxarray properties to re-search for them.</p>
 
 <dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.write_transform">
-<code class="descname">write_transform</code><span class="sig-paren">(</span><em>transform=None</em>, <em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_transform" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_transform</code><span class="sig-paren">(</span><em>transform=None</em>, <em>grid_mapping_name=None</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_transform" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified">New in version 0.0.30.</span></p>
 </div>
@@ -1341,7 +1380,8 @@ rioxarray properties to re-search for them.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>transform</strong> (<em>affine.Affine</em><em>, </em><em>optional</em>) – The transform of the dataset. If not provided, it will be calculated.</li>
-<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the coordinate to store the CRS information in.</li>
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the transform information in.
+Default is the grid_mapping name of the dataset.</li>
 <li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
 </ul>
 </td>
@@ -1388,7 +1428,7 @@ rioxarray properties to re-search for them.</p>
 
 <dl class="function">
 <dt id="rioxarray.rioxarray.add_spatial_ref">
-<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_spatial_ref</code><span class="sig-paren">(</span><em>in_ds</em>, <em>dst_crs</em>, <em>grid_map_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_spatial_ref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_spatial_ref" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_spatial_ref</code><span class="sig-paren">(</span><em>in_ds</em>, <em>dst_crs</em>, <em>grid_mapping_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_spatial_ref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_spatial_ref" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

@@ -12,6 +12,7 @@ Latest
 - ENH: Add `rio.write_coordinate_system()` (issue #147)
 - ENH: Search CF coordinate metadata to find coordinates (issue #147)
 - ENH: Default `rio.clip` to assume geometry has CRS of dataset (pull #150)
+- ENH: Add `rio.grid_mapping` and `rio.write_grid_mapping` & preserve original grid mapping (pull #151)
 
 0.0.29
 -------
