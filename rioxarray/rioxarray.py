@@ -348,7 +348,7 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
         """
         if inplace:
             return self._obj
@@ -375,9 +375,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
-        Dataset with crs attribute.
-
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Dataset with crs attribute.
         """
         crs = CRS.from_user_input(crs_to_wkt(input_crs))
         obj = self._get_obj(inplace=inplace)
@@ -401,9 +400,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
-        Modified dataset with CF compliant CRS information.
-
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with CF compliant CRS information.
         """
         if input_crs is not None:
             data_obj = self.set_crs(input_crs, inplace=inplace)
@@ -493,7 +491,7 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Modified dataset with Geo Transform written.
         """
         transform = transform or self.transform(recalc=True)
@@ -521,7 +519,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        affine.Afffine: The affine of the `xarray.DataArray`
+        :obj:`affine.Afffine`:
+            The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         try:
             src_left, _, _, src_top = self.bounds(recalc=recalc)
@@ -546,8 +545,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
-        Modified dataset with new attributes.
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with new attributes.
         """
         data_obj = self._get_obj(inplace=inplace)
         # set the attributes
@@ -572,9 +571,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
-        Modified dataset with updated attributes.
-
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with updated attributes.
         """
         data_attrs = dict(self._obj.attrs)
         data_attrs.update(**new_attrs)
@@ -596,9 +594,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        xarray.Dataset or xarray.DataArray:
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Dataset with spatial dimensions set.
-
         """
 
         def set_dims(obj, in_x_dim, in_y_dim):
@@ -723,8 +720,7 @@ class XRasterBase(object):
         return left, bottom, right, top
 
     def resolution(self, recalc=False):
-        """Determine the resolution of the `xarray.DataArray`
-
+        """
         Parameters
         ----------
         recalc: bool, optional
@@ -733,10 +729,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        float:
-            X resolution
-        float:
-            Y resolution
+        x_resolution, y_resolution: float
+            The resolution of the `xarray.DataArray` | `xarray.Dataset`
         """
         transform = self._cached_transform()
 
@@ -769,8 +763,7 @@ class XRasterBase(object):
         return resolution_x, resolution_y
 
     def bounds(self, recalc=False):
-        """Determine the bounds of the `xarray.DataArray`
-
+        """
         Parameters
         ----------
         recalc: bool, optional
@@ -780,7 +773,7 @@ class XRasterBase(object):
         Returns
         -------
         left, bottom, right, top: float
-            Outermost coordinates.
+            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.
         """
         resolution_x, resolution_y = self.resolution(recalc=recalc)
 
@@ -813,7 +806,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`: The data in the window.
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            The data in the window.
         """
         (row_start, row_stop), (col_start, col_stop) = window.toranges()
         row_start = math.ceil(row_start) if row_start < 0 else math.floor(row_start)
@@ -857,8 +851,8 @@ class XRasterBase(object):
 
         Returns
         -------
-        DataArray: A sliced :class:`xarray.DataArray` object.
-
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            The data in the slice.
         """
         left, bottom, right, top = self._internal_bounds()
         if top > bottom:
@@ -911,7 +905,7 @@ class XRasterBase(object):
 
 @xarray.register_dataarray_accessor("rio")
 class RasterArray(XRasterBase):
-    """This is the GIS extension for :class:`xarray.DataArray`"""
+    """This is the GIS extension for :obj:`xarray.DataArray`"""
 
     def __init__(self, xarray_obj):
         super(RasterArray, self).__init__(xarray_obj)
@@ -932,7 +926,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        xarray.DataArray: Dataset with nodata attribute set.
+        :obj:`xarray.DataArray`:
+            Dataset with nodata attribute set.
         """
         obj = self._get_obj(inplace=inplace)
         obj.rio._nodata = input_nodata
@@ -952,8 +947,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        xarray.DataArray: Modified DataArray with CF compliant nodata information.
-
+        :obj:`xarray.DataArray`:
+            Modified DataArray with CF compliant nodata information.
         """
         data_obj = self._get_obj(inplace=inplace)
         input_nodata = False if input_nodata is None else input_nodata
@@ -1013,7 +1008,7 @@ class RasterArray(XRasterBase):
         resampling=Resampling.nearest,
     ):
         """
-        Reproject :class:`xarray.DataArray` objects
+        Reproject :obj:`xarray.DataArray` objects
 
         Powered by `rasterio.warp.reproject`
 
@@ -1043,8 +1038,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        :class:`xarray.DataArray`: A reprojected DataArray.
-
+        :obj:`xarray.DataArray`:
+            The reprojected DataArray.
         """
         if resolution is not None and (shape is not None or transform is not None):
             raise RioXarrayError("resolution cannot be used with shape or transform.")
@@ -1140,10 +1135,9 @@ class RasterArray(XRasterBase):
 
         Returns
         --------
-        :obj:`xarray.DataArray`
+        :obj:`xarray.DataArray`:
             Contains the data from the src_data_array, reprojected to match
             match_data_array.
-
         """
         dst_crs = crs_to_wkt(match_data_array.rio.crs)
         return self.reproject(
@@ -1175,8 +1169,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        DataArray: A padded :class:`xarray.DataArray` object.
-
+        :obj:`xarray.DataArray`:
+            The padded object.
         """
         left, bottom, right, top = self._internal_bounds()
         resolution_x, resolution_y = self.resolution()
@@ -1223,7 +1217,7 @@ class RasterArray(XRasterBase):
         return superset
 
     def pad_box(self, minx, miny, maxx, maxy, constant_values=None):
-        """Pad the :class:`xarray.DataArray` to a bounding box
+        """Pad the :obj:`xarray.DataArray` to a bounding box
 
         .. versionadded:: 0.0.29
 
@@ -1244,8 +1238,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        DataArray: A padded :class:`xarray.DataArray` object.
-
+        :obj:`xarray.DataArray`:
+            The padded object.
         """
         resolution_x, resolution_y = self.resolution()
 
@@ -1262,7 +1256,7 @@ class RasterArray(XRasterBase):
         return pd_array
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
-        """Clip the :class:`xarray.DataArray` by a bounding box.
+        """Clip the :obj:`xarray.DataArray` by a bounding box.
 
         Parameters
         ----------
@@ -1282,8 +1276,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        DataArray: A clipped :class:`xarray.DataArray` object.
-
+        :obj:`xarray.DataArray`:
+            The clipped object.
         """
         if self.width == 1 or self.height == 1:
             raise OneDimensionalRaster(
@@ -1348,9 +1342,23 @@ class RasterArray(XRasterBase):
 
     def clip(self, geometries, crs, all_touched=False, drop=True, invert=False):
         """
-        Crops a :class:`xarray.DataArray` by geojson like geometry dicts.
+        Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.
 
         Powered by `rasterio.features.geometry_mask`.
+
+        Examples:
+
+            >>> geometry = ''' {"type": "Polygon",
+            ...                 "coordinates": [
+            ...                 [[-94.07955380199459, 41.69085871273774],
+            ...                 [-94.06082436942204, 41.69103313774798],
+            ...                 [-94.06063203899649, 41.67932439500822],
+            ...                 [-94.07935807746362, 41.679150041277325],
+            ...                 [-94.07955380199459, 41.69085871273774]]]}'''
+            >>> cropping_geometries = [geojson.loads(geometry)]
+            >>> xds = xarray.open_rasterio('cool_raster.tif')
+            >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
+
 
         Parameters
         ----------
@@ -1373,21 +1381,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        DataArray: A clipped :class:`xarray.DataArray` object.
-
-
-        Examples:
-
-            >>> geometry = ''' {"type": "Polygon",
-            ...                 "coordinates": [
-            ...                 [[-94.07955380199459, 41.69085871273774],
-            ...                 [-94.06082436942204, 41.69103313774798],
-            ...                 [-94.06063203899649, 41.67932439500822],
-            ...                 [-94.07935807746362, 41.679150041277325],
-            ...                 [-94.07955380199459, 41.69085871273774]]]}'''
-            >>> cropping_geometries = [geojson.loads(geometry)]
-            >>> xds = xarray.open_rasterio('cool_raster.tif')
-            >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
+        :obj:`xarray.DataArray`:
+            The clipped object.
         """
         if self.crs is None:
             raise MissingCRS(
@@ -1455,8 +1450,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        :class:`numpy.ndarray`: An interpolated :class:`numpy.ndarray`.
-
+        :class:`numpy.ndarray`:
+            An interpolated :class:`numpy.ndarray`.
         """
         src_data_flat = src_data.flatten()
         try:
@@ -1494,8 +1489,8 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        :class:`xarray.DataArray`: An interpolated :class:`xarray.DataArray` object.
-
+        :obj:`xarray.DataArray`:
+            An interpolated :obj:`xarray.DataArray` object.
         """
         extra_dim = self._check_dimensions()
         if extra_dim:
@@ -1891,7 +1886,7 @@ class RasterDataset(XRasterBase):
 
         Returns
         -------
-        :class:`xarray.DataArray`: An interpolated :class:`xarray.DataArray` object.
+        :obj:`xarray.DataArray`: An interpolated :obj:`xarray.DataArray` object.
 
         """
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
