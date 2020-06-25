@@ -107,8 +107,6 @@ def add_xy_grid_meta(coords, crs=None):
         DeprecationWarning,
         "add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.",
     )
-    """Add x,y metadata to coordinates"""
-    # add metadata to x,y coordinates
     if "x" in coords:
         x_coord_attrs = dict(coords["x"].attrs)
         x_coord_attrs["long_name"] = "x coordinate of projection"
