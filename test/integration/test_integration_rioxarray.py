@@ -781,8 +781,8 @@ def test_interpolate_na(interpolate_na):
 
 
 @pytest.mark.xfail(
-    LooseVersion(scipy.__version__) < LooseVersion("1.5.0"),
-    reason="griddata behaves differently across versions",
+    LooseVersion(scipy.__version__) < LooseVersion("1.5.0") or os.name == "nt",
+    reason="griddata behaves differently across versions and platforms",
 )
 def test_interpolate_na_veris(interpolate_na_veris):
     with xarray.open_dataset(interpolate_na_veris["input"]) as mda, xarray.open_dataset(
