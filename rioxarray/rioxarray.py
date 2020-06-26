@@ -329,7 +329,7 @@ class XRasterBase(object):
     @property
     def crs(self):
         """:obj:`rasterio.crs.CRS`:
-            Retrieve projection from `xarray.DataArray` or `xarray.Dataset`
+            Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         if self._crs is not None:
             return None if self._crs is False else self._crs
@@ -1248,7 +1248,7 @@ class RasterArray(XRasterBase):
 
         Parameters
         ----------
-        match_data_array: :obj:`xarray.DataArray`
+        match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             DataArray of the target resolution and projection.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
@@ -1802,8 +1802,8 @@ class RasterDataset(XRasterBase):
 
         Returns
         --------
-        :class:`xarray.Dataset`: A reprojected Dataset.
-
+        :class:`xarray.Dataset`:
+            The reprojected Dataset.
         """
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
@@ -1833,15 +1833,15 @@ class RasterDataset(XRasterBase):
 
         Parameters
         ----------
-        match_data_array: :obj:`xarray.DataArray`
-            DataArray of the target resolution and projection.
+        match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
+            Dataset with the target resolution and projection.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
 
 
         Returns
         --------
-        :obj:`xarray.Dataset`
+        :obj:`xarray.Dataset`:
             Contains the data from the src_data_array,
             reprojected to match match_data_array.
         """
@@ -1875,8 +1875,8 @@ class RasterDataset(XRasterBase):
 
         Returns
         -------
-        DataArray: A padded :class:`xarray.Dataset` object.
-
+        :obj:`xarray.Dataset`:
+            The padded object.
         """
         padded_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
@@ -1913,8 +1913,8 @@ class RasterDataset(XRasterBase):
 
         Returns
         -------
-        DataArray: A clipped :class:`xarray.Dataset` object.
-
+        :obj:`Dataset`:
+            The clipped object.
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
@@ -1943,6 +1943,19 @@ class RasterDataset(XRasterBase):
 
         Powered by `rasterio.features.geometry_mask`.
 
+        Examples:
+
+            >>> geometry = ''' {"type": "Polygon",
+            ...                 "coordinates": [
+            ...                 [[-94.07955380199459, 41.69085871273774],
+            ...                 [-94.06082436942204, 41.69103313774798],
+            ...                 [-94.06063203899649, 41.67932439500822],
+            ...                 [-94.07935807746362, 41.679150041277325],
+            ...                 [-94.07955380199459, 41.69085871273774]]]}'''
+            >>> cropping_geometries = [geojson.loads(geometry)]
+            >>> xds = xarray.open_rasterio('cool_raster.tif')
+            >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
+
         Parameters
         ----------
         geometries: list
@@ -1965,21 +1978,8 @@ class RasterDataset(XRasterBase):
 
         Returns
         -------
-        Dataset: A clipped :class:`xarray.Dataset` object.
-
-
-        Examples:
-
-            >>> geometry = ''' {"type": "Polygon",
-            ...                 "coordinates": [
-            ...                 [[-94.07955380199459, 41.69085871273774],
-            ...                 [-94.06082436942204, 41.69103313774798],
-            ...                 [-94.06063203899649, 41.67932439500822],
-            ...                 [-94.07935807746362, 41.679150041277325],
-            ...                 [-94.07955380199459, 41.69085871273774]]]}'''
-            >>> cropping_geometries = [geojson.loads(geometry)]
-            >>> xds = xarray.open_rasterio('cool_raster.tif')
-            >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
+        :obj:`xarray.Dataset`:
+            The clipped object.
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
@@ -2009,8 +2009,8 @@ class RasterDataset(XRasterBase):
 
         Returns
         -------
-        :obj:`xarray.DataArray`: An interpolated :obj:`xarray.DataArray` object.
-
+        :obj:`xarray.DataArray`:
+             The interpolated object.
         """
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
