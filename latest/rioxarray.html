@@ -233,7 +233,7 @@ if your files are very large or if you don’t need the coordinates.</li>
 <code class="docutils literal notranslate"><span class="pre">{'x':</span> <span class="pre">5,</span> <span class="pre">'y':</span> <span class="pre">5}</span></code>. If chunks is provided, it used to load the new
 DataArray into a dask array. Chunks can also be set to
 <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> to choose sensible chunk sizes according to
-<a href="#id1"><span class="problematic" id="id2">``</span></a>dask.config.get(“array.chunk-size”).</li>
+<code class="docutils literal notranslate"><span class="pre">dask.config.get(&quot;array.chunk-size&quot;)</span></code>.</li>
 <li><strong>cache</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, cache data loaded from the underlying datastore in memory as
 NumPy arrays when accessed to avoid reading from the underlying data-
 store multiple times. Defaults to True unless you specify the <cite>chunks</cite>
@@ -253,10 +253,10 @@ treat integer arrays as unsigned.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>data</strong> – The newly created DataArray.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created dataset(s).</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataArray</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> | List[<code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>]</p>
 </td>
 </tr>
 </tbody>
@@ -295,10 +295,10 @@ If not set, uses the nodata value in the first input DataArray.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>DataArray</strong></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The geospatially merged data.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">The geospatially merged data.</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -333,10 +333,10 @@ If not set, uses the nodata value in the first input Dataset.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Dataset</strong></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The geospatially merged data.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">The geospatially merged data.</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 </td>
 </tr>
 </tbody>

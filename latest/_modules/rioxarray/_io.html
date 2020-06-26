@@ -765,7 +765,7 @@
 <span class="sd">        ``{&#39;x&#39;: 5, &#39;y&#39;: 5}``. If chunks is provided, it used to load the new</span>
 <span class="sd">        DataArray into a dask array. Chunks can also be set to</span>
 <span class="sd">        ``True`` or ``&quot;auto&quot;`` to choose sensible chunk sizes according to</span>
-<span class="sd">        ``dask.config.get(&quot;array.chunk-size&quot;).</span>
+<span class="sd">        ``dask.config.get(&quot;array.chunk-size&quot;)``.</span>
 <span class="sd">    cache: bool, optional</span>
 <span class="sd">        If True, cache data loaded from the underlying datastore in memory as</span>
 <span class="sd">        NumPy arrays when accessed to avoid reading from the underlying data-</span>
@@ -793,8 +793,8 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    data : DataArray</span>
-<span class="sd">        The newly created DataArray.</span>
+<span class="sd">    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | List[:obj:`xarray.Dataset`]:</span>
+<span class="sd">        The newly created dataset(s).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parse_coordinates</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">parse_coordinates</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parse_coordinates</span>
     <span class="n">masked</span> <span class="o">=</span> <span class="n">masked</span> <span class="ow">or</span> <span class="n">mask_and_scale</span>
