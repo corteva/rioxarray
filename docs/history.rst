@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.0.30
 ------
 - BUG: Fix assigning fill value in `rio.pad_box` (pull #140)
 - ENH: Add `rio.write_transform` to store cache in GDAL location (issue #129 & #139)
