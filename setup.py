@@ -47,7 +47,7 @@ setup(
     author="rioxarray Contributors",
     author_email="alansnow21@gmail.com",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
