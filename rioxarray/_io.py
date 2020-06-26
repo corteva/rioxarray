@@ -605,7 +605,7 @@ def open_rasterio(
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array. Chunks can also be set to
         ``True`` or ``"auto"`` to choose sensible chunk sizes according to
-        ``dask.config.get("array.chunk-size").
+        ``dask.config.get("array.chunk-size")``.
     cache: bool, optional
         If True, cache data loaded from the underlying datastore in memory as
         NumPy arrays when accessed to avoid reading from the underlying data-
@@ -633,8 +633,8 @@ def open_rasterio(
 
     Returns
     -------
-    data : DataArray
-        The newly created DataArray.
+    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | List[:obj:`xarray.Dataset`]:
+        The newly created dataset(s).
     """
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
     masked = masked or mask_and_scale

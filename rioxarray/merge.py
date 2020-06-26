@@ -98,7 +98,8 @@ def merge_arrays(
 
     Returns
     -------
-    DataArray: The geospatially merged data.
+    :obj:`xarray.DataArray`:
+        The geospatially merged data.
     """
 
     input_kwargs = dict(
@@ -169,7 +170,8 @@ def merge_datasets(
 
     Returns
     -------
-    Dataset: The geospatially merged data.
+    :obj:`xarray.Dataset`:
+        The geospatially merged data.
     """
 
     representative_ds = datasets[0]

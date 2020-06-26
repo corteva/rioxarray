@@ -360,7 +360,7 @@ class XRasterBase(object):
 
         Returns
         -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         if inplace:
             return self._obj
