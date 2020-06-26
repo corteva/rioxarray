@@ -489,7 +489,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
-<span class="sd">            Retrieve projection from `xarray.DataArray` or `xarray.Dataset`</span>
+<span class="sd">            Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
@@ -1408,7 +1408,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        match_data_array: :obj:`xarray.DataArray`</span>
+<span class="sd">        match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
 <span class="sd">            DataArray of the target resolution and projection.</span>
 <span class="sd">        resampling: Resampling method, optional</span>
 <span class="sd">            See rasterio.warp.reproject for more details.</span>
@@ -1962,8 +1962,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
-<span class="sd">        :class:`xarray.Dataset`: A reprojected Dataset.</span>
-
+<span class="sd">        :class:`xarray.Dataset`:</span>
+<span class="sd">            The reprojected Dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">resampled_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
@@ -1993,15 +1993,15 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        match_data_array: :obj:`xarray.DataArray`</span>
-<span class="sd">            DataArray of the target resolution and projection.</span>
+<span class="sd">        match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
+<span class="sd">            Dataset with the target resolution and projection.</span>
 <span class="sd">        resampling: Resampling method, optional</span>
 <span class="sd">            See rasterio.warp.reproject for more details.</span>
 
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
-<span class="sd">        :obj:`xarray.Dataset`</span>
+<span class="sd">        :obj:`xarray.Dataset`:</span>
 <span class="sd">            Contains the data from the src_data_array,</span>
 <span class="sd">            reprojected to match match_data_array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2035,8 +2035,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A padded :class:`xarray.Dataset` object.</span>
-
+<span class="sd">        :obj:`xarray.Dataset`:</span>
+<span class="sd">            The padded object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">padded_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
@@ -2073,8 +2073,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataArray: A clipped :class:`xarray.Dataset` object.</span>
-
+<span class="sd">        :obj:`Dataset`:</span>
+<span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
@@ -2103,6 +2103,19 @@
 
 <span class="sd">        Powered by `rasterio.features.geometry_mask`.</span>
 
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; geometry = &#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="sd">            ...                 &quot;coordinates&quot;: [</span>
+<span class="sd">            ...                 [[-94.07955380199459, 41.69085871273774],</span>
+<span class="sd">            ...                 [-94.06082436942204, 41.69103313774798],</span>
+<span class="sd">            ...                 [-94.06063203899649, 41.67932439500822],</span>
+<span class="sd">            ...                 [-94.07935807746362, 41.679150041277325],</span>
+<span class="sd">            ...                 [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
+<span class="sd">            &gt;&gt;&gt; cropping_geometries = [geojson.loads(geometry)]</span>
+<span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        geometries: list</span>
@@ -2125,21 +2138,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dataset: A clipped :class:`xarray.Dataset` object.</span>
-
-
-<span class="sd">        Examples:</span>
-
-<span class="sd">            &gt;&gt;&gt; geometry = &#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
-<span class="sd">            ...                 &quot;coordinates&quot;: [</span>
-<span class="sd">            ...                 [[-94.07955380199459, 41.69085871273774],</span>
-<span class="sd">            ...                 [-94.06082436942204, 41.69103313774798],</span>
-<span class="sd">            ...                 [-94.06063203899649, 41.67932439500822],</span>
-<span class="sd">            ...                 [-94.07935807746362, 41.679150041277325],</span>
-<span class="sd">            ...                 [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
-<span class="sd">            &gt;&gt;&gt; cropping_geometries = [geojson.loads(geometry)]</span>
-<span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
-<span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
+<span class="sd">        :obj:`xarray.Dataset`:</span>
+<span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
@@ -2169,8 +2169,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :obj:`xarray.DataArray`: An interpolated :obj:`xarray.DataArray` object.</span>
-
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">             The interpolated object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
