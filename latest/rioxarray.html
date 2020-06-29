@@ -242,10 +242,9 @@ argument to use dask, in which case it defaults to False.</li>
 <code class="xref py py-func docutils literal notranslate"><span class="pre">dask.array.from_array()</span></code>. By default, a global lock is
 used to avoid issues with concurrent access to the same file when using
 dask’s multithreaded backend.</li>
-<li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and to set values to NaN. Defaults to False.</li>
-<li><strong>mask_and_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Lazily scale (using scale_factor and add_offset) and mask
-(using _FillValue). If the _Unsigned attribute is present
-treat integer arrays as unsigned.</li>
+<li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and set values to NaN. Defaults to False.</li>
+<li><strong>mask_and_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Lazily scale (using the <cite>scales</cite> and <cite>offsets</cite> from rasterio) and mask.
+If the _Unsigned attribute is present treat integer arrays as unsigned.</li>
 <li><strong>variable</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Variable name or names to use to filter loading.</li>
 <li><strong>group</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Group name or names to use to filter loading.</li>
 <li><strong>default_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the data array if none exists. Default is None.</li>

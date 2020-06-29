@@ -777,11 +777,10 @@
 <span class="sd">        used to avoid issues with concurrent access to the same file when using</span>
 <span class="sd">        dask&#39;s multithreaded backend.</span>
 <span class="sd">    masked: bool, optional</span>
-<span class="sd">        If True, read the mask and to set values to NaN. Defaults to False.</span>
+<span class="sd">        If True, read the mask and set values to NaN. Defaults to False.</span>
 <span class="sd">    mask_and_scale: bool, optional</span>
-<span class="sd">        Lazily scale (using scale_factor and add_offset) and mask</span>
-<span class="sd">        (using _FillValue). If the _Unsigned attribute is present</span>
-<span class="sd">        treat integer arrays as unsigned.</span>
+<span class="sd">        Lazily scale (using the `scales` and `offsets` from rasterio) and mask.</span>
+<span class="sd">        If the _Unsigned attribute is present treat integer arrays as unsigned.</span>
 <span class="sd">    variable: str or list or tuple, optional</span>
 <span class="sd">        Variable name or names to use to filter loading.</span>
 <span class="sd">    group: str or list or tuple, optional</span>
