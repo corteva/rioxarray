@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 from distutils.version import LooseVersion
 from functools import partial
 
@@ -875,7 +876,8 @@ def test_interpolate_na(interpolate_na):
 
 
 @pytest.mark.xfail(
-    LooseVersion(scipy.__version__) < LooseVersion("1.5.0") or os.name != "posix",
+    LooseVersion(scipy.__version__) < LooseVersion("1.5.0")
+    or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
 def test_interpolate_na_veris(interpolate_na_veris):
