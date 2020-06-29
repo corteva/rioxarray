@@ -1149,7 +1149,7 @@ class RasterArray(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        transform, optional
+        transform: optional
             The destination transform.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
@@ -1794,7 +1794,7 @@ class RasterDataset(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        transform, optional
+        transform: optional
             The destination transform.
         resampling: Resampling method, optional
             See rasterio.warp.reproject for more details.
