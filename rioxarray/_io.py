@@ -617,11 +617,10 @@ def open_rasterio(
         used to avoid issues with concurrent access to the same file when using
         dask's multithreaded backend.
     masked: bool, optional
-        If True, read the mask and to set values to NaN. Defaults to False.
+        If True, read the mask and set values to NaN. Defaults to False.
     mask_and_scale: bool, optional
-        Lazily scale (using scale_factor and add_offset) and mask
-        (using _FillValue). If the _Unsigned attribute is present
-        treat integer arrays as unsigned.
+        Lazily scale (using the `scales` and `offsets` from rasterio) and mask.
+        If the _Unsigned attribute is present treat integer arrays as unsigned.
     variable: str or list or tuple, optional
         Variable name or names to use to filter loading.
     group: str or list or tuple, optional
