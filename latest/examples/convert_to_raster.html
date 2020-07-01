@@ -37,8 +37,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Cloud Optimized GeoTiff (COG)" href="COG.html" />
-    <link rel="prev" title="Example - Transform Bounds" href="transform_bounds.html" /> 
+    <link rel="next" title="Example - Clip" href="clip_geom.html" />
+    <link rel="prev" title="Usage Examples" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,9 +91,13 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Convert dataset to raster (GeoTiff)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Converting-Dataset-to-raster">Converting Dataset to raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Converting-DataArray-to-raster">Converting DataArray to raster</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
@@ -102,11 +106,6 @@
 <li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Convert dataset to raster (GeoTiff)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Converting-Dataset-to-raster">Converting Dataset to raster</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Converting-DataArray-to-raster">Converting DataArray to raster</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
@@ -565,10 +564,10 @@ rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="COG.html" class="btn btn-neutral float-right" title="Example - Cloud Optimized GeoTiff (COG)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="clip_geom.html" class="btn btn-neutral float-right" title="Example - Clip" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="transform_bounds.html" class="btn btn-neutral float-left" title="Example - Transform Bounds" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Usage Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

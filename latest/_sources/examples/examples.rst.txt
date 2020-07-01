@@ -9,8 +9,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    :maxdepth: 1
    :caption: Notebooks:
 
-   crs_management.ipynb
-   manage_information_loss.ipynb
+   convert_to_raster.ipynb
    clip_geom.ipynb
    clip_box.ipynb
    pad_box.ipynb
@@ -19,7 +18,6 @@ This page contains links to a collection of examples of how to use rioxarray.
    merge.ipynb
    interpolate_na.ipynb
    transform_bounds.ipynb
-   convert_to_raster.ipynb
    COG.ipynb
    Example - Zonal Statistics <https://corteva.github.io/geocube/html/examples/zonal_statistics.html>
 

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview: module code &mdash; rioxarray 0.1.dev0 documentation</title>
+  <title>Getting Started &mdash; rioxarray 0.1.dev0 documentation</title>
   
 
   
@@ -36,7 +36,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Coordinate Reference System Management" href="crs_management.html" />
+    <link rel="prev" title="Installation" href="../installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,10 +88,15 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
@@ -141,10 +148,14 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Overview: module code</li>
+      <li>Getting Started</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/getting_started/getting_started.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -156,18 +167,69 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="rioxarray/_io.html">rioxarray._io</a></li>
-<li><a href="rioxarray/_show_versions.html">rioxarray._show_versions</a></li>
-<li><a href="rioxarray/exceptions.html">rioxarray.exceptions</a></li>
-<li><a href="rioxarray/merge.html">rioxarray.merge</a></li>
-<li><a href="rioxarray/rioxarray.html">rioxarray.rioxarray</a></li>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Welcome! This page aims to help you gain a foundational understanding of rioxarray.</p>
+<p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
+section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
+that as well.</p>
+<p>Why use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> instead of <cite>xarray.open_rasterio</cite>?</p>
+<ol class="arabic simple">
+<li>It supports multidimensional datasets such as netCDF.</li>
+<li>It stores the CRS as a WKT, which is the recommended format (<a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">PROJ FAQ</a>).</li>
+<li>It loads in the CRS, transform, and nodata metadata in standard CF &amp; GDAL locations.</li>
+<li>It supports masking and scaling data with the <cite>masked</cite> and <cite>mask_and_scale</cite> kwargs.</li>
+<li>It adds the coordinate axis CF metadata.</li>
+<li>It loads in raster metadata into the attributes.</li>
+</ol>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Data management:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
 </ul>
+</div>
+</div>
+
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="crs_management.html" class="btn btn-neutral float-right" title="Coordinate Reference System Management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
