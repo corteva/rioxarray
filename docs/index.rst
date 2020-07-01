@@ -9,6 +9,7 @@ GitHub: http://github.com/corteva/rioxarray
 
    readme
    installation
+   getting_started/getting_started
    examples/examples
    modules
    contributing
