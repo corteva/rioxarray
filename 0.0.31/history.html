@@ -1,0 +1,489 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>History &mdash; rioxarray 0.0.31 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Contributors ✨" href="authors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> rioxarray
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.31
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Contributors ✨</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">0.0.31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">0.0.30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">0.0.29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">0.0.28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">0.0.27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">0.0.26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">0.0.25</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">0.0.24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">0.0.23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">0.0.22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">0.0.21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">0.0.20</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">0.0.19</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14">0.0.18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">0.0.17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">0.0.16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id17">0.0.15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id18">0.0.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id19">0.0.13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id20">0.0.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id21">0.0.11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id22">0.0.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id23">0.0.9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id24">0.0.8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id25">0.0.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id26">0.0.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id27">0.0.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id28">0.0.4</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rioxarray</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>History</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/history.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="history">
+<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>0.0.31<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Deprecate add_spatial_ref and fix warning for add_xy_grid_meta (pull #158)</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>0.0.30<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BUG: Fix assigning fill value in <cite>rio.pad_box</cite> (pull #140)</li>
+<li>ENH: Add <cite>rio.write_transform</cite> to store cache in GDAL location (issue #129 &amp; #139)</li>
+<li>ENH: Use rasterio windows for <cite>rio.clip_box</cite> (issue #142)</li>
+<li>BUG: Add support for negative indexes in rio.isel_window (pull #145)</li>
+<li>BUG: Write transform based on window in rio.isel_window (pull #145)</li>
+<li>ENH: Add <cite>rio.count</cite>, <cite>rio.slice_xy()</cite>, <cite>rio.bounds()</cite>, <cite>rio.resolution()</cite>, <cite>rio.transform_bounds()</cite> to Dataset level</li>
+<li>ENH: Add <cite>rio.write_coordinate_system()</cite> (issue #147)</li>
+<li>ENH: Search CF coordinate metadata to find coordinates (issue #147)</li>
+<li>ENH: Default <cite>rio.clip</cite> to assume geometry has CRS of dataset (pull #150)</li>
+<li>ENH: Add <cite>rio.grid_mapping</cite> and <cite>rio.write_grid_mapping</cite> &amp; preserve original grid mapping (pull #151)</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>0.0.29<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BUG: Remove unnecessary memory copies in reproject method (pull #136)</li>
+<li>BUG: Fix order of axis in <cite>rio.isel_window</cite> (pull #133)</li>
+<li>BUG: Allow clipping with disjoint geometries (issue #132)</li>
+<li>BUG: Remove automatically setting tiled=True for windowed writing (pull #134)</li>
+<li>ENH: Add <cite>rio.pad_box</cite> (pull #138)</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>0.0.28<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>rio.reproject: change input kwarg dst_affine_width_height -&gt; shape &amp; transform (#125)</li>
+<li>ENH: Use pyproj.CRS to read/write CF parameters (issue #124)</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>0.0.27<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>ENH: Added optional <cite>shape</cite> argument to <cite>rio.reproject</cite> (pull #116)</li>
+<li>Fix <code class="docutils literal notranslate"><span class="pre">RasterioDeprecationWarning</span></code> (pull #117)</li>
+<li>BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)</li>
+<li>Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 &amp; pull #120)</li>
+<li>BUG: Use internal reprojection as engine for resampling window in merge (pull #123)</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h2>0.0.26<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>ENH: Added <a class="reference internal" href="rioxarray.html#rioxarray.show_versions" title="rioxarray.show_versions"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.show_versions()</span></code></a> (issue #106)</li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h2>0.0.25<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BUG: Use recalc=True when using transform internally &amp; ensure stable when coordinates unavailable. (issue #97)</li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h2>0.0.24<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>ENH: Add variable names to error messages for clarity (pull #99)</li>
+<li>BUG: Use assign_coords in _decode_datetime_cf (issue #101)</li>
+</ul>
+</div>
+<div class="section" id="id9">
+<h2>0.0.23<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BUG: Fix ‘rio.set_spatial_dims’ so information saved with ‘rio’ accesors (issue #94)</li>
+<li>ENH: Make ‘rio.isel_window’ available for datasets (pull #95)</li>
+</ul>
+</div>
+<div class="section" id="id10">
+<h2>0.0.22<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>ENH: Use pyproj.CRS internally to manage GDAL 2/3 transition (issue #92)</li>
+<li>ENH: Add MissingCRS exceptions for ‘rio.clip’ and ‘rio.reproject’ (pull #93)</li>
+</ul>
+</div>
+<div class="section" id="id11">
+<h2>0.0.21<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>ENH: Added to_raster method for Datasets (issue #76)</li>
+</ul>
+</div>
+<div class="section" id="id12">
+<h2>0.0.20<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BUG: ensure band_key is list when iterating over bands for mask and scale (pull #87)</li>
+</ul>
+</div>
+<div class="section" id="id13">
+<h2>0.0.19<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add support for writing scales &amp; offsets to raster (pull #79)</li>
+<li>Don’t write standard raster metadata to raster tags (issue #78)</li>
+</ul>
+</div>
+<div class="section" id="id14">
+<h2>0.0.18<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed windowed writing to require tiled output raster (pull #66)</li>
+<li>Write data array attributes using <cite>rio.to_raster</cite> (issue #64)</li>
+<li>Write variable name to descriptions if possible in <cite>rio.to_raster</cite> (issue #64)</li>
+<li>Add <cite>mask_and_scale</cite> option to <cite>rioxarray.open_rasterio()</cite> (issue #67)</li>
+<li>Hide NotGeoreferencedWarning warning when subdatasets are present using open_rasterio (issue #65)</li>
+<li>Add support for loading in 1D variables in <cite>xarray.open_rasterio()</cite> (issue #43)</li>
+<li>Load in netCDF metadata on the variable level (pull #73)</li>
+<li>Add rioxarray.merge module (issue #46)</li>
+</ul>
+</div>
+<div class="section" id="id15">
+<h2>0.0.17<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Renamed <cite>descriptions</cite> to <cite>long_name</cite> when opening with <cite>open_rasterio()</cite> (pull #63)</li>
+<li>Make <cite>units</cite> &amp; <cite>long_name</cite> scalar if they exist in rasterio attributes (pull #63)</li>
+</ul>
+</div>
+<div class="section" id="id16">
+<h2>0.0.16<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add support for netcdf/hdf groups with different shapes (pull #62)</li>
+</ul>
+</div>
+<div class="section" id="id17">
+<h2>0.0.15<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added <cite>variable</cite> and <cite>group</cite> kwargs to <cite>rioxarray.open_rasterio()</cite> to allow filtering of subdatasets (pull #57)</li>
+<li>Added <cite>default_name</cite> kwarg to <cite>rioxarray.open_rasterio()</cite> for backup when the original does not exist (pull #59)</li>
+<li>Added <cite>recalc_transform</cite> kwarg to <cite>rio.to_raster()</cite> (pull #56)</li>
+</ul>
+</div>
+<div class="section" id="id18">
+<h2>0.0.14<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added <cite>windowed</cite> kwarg to <cite>rio.to_raster()</cite> to write to raster using windowed writing (pull #54)</li>
+<li>Added add <cite>rio.isel_window()</cite> to allow selection using a rasterio.windows.Window (pull #54)</li>
+</ul>
+</div>
+<div class="section" id="id19">
+<h2>0.0.13<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Improve CRS searching for xarray.Dataset &amp; use default grid mapping name (pull #51)</li>
+</ul>
+</div>
+<div class="section" id="id20">
+<h2>0.0.12<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Use <cite>xarray.open_rasterio()</cite> for <cite>rioxarray.open_rasterio()</cite> with xarray&lt;0.12.3 (pull #40)</li>
+</ul>
+</div>
+<div class="section" id="id21">
+<h2>0.0.11<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added <cite>open_kwargs</cite> to pass into <cite>rasterio.open()</cite> when using <cite>rioxarray.open_rasterio()</cite> (pull #48)</li>
+<li>Added example opening Cloud Optimized GeoTiff (issue #45)</li>
+</ul>
+</div>
+<div class="section" id="id22">
+<h2>0.0.10<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add support for opening netcdf/hdf files with <cite>rioxarray.open_rasterio</cite> (issue #32)</li>
+<li>Added support for custom CRS with wkt attribute for datacube CRS support (issue #35)</li>
+<li>Added <cite>rio.set_nodata()</cite>, <cite>rio.write_nodata()</cite>, <cite>rio.set_attrs()</cite>, <cite>rio.update_attrs()</cite> (issue #37)</li>
+</ul>
+</div>
+<div class="section" id="id23">
+<h2>0.0.9<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add <cite>rioxarray.open_rasterio</cite> (issue #7)</li>
+</ul>
+</div>
+<div class="section" id="id24">
+<h2>0.0.8<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix setting nodata in _add_attrs_proj (pull #30)</li>
+</ul>
+</div>
+<div class="section" id="id25">
+<h2>0.0.7<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add option to do an inverted clip (pull #29)</li>
+</ul>
+</div>
+<div class="section" id="id26">
+<h2>0.0.6<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add support for scalar coordinates in reproject (issue #15)</li>
+<li>Updated writing encoding for FutureWarning (issue #18)</li>
+<li>Use input raster profile for defaults to write output raster profile if opened with <cite>xarray.open_rasterio</cite> (issue #19)</li>
+<li>Preserve None nodata if opened with <cite>xarray.open_rasterio</cite> (issue #20)</li>
+<li>Added <cite>drop</cite> argument for <cite>clip()</cite> (issue #25)</li>
+<li>Fix order of <cite>CRS</cite> for reprojecting geometries in <cite>clip()</cite> (pull #24)</li>
+<li>Added <cite>set_spatial_dims()</cite> method for datasets when dimensions not found (issue #27)</li>
+</ul>
+</div>
+<div class="section" id="id27">
+<h2>0.0.5<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Find nodata and nodatavals in ‘nodata’ property (pull #12)</li>
+<li>Added ‘encoded_nodata’ property to DataArray (pull #12)</li>
+<li>Write the raster with encoded_nodata instead of NaN for nodata (pull #12)</li>
+<li>Added methods to set and write CRS (issue #5)</li>
+</ul>
+</div>
+<div class="section" id="id28">
+<h2>0.0.4<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added ability to export data array to raster (pull #8)</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="authors.html" class="btn btn-neutral float-left" title="Contributors ✨" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, rioxarray Contributors
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

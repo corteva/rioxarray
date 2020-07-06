@@ -1,0 +1,1594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rioxarray package &mdash; rioxarray 0.0.31 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributing" href="contributing.html" />
+    <link rel="prev" title="rioxarray" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> rioxarray
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.31
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">rioxarray</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">rioxarray package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray-open-rasterio">rioxarray.open_rasterio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray-merge-module">rioxarray.merge module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray-show-versions">rioxarray.show_versions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.rioxarray">rioxarray.rioxarray module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rioxarray</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">rioxarray</a> &raquo;</li>
+        
+      <li>rioxarray package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rioxarray.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="rioxarray-package">
+<h1>rioxarray package<a class="headerlink" href="#rioxarray-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="rioxarray-open-rasterio">
+<h2>rioxarray.open_rasterio<a class="headerlink" href="#rioxarray-open-rasterio" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rioxarray.open_rasterio">
+<code class="descclassname">rioxarray.</code><code class="descname">open_rasterio</code><span class="sig-paren">(</span><em>filename</em>, <em>parse_coordinates=None</em>, <em>chunks=None</em>, <em>cache=None</em>, <em>lock=None</em>, <em>masked=False</em>, <em>mask_and_scale=False</em>, <em>variable=None</em>, <em>group=None</em>, <em>default_name=None</em>, <em>**open_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_io.html#open_rasterio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.open_rasterio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a file with rasterio (experimental).</p>
+<p>This should work with any file that rasterio can open (most often:
+geoTIFF). The x and y coordinates are generated automatically from the
+file’s geoinformation, shifted to the center of each pixel (see
+<a class="reference external" href="http://web.archive.org/web/20160326194152/http://remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2">“PixelIsArea” Raster Space</a>
+for more information).</p>
+<p>You can generate 2D coordinates from the file’s attributes with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;path_to_file.tif&#39;</span><span class="p">)</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span><span class="o">*</span><span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">])</span>
+<span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ny</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">transform</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>str</em><em>, </em><em>rasterio.DatasetReader</em><em>, or </em><em>rasterio.WarpedVRT</em>) – Path to the file to open. Or already open rasterio dataset.</li>
+<li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to parse the x and y coordinates out of the file’s
+<code class="docutils literal notranslate"><span class="pre">transform</span></code> attribute or not. The default is to automatically
+parse the coordinates only if they are rectilinear (1D).
+It can be useful to set <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>
+if your files are very large or if you don’t need the coordinates.</li>
+<li><strong>chunks</strong> (<em>int</em><em>, </em><em>tuple</em><em> or </em><em>dict</em><em>, </em><em>optional</em>) – Chunk sizes along each dimension, e.g., <code class="docutils literal notranslate"><span class="pre">5</span></code>, <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">5)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">{'x':</span> <span class="pre">5,</span> <span class="pre">'y':</span> <span class="pre">5}</span></code>. If chunks is provided, it used to load the new
+DataArray into a dask array. Chunks can also be set to
+<code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> to choose sensible chunk sizes according to
+<code class="docutils literal notranslate"><span class="pre">dask.config.get(&quot;array.chunk-size&quot;)</span></code>.</li>
+<li><strong>cache</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, cache data loaded from the underlying datastore in memory as
+NumPy arrays when accessed to avoid reading from the underlying data-
+store multiple times. Defaults to True unless you specify the <cite>chunks</cite>
+argument to use dask, in which case it defaults to False.</li>
+<li><strong>lock</strong> (<em>False</em><em>, </em><em>True</em><em> or </em><em>threading.Lock</em><em>, </em><em>optional</em>) – If chunks is provided, this argument is passed on to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">dask.array.from_array()</span></code>. By default, a global lock is
+used to avoid issues with concurrent access to the same file when using
+dask’s multithreaded backend.</li>
+<li><strong>masked</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, read the mask and set values to NaN. Defaults to False.</li>
+<li><strong>mask_and_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Lazily scale (using the <cite>scales</cite> and <cite>offsets</cite> from rasterio) and mask.
+If the _Unsigned attribute is present treat integer arrays as unsigned.</li>
+<li><strong>variable</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Variable name or names to use to filter loading.</li>
+<li><strong>group</strong> (<em>str</em><em> or </em><em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Group name or names to use to filter loading.</li>
+<li><strong>default_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the data array if none exists. Default is None.</li>
+<li><strong>**open_kwargs</strong> (<em>kwargs</em><em>, </em><em>optional</em>) – Optional keyword arguments to pass into rasterio.open().</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created dataset(s).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> | List[<code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="rioxarray-merge-module">
+<h2>rioxarray.merge module<a class="headerlink" href="#rioxarray-merge-module" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rioxarray.merge.merge_arrays">
+<code class="descclassname">rioxarray.merge.</code><code class="descname">merge_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/merge.html#merge_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge data arrays geospatially.</p>
+<dl class="docutils">
+<dt>Uses rasterio.merge.merge:</dt>
+<dd><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge">https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</a></dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataarrays</strong> (<em>list</em>) – List of xarray.DataArray’s with all geo attributes.
+The first one is assumed to have the same
+CRS, dtype, and dimensions as the others in the array.</li>
+<li><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
+If not set, bounds are determined from bounds of input DataArrays.</li>
+<li><strong>res</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Output resolution in units of coordinate reference system.
+If not set, the resolution of the first DataArray is used.
+If a single value is passed, output pixels will be square.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – nodata value to use in output file.
+If not set, uses the nodata value in the first input DataArray.</li>
+<li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
+<li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
+<li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, it will disable loading spatial coordinates.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The geospatially merged data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rioxarray.merge.merge_datasets">
+<code class="descclassname">rioxarray.merge.</code><code class="descname">merge_datasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/merge.html#merge_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge datasets geospatially.</p>
+<dl class="docutils">
+<dt>Uses rasterio.merge.merge:</dt>
+<dd><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge">https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</a></dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>datasets</strong> (<em>list</em>) – List of xarray.Dataset’s with all geo attributes.
+The first one is assumed to have the same
+CRS, dtype, dimensions, and data_vars as the others in the array.</li>
+<li><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
+If not set, bounds are determined from bounds of input Dataset.</li>
+<li><strong>res</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Output resolution in units of coordinate reference system.
+If not set, the resolution of the first Dataset is used.
+If a single value is passed, output pixels will be square.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – nodata value to use in output file.
+If not set, uses the nodata value in the first input Dataset.</li>
+<li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
+<li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The geospatially merged data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="rioxarray-show-versions">
+<h2>rioxarray.show_versions<a class="headerlink" href="#rioxarray-show-versions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rioxarray.show_versions">
+<code class="descclassname">rioxarray.</code><code class="descname">show_versions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_show_versions.html#show_versions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.show_versions" title="Permalink to this definition">¶</a></dt>
+<dd><div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.26.</span></p>
+</div>
+<p>Print useful debugging information</p>
+<p class="rubric">Example</p>
+<p>&gt; python -c “import rioxarray; rioxarray.show_versions()”</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-rioxarray.rioxarray">
+<span id="rioxarray-rioxarray-module"></span><h2>rioxarray.rioxarray module<a class="headerlink" href="#module-rioxarray.rioxarray" title="Permalink to this headline">¶</a></h2>
+<p>This module is an extension for xarray to provide rasterio capabilities
+to xarray datasets/dataarrays.</p>
+<p>Credits: The <cite>reproject</cite> functionality was adopted from <a class="reference external" href="https://github.com/opendatacube/datacube-core">https://github.com/opendatacube/datacube-core</a>  # noqa
+Source file:
+- <a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py">https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py</a>  # noqa
+datacube is licensed under the Apache License, Version 2.0:
+- <a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE">https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE</a>  # noqa</p>
+<dl class="class">
+<dt id="rioxarray.rioxarray.RasterArray">
+<em class="property">class </em><code class="descclassname">rioxarray.rioxarray.</code><code class="descname">RasterArray</code><span class="sig-paren">(</span><em>xarray_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.rioxarray.XRasterBase" title="rioxarray.rioxarray.XRasterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></a></p>
+<p>This is the GIS extension for <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.clip">
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by geojson like geometry dicts.</p>
+<p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">geometry</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="gp">... </span><span class="s1">                &quot;coordinates&quot;: [</span>
+<span class="gp">... </span><span class="s1">                [[-94.07955380199459, 41.69085871273774],</span>
+<span class="gp">... </span><span class="s1">                [-94.06082436942204, 41.69103313774798],</span>
+<span class="gp">... </span><span class="s1">                [-94.06063203899649, 41.67932439500822],</span>
+<span class="gp">... </span><span class="s1">                [-94.07935807746362, 41.679150041277325],</span>
+<span class="gp">... </span><span class="s1">                [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cropping_geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">geojson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">geometry</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;cool_raster.tif&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cropped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="o">=</span><span class="n">cropping_geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
+<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, optional) – The CRS of the input geometries. Default is to assume it is the same
+as the dataset.</li>
+<li><strong>all_touched</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
+false, only pixels whose center is within the polygon or that
+are selected by Bresenham’s line algorithm will be burned in.</li>
+<li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geoemtries
+Otherwise, it will return the same raster with the data masked.
+Default is True.</li>
+<li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
+Otherwise, pixels that overlap the shapes will be set as nodata.
+False by default.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The clipped object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.clip_box">
+<code class="descname">clip_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>auto_expand=False</em>, <em>auto_expand_limit=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by a bounding box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>auto_expand</strong> (<em>bool</em>) – If True, it will expand clip search if only 1D raster found with clip.</li>
+<li><strong>auto_expand_limit</strong> (<em>int</em>) – maximum number of times the clip will be retried before raising
+an exception.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The clipped object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.RasterArray.encoded_nodata">
+<code class="descname">encoded_nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.encoded_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the encoded nodata value for the dataset if encoded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.interpolate_na">
+<code class="descname">interpolate_na</code><span class="sig-paren">(</span><em>method='nearest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.interpolate_na" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method uses scipy.interpolate.griddata to interpolate missing data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> (<em>{‘linear’</em><em>, </em><em>‘nearest’</em><em>, </em><em>‘cubic’}</em><em>, </em><em>optional</em>) – The method to use for interpolation in <cite>scipy.interpolate.griddata</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An interpolated <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.RasterArray.nodata">
+<code class="descname">nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the nodata value for the dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.pad_box">
+<code class="descname">pad_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>constant_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> to a bounding box</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.29.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>constant_values</strong> (<em>scalar</em>) – The value used for padding. If None, nodata will be used if it is
+set, and np.nan otherwise.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The padded object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.pad_xy">
+<code class="descname">pad_xy</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>constant_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the array to x,y bounds.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.29.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>constant_values</strong> (<em>scalar</em>) – The value used for padding. If None, nodata will be used if it is
+set, and np.nan otherwise.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The padded object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.reproject">
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reproject <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects</p>
+<p>Powered by <cite>rasterio.warp.reproject</cite></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Requires either a grid mapping variable with ‘spatial_ref’ or
+a ‘crs’ attribute to be set containing a valid CRS.
+If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.27: </span>shape</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dst_crs</strong> (<em>str</em>) – OGC WKT string or Proj.4 string.</li>
+<li><strong>resolution</strong> (<em>float</em><em> or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Size of a destination pixel in destination projection units
+(e.g. degrees or metres).</li>
+<li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
+together with resolution.</li>
+<li><strong>transform</strong> (<em>optional</em>) – The destination transform.</li>
+<li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The reprojected DataArray.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.reproject_match">
+<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reproject a DataArray object to match the resolution, projection,
+and region of another DataArray.</p>
+<p>Powered by <cite>rasterio.warp.reproject</cite></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Requires either a grid mapping variable with ‘spatial_ref’ or
+a ‘crs’ attribute to be set containing a valid CRS.
+If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>match_data_array</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>) – DataArray of the target resolution and projection.</li>
+<li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Contains the data from the src_data_array, reprojected to match
+match_data_array.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.set_nodata">
+<code class="descname">set_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.set_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.set_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the nodata value for the DataArray without modifying
+the data array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_nodata</strong> (<em>object</em>) – Valid nodata for dtype.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataset with nodata attribute set.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.to_raster">
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver='GTiff'</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the DataArray to a raster file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>raster_path</strong> (<em>str</em>) – The path to output the raster to.</li>
+<li><strong>driver</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the GDAL/rasterio driver to use to export the raster.
+Default is “GTiff”.</li>
+<li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
+<li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
+<li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
+This only works if the output raster is tiled. As such, if you
+set this to True, the output raster will be tiled.
+Default is False.</li>
+<li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
+nodata, transform, crs, count, width, and height attributes
+are ignored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterArray.write_nodata">
+<code class="descname">write_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the nodata to the DataArray in a CF compliant manner.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_nodata</strong> (<em>object</em>) – Nodata value for the DataArray.
+If input_nodata is None, it will remove the _FillValue attribute.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing DataArray. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified DataArray with CF compliant nodata information.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rioxarray.rioxarray.RasterDataset">
+<em class="property">class </em><code class="descclassname">rioxarray.rioxarray.</code><code class="descname">RasterDataset</code><span class="sig-paren">(</span><em>xarray_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.rioxarray.XRasterBase" title="rioxarray.rioxarray.XRasterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></a></p>
+<p>This is the GIS extension for <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.clip">
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by geojson like geometry dicts.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only works if all variables in the dataset have the same
+coordinates.</p>
+</div>
+<p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">geometry</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="gp">... </span><span class="s1">                &quot;coordinates&quot;: [</span>
+<span class="gp">... </span><span class="s1">                [[-94.07955380199459, 41.69085871273774],</span>
+<span class="gp">... </span><span class="s1">                [-94.06082436942204, 41.69103313774798],</span>
+<span class="gp">... </span><span class="s1">                [-94.06063203899649, 41.67932439500822],</span>
+<span class="gp">... </span><span class="s1">                [-94.07935807746362, 41.679150041277325],</span>
+<span class="gp">... </span><span class="s1">                [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cropping_geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">geojson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">geometry</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;cool_raster.tif&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cropped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="o">=</span><span class="n">cropping_geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
+<li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, optional) – The CRS of the input geometries. Default is to assume it is the same
+as the dataset.</li>
+<li><strong>all_touched</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
+false, only pixels whose center is within the polygon or that
+are selected by Bresenham’s line algorithm will be burned in.</li>
+<li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geoemtries
+Otherwise, it will return the same raster with the data masked.
+Default is True.</li>
+<li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
+Otherwise, pixels that overlap the shapes will be set as nodata.
+False by default.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The clipped object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.clip_box">
+<code class="descname">clip_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>auto_expand=False</em>, <em>auto_expand_limit=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by a bounding box.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only works if all variables in the dataset have the
+same coordinates.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+<li><strong>auto_expand</strong> (<em>bool</em>) – If True, it will expand clip search if only 1D raster found with clip.</li>
+<li><strong>auto_expand_limit</strong> (<em>int</em>) – maximum number of times the clip will be retried before raising
+an exception.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The clipped object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.RasterDataset.crs">
+<code class="descname">crs</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve projection from <cite>xarray.Dataset</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.interpolate_na">
+<code class="descname">interpolate_na</code><span class="sig-paren">(</span><em>method='nearest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.interpolate_na" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method uses <cite>scipy.interpolate.griddata</cite> to interpolate missing data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> (<em>{‘linear’</em><em>, </em><em>‘nearest’</em><em>, </em><em>‘cubic’}</em><em>, </em><em>optional</em>) – The method to use for interpolation in <cite>scipy.interpolate.griddata</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The interpolated object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.pad_box">
+<code class="descname">pad_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.pad_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> to a bounding box.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only works if all variables in the dataset have the
+same coordinates.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The padded object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.reproject">
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reproject <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> objects</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Requires either a grid mapping variable with ‘spatial_ref’ or
+a ‘crs’ attribute to be set containing a valid CRS.
+If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.27: </span>shape</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dst_crs</strong> (<em>str</em>) – OGC WKT string or Proj.4 string.</li>
+<li><strong>resolution</strong> (<em>float</em><em> or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Size of a destination pixel in destination projection units
+(e.g. degrees or metres).</li>
+<li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
+together with resolution.</li>
+<li><strong>transform</strong> (<em>optional</em>) – The destination transform.</li>
+<li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The reprojected Dataset.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.reproject_match">
+<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reproject a Dataset object to match the resolution, projection,
+and region of another DataArray.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Requires either a grid mapping variable with ‘spatial_ref’ or
+a ‘crs’ attribute to be set containing a valid CRS.
+If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>match_data_array</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>) – Dataset with the target resolution and projection.</li>
+<li><strong>resampling</strong> (<em>Resampling method</em><em>, </em><em>optional</em>) – See rasterio.warp.reproject for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Contains the data from the src_data_array,
+reprojected to match match_data_array.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.RasterDataset.to_raster">
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver='GTiff'</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the Dataset to a raster file. Only works with 2D data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>raster_path</strong> (<em>str</em>) – The path to output the raster to.</li>
+<li><strong>driver</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the GDAL/rasterio driver to use to export the raster.
+Default is “GTiff”.</li>
+<li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
+<li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
+<li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
+This only works if the output raster is tiled. As such, if you
+set this to True, the output raster will be tiled.
+Default is False.</li>
+<li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
+nodata, transform, crs, count, width, and height attributes
+are ignored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.RasterDataset.vars">
+<code class="descname">vars</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns non-coordinate varibles</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rioxarray.rioxarray.XRasterBase">
+<em class="property">class </em><code class="descclassname">rioxarray.rioxarray.</code><code class="descname">XRasterBase</code><span class="sig-paren">(</span><em>xarray_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is the base class for the GIS extensions for xarray</p>
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.bounds">
+<code class="descname">bounds</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.bounds" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the bounds to be recalculated instead of using the
+transform attribute.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>left, bottom, right, top</strong> – Outermost coordinates of the <cite>xarray.DataArray</cite> | <cite>xarray.Dataset</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.count">
+<code class="descname">count</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the band count (z dimension size)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.crs">
+<code class="descname">crs</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve projection from <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.grid_mapping">
+<code class="descname">grid_mapping</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>The CF grid_mapping attribute. ‘spatial_ref’ is the default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.height">
+<code class="descname">height</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the height of the dataset (y dimension size)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.isel_window">
+<code class="descname">isel_window</code><span class="sig-paren">(</span><em>window</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.isel_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.isel_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a rasterio.window.Window to select a subset of the data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Float indices are converted to integers.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio.window.Window</span></code>) – The window of the dataset to read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The data in the window.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.resolution">
+<code class="descname">resolution</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.resolution" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the resolution to be recalculated instead of using the
+transform attribute.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>x_resolution, y_resolution</strong> – The resolution of the <cite>xarray.DataArray</cite> | <cite>xarray.Dataset</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_attrs">
+<code class="descname">set_attrs</code><span class="sig-paren">(</span><em>new_attrs</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_attrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the attributes of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with new attributes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_crs">
+<code class="descname">set_crs</code><span class="sig-paren">(</span><em>input_crs</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the CRS value for the Dataset/DataArray without modifying
+the dataset/data array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataset with crs attribute.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_spatial_dims">
+<code class="descname">set_spatial_dims</code><span class="sig-paren">(</span><em>x_dim</em>, <em>y_dim</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_spatial_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_spatial_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>This sets the spatial dimensions of the dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_dim</strong> (<em>str</em>) – The name of the x dimension.</li>
+<li><strong>y_dim</strong> (<em>str</em>) – The name of the y dimension.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will modify the dataframe in place.
+Otherwise it will return a modified copy.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataset with spatial dimensions set.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.shape">
+<code class="descname">shape</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the shape (height, width)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">tuple(int, int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.slice_xy">
+<code class="descname">slice_xy</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.slice_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.slice_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice the array by x,y bounds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</li>
+<li><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</li>
+<li><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</li>
+<li><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The data in the slice.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.transform" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will re-calculate the transform instead of using
+the cached transform.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The affine of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">affine.Afffine</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.transform_bounds">
+<code class="descname">transform_bounds</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>densify_pts=21</em>, <em>recalc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.transform_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.transform_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform bounds from src_crs to dst_crs.</p>
+<p>Optionally densifying the edges (to account for nonlinear transformations
+along these edges) and extracting the outermost bounds.</p>
+<p>Note: this does not account for the antimeridian.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dst_crs</strong> (str, <code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, or dict) – Target coordinate reference system.</li>
+<li><strong>densify_pts</strong> (<em>uint</em><em>, </em><em>optional</em>) – Number of points to add to each edge to account for nonlinear
+edges produced by the transform process.  Large numbers will produce
+worse performance.  Default: 21 (gdal default).</li>
+<li><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the bounds to be recalculated instead of using the transform
+attribute.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>left, bottom, right, top</strong> – Outermost coordinates in target coordinate reference system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.update_attrs">
+<code class="descname">update_attrs</code><span class="sig-paren">(</span><em>new_attrs</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.update_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.update_attrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the attributes of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes to update with.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with updated attributes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.width">
+<code class="descname">width</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the width of the dataset (x dimension size)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_coordinate_system">
+<code class="descname">write_coordinate_system</code><span class="sig-paren">(</span><em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the coordinate system CF metadata.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.30.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The dataset with the CF coordinate system attributes added.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_crs">
+<code class="descname">write_crs</code><span class="sig-paren">(</span><em>input_crs=None</em>, <em>grid_mapping_name=None</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the CRS to the dataset in a CF compliant manner.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</li>
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the CRS information in.
+Default is the grid_mapping name of the dataset.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with CF compliant CRS information.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_grid_mapping">
+<code class="descname">write_grid_mapping</code><span class="sig-paren">(</span><em>grid_mapping_name='spatial_ref'</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_grid_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_grid_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the CF grid_mapping attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with CF compliant CRS information.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.write_transform">
+<code class="descname">write_transform</code><span class="sig-paren">(</span><em>transform=None</em>, <em>grid_mapping_name=None</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_transform" title="Permalink to this definition">¶</a></dt>
+<dd><div class="versionadded">
+<p><span class="versionmodified">New in version 0.0.30.</span></p>
+</div>
+<p>Write the GeoTransform to the dataset where GDAL can read it in.</p>
+<p><a class="reference external" href="https://gdal.org/drivers/raster/netcdf.html#georeference">https://gdal.org/drivers/raster/netcdf.html#georeference</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>transform</strong> (<em>affine.Affine</em><em>, </em><em>optional</em>) – The transform of the dataset. If not provided, it will be calculated.</li>
+<li><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the transform information in.
+Default is the grid_mapping name of the dataset.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with Geo Transform written.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.x_dim">
+<code class="descname">x_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.x_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dimension for the X-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rioxarray.rioxarray.XRasterBase.y_dim">
+<code class="descname">y_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.y_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dimension for the Y-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="rioxarray.rioxarray.add_spatial_ref">
+<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_spatial_ref</code><span class="sig-paren">(</span><em>in_ds</em>, <em>dst_crs</em>, <em>grid_mapping_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_spatial_ref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_spatial_ref" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="rioxarray.rioxarray.add_xy_grid_meta">
+<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">add_xy_grid_meta</code><span class="sig-paren">(</span><em>coords</em>, <em>crs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_xy_grid_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_xy_grid_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add x,y metadata to coordinates</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rioxarray.rioxarray.affine_to_coords">
+<code class="descclassname">rioxarray.rioxarray.</code><code class="descname">affine_to_coords</code><span class="sig-paren">(</span><em>affine</em>, <em>width</em>, <em>height</em>, <em>x_dim='x'</em>, <em>y_dim='y'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#affine_to_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.affine_to_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate 1d pixel centered coordinates from affine.</p>
+<p>Based on code from the xarray rasterio backend.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>affine</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">affine.Affine</span></code>) – The affine of the grid.</li>
+<li><strong>width</strong> (<em>int</em>) – The width of the grid.</li>
+<li><strong>height</strong> (<em>int</em>) – The height of the grid.</li>
+<li><strong>x_dim</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the X dimension. Default is ‘x’.</li>
+<li><strong>y_dim</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the Y dimension. Default is ‘y’.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dict</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">x and y coordinate arrays.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-rioxarray.exceptions">
+<span id="rioxarray-exceptions-module"></span><h2>rioxarray.exceptions module<a class="headerlink" href="#module-rioxarray.exceptions" title="Permalink to this headline">¶</a></h2>
+<p>This contains exceptions for rioxarray.</p>
+<dl class="exception">
+<dt id="rioxarray.exceptions.DimensionError">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">DimensionError</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#DimensionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.DimensionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>This is raised when there are more dimensions than is supported by the method</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.DimensionMissingCoordinateError">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">DimensionMissingCoordinateError</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#DimensionMissingCoordinateError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.DimensionMissingCoordinateError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>This is raised when the dimension does not have the supporting coordinate.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.InvalidDimensionOrder">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">InvalidDimensionOrder</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#InvalidDimensionOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.InvalidDimensionOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.DimensionError" title="rioxarray.exceptions.DimensionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.DimensionError</span></code></a></p>
+<p>This is raised when there the dimensions are not ordered correctly.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.MissingCRS">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">MissingCRS</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#MissingCRS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.MissingCRS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>Missing the CRS in the dataset.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.NoDataInBounds">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">NoDataInBounds</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#NoDataInBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.NoDataInBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>This is for when there are no data in the bounds for clipping a raster.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.OneDimensionalRaster">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">OneDimensionalRaster</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#OneDimensionalRaster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.OneDimensionalRaster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.DimensionError" title="rioxarray.exceptions.DimensionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.DimensionError</span></code></a></p>
+<p>This is an error when you have a 1 dimensional raster.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.RioXarrayError">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">RioXarrayError</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#RioXarrayError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.RioXarrayError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></p>
+<p>This is the base exception for errors in the rioxarray extension.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.SingleVariableDataset">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">SingleVariableDataset</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#SingleVariableDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.SingleVariableDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
+<p>This is for when you have a dataset with a single variable.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.TooManyDimensions">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">TooManyDimensions</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#TooManyDimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.TooManyDimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.DimensionError" title="rioxarray.exceptions.DimensionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.DimensionError</span></code></a></p>
+<p>This is raised when there are more dimensions than is supported by the method</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="rioxarray" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, rioxarray Contributors
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
