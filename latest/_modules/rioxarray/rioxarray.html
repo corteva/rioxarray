@@ -257,8 +257,8 @@
 <div class="viewcode-block" id="add_xy_grid_meta"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.add_xy_grid_meta">[docs]</a><span class="k">def</span> <span class="nf">add_xy_grid_meta</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add x,y metadata to coordinates&quot;&quot;&quot;</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-        <span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="s2">&quot;add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.&quot;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
         <span class="n">x_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
@@ -285,6 +285,9 @@
 
 
 <div class="viewcode-block" id="add_spatial_ref"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.add_spatial_ref">[docs]</a><span class="k">def</span> <span class="nf">add_spatial_ref</span><span class="p">(</span><span class="n">in_ds</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;add_spatial_ref is deprecated. Use rio.write_crs instead.&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">in_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span>
         <span class="n">input_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
@@ -310,8 +313,8 @@
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># make sure projection added</span>
-    <span class="n">new_data_array</span> <span class="o">=</span> <span class="n">add_spatial_ref</span><span class="p">(</span>
-        <span class="n">new_data_array</span><span class="p">,</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">grid_mapping</span>
+    <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span>
+        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1391,7 +1394,7 @@
         <span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">xda</span> <span class="o">=</span> <span class="n">add_spatial_ref</span><span class="p">(</span><span class="n">xda</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">)</span>
+        <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">xda</span></div>
 

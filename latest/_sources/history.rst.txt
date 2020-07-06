@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- Deprecate add_spatial_ref and fix warning for add_xy_grid_meta
 
 0.0.30
 ------
