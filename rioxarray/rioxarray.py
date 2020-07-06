@@ -96,8 +96,8 @@ def _generate_attrs(src_data_array, dst_nodata):
 def add_xy_grid_meta(coords, crs=None):
     """Add x,y metadata to coordinates"""
     warnings.warn(
-        DeprecationWarning,
         "add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.",
+        DeprecationWarning,
     )
     if "x" in coords:
         x_coord_attrs = dict(coords["x"].attrs)
@@ -124,6 +124,9 @@ def add_xy_grid_meta(coords, crs=None):
 
 
 def add_spatial_ref(in_ds, dst_crs, grid_mapping_name):
+    warnings.warn(
+        "add_spatial_ref is deprecated. Use rio.write_crs instead.", DeprecationWarning,
+    )
     in_ds.rio.write_crs(
         input_crs=dst_crs, grid_mapping_name=grid_mapping_name, inplace=True
     )
@@ -149,8 +152,8 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
-    new_data_array = add_spatial_ref(
-        new_data_array, src_data_array.rio.crs, src_data_array.rio.grid_mapping
+    new_data_array.rio.write_crs(
+        src_data_array.rio.crs, inplace=True,
     )
     new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
@@ -1230,7 +1233,7 @@ class RasterArray(XRasterBase):
         )
         xda.encoding = self._obj.encoding
         xda.rio.write_transform(dst_affine, inplace=True)
-        xda = add_spatial_ref(xda, dst_crs, DEFAULT_GRID_MAP)
+        xda.rio.write_crs(dst_crs, inplace=True)
         xda.rio.write_coordinate_system(inplace=True)
         return xda
 
