@@ -24,7 +24,7 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.rioxarray import _make_coords
+from rioxarray.rioxarray import _make_coords, add_spatial_ref, add_xy_grid_meta
 from test.conftest import (
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -2077,3 +2077,13 @@ def test_grid_mapping__change(open_func):
 def test_grid_mapping_default():
     xarray.Dataset().rio.grid_mapping == "spatial_ref"
     xarray.DataArray().rio.grid_mapping == "spatial_ref"
+
+
+def test_add_spatial_ref_warning():
+    with pytest.warns(DeprecationWarning):
+        add_spatial_ref(xarray.Dataset(), "epsg:4326", "spatial_ref")
+
+
+def test_add_xy_grid_meta_warning():
+    with pytest.warns(DeprecationWarning):
+        add_xy_grid_meta({})
