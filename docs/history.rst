@@ -1,9 +1,9 @@
 History
 =======
 
-Latest
+0.0.31
 ------
-- Deprecate add_spatial_ref and fix warning for add_xy_grid_meta
+- Deprecate add_spatial_ref and fix warning for add_xy_grid_meta (pull #158)
 
 0.0.30
 ------
