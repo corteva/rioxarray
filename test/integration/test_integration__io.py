@@ -942,5 +942,5 @@ def test_nc_attr_loading():
             "units": "seconds since 2016-12-19T10:27:29.687763",
             "calendar": "proleptic_gregorian",
         }
-        assert str(rds.time.values[0]) == "2016-12-19 10:27:29"
-        assert str(rds.time.values[1]) == "2016-12-29 12:52:41.659696"
+        assert str(rds.time.values[0]) == "2016-12-19 10:27:29.687763"
+        assert str(rds.time.values[1]) == "2016-12-29 12:52:42.347451"
