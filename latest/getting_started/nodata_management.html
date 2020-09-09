@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -26,11 +26,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -439,16 +439,16 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Search-order-for-nodata-(DataArray-only):">
 <h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</li>
-<li>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</li>
+<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</p></li>
+<li><p>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
 </div>
 <div class="section" id="API-Documentation">
 <h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
