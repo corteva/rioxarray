@@ -26,7 +26,7 @@ with open("README.rst") as readme_file:
 
 requirements = ["rasterio", "scipy", "xarray", "pyproj>=2.2"]
 
-test_requirements = ["pytest>=3.6", "pytest-cov", "mock"]
+test_requirements = ["pytest>=3.6", "pytest-cov", "mock", "dask"]
 
 extras_require = {
     "dev": test_requirements
@@ -35,7 +35,7 @@ extras_require = {
         "nbsphinx",
         "sphinx_rtd_theme",
         "black",
-        "flake8==3.7",
+        "flake8",
         "pylint",
         "isort",
         "pre-commit",

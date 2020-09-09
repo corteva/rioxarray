@@ -54,15 +54,10 @@ clean-docs: ## remove builds
 	rm -fr docs/examples/.ipynb_checkpoints/
 
 lint: ## check style with flake8
-	flake8 rioxarray test --max-line-length 88
+	flake8 rioxarray/ test/
 	black --check .
 
-check:
-	###### FLAKE8 #####
-	# No unused imports, no undefined vars,
-	flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
-	flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
-	black --check .
+check: lint
 
 pylint:
 	###### PYLINT ######
