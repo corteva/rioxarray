@@ -35,7 +35,7 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
 
 
 def _assert_xarrays_equal(
-    input_xarray, compare_xarray, precision=7, skip_xy_check=False,
+    input_xarray, compare_xarray, precision=7, skip_xy_check=False
 ):
     _assert_attrs_equal(input_xarray, compare_xarray, precision)
     if hasattr(input_xarray, "variables"):

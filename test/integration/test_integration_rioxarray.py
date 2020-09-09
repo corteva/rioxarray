@@ -294,9 +294,7 @@ def test_clip_box__nodata_error(modis_clip):
         var_match = ""
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
-        with pytest.raises(
-            NoDataInBounds, match=var_match,
-        ):
+        with pytest.raises(NoDataInBounds, match=var_match):
             xdi.rio.clip_box(
                 minx=-8272735.53951584,  # xdi.x[5].values
                 miny=8048371.187465771,  # xdi.y[7].values
@@ -792,11 +790,11 @@ def test_make_coords__calc_trans(open_func, modis_reproject):
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
-        calc_coords_calc_trans = _make_coords(xdi, calculated_transform, width, height,)
+        calc_coords_calc_trans = _make_coords(xdi, calculated_transform, width, height)
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform(recalc=True)
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr,
+            xri, calculated_transformr, widthr, heightr
         )
 
         assert_almost_equal(calculated_transform, calculated_transformr)
@@ -832,11 +830,11 @@ def test_make_coords__attr_trans(open_func, modis_reproject):
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
-        calc_coords_attr_trans = _make_coords(xdi, attr_transform, width, height,)
+        calc_coords_attr_trans = _make_coords(xdi, attr_transform, width, height)
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform()
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr,
+            xri, calculated_transformr, widthr, heightr
         )
         assert_almost_equal(attr_transform, calculated_transformr)
         # check to see if they all match
@@ -1256,7 +1254,7 @@ def test_to_raster__dataset__different_crs(tmpdir):
 def test_to_raster__dataset__different_nodata(tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with xarray.open_dataset(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), mask_and_scale=False,
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), mask_and_scale=False
     ) as mda:
         rds = mda.isel(time=0)
         rds.green.rio.write_nodata(1234, inplace=True)
@@ -1827,13 +1825,9 @@ def test_nonstandard_dims_error_msg():
     ) as xds:
         xds.coords["lon"].attrs = {}
         xds.coords["lat"].attrs = {}
-        with pytest.raises(
-            DimensionError, match="x dimension not found",
-        ):
+        with pytest.raises(DimensionError, match="x dimension not found"):
             xds.rio.width
-        with pytest.raises(
-            DimensionError, match="Data variable: analysed_sst",
-        ):
+        with pytest.raises(DimensionError, match="Data variable: analysed_sst"):
             xds.analysed_sst.rio.width
 
 
@@ -1881,15 +1875,11 @@ def test_missing_crs_error_msg():
     ) as xds:
         xds = xds.drop_vars("spatial_ref")
         xds.attrs.pop("grid_mapping")
-        with pytest.raises(
-            MissingCRS, match="Data variable: analysed_sst",
-        ):
+        with pytest.raises(MissingCRS, match="Data variable: analysed_sst"):
             xds.rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.reproject(
                 "EPSG:4326"
             )
-        with pytest.raises(
-            MissingCRS, match="Data variable: analysed_sst",
-        ):
+        with pytest.raises(MissingCRS, match="Data variable: analysed_sst"):
             xds.rio.set_spatial_dims(
                 x_dim="lon", y_dim="lat"
             ).analysed_sst.rio.reproject("EPSG:4326")

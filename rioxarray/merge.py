@@ -113,7 +113,7 @@ def merge_arrays(
     representative_array = dataarrays[0]
     if parse_coordinates:
         coords = _make_coords(
-            representative_array, merged_transform, merged_shape[-1], merged_shape[-2],
+            representative_array, merged_transform, merged_shape[-1], merged_shape[-2]
         )
     else:
         coords = _get_nonspatial_coords(representative_array)

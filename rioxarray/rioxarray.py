@@ -125,7 +125,7 @@ def add_xy_grid_meta(coords, crs=None):
 
 def add_spatial_ref(in_ds, dst_crs, grid_mapping_name):
     warnings.warn(
-        "add_spatial_ref is deprecated. Use rio.write_crs instead.", DeprecationWarning,
+        "add_spatial_ref is deprecated. Use rio.write_crs instead.", DeprecationWarning
     )
     in_ds.rio.write_crs(
         input_crs=dst_crs, grid_mapping_name=grid_mapping_name, inplace=True
@@ -152,9 +152,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
-    new_data_array.rio.write_crs(
-        src_data_array.rio.crs, inplace=True,
-    )
+    new_data_array.rio.write_crs(src_data_array.rio.crs, inplace=True)
     new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
     # make sure encoding added
@@ -332,7 +330,7 @@ class XRasterBase(object):
     @property
     def crs(self):
         """:obj:`rasterio.crs.CRS`:
-            Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
+        Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         if self._crs is not None:
             return None if self._crs is False else self._crs
@@ -523,7 +521,7 @@ class XRasterBase(object):
             # look in grid_mapping
             return Affine.from_gdal(
                 *np.fromstring(
-                    self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" ",
+                    self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
                 )
             )
         except KeyError:
@@ -1751,7 +1749,7 @@ class RasterDataset(XRasterBase):
     @property
     def crs(self):
         """:obj:`rasterio.crs.CRS`:
-            Retrieve projection from `xarray.Dataset`
+        Retrieve projection from `xarray.Dataset`
         """
         if self._crs is not None:
             return None if self._crs is False else self._crs
@@ -1886,7 +1884,7 @@ class RasterDataset(XRasterBase):
             padded_dataset[var] = (
                 self._obj[var]
                 .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.pad_box(minx, miny, maxx, maxy,)
+                .rio.pad_box(minx, miny, maxx, maxy)
             )
         return padded_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True

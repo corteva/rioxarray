@@ -91,7 +91,7 @@ Ready to contribute? Here's how to set up `rioxarray` for local development.
 
     $ flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
     $ flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
-    $ black --target-version py36 --check .
+    $ black --check .
     $ py.test
 
 7. Commit your changes and push your branch to GitLab::
