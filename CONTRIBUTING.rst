@@ -89,8 +89,7 @@ Ready to contribute? Here's how to set up `rioxarray` for local development.
 
    Or, if you cannot run makefile commands::
 
-    $ flake8 --ignore=E731,W503,W504 --exclude --max-complexity 10 --max-line-length 88 rioxarray/
-    $ flake8 --max-line-length 88 tests/unit/ tests/functional/ tests/integration
+    $ flake8 rioxarray/ test/
     $ black --check .
     $ py.test
 

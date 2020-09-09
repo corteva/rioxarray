@@ -27,4 +27,3 @@ repos:
         rev: 3.8.3
         hooks:
         -   id: flake8
-            args: [--max-line-length, '88', --ignore, "E225,W503,C408"]
