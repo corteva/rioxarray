@@ -86,7 +86,7 @@ class RasterioArrayWrapper(BackendArray):
         return self._shape
 
     def _get_indexer(self, key):
-        """ Get indexer for rasterio array.
+        """Get indexer for rasterio array.
 
         Parameter
         ---------
@@ -538,8 +538,8 @@ def _prepare_dask(result, riods, filename, chunks):
         mtime = None
 
     if chunks in (True, "auto"):
-        from dask.array.core import normalize_chunks
         import dask
+        from dask.array.core import normalize_chunks
 
         if LooseVersion(dask.__version__) < LooseVersion("0.18.0"):
             msg = (
