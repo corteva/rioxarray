@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -26,11 +26,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -211,9 +211,9 @@ helps, and credit will always be given.</p>
 <p>Report bugs at <a class="reference external" href="https://github.com/corteva/rioxarray/issues">https://github.com/corteva/rioxarray/issues</a>.</p>
 <p>If you are reporting a bug, please include:</p>
 <ul class="simple">
-<li><p>Your operating system name and version.</p></li>
-<li><p>Any details about your local setup that might be helpful in troubleshooting.</p></li>
-<li><p>Detailed steps to reproduce the bug.</p></li>
+<li>Your operating system name and version.</li>
+<li>Any details about your local setup that might be helpful in troubleshooting.</li>
+<li>Detailed steps to reproduce the bug.</li>
 </ul>
 </div>
 <div class="section" id="fix-bugs">
@@ -237,10 +237,10 @@ articles, and such.</p>
 <p>The best way to send feedback is to file an issue at <a class="reference external" href="https://github.com/corteva/rioxarray/issues">https://github.com/corteva/rioxarray/issues</a>.</p>
 <p>If you are proposing a feature:</p>
 <ul class="simple">
-<li><p>Explain in detail how it would work.</p></li>
-<li><p>Keep the scope as narrow as possible, to make it easier to implement.</p></li>
-<li><p>Remember that this is a volunteer-driven project, and that contributions
-are welcome :)</p></li>
+<li>Explain in detail how it would work.</li>
+<li>Keep the scope as narrow as possible, to make it easier to implement.</li>
+<li>Remember that this is a volunteer-driven project, and that contributions
+are welcome :)</li>
 </ul>
 </div>
 </div>
@@ -248,32 +248,33 @@ are welcome :)</p></li>
 <h2>Get Started!<a class="headerlink" href="#get-started" title="Permalink to this headline">¶</a></h2>
 <p>Ready to contribute? Here’s how to set up <cite>rioxarray</cite> for local development.</p>
 <ol class="arabic">
-<li><p>Fork the <cite>rioxarray</cite> repo on GitHub.</p></li>
-<li><p>Clone your fork locally:</p>
+<li><p class="first">Fork the <cite>rioxarray</cite> repo on GitHub.</p>
+</li>
+<li><p class="first">Clone your fork locally:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git clone git@github.com:your_name_here/rioxarray.git
 </pre></div>
 </div>
 </li>
-<li><p>Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:</p>
+<li><p class="first">Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ python -m venv rioxarray_env
 $ <span class="nb">cd</span> rioxarray/
 $ pip install -e .<span class="o">[</span>dev<span class="o">]</span>
 </pre></div>
 </div>
 </li>
-<li><p>Setup pre-commit hooks:</p>
+<li><p class="first">Setup pre-commit hooks:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pre-commit install
 $ pre-commit autoupdate
 </pre></div>
 </div>
 </li>
-<li><p>Create a branch for local development:</p>
+<li><p class="first">Create a branch for local development:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git checkout -b name-of-your-bugfix-or-feature
 </pre></div>
 </div>
 <p>Now you can make your changes locally.</p>
 </li>
-<li><p>When you’re done making changes, check that your changes pass flake8, are black formatter,
+<li><p class="first">When you’re done making changes, check that your changes pass flake8, are black formatter,
 and the tests pass:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ make check
 $ make <span class="nb">test</span>
@@ -286,25 +287,26 @@ $ py.test
 </pre></div>
 </div>
 </li>
-<li><p>Commit your changes and push your branch to GitLab:</p>
+<li><p class="first">Commit your changes and push your branch to GitLab:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git add .
 $ git commit -m <span class="s2">&quot;Your detailed description of your changes.&quot;</span>
 $ git push origin name-of-your-bugfix-or-feature
 </pre></div>
 </div>
 </li>
-<li><p>Submit a pull request through the GitHub website.</p></li>
+<li><p class="first">Submit a pull request through the GitHub website.</p>
+</li>
 </ol>
 </div>
 <div class="section" id="pull-request-guidelines">
 <h2>Pull Request Guidelines<a class="headerlink" href="#pull-request-guidelines" title="Permalink to this headline">¶</a></h2>
 <p>Before you submit a pull request, check that it meets these guidelines:</p>
 <ol class="arabic simple">
-<li><p>The pull request should include tests.</p></li>
-<li><p>If the pull request adds functionality, the docs should be updated. Put
+<li>The pull request should include tests.</li>
+<li>If the pull request adds functionality, the docs should be updated. Put
 your new functionality into a function with a docstring, and add the
-feature to the list in README.rst.</p></li>
-<li><p>The pull request should work for Python 3.5, 3.6, and 3.7.</p></li>
+feature to the list in README.rst.</li>
+<li>The pull request should work for Python 3.5, 3.6, and 3.7.</li>
 </ol>
 </div>
 <div class="section" id="tips">
