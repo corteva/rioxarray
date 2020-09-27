@@ -1528,10 +1528,6 @@ class RasterArray(XRasterBase):
         )
         clip_mask_xray = xarray.DataArray(
             clip_mask_arr,
-            coords={
-                self.y_dim: self._obj.coords[self.y_dim],
-                self.x_dim: self._obj.coords[self.x_dim],
-            },
             dims=(self.y_dim, self.x_dim),
         )
         cropped_ds = self._obj.where(clip_mask_xray)
