@@ -94,43 +94,13 @@ def _generate_attrs(src_data_array, dst_nodata):
 
 
 def add_xy_grid_meta(coords, crs=None):
-    """Add x,y metadata to coordinates"""
-    warnings.warn(
-        "add_xy_grid_meta is deprecated. Use rio.write_coordinate_system instead.",
-        DeprecationWarning,
+    raise RuntimeError(
+        "add_xy_grid_meta has been removed. Use rio.write_coordinate_system instead.",
     )
-    if "x" in coords:
-        x_coord_attrs = dict(coords["x"].attrs)
-        x_coord_attrs["long_name"] = "x coordinate of projection"
-        x_coord_attrs["standard_name"] = "projection_x_coordinate"
-        coords["x"].attrs = x_coord_attrs
-    elif "longitude" in coords:
-        x_coord_attrs = dict(coords["longitude"].attrs)
-        x_coord_attrs["long_name"] = "longitude"
-        x_coord_attrs["standard_name"] = "longitude"
-        coords["longitude"].attrs = x_coord_attrs
-
-    if "y" in coords:
-        y_coord_attrs = dict(coords["y"].attrs)
-        y_coord_attrs["long_name"] = "y coordinate of projection"
-        y_coord_attrs["standard_name"] = "projection_y_coordinate"
-        coords["y"].attrs = y_coord_attrs
-    elif "latitude" in coords:
-        x_coord_attrs = dict(coords["latitude"].attrs)
-        x_coord_attrs["long_name"] = "latitude"
-        x_coord_attrs["standard_name"] = "latitude"
-        coords["latitude"].attrs = x_coord_attrs
-    return coords
 
 
 def add_spatial_ref(in_ds, dst_crs, grid_mapping_name):
-    warnings.warn(
-        "add_spatial_ref is deprecated. Use rio.write_crs instead.", DeprecationWarning
-    )
-    in_ds.rio.write_crs(
-        input_crs=dst_crs, grid_mapping_name=grid_mapping_name, inplace=True
-    )
-    return in_ds
+    raise RuntimeError("add_spatial_ref has been removed. Use rio.write_crs instead.")
 
 
 def _add_attrs_proj(new_data_array, src_data_array):

@@ -2143,10 +2143,10 @@ def test_grid_mapping_default():
 
 
 def test_add_spatial_ref_warning():
-    with pytest.warns(DeprecationWarning):
+    with pytest.raises(RuntimeError):
         add_spatial_ref(xarray.Dataset(), "epsg:4326", "spatial_ref")
 
 
 def test_add_xy_grid_meta_warning():
-    with pytest.warns(DeprecationWarning):
+    with pytest.raises(RuntimeError):
         add_xy_grid_meta({})
