@@ -449,6 +449,21 @@
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
 
+<span class="k">def</span> <span class="nf">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">,</span> <span class="n">new_dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the nodata to the new datatype and raise warning</span>
+<span class="sd">    if the value of the nodata value changed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">original_nodata</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">)</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">new_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="ow">and</span> <span class="n">original_nodata</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The nodata value (</span><span class="si">{</span><span class="n">original_nodata</span><span class="si">}</span><span class="s2">) has been automatically &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;changed to (</span><span class="si">{</span><span class="n">nodata</span><span class="si">}</span><span class="s2">) to match the dtype of the data.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">nodata</span>
+
+
 <div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
 
@@ -1234,6 +1249,7 @@
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">input_nodata</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">input_nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_nodata</span>
         <span class="k">if</span> <span class="n">input_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">input_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">input_nodata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
             <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">_FillValue</span><span class="o">=</span><span class="n">input_nodata</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">new_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
@@ -1245,7 +1261,10 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">encoded_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the encoded nodata value for the dataset if encoded.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">)</span>
+        <span class="n">encoded_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">encoded_nodata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1278,6 +1297,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span>
 
 <div class="viewcode-block" id="RasterArray.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.RasterArray.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
@@ -1857,6 +1877,15 @@
                 <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">}</span>
+        <span class="n">rio_nodata</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">rio_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Ensure dtype of output data matches the expected dtype.</span>
+            <span class="c1"># This check is added here as the dtype of the data is</span>
+            <span class="c1"># converted right before writing.</span>
+            <span class="n">rio_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">rio_nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
             <span class="n">raster_path</span><span class="p">,</span>
             <span class="s2">&quot;w&quot;</span><span class="p">,</span>
@@ -1867,9 +1896,7 @@
             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">),</span>
-            <span class="n">nodata</span><span class="o">=</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
-            <span class="p">),</span>
+            <span class="n">nodata</span><span class="o">=</span><span class="n">rio_nodata</span><span class="p">,</span>
             <span class="o">**</span><span class="n">out_profile</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
 
@@ -1887,7 +1914,7 @@
                     <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">out_data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">)</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
