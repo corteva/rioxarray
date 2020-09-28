@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -26,11 +26,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -441,8 +441,8 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
 <h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
-<li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
+<li>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</li>
+<li>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</li>
 </ol>
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
 </div>
@@ -453,8 +453,8 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="API-Documentation">
 <h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:

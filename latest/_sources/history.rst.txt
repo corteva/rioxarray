@@ -5,6 +5,7 @@ History
 ------
 - BUG: Ensure transform correct in rio.clip without coords (pull #165)
 - BUG: Ensure the nodata value matches the dtype (pull #166)
+- Raise deprecation exception in add_spatial_ref and add_xy_grid_meta (pull #167)
 
 0.0.31
 ------
