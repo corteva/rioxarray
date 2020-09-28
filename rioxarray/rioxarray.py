@@ -288,6 +288,21 @@ def _get_data_var_message(obj):
         return ""
 
 
+def _ensure_nodata_dtype(original_nodata, new_dtype):
+    """
+    Convert the nodata to the new datatype and raise warning
+    if the value of the nodata value changed.
+    """
+    original_nodata = float(original_nodata)
+    nodata = np.dtype(new_dtype).type(original_nodata)
+    if not np.isnan(nodata) and original_nodata != nodata:
+        warnings.warn(
+            f"The nodata value ({original_nodata}) has been automatically "
+            f"changed to ({nodata}) to match the dtype of the data."
+        )
+    return nodata
+
+
 class XRasterBase(object):
     """This is the base class for the GIS extensions for xarray"""
 
@@ -1073,6 +1088,7 @@ class RasterArray(XRasterBase):
         data_obj = self._get_obj(inplace=inplace)
         input_nodata = False if input_nodata is None else input_nodata
         if input_nodata is not False:
+            input_nodata = _ensure_nodata_dtype(input_nodata, self._obj.dtype)
             data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
         else:
             new_vars = dict(data_obj.attrs)
@@ -1084,7 +1100,10 @@ class RasterArray(XRasterBase):
     @property
     def encoded_nodata(self):
         """Return the encoded nodata value for the dataset if encoded."""
-        return self._obj.encoding.get("_FillValue")
+        encoded_nodata = self._obj.encoding.get("_FillValue")
+        if encoded_nodata is None:
+            return None
+        return _ensure_nodata_dtype(encoded_nodata, self._obj.dtype)
 
     @property
     def nodata(self):
@@ -1117,6 +1136,7 @@ class RasterArray(XRasterBase):
             self._nodata = False
             return None
 
+        self._nodata = _ensure_nodata_dtype(self._nodata, self._obj.dtype)
         return self._nodata
 
     def reproject(
@@ -1696,6 +1716,15 @@ class RasterArray(XRasterBase):
                 "dtype",
             )
         }
+        rio_nodata = (
+            self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+        )
+        if rio_nodata is not None:
+            # Ensure dtype of output data matches the expected dtype.
+            # This check is added here as the dtype of the data is
+            # converted right before writing.
+            rio_nodata = _ensure_nodata_dtype(rio_nodata, dtype)
+
         with rasterio.open(
             raster_path,
             "w",
@@ -1706,9 +1735,7 @@ class RasterArray(XRasterBase):
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
-            nodata=(
-                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
-            ),
+            nodata=rio_nodata,
             **out_profile,
         ) as dst:
 
@@ -1726,7 +1753,7 @@ class RasterArray(XRasterBase):
                     out_data = self._obj
                 if self.encoded_nodata is not None:
                     out_data = out_data.fillna(self.encoded_nodata)
-                data = out_data.astype(dtype).load().data
+                data = out_data.values.astype(dtype)
                 if data.ndim == 2:
                     dst.write(data, 1, window=window)
                 else:

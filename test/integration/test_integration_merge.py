@@ -81,6 +81,7 @@ def test_merge_arrays__res():
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
+    assert_almost_equal(merged.attrs.pop("_FillValue"), rds.attrs.pop("_FillValue"))
     assert merged.attrs == rds.attrs
     assert_almost_equal(nansum(merged), 13556564)
 

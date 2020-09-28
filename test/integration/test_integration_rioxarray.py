@@ -1271,6 +1271,35 @@ def test_to_raster__dataset__different_nodata(tmpdir):
             rds.rio.to_raster(str(tmp_raster))
 
 
+@pytest.mark.parametrize("windowed", [True, False])
+def test_to_raster__different_dtype(tmp_path, windowed):
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_da.values[1, 1] = -1.1
+    test_nd = test_da.rio.write_nodata(-1.1)
+    test_nd.rio.write_transform(
+        Affine.from_gdal(425047, 3.0, 0.0, 4615780, 0.0, -3.0), inplace=True
+    )
+    test_nd.rio.write_crs("EPSG:4326", inplace=True)
+    tmpfile = tmp_path / "dtype.tif"
+    with pytest.warns(
+        UserWarning,
+        match=(
+            r"The nodata value \(-1.1\) has been automatically changed to "
+            r"\(255\) to match the dtype of the data."
+        ),
+    ):
+        test_nd.rio.to_raster(tmpfile, dtype=numpy.uint8, windowed=windowed)
+    xds = rioxarray.open_rasterio(tmpfile)
+    assert str(xds.dtype) == "uint8"
+    assert xds.attrs["_FillValue"] == 255
+    assert xds.rio.nodata == 255
+    assert xds.squeeze().values[1, 1] == 255
+
+
 def test_missing_spatial_dimensions():
     test_ds = xarray.Dataset()
     with pytest.raises(DimensionError):
@@ -1645,6 +1674,45 @@ def test_nodata_writer__remove():
     assert test_nd.attrs["_FillValue"] == -1
     test_nd.rio.write_nodata(None, inplace=True)
     assert not test_nd.attrs
+
+
+@pytest.mark.parametrize("nodata", [-1.1, "-1.1"])
+def test_nodata_writer__different_dtype(nodata):
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5), dtype=int),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    with pytest.warns(
+        UserWarning,
+        match=(
+            r"The nodata value \(-1.1\) has been automatically changed to "
+            r"\(-1\) to match the dtype of the data."
+        ),
+    ):
+        test_nd = test_da.rio.write_nodata(nodata)
+    assert not test_da.attrs
+    assert test_nd.attrs["_FillValue"] == -1
+    assert test_nd.rio.nodata == -1
+
+
+@pytest.mark.parametrize("nodata", [-1.1, "-1.1"])
+def test_nodata_reader__different_dtype(nodata):
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5), dtype=numpy.uint8),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+        attrs={"_FillValue": nodata},
+    )
+    assert test_da.attrs["_FillValue"] == nodata
+    with pytest.warns(
+        UserWarning,
+        match=(
+            r"The nodata value \(-1.1\) has been automatically changed to "
+            r"\(255\) to match the dtype of the data."
+        ),
+    ):
+        assert test_da.rio.nodata == 255
 
 
 def test_isel_window():
