@@ -1689,10 +1689,6 @@
         <span class="p">)</span>
         <span class="n">clip_mask_xray</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
             <span class="n">clip_mask_arr</span><span class="p">,</span>
-            <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">],</span>
-            <span class="p">},</span>
             <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">cropped_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clip_mask_xray</span><span class="p">)</span>
