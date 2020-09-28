@@ -4,6 +4,7 @@ History
 Latest
 ------
 - BUG: Ensure transform correct in rio.clip without coords (pull #165)
+- BUG: Ensure the nodata value matches the dtype (pull #166)
 
 0.0.31
 ------
