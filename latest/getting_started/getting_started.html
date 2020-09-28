@@ -1,13 +1,13 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; rioxarray 0.1.0 documentation</title>
+  <title>Getting Started &mdash; rioxarray 0.1.1.dev0 documentation</title>
   
 
   
@@ -26,11 +26,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev0
               </div>
             
           
@@ -199,12 +199,12 @@ section of the documentation. Need to export to a raster (GeoTiff)? There is an 
 that as well.</p>
 <p>Why use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> instead of <cite>xarray.open_rasterio</cite>?</p>
 <ol class="arabic simple">
-<li>It supports multidimensional datasets such as netCDF.</li>
-<li>It stores the CRS as a WKT, which is the recommended format (<a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">PROJ FAQ</a>).</li>
-<li>It loads in the CRS, transform, and nodata metadata in standard CF &amp; GDAL locations.</li>
-<li>It supports masking and scaling data with the <cite>masked</cite> and <cite>mask_and_scale</cite> kwargs.</li>
-<li>It adds the coordinate axis CF metadata.</li>
-<li>It loads in raster metadata into the attributes.</li>
+<li><p>It supports multidimensional datasets such as netCDF.</p></li>
+<li><p>It stores the CRS as a WKT, which is the recommended format (<a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">PROJ FAQ</a>).</p></li>
+<li><p>It loads in the CRS, transform, and nodata metadata in standard CF &amp; GDAL locations.</p></li>
+<li><p>It supports masking and scaling data with the <cite>masked</cite> and <cite>mask_and_scale</cite> kwargs.</p></li>
+<li><p>It adds the coordinate axis CF metadata.</p></li>
+<li><p>It loads in raster metadata into the attributes.</p></li>
 </ol>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Data management:</span></p>
