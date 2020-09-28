@@ -409,6 +409,11 @@ def test_clip_geojson(open_func):
         _assert_xarrays_equal(
             clipped_ds, comp_subset_ds, skip_xy_check=isinstance(open_func, partial)
         )
+        # check the transform
+        assert_almost_equal(
+            clipped_ds.rio.transform(),
+            (3.0, 0.0, 425500.68381405267, 0.0, -3.0, 4615477.040546387, 0.0, 0.0, 1.0),
+        )
 
 
 @pytest.mark.parametrize(

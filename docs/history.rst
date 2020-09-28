@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Ensure transform correct in rio.clip without coords (pull #165)
 
 0.0.31
 ------
