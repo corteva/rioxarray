@@ -11,16 +11,28 @@ matrix:
     - os: osx
       env:
         - PYTHON_VERSION=3.6
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.6
-        - DOC=true
     - os: osx
       env:
         - PYTHON_VERSION=3.7
+    - os: osx
+      env:
+        - PYTHON_VERSION=3.8
+    - os: osx
+      env:
+        - PYTHON_VERSION=3.9
+    - os: linux
+      env:
+        - PYTHON_VERSION=3.6
     - os: linux
       env:
         - PYTHON_VERSION=3.7
+        - DOC=true
+    - os: linux
+      env:
+        - PYTHON_VERSION=3.8
+    - os: linux
+      env:
+        - PYTHON_VERSION=3.9
 notifications:
   email: false
 
