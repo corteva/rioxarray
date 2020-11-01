@@ -1251,7 +1251,7 @@ def test_to_raster__dataset__different_crs(tmpdir):
         rds.blue.attrs = attrs
         rds = rds.drop_vars("spatial_ref")
         with pytest.raises(
-            RioXarrayError, match="All CRS must be the same when exporting to raster."
+            RioXarrayError, match="CRS in DataArrays differ in the Dataset"
         ):
             rds.rio.to_raster(str(tmp_raster))
 
@@ -1484,6 +1484,20 @@ def test_crs_writer__missing():
         test_da.rio.write_crs()
     with pytest.raises(MissingCRS):
         test_da.to_dataset(name="test").rio.write_crs()
+
+
+def test_crs__dataset__different_crs(tmpdir):
+    green = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+        attrs={"crs": "EPSG:4326"},
+    )
+    blue = green.copy(deep=True)
+    blue.attrs = {"crs": "EPSG:32722"}
+
+    with pytest.raises(RioXarrayError, match="CRS in DataArrays differ in the Dataset"):
+        xarray.Dataset({"green": green, "blue": blue}).rio.crs
 
 
 def test_clip_missing_crs():
