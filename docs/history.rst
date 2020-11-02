@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.1.1
 ------
 - BUG: Check all CRS are the same in the dataset in crs() method
