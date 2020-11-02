@@ -1749,14 +1749,24 @@ class RasterDataset(XRasterBase):
         self._crs = super().crs
         if self._crs is not None:
             return self._crs
+        # ensure all the CRS of the variables are the same
+        crs_list = []
         for var in self.vars:
-            crs = self._obj[var].rio.crs
-            if crs is not None:
-                self._crs = crs
-                break
-        else:
+            if self._obj[var].rio.crs is not None:
+                crs_list.append(self._obj[var].rio.crs)
+        try:
+            crs = crs_list[0]
+        except IndexError:
+            crs = None
+        if crs is None:
             self._crs = False
             return None
+        elif all(crs_i == crs for crs_i in crs_list):
+            self._crs = crs
+        else:
+            raise RioXarrayError(
+                "CRS in DataArrays differ in the Dataset: {}".format(crs_list)
+            )
         return self._crs
 
     def reproject(
@@ -2060,12 +2070,10 @@ class RasterDataset(XRasterBase):
         scales = []
         offsets = []
         nodatavals = []
-        crs_list = []
         for data_var in data_array[variable_dim].values:
             scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
             offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
             nodatavals.append(self._obj[data_var].rio.nodata)
-            crs_list.append(self._obj[data_var].rio.crs)
         data_array.attrs["scales"] = scales
         data_array.attrs["offsets"] = offsets
         nodata = nodatavals[0]
@@ -2079,14 +2087,8 @@ class RasterDataset(XRasterBase):
                 "All nodata values must be the same when exporting to raster. "
                 "Current values: {}".format(nodatavals)
             )
-        crs = crs_list[0]
-        if all(crs_i == crs for crs_i in crs_list):
-            data_array.rio.write_crs(crs, inplace=True)
-        else:
-            raise RioXarrayError(
-                "All CRS must be the same when exporting to raster. "
-                "Current values: {}".format(crs_list)
-            )
+        if self.crs is not None:
+            data_array.rio.write_crs(self.crs, inplace=True)
         # write it to a raster
         data_array.rio.to_raster(
             raster_path=raster_path,
