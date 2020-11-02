@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: Check all CRS are the same in the dataset in crs() method
 
 0.1.0
 ------
