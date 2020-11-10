@@ -496,6 +496,54 @@ class XRasterBase(object):
             grid_mapping_name=grid_mapping_name, inplace=True
         )
 
+    def estimate_utm_crs(self, datum_name="WGS 84"):
+        """Returns the estimated UTM CRS based on the bounds of the dataset.
+
+        .. versionadded:: 0.2
+
+        .. note:: Requires pyproj 3+
+
+        Parameters
+        ----------
+        datum_name : str, optional
+            The name of the datum to use in the query. Default is WGS 84.
+
+        Returns
+        -------
+        rasterio.crs.CRS
+        """
+        try:
+            from pyproj.aoi import AreaOfInterest
+            from pyproj.database import query_utm_crs_info
+        except ImportError:
+            raise RuntimeError("pyproj 3+ required for estimate_utm_crs.")
+
+        if self.crs is None:
+            raise RuntimeError("crs must be set to estimate UTM CRS.")
+
+        # ensure using geographic coordinates
+        if self.crs.is_geographic:
+            minx, miny, maxx, maxy = self.bounds(recalc=True)
+        else:
+            minx, miny, maxx, maxy = self.transform_bounds("EPSG:4326", recalc=True)
+
+        x_center = np.mean([minx, maxx])
+        y_center = np.mean([miny, maxy])
+
+        utm_crs_list = query_utm_crs_info(
+            datum_name=datum_name,
+            area_of_interest=AreaOfInterest(
+                west_lon_degree=x_center,
+                south_lat_degree=y_center,
+                east_lon_degree=x_center,
+                north_lat_degree=y_center,
+            ),
+        )
+        try:
+            return CRS.from_epsg(utm_crs_list[0].code)
+        except IndexError:
+            raise RuntimeError("Unable to determine UTM CRS")
+
     def _cached_transform(self):
         """
         Get the transform from:

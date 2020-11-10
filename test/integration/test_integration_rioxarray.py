@@ -5,6 +5,7 @@ from distutils.version import LooseVersion
 from functools import partial
 
 import numpy
+import pyproj
 import pytest
 import rasterio
 import scipy
@@ -30,6 +31,8 @@ from test.conftest import (
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
 )
+
+PYPROJ_LT_3 = LooseVersion(pyproj.__version__) < LooseVersion("3")
 
 
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
@@ -2164,3 +2167,42 @@ def test_add_spatial_ref_warning():
 def test_add_xy_grid_meta_warning():
     with pytest.raises(RuntimeError):
         add_xy_grid_meta({})
+
+
+def test_estimate_utm_crs():
+    xds = rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"),
+    )
+    if PYPROJ_LT_3:
+        with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
+            xds.rio.estimate_utm_crs()
+    else:
+        assert xds.rio.estimate_utm_crs() == CRS.from_epsg(32618)
+        assert xds.rio.reproject("EPSG:4326").rio.estimate_utm_crs() == CRS.from_epsg(
+            32618
+        )
+        assert xds.rio.estimate_utm_crs("NAD83") == CRS.from_epsg(26918)
+
+
+@pytest.mark.skipif(PYPROJ_LT_3, reason="pyproj 3+ required")
+def test_estimate_utm_crs__missing_crs():
+    with pytest.raises(RuntimeError, match=r"crs must be set to estimate UTM CRS"):
+        xarray.Dataset().rio.estimate_utm_crs("NAD83")
+
+
+def test_estimate_utm_crs__out_of_bounds():
+    xds = xarray.DataArray(
+        numpy.zeros((2, 2)),
+        dims=("latitude", "longitude"),
+        coords={
+            "latitude": [-90.0, -90.0],
+            "longitude": [-5.0, 5.0],
+        },
+    )
+    xds.rio.write_crs("EPSG:4326", inplace=True)
+    if PYPROJ_LT_3:
+        with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
+            xds.rio.estimate_utm_crs()
+    else:
+        with pytest.raises(RuntimeError, match=r"Unable to determine UTM CRS"):
+            xds.rio.estimate_utm_crs()
