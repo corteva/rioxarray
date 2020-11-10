@@ -52,6 +52,58 @@ def test_merge_arrays():
     assert_almost_equal(merged.sum(), 11368261)
 
 
+@pytest.mark.parametrize("dataset", [True, False])
+def test_merge__different_crs(dataset):
+    dem_test = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
+    with open_rasterio(dem_test) as rds:
+        crs = rds.rio.crs
+        if dataset:
+            rds = rds.to_dataset()
+        arrays = [
+            rds.isel(x=slice(100), y=slice(100)).rio.reproject("EPSG:3857"),
+            rds.isel(x=slice(100, 200), y=slice(100, 200)),
+            rds.isel(x=slice(100), y=slice(100, 200)),
+            rds.isel(x=slice(100, 200), y=slice(100)),
+        ]
+        if dataset:
+            merged = merge_datasets(arrays, crs=crs)
+        else:
+            merged = merge_arrays(arrays, crs=crs)
+    assert_almost_equal(
+        merged.rio.bounds(),
+        (-7300984.0238134, 5003618.5908794, -7223500.6583578, 5050108.6101528),
+    )
+    assert_almost_equal(
+        tuple(merged.rio.transform()),
+        (
+            553.4526103969893,
+            0.0,
+            -7300984.023813409,
+            0.0,
+            -553.4526103969796,
+            5050108.610152751,
+            0.0,
+            0.0,
+            1.0,
+        ),
+    )
+    assert merged.rio.shape == (84, 140)
+    assert merged.coords["band"].values == [1]
+    assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
+    assert merged.rio.crs == rds.rio.crs
+    if dataset:
+        assert merged.attrs == {"grid_mapping": "spatial_ref"}
+        assert_almost_equal(merged[merged.rio.vars[0]].sum(), -131013894)
+    else:
+        assert merged.attrs == {
+            "_FillValue": -28672,
+            "add_offset": 0.0,
+            "grid_mapping": "spatial_ref",
+            "scale_factor": 1.0,
+        }
+        assert_almost_equal(merged.sum(), -131013894)
+
+
 def test_merge_arrays__res():
     dem_test = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
     with open_rasterio(dem_test, masked=True) as rds:
@@ -70,20 +122,22 @@ def test_merge_arrays__res():
 
     assert_almost_equal(
         merged.rio.bounds(),
-        (-7274009.649486291, 5003608.61015275, -7227509.649486291, 5050108.61015275),
+        (-7274009.6494863, 5003308.6101528, -7227209.6494863, 5050108.6101528),
     )
     assert_almost_equal(
         tuple(merged.rio.transform()),
         (300.0, 0.0, -7274009.649486291, 0.0, -300.0, 5050108.61015275, 0.0, 0.0, 1.0),
     )
     assert merged.rio._cached_transform() == merged.rio.transform()
-    assert merged.rio.shape == (155, 155)
+    assert merged.rio.shape == (156, 156)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert_almost_equal(merged.attrs.pop("_FillValue"), rds.attrs.pop("_FillValue"))
-    assert merged.attrs == rds.attrs
-    assert_almost_equal(nansum(merged), 13556564)
+    compare_attrs = dict(rds.attrs)
+    compare_attrs.pop("crs")
+    assert merged.attrs == compare_attrs
+    assert_almost_equal(nansum(merged), 13760565)
 
 
 @pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
@@ -185,4 +239,4 @@ def test_merge_datasets__res():
     base_attrs = dict(rds.attrs)
     base_attrs["grid_mapping"] = "spatial_ref"
     assert merged.attrs == base_attrs
-    assert_almost_equal(merged[data_var].sum(), 973667940761024)
+    assert_almost_equal(merged[data_var].sum(), 974566547463955)

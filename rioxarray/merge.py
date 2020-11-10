@@ -1,6 +1,7 @@
-from typing import Callable, Iterable, Tuple, Union
+from typing import Callable, Iterable, Optional, Tuple, Union
 
 import numpy
+from rasterio.crs import CRS
 from rasterio.merge import merge as _rio_merge
 from xarray import DataArray, Dataset
 
@@ -60,11 +61,12 @@ class RasterioDatasetDuck:
 
 def merge_arrays(
     dataarrays: Iterable[DataArray],
-    bounds: Union[Tuple, None] = None,
-    res: Union[Tuple, None] = None,
-    nodata: Union[float, None] = None,
-    precision: Union[float, None] = None,
+    bounds: Optional[Tuple] = None,
+    res: Optional[Tuple] = None,
+    nodata: Optional[float] = None,
+    precision: Optional[float] = None,
     method: Union[str, Callable, None] = None,
+    crs: Optional[CRS] = None,
     parse_coordinates: bool = True,
 ) -> DataArray:
     """
@@ -72,6 +74,8 @@ def merge_arrays(
 
     Uses rasterio.merge.merge:
         https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
+
+    .. versionadded:: 0.2 crs
 
     Parameters
     ----------
@@ -93,6 +97,8 @@ def merge_arrays(
         Number of decimal points of precision when computing inverse transform.
     method: str or callable, optional
         See rasterio docs.
+    crs: rasterio.crs.CRS, optional
+        Output CRS. If not set, the CRS of the first DataArray is used.
     parse_coordinates: bool, optional
         If False, it will disable loading spatial coordinates.
 
@@ -105,12 +111,27 @@ def merge_arrays(
     input_kwargs = dict(
         bounds=bounds, res=res, nodata=nodata, precision=precision, method=method
     )
+    if crs is None:
+        crs = dataarrays[0].rio.crs
+    if res is None:
+        res = tuple(abs(res_val) for res_val in dataarrays[0].rio.resolution())
+    rioduckarrays = []
+    for dataarray in dataarrays:
+        da_res = tuple(abs(res_val) for res_val in dataarray.rio.resolution())
+        if da_res != res or dataarray.rio.crs != crs:
+            rioduckarrays.append(
+                RasterioDatasetDuck(
+                    dataarray.rio.reproject(dst_crs=crs, resolution=res)
+                )
+            )
+        else:
+            rioduckarrays.append(RasterioDatasetDuck(dataarray))
     merged_data, merged_transform = _rio_merge(
-        [RasterioDatasetDuck(dataarray) for dataarray in dataarrays],
+        rioduckarrays,
         **{key: val for key, val in input_kwargs.items() if val is not None},
     )
     merged_shape = merged_data.shape
-    representative_array = dataarrays[0]
+    representative_array = rioduckarrays[0]._xds
     if parse_coordinates:
         coords = _make_coords(
             representative_array, merged_transform, merged_shape[-1], merged_shape[-2]
@@ -120,7 +141,7 @@ def merge_arrays(
 
     out_attrs = representative_array.attrs
     xda = DataArray(
-        name=dataarrays[0].name,
+        name=representative_array.name,
         data=merged_data,
         coords=coords,
         dims=tuple(representative_array.dims),
@@ -135,17 +156,20 @@ def merge_arrays(
 
 def merge_datasets(
     datasets: Iterable[Dataset],
-    bounds: Union[Tuple, None] = None,
-    res: Union[Tuple, None] = None,
-    nodata: Union[float, None] = None,
-    precision: Union[float, None] = None,
+    bounds: Optional[Tuple] = None,
+    res: Optional[Tuple] = None,
+    nodata: Optional[float] = None,
+    precision: Optional[float] = None,
     method: Union[str, Callable, None] = None,
+    crs: Optional[CRS] = None,
 ) -> DataArray:
     """
     Merge datasets geospatially.
 
     Uses rasterio.merge.merge:
         https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
+
+    .. versionadded:: 0.2 crs
 
     Parameters
     ----------
@@ -167,6 +191,8 @@ def merge_datasets(
         Number of decimal points of precision when computing inverse transform.
     method: str or callable, optional
         See rasterio docs.
+    crs: rasterio.crs.CRS, optional
+        Output CRS. If not set, the CRS of the first DataArray is used.
 
     Returns
     -------
@@ -184,6 +210,7 @@ def merge_datasets(
             nodata=nodata,
             precision=precision,
             method=method,
+            crs=crs,
             parse_coordinates=False,
         )
     data_var = list(representative_ds.data_vars)[0]
@@ -197,5 +224,5 @@ def merge_datasets(
         ),
         attrs=representative_ds.attrs,
     )
-    xds.rio.write_crs(representative_ds.rio.crs, inplace=True)
+    xds.rio.write_crs(merged_data[data_var].rio.crs, inplace=True)
     return xds

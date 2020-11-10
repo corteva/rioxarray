@@ -4,6 +4,7 @@ History
 Latest
 ------
 - ENH: Added `rio.estimate_utm_crs` (issue #181)
+- ENH: Add support for merging datasets with different CRS (issue #173)
 
 0.1.1
 ------
