@@ -657,6 +657,54 @@
             <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="XRasterBase.estimate_utm_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="o">=</span><span class="s2">&quot;WGS 84&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the estimated UTM CRS based on the bounds of the dataset.</span>
+
+<span class="sd">        .. versionadded:: 0.2</span>
+
+<span class="sd">        .. note:: Requires pyproj 3+</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        datum_name : str, optional</span>
+<span class="sd">            The name of the datum to use in the query. Default is WGS 84.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rasterio.crs.CRS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pyproj.aoi</span> <span class="kn">import</span> <span class="n">AreaOfInterest</span>
+            <span class="kn">from</span> <span class="nn">pyproj.database</span> <span class="kn">import</span> <span class="n">query_utm_crs_info</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;pyproj 3+ required for estimate_utm_crs.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;crs must be set to estimate UTM CRS.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ensure using geographic coordinates</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+            <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">x_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">])</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">])</span>
+
+        <span class="n">utm_crs_list</span> <span class="o">=</span> <span class="n">query_utm_crs_info</span><span class="p">(</span>
+            <span class="n">datum_name</span><span class="o">=</span><span class="n">datum_name</span><span class="p">,</span>
+            <span class="n">area_of_interest</span><span class="o">=</span><span class="n">AreaOfInterest</span><span class="p">(</span>
+                <span class="n">west_lon_degree</span><span class="o">=</span><span class="n">x_center</span><span class="p">,</span>
+                <span class="n">south_lat_degree</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span>
+                <span class="n">east_lon_degree</span><span class="o">=</span><span class="n">x_center</span><span class="p">,</span>
+                <span class="n">north_lat_degree</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">utm_crs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unable to determine UTM CRS&quot;</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the transform from:</span>

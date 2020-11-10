@@ -1023,6 +1023,31 @@ transform attribute.</td>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.estimate_utm_crs">
+<code class="descname">estimate_utm_crs</code><span class="sig-paren">(</span><em>datum_name='WGS 84'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.estimate_utm_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.estimate_utm_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the estimated UTM CRS based on the bounds of the dataset.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.2.</span></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Requires pyproj 3+</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datum_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the datum to use in the query. Default is WGS 84.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">rasterio.crs.CRS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rioxarray.rioxarray.XRasterBase.grid_mapping">
 <code class="descname">grid_mapping</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Permalink to this definition">¶</a></dt>
