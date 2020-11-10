@@ -13,6 +13,7 @@ datacube is licensed under the Apache License, Version 2.0:
 import copy
 import math
 import warnings
+from typing import Iterable
 from uuid import uuid4
 
 import numpy as np
@@ -176,6 +177,10 @@ def _make_dst_affine(
     src_bounds = src_data_array.rio.bounds()
     src_height, src_width = src_data_array.rio.shape
     dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
+    if isinstance(dst_resolution, Iterable):
+        dst_resolution = tuple(abs(res_val) for res_val in dst_resolution)
+    elif dst_resolution is not None:
+        dst_resolution = abs(dst_resolution)
     resolution_or_width_height = {
         k: v
         for k, v in [
