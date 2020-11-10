@@ -18,12 +18,12 @@ jobs:
 
   test:
     needs: linting
-    name: ${{ matrix.os }}, ${{ matrix.python }}
+    name: ${{ matrix.os }}, ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Env
         shell: bash
-        run: conda create -n test python=${{ matrix.python }} rasterio xarray scipy pyproj netcdf4 dask pandoc
+        run: conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
 
       - name: Check and Log Environment
         shell: bash
@@ -62,7 +62,7 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: run-${{ matrix.os }}-python-${{ matrix.python }}
+          flag-name: run-${{ matrix.os }}-python-${{ matrix.python-version }}
           parallel: true
 
   finish:
