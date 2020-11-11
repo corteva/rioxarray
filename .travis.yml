@@ -45,8 +45,6 @@ install:
 - pip install .[all]
 
 script:
-- py.test
-- make check
 - make docs
 # Building and uploading docs with doctr
 - set -e
