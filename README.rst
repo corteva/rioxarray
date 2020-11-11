@@ -31,9 +31,6 @@ rasterio xarray extension.
 .. image:: https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true
     :target: https://ci.appveyor.com/project/snowman2/rioxarray
 
-.. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
-    :target: https://coveralls.io/github/corteva/rioxarray?branch=master
-
 .. image:: https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/corteva/rioxarray
 
