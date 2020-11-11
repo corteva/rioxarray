@@ -2,9 +2,7 @@
 # System specifications for Travis CI
 #-------------------------------------------------------------------------------
 language: c
-branches:
-  only:
-  - master
+if: branch = master OR tag IS present
 env:
   global:
     # Doctr deploy key for corteva/rioxarray
