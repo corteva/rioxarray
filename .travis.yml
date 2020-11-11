@@ -7,6 +7,7 @@ env:
     # Doctr deploy key for corteva/rioxarray
     - secure: "CWWro84t7SpW3AuV6dE1d4Lcx3V7HZWi47RHovcKTxrcoD0iwu/cYXG3f0yiN81ehFmWOK/4mkCV8bEpF9THdwyoWQdKn0rF92IESy0+ZLdyDy0yvrL/nt2PY7oAL0OH0yuh784eTivhmUmBYjcZZdEDJnymM2Wgf1VgtKDhvqGgk+gzQkO4M4vc7/H7sERkmvH7AvsYhgP9zD2yelwOYfFuNa7n7RkHwymABWwDGXN3ri0wXkRJst3CSccv2BstzVl9K5OHevTdPqyATK5a9D5J8szf4X2oem/bisJsT5w+SyX9tmWJJbItEUsDghcWM3wQqWfguXl5cYQ7Bf7P2LbrphD4Hr5lmOpG9M/mijyL+2nkCoK7woXU4z02TZEX8mO43RmaHIWYOVBi4HRDIpj5Y6MgktctfGk8lg67V5eRjZwG4Jj1mhn+lnCpu2pK5pH0pTmWEM8QFcjF7DadMif38x0KcG74ukExxOX3lXGeN+mZN/eD7z1J3pfTi6U/acXDBtVG2li2YI5dMkEwad/IE8Q5s+TGH1AVFGBPMQWY2VEtRuSTKWZtK/09VEJcbP8CzhDu2I7ZOEvMcNqwUX/aZrNBgbZfZZijkIcC0ToJMfZs1Tg8gl6n+OTEnAuWf/727F8oTNYv0oR/MHCBPdrbQHsXRlZ8b4HZcG+3wNA="
 matrix:
+  fast_finish: true
   include:
     - os: osx
       env:
