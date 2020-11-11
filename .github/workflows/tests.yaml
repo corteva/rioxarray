@@ -36,6 +36,7 @@ jobs:
           conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
           source activate test
           python -m pip install -e .[all]
+          python -m pip install coveralls
 
       - name: Check and Log Environment
         shell: bash
