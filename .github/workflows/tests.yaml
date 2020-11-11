@@ -32,7 +32,10 @@ jobs:
 
       - name: Install Env
         shell: bash
-        run: conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
+        run: |
+          conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
+          source activate test
+          python -m pip install -e .[all]
 
       - name: Check and Log Environment
         shell: bash
