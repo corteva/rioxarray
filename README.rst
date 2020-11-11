@@ -34,6 +34,9 @@ rasterio xarray extension.
 .. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
     :target: https://coveralls.io/github/corteva/rioxarray?branch=master
 
+.. image:: https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/corteva/rioxarray
+
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
     :target: https://github.com/pre-commit/pre-commit
 
