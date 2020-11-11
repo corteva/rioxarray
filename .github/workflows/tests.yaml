@@ -26,6 +26,7 @@ jobs:
       - name: Setup Conda
         uses: s-weigand/setup-conda@v1
         with:
+          activate-conda: false
           python-version: ${{ matrix.python-version }}
           conda-channels: conda-forge
 
@@ -36,7 +37,7 @@ jobs:
       - name: Check and Log Environment
         shell: bash
         run: |
-          conda activate test
+          source activate test
           python -V
           python -c "import rioxarray; rioxarray.show_versions();"
           conda info
@@ -44,7 +45,7 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          conda activate test
+          source activate test
           py.test --cov-report term-missing --cov=rioxarray
 
       - name: Test Build docs
