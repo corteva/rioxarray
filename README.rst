@@ -35,7 +35,7 @@ rasterio xarray extension.
     :target: https://ci.appveyor.com/project/snowman2/rioxarray
 
 .. image:: https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/corteva/rioxarray
+    :target: https://codecov.io/gh/corteva/rioxarray
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
     :target: https://github.com/pre-commit/pre-commit
