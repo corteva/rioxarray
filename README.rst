@@ -25,6 +25,9 @@ rasterio xarray extension.
 .. image:: https://img.shields.io/conda/vn/conda-forge/rioxarray.svg
     :target: https://anaconda.org/conda-forge/rioxarray
 
+.. image:: https://github.com/pyproj4/pyproj/workflows/Tests/badge.svg
+    :target: https://github.com/pyproj4/pyproj/actions?query=workflow%3ATests
+
 .. image:: https://travis-ci.com/corteva/rioxarray.svg?branch=master
     :target: https://travis-ci.com/corteva/rioxarray
 
