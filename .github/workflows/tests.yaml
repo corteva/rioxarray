@@ -1,0 +1,72 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron:  '0 0 * * 0'
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.0
+
+  test:
+    needs: linting
+    name: ${{ matrix.os }}, ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        include:
+          - os: windows-latest
+            python-version: 3.7
+          - os: windows-latest
+            python-version: 3.8
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          activate-conda: false
+          python-version: ${{ matrix.python-version }}
+          conda-channels: conda-forge
+
+      - name: Install Env
+        shell: bash
+        run: |
+          conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
+          source activate test
+          python -m pip install -e .[all]
+
+      - name: Check and Log Environment
+        shell: bash
+        run: |
+          source activate test
+          python -V
+          python -c "import rioxarray; rioxarray.show_versions();"
+          conda info
+
+      - name: Test
+        shell: bash
+        run: |
+          source activate test
+          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
+
+      - name: Test Build docs
+        shell: bash
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          source activate test
+          sphinx-build -b html docs/ docs/_build/
+
+      - uses: codecov/codecov-action@v1

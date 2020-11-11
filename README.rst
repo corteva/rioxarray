@@ -25,14 +25,17 @@ rasterio xarray extension.
 .. image:: https://img.shields.io/conda/vn/conda-forge/rioxarray.svg
     :target: https://anaconda.org/conda-forge/rioxarray
 
+.. image:: https://github.com/corteva/rioxarray/workflows/Tests/badge.svg
+    :target: https://github.com/corteva/rioxarray/actions?query=workflow%3ATests
+
 .. image:: https://travis-ci.com/corteva/rioxarray.svg?branch=master
     :target: https://travis-ci.com/corteva/rioxarray
 
 .. image:: https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true
     :target: https://ci.appveyor.com/project/snowman2/rioxarray
 
-.. image:: https://coveralls.io/repos/github/corteva/rioxarray/badge.svg?branch=master
-    :target: https://coveralls.io/github/corteva/rioxarray?branch=master
+.. image:: https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/corteva/rioxarray
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
     :target: https://github.com/pre-commit/pre-commit

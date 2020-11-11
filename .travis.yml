@@ -2,37 +2,19 @@
 # System specifications for Travis CI
 #-------------------------------------------------------------------------------
 language: c
+if: branch = master OR tag IS present
 env:
   global:
     # Doctr deploy key for corteva/rioxarray
     - secure: "CWWro84t7SpW3AuV6dE1d4Lcx3V7HZWi47RHovcKTxrcoD0iwu/cYXG3f0yiN81ehFmWOK/4mkCV8bEpF9THdwyoWQdKn0rF92IESy0+ZLdyDy0yvrL/nt2PY7oAL0OH0yuh784eTivhmUmBYjcZZdEDJnymM2Wgf1VgtKDhvqGgk+gzQkO4M4vc7/H7sERkmvH7AvsYhgP9zD2yelwOYfFuNa7n7RkHwymABWwDGXN3ri0wXkRJst3CSccv2BstzVl9K5OHevTdPqyATK5a9D5J8szf4X2oem/bisJsT5w+SyX9tmWJJbItEUsDghcWM3wQqWfguXl5cYQ7Bf7P2LbrphD4Hr5lmOpG9M/mijyL+2nkCoK7woXU4z02TZEX8mO43RmaHIWYOVBi4HRDIpj5Y6MgktctfGk8lg67V5eRjZwG4Jj1mhn+lnCpu2pK5pH0pTmWEM8QFcjF7DadMif38x0KcG74ukExxOX3lXGeN+mZN/eD7z1J3pfTi6U/acXDBtVG2li2YI5dMkEwad/IE8Q5s+TGH1AVFGBPMQWY2VEtRuSTKWZtK/09VEJcbP8CzhDu2I7ZOEvMcNqwUX/aZrNBgbZfZZijkIcC0ToJMfZs1Tg8gl6n+OTEnAuWf/727F8oTNYv0oR/MHCBPdrbQHsXRlZ8b4HZcG+3wNA="
 matrix:
+  fast_finish: true
   include:
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.6
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.7
-    - os: osx
+    - os: linux
       env:
         - PYTHON_VERSION=3.8
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.9
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.6
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.7
         - DOC=true
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.8
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.9
+
 notifications:
   email: false
 
@@ -59,11 +41,8 @@ before_install:
 
 install:
 - pip install .[all]
-- pip install coveralls
 
 script:
-- py.test --cov-report term-missing --cov=rioxarray
-- make check
 - make docs
 # Building and uploading docs with doctr
 - set -e
@@ -77,7 +56,3 @@ script:
     fi
     doctr deploy --build-tags --built-docs docs/_build/html $DEPLOY_DIR
   fi
-
-after_success:
-  # Coveralls stats for code coverage
-  - coveralls
