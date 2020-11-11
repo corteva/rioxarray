@@ -36,7 +36,6 @@ jobs:
           conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
           source activate test
           python -m pip install -e .[all]
-          python -m pip install coveralls
 
       - name: Check and Log Environment
         shell: bash
@@ -50,7 +49,7 @@ jobs:
         shell: bash
         run: |
           source activate test
-          py.test --cov-report term-missing --cov=rioxarray
+          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
 
       - name: Test Build docs
         shell: bash
@@ -59,19 +58,4 @@ jobs:
           source activate test
           sphinx-build -b html docs/ docs/_build/
 
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: run-${{ matrix.os }}-python-${{ matrix.python-version }}
-          parallel: true
-
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
+      - uses: codecov/codecov-action@v1
