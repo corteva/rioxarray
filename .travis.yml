@@ -9,31 +9,11 @@ env:
 matrix:
   fast_finish: true
   include:
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.6
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.7
-    - os: osx
+    - os: linux
       env:
         - PYTHON_VERSION=3.8
-    - os: osx
-      env:
-        - PYTHON_VERSION=3.9
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.6
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.7
         - DOC=true
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.8
-    - os: linux
-      env:
-        - PYTHON_VERSION=3.9
+
 notifications:
   email: false
 
@@ -60,10 +40,9 @@ before_install:
 
 install:
 - pip install .[all]
-- pip install coveralls
 
 script:
-- py.test --cov-report term-missing --cov=rioxarray
+- py.test
 - make check
 - make docs
 # Building and uploading docs with doctr
@@ -78,7 +57,3 @@ script:
     fi
     doctr deploy --build-tags --built-docs docs/_build/html $DEPLOY_DIR
   fi
-
-after_success:
-  # Coveralls stats for code coverage
-  - coveralls
