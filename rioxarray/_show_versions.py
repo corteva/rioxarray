@@ -4,6 +4,7 @@ Utility methods to print system info for debugging
 adapted from :func:`sklearn.utils._show_versions`
 which was adapted from :func:`pandas.show_versions`
 """
+# pylint: disable=import-outside-toplevel
 import importlib
 import platform
 import sys
@@ -93,7 +94,7 @@ def show_versions():
     > python -c "import rioxarray; rioxarray.show_versions()"
 
     """
-    import rioxarray
+    import rioxarray  # pylint: disable=cyclic-import
 
     print(f"rioxarray ({rioxarray.__version__}) deps:")
     _print_info_dict(_get_main_info())

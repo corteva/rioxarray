@@ -44,8 +44,6 @@ class RasterioArrayWrapper(BackendArray):
         mask_and_scale=False,
         unsigned=False,
     ):
-        from rasterio.vrt import WarpedVRT
-
         self.manager = manager
         self.lock = lock
         self.masked = masked or mask_and_scale
@@ -79,10 +77,16 @@ class RasterioArrayWrapper(BackendArray):
 
     @property
     def dtype(self):
+        """
+        Data type of the array
+        """
         return self._dtype
 
     @property
     def shape(self):
+        """
+        Shape of the array
+        """
         return self._shape
 
     def _get_indexer(self, key):
@@ -121,20 +125,20 @@ class RasterioArrayWrapper(BackendArray):
         # but other dims can only be windowed
         window = []
         squeeze_axis = []
-        for i, (k, n) in enumerate(zip(key[1:], self.shape[1:])):
-            if isinstance(k, slice):
+        for iii, (ikey, size) in enumerate(zip(key[1:], self.shape[1:])):
+            if isinstance(ikey, slice):
                 # step is always positive. see indexing.decompose_indexer
-                start, stop, step = k.indices(n)
+                start, stop, step = ikey.indices(size)
                 np_inds.append(slice(None, None, step))
-            elif is_scalar(k):
+            elif is_scalar(ikey):
                 # windowed operations will always return an array
                 # we will have to squeeze it later
-                squeeze_axis.append(-(2 - i))
-                start = k
-                stop = k + 1
+                squeeze_axis.append(-(2 - iii))
+                start = ikey
+                stop = ikey + 1
             else:
-                start, stop = np.min(k), np.max(k) + 1
-                np_inds.append(k - start)
+                start, stop = np.min(ikey), np.max(ikey) + 1
+                np_inds.append(ikey - start)
             window.append((start, stop))
 
         if isinstance(key[1], np.ndarray) and isinstance(key[2], np.ndarray):
@@ -144,8 +148,6 @@ class RasterioArrayWrapper(BackendArray):
         return band_key, tuple(window), tuple(squeeze_axis), tuple(np_inds)
 
     def _getitem(self, key):
-        from rasterio.vrt import WarpedVRT
-
         band_key, window, squeeze_axis, np_inds = self._get_indexer(key)
 
         if not band_key or any(start == stop for (start, stop) in window):
@@ -197,14 +199,14 @@ def _parse_envi(meta):
 
     """
 
-    def parsevec(s):
-        return np.fromstring(s.strip("{}"), dtype="float", sep=",")
+    def parsevec(value):
+        return np.fromstring(value.strip("{}"), dtype="float", sep=",")
 
-    def default(s):
-        return s.strip("{}")
+    def default(value):
+        return value.strip("{}")
 
     parse = {"wavelength": parsevec, "fwhm": parsevec}
-    parsed_meta = {k: parse.get(k, default)(v) for k, v in meta.items()}
+    parsed_meta = {key: parse.get(key, default)(value) for key, value in meta.items()}
     return parsed_meta
 
 
@@ -228,6 +230,7 @@ def _parse_tag(key, value):
     if value.startswith("{") and value.endswith("}"):
         try:
             new_val = np.fromstring(value.strip("{}"), dtype="float", sep=",")
+            # pylint: disable=len-as-condition
             value = new_val if len(new_val) else _to_numeric(value)
         except ValueError:
             value = _to_numeric(value)
@@ -294,6 +297,7 @@ def _load_netcdf_1d_coords(tags):
         dim_def = tags.get(f"NETCDF_DIM_{dim_name}_DEF")
         if not dim_def:
             continue
+        # pylint: disable=unused-variable
         dim_size, dim_dtype = dim_def.strip("{}").split(",")
         dim_dtype = NETCDF_DTYPE_MAP.get(int(dim_dtype), object)
         dim_values = tags[f"NETCDF_DIM_{dim_name}_VALUES"].strip("{}")
@@ -356,6 +360,7 @@ def _get_rasterio_attrs(riods):
     """
     Get rasterio specific attributes
     """
+    # pylint: disable=too-many-branches
     # Add rasterio attributes
     attrs = _parse_tags(riods.tags(1))
     if hasattr(riods, "nodata") and riods.nodata is not None:
@@ -465,13 +470,13 @@ def _parse_driver_tags(riods, attrs, coords):
     if driver in parsers:
         meta = parsers[driver](riods.tags(ns=driver))
 
-        for k, v in meta.items():
+        for key, value in meta.items():
             # Add values as coordinates if they match the band count,
             # as attributes otherwise
-            if isinstance(v, (list, np.ndarray)) and len(v) == riods.count:
-                coords[k] = ("band", np.asarray(v))
+            if isinstance(value, (list, np.ndarray)) and len(value) == riods.count:
+                coords[key] = ("band", np.asarray(value))
             else:
-                attrs[k] = v
+                attrs[key] = value
 
 
 def _load_subdatasets(
@@ -493,7 +498,7 @@ def _load_subdatasets(
     subdataset_filter = None
     if any((group, variable)):
         subdataset_filter = build_subdataset_filter(group, variable)
-    for iii, subdataset in enumerate(riods.subdatasets):
+    for subdataset in riods.subdatasets:
         if subdataset_filter is not None and not subdataset_filter.match(subdataset):
             continue
         with rasterio.open(subdataset) as rds:
@@ -528,6 +533,7 @@ def _prepare_dask(result, riods, filename, chunks):
     """
     Prepare the data for dask computations
     """
+    # pylint: disable=import-outside-toplevel
     from dask.base import tokenize
 
     # augment the token with the file modification time
@@ -559,6 +565,26 @@ def _prepare_dask(result, riods, filename, chunks):
     return result.chunk(chunks, name_prefix=name_prefix, token=token)
 
 
+def _handle_encoding(result, mask_and_scale, masked, da_name):
+    """
+    Make sure encoding handled properly
+    """
+    if mask_and_scale:
+        if "scale_factor" in result.attrs:
+            variables.pop_to(
+                result.attrs, result.encoding, "scale_factor", name=da_name
+            )
+        if "add_offset" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "add_offset", name=da_name)
+    if masked:
+        if "_FillValue" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "_FillValue", name=da_name)
+        if "missing_value" in result.attrs:
+            variables.pop_to(
+                result.attrs, result.encoding, "missing_value", name=da_name
+            )
+
+
 def open_rasterio(
     filename,
     parse_coordinates=None,
@@ -572,6 +598,7 @@ def open_rasterio(
     default_name=None,
     **open_kwargs,
 ):
+    # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     """Open a file with rasterio (experimental).
 
     This should work with any file that rasterio can open (most often:
@@ -767,20 +794,7 @@ def open_rasterio(
         attrs["_FillValue"] = result.dtype.type(attrs["_FillValue"])
 
     # handle encoding
-    if mask_and_scale:
-        if "scale_factor" in result.attrs:
-            variables.pop_to(
-                result.attrs, result.encoding, "scale_factor", name=da_name
-            )
-        if "add_offset" in result.attrs:
-            variables.pop_to(result.attrs, result.encoding, "add_offset", name=da_name)
-    if masked:
-        if "_FillValue" in result.attrs:
-            variables.pop_to(result.attrs, result.encoding, "_FillValue", name=da_name)
-        if "missing_value" in result.attrs:
-            variables.pop_to(
-                result.attrs, result.encoding, "missing_value", name=da_name
-            )
+    _handle_encoding(result, mask_and_scale, masked, da_name)
 
     # Affine transformation matrix (always available)
     # This describes coefficients mapping pixel coordinates to CRS

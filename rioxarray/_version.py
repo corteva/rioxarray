@@ -1,2 +1,2 @@
-# -*- coding: utf-8 -*-
+"""rioxarray version"""
 __version__ = "0.1.2.dev0"
