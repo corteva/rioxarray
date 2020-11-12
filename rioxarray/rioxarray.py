@@ -400,15 +400,16 @@ class XRasterBase(object):
         if hasattr(self._obj, "data_vars"):
             grid_mappings = set()
             for var in self._obj.data_vars:
-                if (
-                    self.x_dim in self._obj[var].dims
-                    and self.y_dim in self._obj[var].dims
-                ):
-                    try:
-                        grid_mapping = self._obj[var].attrs["grid_mapping"]
-                        grid_mappings.add(grid_mapping)
-                    except KeyError:
-                        pass
+                try:
+                    self._obj[var].rio.x_dim
+                    self._obj[var].rio.y_dim
+                except DimensionError:
+                    continue
+                try:
+                    grid_mapping = self._obj[var].attrs["grid_mapping"]
+                    grid_mappings.add(grid_mapping)
+                except KeyError:
+                    pass
             if len(grid_mappings) > 1:
                 raise RioXarrayError("Multiple grid mappings exist.")
         return grid_mapping
@@ -432,15 +433,15 @@ class XRasterBase(object):
         data_obj = self._get_obj(inplace=inplace)
         if hasattr(data_obj, "data_vars"):
             for var in data_obj.data_vars:
-                if (
-                    self.x_dim in data_obj[var].dims
-                    and self.y_dim in data_obj[var].dims
-                ):
-                    data_obj[var].rio.update_attrs(
-                        dict(grid_mapping=grid_mapping_name), inplace=True
-                    ).rio.set_spatial_dims(
-                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-                    )
+                try:
+                    x_dim = data_obj[var].rio.x_dim
+                    y_dim = data_obj[var].rio.y_dim
+                except DimensionError:
+                    continue
+
+                data_obj[var].rio.update_attrs(
+                    dict(grid_mapping=grid_mapping_name), inplace=True
+                ).rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
         return data_obj.rio.update_attrs(
             dict(grid_mapping=grid_mapping_name), inplace=True
         )

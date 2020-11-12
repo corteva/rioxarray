@@ -1590,6 +1590,17 @@ def test_write_crs_cf():
     assert test_da.spatial_ref.attrs["grid_mapping_name"] == "latitude_longitude"
 
 
+def test_write_crs__missing_geospatial_dims():
+    test_da = xarray.DataArray(
+        [1],
+        name="data",
+        dims=("time",),
+        coords={"time": [1]},
+    )
+    assert test_da.copy().rio.write_crs(3857).rio.crs.to_epsg() == 3857
+    assert test_da.to_dataset().rio.write_crs(3857).rio.crs.to_epsg() == 3857
+
+
 def test_read_crs_cf():
     test_da = xarray.DataArray(1)
     test_da = test_da.rio.write_crs(4326)

@@ -5,6 +5,7 @@ Latest
 ------
 - ENH: Added `rio.estimate_utm_crs` (issue #181)
 - ENH: Add support for merging datasets with different CRS (issue #173)
+- BUG: Allow `rio.write_crs` when spatial dimensions not found (pull #186)
 
 0.1.1
 ------
