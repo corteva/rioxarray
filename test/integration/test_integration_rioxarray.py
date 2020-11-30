@@ -25,7 +25,7 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.rioxarray import _make_coords, add_spatial_ref, add_xy_grid_meta
+from rioxarray.rioxarray import _make_coords
 from test.conftest import (
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -1552,7 +1552,7 @@ def test_reproject_transform_missing_shape():
     assert reprojected.rio.transform() == affine
 
 
-class CustomCRS(object):
+class CustomCRS:
     @property
     def wkt(self):
         return CRS.from_epsg(4326).to_wkt()
@@ -2168,16 +2168,6 @@ def test_grid_mapping__change(open_func):
 def test_grid_mapping_default():
     xarray.Dataset().rio.grid_mapping == "spatial_ref"
     xarray.DataArray().rio.grid_mapping == "spatial_ref"
-
-
-def test_add_spatial_ref_warning():
-    with pytest.raises(RuntimeError):
-        add_spatial_ref(xarray.Dataset(), "epsg:4326", "spatial_ref")
-
-
-def test_add_xy_grid_meta_warning():
-    with pytest.raises(RuntimeError):
-        add_xy_grid_meta({})
 
 
 def test_estimate_utm_crs():

@@ -1,3 +1,8 @@
+"""
+This module allows you to merge xarray Datasets/DataArrays
+geospatially with the `rasterio.merge` module.
+"""
+
 from typing import Callable, Iterable, Optional, Tuple, Union
 
 import numpy
@@ -15,6 +20,8 @@ class RasterioDatasetDuck:
     the xarray.DataArray is a rasterio Dataset.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, xds: DataArray):
         self._xds = xds
         self.bounds = xds.rio.bounds(recalc=True)
@@ -27,6 +34,7 @@ class RasterioDatasetDuck:
         self.transform = xds.rio.transform(recalc=True)
 
     def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.array:
+        # pylint: disable=unused-argument
         """
         This method is meant to be used by the rasterio.merge.merge function.
         """
@@ -107,14 +115,16 @@ def merge_arrays(
     :obj:`xarray.DataArray`:
         The geospatially merged data.
     """
-
     input_kwargs = dict(
         bounds=bounds, res=res, nodata=nodata, precision=precision, method=method
     )
+
     if crs is None:
         crs = dataarrays[0].rio.crs
     if res is None:
         res = tuple(abs(res_val) for res_val in dataarrays[0].rio.resolution())
+
+    # prepare the duck arrays
     rioduckarrays = []
     for dataarray in dataarrays:
         da_res = tuple(abs(res_val) for res_val in dataarray.rio.resolution())
@@ -126,29 +136,35 @@ def merge_arrays(
             )
         else:
             rioduckarrays.append(RasterioDatasetDuck(dataarray))
+
+    # use rasterio to merge
     merged_data, merged_transform = _rio_merge(
         rioduckarrays,
         **{key: val for key, val in input_kwargs.items() if val is not None},
     )
-    merged_shape = merged_data.shape
+
+    # generate merged data array
     representative_array = rioduckarrays[0]._xds
     if parse_coordinates:
         coords = _make_coords(
-            representative_array, merged_transform, merged_shape[-1], merged_shape[-2]
+            representative_array,
+            merged_transform,
+            merged_data.shape[-1],
+            merged_data.shape[-2],
         )
     else:
         coords = _get_nonspatial_coords(representative_array)
 
-    out_attrs = representative_array.attrs
     xda = DataArray(
         name=representative_array.name,
         data=merged_data,
         coords=coords,
         dims=tuple(representative_array.dims),
-        attrs=out_attrs,
+        attrs=representative_array.attrs,
     )
-    out_nodata = nodata if nodata is not None else representative_array.rio.nodata
-    xda.rio.write_nodata(out_nodata, inplace=True)
+    xda.rio.write_nodata(
+        nodata if nodata is not None else representative_array.rio.nodata, inplace=True
+    )
     xda.rio.write_crs(representative_array.rio.crs, inplace=True)
     xda.rio.write_transform(merged_transform, inplace=True)
     return xda

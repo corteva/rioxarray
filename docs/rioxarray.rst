@@ -21,10 +21,15 @@ rioxarray.show_versions
 .. autofunction:: rioxarray.show_versions
 
 
-rioxarray.rioxarray module
+rioxarray `rio` accessors
 --------------------------
 
-.. automodule:: rioxarray.rioxarray
+.. automodule:: rioxarray.raster_array
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: rioxarray.raster_dataset
     :members:
     :undoc-members:
     :show-inheritance:
