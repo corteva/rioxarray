@@ -205,8 +205,6 @@
         <span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">unsigned</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="kn">import</span> <span class="n">WarpedVRT</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">manager</span> <span class="o">=</span> <span class="n">manager</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">lock</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">masked</span> <span class="o">=</span> <span class="n">masked</span> <span class="ow">or</span> <span class="n">mask_and_scale</span>
@@ -240,10 +238,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Data type of the array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shape of the array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
 
     <span class="k">def</span> <span class="nf">_get_indexer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
@@ -282,20 +286,20 @@
         <span class="c1"># but other dims can only be windowed</span>
         <span class="n">window</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">squeeze_axis</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="p">(</span><span class="n">ikey</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ikey</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
                 <span class="c1"># step is always positive. see indexing.decompose_indexer</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">ikey</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
                 <span class="n">np_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">step</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">is_scalar</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">is_scalar</span><span class="p">(</span><span class="n">ikey</span><span class="p">):</span>
                 <span class="c1"># windowed operations will always return an array</span>
                 <span class="c1"># we will have to squeeze it later</span>
-                <span class="n">squeeze_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">i</span><span class="p">))</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">k</span>
-                <span class="n">stop</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">squeeze_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">iii</span><span class="p">))</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">ikey</span>
+                <span class="n">stop</span> <span class="o">=</span> <span class="n">ikey</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">np_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ikey</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ikey</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">np_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ikey</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
             <span class="n">window</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -305,8 +309,6 @@
         <span class="k">return</span> <span class="n">band_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">window</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">squeeze_axis</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np_inds</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_getitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="kn">import</span> <span class="n">WarpedVRT</span>
-
         <span class="n">band_key</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">squeeze_axis</span><span class="p">,</span> <span class="n">np_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_indexer</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">band_key</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">start</span> <span class="o">==</span> <span class="n">stop</span> <span class="k">for</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span> <span class="ow">in</span> <span class="n">window</span><span class="p">):</span>
@@ -358,14 +360,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">parsevec</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">parsevec</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">parse</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;wavelength&quot;</span><span class="p">:</span> <span class="n">parsevec</span><span class="p">,</span> <span class="s2">&quot;fwhm&quot;</span><span class="p">:</span> <span class="n">parsevec</span><span class="p">}</span>
-    <span class="n">parsed_meta</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">parse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">default</span><span class="p">)(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">parsed_meta</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">parse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="k">return</span> <span class="n">parsed_meta</span>
 
 
@@ -389,6 +391,7 @@
     <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">new_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="c1"># pylint: disable=len-as-condition</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">new_val</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_val</span><span class="p">)</span> <span class="k">else</span> <span class="n">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -455,6 +458,7 @@
         <span class="n">dim_def</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">dim_name</span><span class="si">}</span><span class="s2">_DEF&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dim_def</span><span class="p">:</span>
             <span class="k">continue</span>
+        <span class="c1"># pylint: disable=unused-variable</span>
         <span class="n">dim_size</span><span class="p">,</span> <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">dim_def</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
         <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">NETCDF_DTYPE_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dim_dtype</span><span class="p">),</span> <span class="nb">object</span><span class="p">)</span>
         <span class="n">dim_values</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">dim_name</span><span class="si">}</span><span class="s2">_VALUES&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -517,6 +521,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get rasterio specific attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pylint: disable=too-many-branches</span>
     <span class="c1"># Add rasterio attributes</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -626,13 +631,13 @@
     <span class="k">if</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">parsers</span><span class="p">:</span>
         <span class="n">meta</span> <span class="o">=</span> <span class="n">parsers</span><span class="p">[</span><span class="n">driver</span><span class="p">](</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="n">ns</span><span class="o">=</span><span class="n">driver</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Add values as coordinates if they match the band count,</span>
             <span class="c1"># as attributes otherwise</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
-                <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
+                <span class="n">coords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
 
 <span class="k">def</span> <span class="nf">_load_subdatasets</span><span class="p">(</span>
@@ -654,7 +659,7 @@
     <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)):</span>
         <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="n">build_subdataset_filter</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">subdataset_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">subdataset_filter</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">subdataset</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">subdataset</span><span class="p">)</span> <span class="k">as</span> <span class="n">rds</span><span class="p">:</span>
@@ -689,6 +694,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare the data for dask computations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pylint: disable=import-outside-toplevel</span>
     <span class="kn">from</span> <span class="nn">dask.base</span> <span class="kn">import</span> <span class="n">tokenize</span>
 
     <span class="c1"># augment the token with the file modification time</span>
@@ -720,6 +726,26 @@
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">name_prefix</span><span class="o">=</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure encoding handled properly</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mask_and_scale</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;scale_factor&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;add_offset&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;_FillValue&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;missing_value&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
+            <span class="p">)</span>
+
+
 <div class="viewcode-block" id="open_rasterio"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.open_rasterio">[docs]</a><span class="k">def</span> <span class="nf">open_rasterio</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">,</span>
     <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -733,6 +759,7 @@
     <span class="n">default_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
+    <span class="c1"># pylint: disable=too-many-statements,too-many-locals,too-many-branches</span>
     <span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
 
 <span class="sd">    This should work with any file that rasterio can open (most often:</span>
@@ -928,20 +955,7 @@
         <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">])</span>
 
     <span class="c1"># handle encoding</span>
-    <span class="k">if</span> <span class="n">mask_and_scale</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;scale_factor&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;add_offset&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;_FillValue&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;missing_value&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
-            <span class="p">)</span>
+    <span class="n">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">)</span>
 
     <span class="c1"># Affine transformation matrix (always available)</span>
     <span class="c1"># This describes coefficients mapping pixel coordinates to CRS</span>

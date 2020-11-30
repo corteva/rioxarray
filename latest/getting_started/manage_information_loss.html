@@ -444,15 +444,15 @@ div.rendered_html tbody tr:hover {
 <p>Sometimes, you can lose important information from your dataset when performing operations. You will likely want to keep track of the attributes, <code class="docutils literal notranslate"><span class="pre">nodata</span></code>, and <code class="docutils literal notranslate"><span class="pre">CRS</span></code>.</p>
 <p>API Reference:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs"><span class="std std-ref">rio.update_attrs()</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata</span></a></p></li>
-<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
+<li><p>rio.to_raster()</p></li>
+<li><p>rio.write_crs()</p></li>
+<li><p>rio.write_transform()</p></li>
+<li><p>rio.update_attrs()</p></li>
+<li><p>rio.crs</p></li>
+<li><p>rio.nodata</p></li>
+<li><p>rio.encoded_nodata</p></li>
+<li><p>rio.write_nodata</p></li>
+<li><p>rio.transform()</p></li>
 </ul>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">write_transform</span></code> is only needed if you are not saving the x,y coordinates. It is for GDAL to be able to read in the transform without needing the original coordinates and is useful if you read in the file with <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>.</p>
 <div class="nbinput nblast docutils container">

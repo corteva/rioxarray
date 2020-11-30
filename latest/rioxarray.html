@@ -98,7 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-open-rasterio">rioxarray.open_rasterio</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-merge-module">rioxarray.merge module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-show-versions">rioxarray.show_versions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.rioxarray">rioxarray.rioxarray module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.raster_array">rioxarray <cite>rio</cite> accessors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a></li>
 </ul>
 </li>
@@ -354,23 +354,23 @@ If not set, uses the nodata value in the first input Dataset.</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-rioxarray.rioxarray">
-<span id="rioxarray-rioxarray-module"></span><h2>rioxarray.rioxarray module<a class="headerlink" href="#module-rioxarray.rioxarray" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-rioxarray.raster_array">
+<span id="rioxarray-rio-accessors"></span><h2>rioxarray <cite>rio</cite> accessors<a class="headerlink" href="#module-rioxarray.raster_array" title="Permalink to this headline">¶</a></h2>
 <p>This module is an extension for xarray to provide rasterio capabilities
-to xarray datasets/dataarrays.</p>
+to xarray dataarrays.</p>
 <p>Credits: The <cite>reproject</cite> functionality was adopted from <a class="reference external" href="https://github.com/opendatacube/datacube-core">https://github.com/opendatacube/datacube-core</a>  # noqa
 Source file:
 - <a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py">https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py</a>  # noqa
 datacube is licensed under the Apache License, Version 2.0:
 - <a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE">https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE</a>  # noqa</p>
 <dl class="py class">
-<dt id="rioxarray.rioxarray.RasterArray">
-<em class="property">class </em><code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">RasterArray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xarray_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#rioxarray.rioxarray.XRasterBase" title="rioxarray.rioxarray.XRasterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></a></p>
+<dt id="rioxarray.raster_array.RasterArray">
+<em class="property">class </em><code class="sig-prename descclassname">rioxarray.raster_array.</code><code class="sig-name descname">RasterArray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xarray_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></p>
 <p>This is the GIS extension for <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.clip">
-<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">geometries</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">all_touched</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.clip">
+<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">geometries</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">all_touched</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by geojson like geometry dicts.</p>
 <p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
 <p class="rubric">Examples</p>
@@ -413,8 +413,8 @@ False by default.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.clip_box">
-<code class="sig-name descname">clip_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">auto_expand</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">auto_expand_limit</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.clip_box" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.clip_box">
+<code class="sig-name descname">clip_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">auto_expand</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">auto_expand_limit</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.clip_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clip the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by a bounding box.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -438,14 +438,14 @@ an exception.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.encoded_nodata">
-<em class="property">property </em><code class="sig-name descname">encoded_nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.encoded_nodata" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.encoded_nodata">
+<em class="property">property </em><code class="sig-name descname">encoded_nodata</code><a class="headerlink" href="#rioxarray.raster_array.RasterArray.encoded_nodata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the encoded nodata value for the dataset if encoded.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.interpolate_na">
-<code class="sig-name descname">interpolate_na</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'nearest'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.interpolate_na" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.interpolate_na">
+<code class="sig-name descname">interpolate_na</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'nearest'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.interpolate_na" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method uses scipy.interpolate.griddata to interpolate missing data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -461,14 +461,14 @@ an exception.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.nodata">
-<em class="property">property </em><code class="sig-name descname">nodata</code><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.nodata" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.nodata">
+<em class="property">property </em><code class="sig-name descname">nodata</code><a class="headerlink" href="#rioxarray.raster_array.RasterArray.nodata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the nodata value for the dataset.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.pad_box">
-<code class="sig-name descname">pad_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">constant_values</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_box" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.pad_box">
+<code class="sig-name descname">pad_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">constant_values</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.pad_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> to a bounding box</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 0.0.29.</span></p>
@@ -494,8 +494,8 @@ set, and np.nan otherwise.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.pad_xy">
-<code class="sig-name descname">pad_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">constant_values</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.pad_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.pad_xy" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.pad_xy">
+<code class="sig-name descname">pad_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">constant_values</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.pad_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.pad_xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad the array to x,y bounds.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 0.0.29.</span></p>
@@ -521,8 +521,8 @@ set, and np.nan otherwise.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.reproject">
-<code class="sig-name descname">reproject</code><span class="sig-paren">(</span><em class="sig-param">dst_crs</em>, <em class="sig-param">resolution=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.reproject">
+<code class="sig-name descname">reproject</code><span class="sig-paren">(</span><em class="sig-param">dst_crs</em>, <em class="sig-param">resolution=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects</p>
 <p>Powered by <cite>rasterio.warp.reproject</cite></p>
 <div class="admonition note">
@@ -560,8 +560,8 @@ together with resolution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.reproject_match">
-<code class="sig-name descname">reproject_match</code><span class="sig-paren">(</span><em class="sig-param">match_data_array</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.reproject_match">
+<code class="sig-name descname">reproject_match</code><span class="sig-paren">(</span><em class="sig-param">match_data_array</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject a DataArray object to match the resolution, projection,
 and region of another DataArray.</p>
 <p>Powered by <cite>rasterio.warp.reproject</cite></p>
@@ -590,8 +590,8 @@ match_data_array.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.set_nodata">
-<code class="sig-name descname">set_nodata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_nodata</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.set_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.set_nodata" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.set_nodata">
+<code class="sig-name descname">set_nodata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_nodata</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.set_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.set_nodata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the nodata value for the DataArray without modifying
 the data array.</p>
 <dl class="field-list simple">
@@ -611,8 +611,8 @@ the data array.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.to_raster">
-<code class="sig-name descname">to_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raster_path</span></em>, <em class="sig-param"><span class="n">driver</span><span class="o">=</span><span class="default_value">'GTiff'</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">windowed</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">recalc_transform</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">profile_kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.to_raster">
+<code class="sig-name descname">to_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raster_path</span></em>, <em class="sig-param"><span class="n">driver</span><span class="o">=</span><span class="default_value">'GTiff'</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">windowed</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">recalc_transform</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">profile_kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export the DataArray to a raster file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -635,8 +635,8 @@ are ignored.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterArray.write_nodata">
-<code class="sig-name descname">write_nodata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_nodata</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_array.RasterArray.write_nodata">
+<code class="sig-name descname">write_nodata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_nodata</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the nodata to the DataArray in a CF compliant manner.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -657,14 +657,16 @@ If input_nodata is None, it will remove the _FillValue attribute.</p></li>
 
 </dd></dl>
 
+<span class="target" id="module-rioxarray.raster_dataset"></span><p>This module is an extension for xarray to provide rasterio capabilities
+to xarray datasets.</p>
 <dl class="py class">
-<dt id="rioxarray.rioxarray.RasterDataset">
-<em class="property">class </em><code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">RasterDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xarray_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#rioxarray.rioxarray.XRasterBase" title="rioxarray.rioxarray.XRasterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></a></p>
+<dt id="rioxarray.raster_dataset.RasterDataset">
+<em class="property">class </em><code class="sig-prename descclassname">rioxarray.raster_dataset.</code><code class="sig-name descname">RasterDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xarray_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.rioxarray.XRasterBase</span></code></p>
 <p>This is the GIS extension for <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.clip">
-<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">geometries</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">all_touched</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.clip">
+<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">geometries</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">all_touched</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by geojson like geometry dicts.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -712,8 +714,8 @@ False by default.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.clip_box">
-<code class="sig-name descname">clip_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">auto_expand</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">auto_expand_limit</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.clip_box" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.clip_box">
+<code class="sig-name descname">clip_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em>, <em class="sig-param"><span class="n">auto_expand</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">auto_expand_limit</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clip the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by a bounding box.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -742,15 +744,15 @@ an exception.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.crs">
-<em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.crs" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.crs">
+<em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.crs" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>:
 Retrieve projection from <cite>xarray.Dataset</cite></p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.interpolate_na">
-<code class="sig-name descname">interpolate_na</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'nearest'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.interpolate_na" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.interpolate_na">
+<code class="sig-name descname">interpolate_na</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'nearest'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.interpolate_na" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method uses <cite>scipy.interpolate.griddata</cite> to interpolate missing data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -766,8 +768,8 @@ Retrieve projection from <cite>xarray.Dataset</cite></p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.pad_box">
-<code class="sig-name descname">pad_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.pad_box" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.pad_box">
+<code class="sig-name descname">pad_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.pad_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.pad_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad the <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> to a bounding box.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -793,8 +795,8 @@ same coordinates.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.reproject">
-<code class="sig-name descname">reproject</code><span class="sig-paren">(</span><em class="sig-param">dst_crs</em>, <em class="sig-param">resolution=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.reproject">
+<code class="sig-name descname">reproject</code><span class="sig-paren">(</span><em class="sig-param">dst_crs</em>, <em class="sig-param">resolution=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> objects</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -831,8 +833,8 @@ together with resolution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.reproject_match">
-<code class="sig-name descname">reproject_match</code><span class="sig-paren">(</span><em class="sig-param">match_data_array</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.reproject_match" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.reproject_match">
+<code class="sig-name descname">reproject_match</code><span class="sig-paren">(</span><em class="sig-param">match_data_array</em>, <em class="sig-param">resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject a Dataset object to match the resolution, projection,
 and region of another DataArray.</p>
 <div class="admonition note">
@@ -860,8 +862,8 @@ reprojected to match match_data_array.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.to_raster">
-<code class="sig-name descname">to_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raster_path</span></em>, <em class="sig-param"><span class="n">driver</span><span class="o">=</span><span class="default_value">'GTiff'</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">windowed</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">recalc_transform</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">profile_kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.to_raster">
+<code class="sig-name descname">to_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raster_path</span></em>, <em class="sig-param"><span class="n">driver</span><span class="o">=</span><span class="default_value">'GTiff'</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">windowed</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">recalc_transform</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">profile_kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export the Dataset to a raster file. Only works with 2D data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -884,8 +886,8 @@ are ignored.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="rioxarray.rioxarray.RasterDataset.vars">
-<em class="property">property </em><code class="sig-name descname">vars</code><a class="headerlink" href="#rioxarray.rioxarray.RasterDataset.vars" title="Permalink to this definition">¶</a></dt>
+<dt id="rioxarray.raster_dataset.RasterDataset.vars">
+<em class="property">property </em><code class="sig-name descname">vars</code><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns non-coordinate varibles</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -894,449 +896,6 @@ are ignored.</p></li>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt id="rioxarray.rioxarray.XRasterBase">
-<em class="property">class </em><code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">XRasterBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xarray_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is the base class for the GIS extensions for xarray</p>
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.bounds">
-<code class="sig-name descname">bounds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">recalc</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.bounds" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the bounds to be recalculated instead of using the
-transform attribute.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>left, bottom, right, top</strong> – Outermost coordinates of the <cite>xarray.DataArray</cite> | <cite>xarray.Dataset</cite>.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.count">
-<em class="property">property </em><code class="sig-name descname">count</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the band count (z dimension size)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.crs">
-<em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.crs" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>:
-Retrieve projection from <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.estimate_utm_crs">
-<code class="sig-name descname">estimate_utm_crs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datum_name</span><span class="o">=</span><span class="default_value">'WGS 84'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.estimate_utm_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.estimate_utm_crs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the estimated UTM CRS based on the bounds of the dataset.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 0.2.</span></p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Requires pyproj 3+</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>datum_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the datum to use in the query. Default is WGS 84.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>rasterio.crs.CRS</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.grid_mapping">
-<em class="property">property </em><code class="sig-name descname">grid_mapping</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>The CF grid_mapping attribute. ‘spatial_ref’ is the default.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.height">
-<em class="property">property </em><code class="sig-name descname">height</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.height" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the height of the dataset (y dimension size)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.isel_window">
-<code class="sig-name descname">isel_window</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.isel_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.isel_window" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use a rasterio.window.Window to select a subset of the data.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Float indices are converted to integers.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>window</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio.window.Window</span></code>) – The window of the dataset to read.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The data in the window.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.resolution">
-<code class="sig-name descname">resolution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">recalc</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.resolution" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the resolution to be recalculated instead of using the
-transform attribute.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>x_resolution, y_resolution</strong> – The resolution of the <cite>xarray.DataArray</cite> | <cite>xarray.Dataset</cite></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.set_attrs">
-<code class="sig-name descname">set_attrs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_attrs</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_attrs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the attributes of the dataset/dataarray and reset
-rioxarray properties to re-search for them.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Modified dataset with new attributes.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.set_crs">
-<code class="sig-name descname">set_crs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_crs</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_crs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the CRS value for the Dataset/DataArray without modifying
-the dataset/data array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dataset with crs attribute.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.set_spatial_dims">
-<code class="sig-name descname">set_spatial_dims</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_dim</span></em>, <em class="sig-param"><span class="n">y_dim</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_spatial_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_spatial_dims" title="Permalink to this definition">¶</a></dt>
-<dd><p>This sets the spatial dimensions of the dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x_dim</strong> (<em>str</em>) – The name of the x dimension.</p></li>
-<li><p><strong>y_dim</strong> (<em>str</em>) – The name of the y dimension.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will modify the dataframe in place.
-Otherwise it will return a modified copy.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dataset with spatial dimensions set.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.shape">
-<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the shape (height, width)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>tuple(int, int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.slice_xy">
-<code class="sig-name descname">slice_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minx</span></em>, <em class="sig-param"><span class="n">miny</span></em>, <em class="sig-param"><span class="n">maxx</span></em>, <em class="sig-param"><span class="n">maxy</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.slice_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.slice_xy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Slice the array by x,y bounds.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>minx</strong> (<em>float</em>) – Minimum bound for x coordinate.</p></li>
-<li><p><strong>miny</strong> (<em>float</em>) – Minimum bound for y coordinate.</p></li>
-<li><p><strong>maxx</strong> (<em>float</em>) – Maximum bound for x coordinate.</p></li>
-<li><p><strong>maxy</strong> (<em>float</em>) – Maximum bound for y coordinate.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The data in the slice.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.transform">
-<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">recalc</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will re-calculate the transform instead of using
-the cached transform.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The affine of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">affine.Afffine</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.transform_bounds">
-<code class="sig-name descname">transform_bounds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dst_crs</span></em>, <em class="sig-param"><span class="n">densify_pts</span><span class="o">=</span><span class="default_value">21</span></em>, <em class="sig-param"><span class="n">recalc</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.transform_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.transform_bounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform bounds from src_crs to dst_crs.</p>
-<p>Optionally densifying the edges (to account for nonlinear transformations
-along these edges) and extracting the outermost bounds.</p>
-<p>Note: this does not account for the antimeridian.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dst_crs</strong> (str, <code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, or dict) – Target coordinate reference system.</p></li>
-<li><p><strong>densify_pts</strong> (<em>uint</em><em>, </em><em>optional</em>) – Number of points to add to each edge to account for nonlinear
-edges produced by the transform process.  Large numbers will produce
-worse performance.  Default: 21 (gdal default).</p></li>
-<li><p><strong>recalc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Will force the bounds to be recalculated instead of using the transform
-attribute.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>left, bottom, right, top</strong> – Outermost coordinates in target coordinate reference system.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.update_attrs">
-<code class="sig-name descname">update_attrs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_attrs</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.update_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.update_attrs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update the attributes of the dataset/dataarray and reset
-rioxarray properties to re-search for them.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes to update with.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Modified dataset with updated attributes.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.width">
-<em class="property">property </em><code class="sig-name descname">width</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.width" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the width of the dataset (x dimension size)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.write_coordinate_system">
-<code class="sig-name descname">write_coordinate_system</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_coordinate_system" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the coordinate system CF metadata.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 0.0.30.</span></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The dataset with the CF coordinate system attributes added.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.write_crs">
-<code class="sig-name descname">write_crs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_mapping_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_crs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_crs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the CRS to the dataset in a CF compliant manner.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_crs</strong> (<em>object</em>) – Anything accepted by <cite>rasterio.crs.CRS.from_user_input</cite>.</p></li>
-<li><p><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the CRS information in.
-Default is the grid_mapping name of the dataset.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Modified dataset with CF compliant CRS information.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.write_grid_mapping">
-<code class="sig-name descname">write_grid_mapping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid_mapping_name</span><span class="o">=</span><span class="default_value">'spatial_ref'</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_grid_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_grid_mapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the CF grid_mapping attribute.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Modified dataset with CF compliant CRS information.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.write_transform">
-<code class="sig-name descname">write_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_mapping_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">inplace</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_transform" title="Permalink to this definition">¶</a></dt>
-<dd><div class="versionadded">
-<p><span class="versionmodified added">New in version 0.0.30.</span></p>
-</div>
-<p>Write the GeoTransform to the dataset where GDAL can read it in.</p>
-<p><a class="reference external" href="https://gdal.org/drivers/raster/netcdf.html#georeference">https://gdal.org/drivers/raster/netcdf.html#georeference</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>transform</strong> (<em>affine.Affine</em><em>, </em><em>optional</em>) – The transform of the dataset. If not provided, it will be calculated.</p></li>
-<li><p><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the transform information in.
-Default is the grid_mapping name of the dataset.</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Modified dataset with Geo Transform written.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.x_dim">
-<em class="property">property </em><code class="sig-name descname">x_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.x_dim" title="Permalink to this definition">¶</a></dt>
-<dd><p>The dimension for the X-axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="rioxarray.rioxarray.XRasterBase.y_dim">
-<em class="property">property </em><code class="sig-name descname">y_dim</code><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.y_dim" title="Permalink to this definition">¶</a></dt>
-<dd><p>The dimension for the Y-axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt id="rioxarray.rioxarray.add_spatial_ref">
-<code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">add_spatial_ref</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_ds</span></em>, <em class="sig-param"><span class="n">dst_crs</span></em>, <em class="sig-param"><span class="n">grid_mapping_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_spatial_ref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_spatial_ref" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="rioxarray.rioxarray.add_xy_grid_meta">
-<code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">add_xy_grid_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#add_xy_grid_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.add_xy_grid_meta" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="rioxarray.rioxarray.affine_to_coords">
-<code class="sig-prename descclassname">rioxarray.rioxarray.</code><code class="sig-name descname">affine_to_coords</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">affine</span></em>, <em class="sig-param"><span class="n">width</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">x_dim</span><span class="o">=</span><span class="default_value">'x'</span></em>, <em class="sig-param"><span class="n">y_dim</span><span class="o">=</span><span class="default_value">'y'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#affine_to_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.affine_to_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate 1d pixel centered coordinates from affine.</p>
-<p>Based on code from the xarray rasterio backend.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>affine</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">affine.Affine</span></code>) – The affine of the grid.</p></li>
-<li><p><strong>width</strong> (<em>int</em>) – The width of the grid.</p></li>
-<li><p><strong>height</strong> (<em>int</em>) – The height of the grid.</p></li>
-<li><p><strong>x_dim</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the X dimension. Default is ‘x’.</p></li>
-<li><p><strong>y_dim</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the Y dimension. Default is ‘y’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dict</strong></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>x and y coordinate arrays.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
