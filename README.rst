@@ -28,9 +28,6 @@ rasterio xarray extension.
 .. image:: https://github.com/corteva/rioxarray/workflows/Tests/badge.svg
     :target: https://github.com/corteva/rioxarray/actions?query=workflow%3ATests
 
-.. image:: https://travis-ci.com/corteva/rioxarray.svg?branch=master
-    :target: https://travis-ci.com/corteva/rioxarray
-
 .. image:: https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true
     :target: https://ci.appveyor.com/project/snowman2/rioxarray
 
