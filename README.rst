@@ -50,9 +50,10 @@ Documentation
 Bugs/Questions
 --------------
 
-- Report bugs/ask questions: https://github.com/corteva/rioxarray/issues
+- Report bugs/feature requests: https://github.com/corteva/rioxarray/issues
+- Ask questions: https://github.com/corteva/rioxarray/discussions
 - Ask developer questions: https://gitter.im/rioxarray/community
-- Ask the community: https://gis.stackexchange.com/questions/tagged/rioxarray
+- Ask questions from the GIS community: https://gis.stackexchange.com/questions/tagged/rioxarray
 
 Credits
 -------
