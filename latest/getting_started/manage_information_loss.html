@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -26,11 +26,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -444,15 +444,15 @@ div.rendered_html tbody tr:hover {
 <p>Sometimes, you can lose important information from your dataset when performing operations. You will likely want to keep track of the attributes, <code class="docutils literal notranslate"><span class="pre">nodata</span></code>, and <code class="docutils literal notranslate"><span class="pre">CRS</span></code>.</p>
 <p>API Reference:</p>
 <ul class="simple">
-<li><p>rio.to_raster()</p></li>
-<li><p>rio.write_crs()</p></li>
-<li><p>rio.write_transform()</p></li>
-<li><p>rio.update_attrs()</p></li>
-<li><p>rio.crs</p></li>
-<li><p>rio.nodata</p></li>
-<li><p>rio.encoded_nodata</p></li>
-<li><p>rio.write_nodata</p></li>
-<li><p>rio.transform()</p></li>
+<li>rio.to_raster()</li>
+<li>rio.write_crs()</li>
+<li>rio.write_transform()</li>
+<li>rio.update_attrs()</li>
+<li>rio.crs</li>
+<li>rio.nodata</li>
+<li>rio.encoded_nodata</li>
+<li>rio.write_nodata</li>
+<li>rio.transform()</li>
 </ul>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">write_transform</span></code> is only needed if you are not saving the x,y coordinates. It is for GDAL to be able to read in the transform without needing the original coordinates and is useful if you read in the file with <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>.</p>
 <div class="nbinput nblast docutils container">
