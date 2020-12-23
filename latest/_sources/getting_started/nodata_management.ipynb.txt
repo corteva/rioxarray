@@ -21,9 +21,9 @@
     "\n",
     "### API Documentation\n",
     "\n",
-    "- [rio.write_nodata()](../rioxarray.rst#rioxarray.rioxarray.RasterArray.write_nodata)\n",
-    "- [rio.nodata](../rioxarray.rst#rioxarray.rioxarray.RasterArray.nodata)\n",
-    "- [rio.encoded_nodata](../rioxarray.rst#rioxarray.rioxarray.RasterArray.encoded_nodata)"
+    "- [rio.write_nodata()](../rioxarray.rst#rioxarray.raster_array.RasterArray.write_nodata)\n",
+    "- [rio.nodata](../rioxarray.rst#rioxarray.raster_array.RasterArray.nodata)\n",
+    "- [rio.encoded_nodata](../rioxarray.rst#rioxarray.raster_array.RasterArray.encoded_nodata)"
    ]
   },
   {
