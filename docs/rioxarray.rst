@@ -24,12 +24,25 @@ rioxarray.show_versions
 rioxarray `rio` accessors
 --------------------------
 
-.. automodule:: rioxarray.raster_array
+rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals.html#extending-xarray>`__
+with the `rio` accessor. The `rio` accessor is activated by importing rioxarray like so:
+
+.. code-block:: python
+
+    import rioxarray
+
+
+.. autoclass:: rioxarray.rioxarray.XRasterBase
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: rioxarray.raster_dataset
+.. autoclass:: rioxarray.raster_array.RasterArray
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: rioxarray.raster_dataset.RasterDataset
     :members:
     :undoc-members:
     :show-inheritance:

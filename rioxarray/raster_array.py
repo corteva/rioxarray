@@ -329,7 +329,7 @@ class RasterArray(XRasterBase):
             raise RioXarrayError("resolution cannot be used with shape or transform.")
         if self.crs is None:
             raise MissingCRS(
-                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+                "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
         src_affine = self.transform(recalc=True)
@@ -669,7 +669,7 @@ class RasterArray(XRasterBase):
         """
         if self.crs is None:
             raise MissingCRS(
-                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+                "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
         crs = CRS.from_wkt(crs_to_wkt(crs)) if crs is not None else self.crs

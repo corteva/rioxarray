@@ -5,6 +5,14 @@ Getting Started
 
 Welcome! This page aims to help you gain a foundational understanding of rioxarray.
 
+rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals.html#extending-xarray>`__
+with the `rio` accessor. The `rio` accessor is activated by importing rioxarray like so:
+
+.. code-block:: python
+
+    import rioxarray
+
+
 You can learn how to `clip`, `merge`, and `reproject` rasters in the :ref:`usage_examples`
 section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
 that as well.
