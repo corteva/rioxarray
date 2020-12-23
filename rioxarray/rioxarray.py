@@ -606,7 +606,8 @@ class XRasterBase:
         if self._x_dim is not None:
             return self._x_dim
         raise DimensionError(
-            "x dimension not found. 'rio.set_spatial_dims()' can address this."
+            "x dimension not found. 'rio.set_spatial_dims()' or "
+            "using 'rename()' to change the dimension name to 'x' can address this."
             f"{_get_data_var_message(self._obj)}"
         )
 
@@ -616,7 +617,8 @@ class XRasterBase:
         if self._y_dim is not None:
             return self._y_dim
         raise DimensionError(
-            "x dimension not found. 'rio.set_spatial_dims()' can address this."
+            "y dimension not found. 'rio.set_spatial_dims()' or "
+            "using 'rename()' to change the dimension name to 'y' can address this."
             f"{_get_data_var_message(self._obj)}"
         )
 
