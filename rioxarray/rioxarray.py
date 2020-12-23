@@ -310,7 +310,7 @@ class XRasterBase:
 
         if data_obj.rio.crs is None:
             raise MissingCRS(
-                "CRS not found. Please set the CRS with 'set_crs()' or 'write_crs()'."
+                "CRS not found. Please set the CRS with 'rio.write_crs()'."
             )
         # add grid mapping coordinate
         data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
@@ -606,7 +606,7 @@ class XRasterBase:
         if self._x_dim is not None:
             return self._x_dim
         raise DimensionError(
-            "x dimension not found. 'set_spatial_dims()' can address this."
+            "x dimension not found. 'rio.set_spatial_dims()' can address this."
             f"{_get_data_var_message(self._obj)}"
         )
 
@@ -616,7 +616,7 @@ class XRasterBase:
         if self._y_dim is not None:
             return self._y_dim
         raise DimensionError(
-            "x dimension not found. 'set_spatial_dims()' can address this."
+            "x dimension not found. 'rio.set_spatial_dims()' can address this."
             f"{_get_data_var_message(self._obj)}"
         )
 
