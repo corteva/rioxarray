@@ -7,9 +7,9 @@ import sys
 import tempfile
 import warnings
 from distutils.version import LooseVersion
+from unittest.mock import patch
 
 import dask.array as da
-import mock
 import numpy as np
 import pytest
 import rasterio
@@ -746,7 +746,7 @@ class TestRasterio:
         with create_tmp_geotiff(
             8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
         ) as (tmp_file, expected):
-            with mock.patch("os.path.getmtime", side_effect=OSError):
+            with patch("os.path.getmtime", side_effect=OSError):
                 with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
                     assert isinstance(actual.data, da.Array)
                     assert_allclose(actual, expected)
