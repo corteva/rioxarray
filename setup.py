@@ -25,7 +25,7 @@ with open("README.rst") as readme_file:
 
 requirements = ["rasterio", "scipy", "xarray", "pyproj>=2.2"]
 
-test_requirements = ["pytest>=3.6", "pytest-cov", "mock", "dask"]
+test_requirements = ["pytest>=3.6", "pytest-cov", "dask"]
 doc_requirements = ["sphinx-click==1.1.0", "nbsphinx", "sphinx_rtd_theme"]
 
 extras_require = {
