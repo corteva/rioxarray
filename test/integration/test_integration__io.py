@@ -9,7 +9,7 @@ import warnings
 from distutils.version import LooseVersion
 from unittest.mock import patch
 
-import dask.array as da
+import dask.array
 import numpy as np
 import pytest
 import rasterio
@@ -661,7 +661,7 @@ class TestRasterio:
         ) as (tmp_file, expected):
             # Chunk at open time
             with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-                assert isinstance(actual.data, da.Array)
+                assert isinstance(actual.data, dask.array.Array)
                 assert "open_rasterio" in actual.data.name
 
                 # do some arithmetic
@@ -748,7 +748,7 @@ class TestRasterio:
         ) as (tmp_file, expected):
             with patch("os.path.getmtime", side_effect=OSError):
                 with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-                    assert isinstance(actual.data, da.Array)
+                    assert isinstance(actual.data, dask.array.Array)
                     assert_allclose(actual, expected)
 
     @pytest.mark.xfail(reason="Network could be problematic")
@@ -760,7 +760,7 @@ class TestRasterio:
             assert actual.shape == (1, 512, 512)
         # make sure chunking works
         with xr.open_rasterio(url, chunks=(1, 256, 256)) as actual:
-            assert isinstance(actual.data, da.Array)
+            assert isinstance(actual.data, dask.array.Array)
 
     def test_rasterio_environment(self):
         with create_tmp_geotiff() as (tmp_file, expected):
@@ -785,11 +785,11 @@ class TestRasterio:
                     # Value of single pixel in center of image
                     lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
                     expected_val = next(vrt.sample([(lon, lat)]))
-                    with xr.open_rasterio(vrt) as da:
-                        actual_shape = (da.sizes["x"], da.sizes["y"])
-                        actual_crs = da.crs
-                        actual_res = da.res
-                        actual_val = da.sel(dict(x=lon, y=lat), method="nearest").data
+                    with xr.open_rasterio(vrt) as rds:
+                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
+                        actual_crs = rds.crs
+                        actual_res = rds.res
+                        actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
 
                         assert actual_crs == expected_crs
                         assert actual_res == expected_res
@@ -813,10 +813,10 @@ class TestRasterio:
                     expected_shape = (vrt.width, vrt.height)
                     expected_res = vrt.res
                     expected_transform = vrt.transform
-                    with xr.open_rasterio(vrt) as da:
-                        actual_shape = (da.sizes["x"], da.sizes["y"])
-                        actual_res = da.res
-                        actual_transform = Affine(*da.transform)
+                    with xr.open_rasterio(vrt) as rds:
+                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
+                        actual_res = rds.res
+                        actual_transform = Affine(*rds.transform)
                         assert actual_res == expected_res
                         assert actual_shape == expected_shape
                         assert actual_transform == expected_transform
@@ -841,11 +841,11 @@ class TestRasterio:
                     # Value of single pixel in center of image
                     lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
                     expected_val = next(vrt.sample([(lon, lat)]))
-                    with xr.open_rasterio(vrt) as da:
-                        actual_shape = (da.sizes["x"], da.sizes["y"])
-                        actual_crs = da.crs
-                        actual_res = da.res
-                        actual_val = da.sel(dict(x=lon, y=lat), method="nearest").data
+                    with xr.open_rasterio(vrt) as rds:
+                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
+                        actual_crs = rds.crs
+                        actual_res = rds.res
+                        actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
 
                         assert_equal(actual_shape, expected_shape)
                         assert_equal(actual_crs, expected_crs)
@@ -860,8 +860,8 @@ class TestRasterio:
             with rasterio.open(tmp_file) as src:
                 assert src.crs is None
                 with rasterio.vrt.WarpedVRT(src, src_crs=src_crs) as vrt:
-                    with rioxarray.open_rasterio(vrt) as da:
-                        assert da.rio.crs == src_crs
+                    with rioxarray.open_rasterio(vrt) as rds:
+                        assert rds.rio.crs == src_crs
 
 
 def test_open_cog():
