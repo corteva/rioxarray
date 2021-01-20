@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html4" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>rioxarray.raster_array &mdash; rioxarray 0.1.2.dev0 documentation</title>
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -50,7 +53,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> rioxarray
+            <a href="../../index.html" class="icon icon-home"> rioxarray
           
 
           
@@ -135,6 +138,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -163,11 +168,11 @@
 <span class="sd">This module is an extension for xarray to provide rasterio capabilities</span>
 <span class="sd">to xarray dataarrays.</span>
 
-<span class="sd">Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core  # noqa</span>
+<span class="sd">Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core # noqa: E501</span>
 <span class="sd">Source file:</span>
-<span class="sd">- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py  # noqa</span>
+<span class="sd">- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py  # noqa: E501</span>
 <span class="sd">datacube is licensed under the Apache License, Version 2.0:</span>
-<span class="sd">- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa</span>
+<span class="sd">- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa: E501</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -189,10 +194,8 @@
     <span class="n">OneDimensionalRaster</span><span class="p">,</span>
     <span class="n">RioXarrayError</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rioxarray.raster_writer</span> <span class="kn">import</span> <span class="n">FILL_VALUE_NAMES</span><span class="p">,</span> <span class="n">UNWANTED_RIO_ATTRS</span><span class="p">,</span> <span class="n">RasterioWriter</span>
 <span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span><span class="p">,</span> <span class="n">_get_data_var_message</span><span class="p">,</span> <span class="n">_make_coords</span>
-
-<span class="n">FILL_VALUE_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_value&quot;</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span>
-<span class="n">UNWANTED_RIO_ATTRS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;nodatavals&quot;</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="s2">&quot;is_tiled&quot;</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">):</span>
@@ -274,58 +277,6 @@
         <span class="o">**</span><span class="n">resolution_or_width_height</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span>
-
-
-<span class="k">def</span> <span class="nf">_write_metatata_to_raster</span><span class="p">(</span><span class="n">raster_handle</span><span class="p">,</span> <span class="n">xarray_dataset</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Write the metadata stored in the xarray object to raster metadata</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span> <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="o">**</span><span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">tags</span><span class="p">}</span>
-
-    <span class="c1"># write scales and offsets</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">raster_handle</span><span class="o">.</span><span class="n">scales</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">raster_handle</span><span class="o">.</span><span class="n">scales</span> <span class="o">=</span> <span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">],)</span> <span class="o">*</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">raster_handle</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">raster_handle</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;add_offset&quot;</span><span class="p">],)</span> <span class="o">*</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-    <span class="c1"># filter out attributes that should be written in a different location</span>
-    <span class="n">skip_tags</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">UNWANTED_RIO_ATTRS</span>
-        <span class="o">+</span> <span class="n">FILL_VALUE_NAMES</span>
-        <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">,</span> <span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="c1"># this is for when multiple values are used</span>
-    <span class="c1"># in this case, it will be stored in the raster description</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">skip_tags</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">,)</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip_tags</span><span class="p">}</span>
-    <span class="n">raster_handle</span><span class="o">.</span><span class="n">update_tags</span><span class="p">(</span><span class="o">**</span><span class="n">tags</span><span class="p">)</span>
-
-    <span class="c1"># write band name information</span>
-    <span class="n">long_name</span> <span class="o">=</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">long_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">long_name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
-                <span class="s2">&quot;Number of names in the &#39;long_name&#39; attribute does not equal &quot;</span>
-                <span class="s2">&quot;the number of bands.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">for</span> <span class="n">iii</span><span class="p">,</span> <span class="n">band_description</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">long_name</span><span class="p">):</span>
-            <span class="n">raster_handle</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="n">iii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">band_description</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">band_description</span> <span class="o">=</span> <span class="n">long_name</span> <span class="ow">or</span> <span class="n">xarray_dataset</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">if</span> <span class="n">band_description</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">iii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">raster_handle</span><span class="o">.</span><span class="n">count</span><span class="p">):</span>
-                <span class="n">raster_handle</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="n">iii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">band_description</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">,</span> <span class="n">new_dtype</span><span class="p">):</span>
@@ -1026,9 +977,9 @@
             <span class="c1"># converted right before writing.</span>
             <span class="n">rio_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">rio_nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
-            <span class="n">raster_path</span><span class="p">,</span>
-            <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+        <span class="n">RasterioWriter</span><span class="p">(</span><span class="n">raster_path</span><span class="o">=</span><span class="n">raster_path</span><span class="p">)</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+            <span class="n">xarray_dataarray</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+            <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
             <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
             <span class="n">height</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
@@ -1037,56 +988,34 @@
             <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">),</span>
             <span class="n">nodata</span><span class="o">=</span><span class="n">rio_nodata</span><span class="p">,</span>
+            <span class="n">windowed</span><span class="o">=</span><span class="n">windowed</span><span class="p">,</span>
             <span class="o">**</span><span class="n">out_profile</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
-
-            <span class="n">_write_metatata_to_raster</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
-
-            <span class="c1"># write data to raster</span>
-            <span class="k">if</span> <span class="n">windowed</span><span class="p">:</span>
-                <span class="n">window_iter</span> <span class="o">=</span> <span class="n">dst</span><span class="o">.</span><span class="n">block_windows</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">window_iter</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">window_iter</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">out_data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">)</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">out_data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span></div></div>
+        <span class="p">)</span></div></div>
 </pre></div>
 
            </div>
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019, rioxarray Contributors
+        &#169; Copyright 2019, rioxarray Contributors.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
