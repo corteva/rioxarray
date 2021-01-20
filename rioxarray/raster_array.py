@@ -811,9 +811,9 @@ class RasterArray(XRasterBase):
             # converted right before writing.
             rio_nodata = _ensure_nodata_dtype(rio_nodata, dtype)
 
-        with RasterioWriter(
-            raster_path,
-            "w",
+        RasterioWriter(raster_path=raster_path).to_raster(
+            xarray_dataarray=self._obj,
+            tags=tags,
             driver=driver,
             height=int(self.height),
             width=int(self.width),
@@ -822,8 +822,6 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
             nodata=rio_nodata,
+            windowed=windowed,
             **out_profile,
-        ) as dst:
-
-            dst.write_metadata(self._obj, tags)
-            dst.write_data(self._obj, dtype=dtype, windowed=windowed)
+        )
