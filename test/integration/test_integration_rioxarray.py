@@ -1016,6 +1016,7 @@ def test_geographic_resample_integer():
         (xarray.open_dataarray, False, False),
         (partial(rioxarray.open_rasterio, masked=True), True, True),
         (partial(rioxarray.open_rasterio, masked=True), False, False),
+        (partial(rioxarray.open_rasterio, masked=True, chunks=True), False, False),
     ],
 )
 def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
@@ -1061,6 +1062,7 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
         (xarray.open_dataset, False),
         (partial(rioxarray.open_rasterio, masked=True), True),
         (partial(rioxarray.open_rasterio, masked=True), False),
+        (partial(rioxarray.open_rasterio, masked=True, chunks=True), False),
     ],
 )
 def test_to_raster_3d(open_method, windowed, tmpdir):
@@ -1113,11 +1115,12 @@ def test_to_raster__custom_description(tmpdir):
         assert rds.rio.nodata == 0.0
 
 
-def test_to_raster__scale_factor_and_add_offset(tmpdir):
+@pytest.mark.parametrize("chunks", [True, None])
+def test_to_raster__scale_factor_and_add_offset(chunks, tmpdir):
     tmp_raster = tmpdir.join("air_temp_offset.tif")
 
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
         assert rds.air_temperature.scale_factor == 0.1
         assert rds.air_temperature.add_offset == 220.0
@@ -1134,11 +1137,12 @@ def test_to_raster__scale_factor_and_add_offset(tmpdir):
         assert rds.rio.nodata == 32767.0
 
 
-def test_to_raster__offsets_and_scales(tmpdir):
+@pytest.mark.parametrize("chunks", [True, None])
+def test_to_raster__offsets_and_scales(chunks, tmpdir):
     tmp_raster = tmpdir.join("air_temp_offset.tif")
 
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
         attrs = dict(rds.air_temperature.attrs)
         attrs["scales"] = [0.1]
@@ -1195,7 +1199,7 @@ def test_to_raster__preserve_profile__none_nodata(windowed, tmpdir):
     ) as rds:
         rds.write(numpy.empty((1, 512, 512), dtype=numpy.float32))
 
-    with xarray.open_rasterio(str(input_raster)) as mda:
+    with rioxarray.open_rasterio(str(input_raster)) as mda:
         mda.rio.to_raster(str(tmp_raster), windowed=windowed)
 
     with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
@@ -1223,10 +1227,11 @@ def test_to_raster__dataset(tmpdir):
         assert numpy.isnan(rdscompare.rio.nodata)
 
 
-def test_to_raster__dataset__mask_and_scale(tmpdir):
+@pytest.mark.parametrize("chunks", [True, None])
+def test_to_raster__dataset__mask_and_scale(chunks, tmpdir):
     output_raster = tmpdir.join("tmmx_20190121.tif")
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
         rds.isel(band=0).rio.to_raster(str(output_raster))
 

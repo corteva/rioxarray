@@ -2,11 +2,11 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray dataarrays.
 
-Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core  # noqa
+Credits: The `reproject` functionality was adopted from https://github.com/opendatacube/datacube-core # noqa: E501
 Source file:
-- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py  # noqa
+- https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py  # noqa: E501
 datacube is licensed under the Apache License, Version 2.0:
-- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa
+- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa: E501
 
 """
 import copy
@@ -28,10 +28,8 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
+from rioxarray.raster_writer import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS, RasterioWriter
 from rioxarray.rioxarray import XRasterBase, _get_data_var_message, _make_coords
-
-FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
 
 
 def _generate_attrs(src_data_array, dst_nodata):
@@ -113,58 +111,6 @@ def _make_dst_affine(
         **resolution_or_width_height,
     )
     return dst_affine, dst_width, dst_height
-
-
-def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
-    """
-    Write the metadata stored in the xarray object to raster metadata
-    """
-    tags = xarray_dataset.attrs if tags is None else {**xarray_dataset.attrs, **tags}
-
-    # write scales and offsets
-    try:
-        raster_handle.scales = tags["scales"]
-    except KeyError:
-        try:
-            raster_handle.scales = (tags["scale_factor"],) * raster_handle.count
-        except KeyError:
-            pass
-    try:
-        raster_handle.offsets = tags["offsets"]
-    except KeyError:
-        try:
-            raster_handle.offsets = (tags["add_offset"],) * raster_handle.count
-        except KeyError:
-            pass
-
-    # filter out attributes that should be written in a different location
-    skip_tags = (
-        UNWANTED_RIO_ATTRS
-        + FILL_VALUE_NAMES
-        + ("transform", "scales", "scale_factor", "add_offset", "offsets")
-    )
-    # this is for when multiple values are used
-    # in this case, it will be stored in the raster description
-    if not isinstance(tags.get("long_name"), str):
-        skip_tags += ("long_name",)
-    tags = {key: value for key, value in tags.items() if key not in skip_tags}
-    raster_handle.update_tags(**tags)
-
-    # write band name information
-    long_name = xarray_dataset.attrs.get("long_name")
-    if isinstance(long_name, (tuple, list)):
-        if len(long_name) != raster_handle.count:
-            raise RioXarrayError(
-                "Number of names in the 'long_name' attribute does not equal "
-                "the number of bands."
-            )
-        for iii, band_description in enumerate(long_name):
-            raster_handle.set_band_description(iii + 1, band_description)
-    else:
-        band_description = long_name or xarray_dataset.name
-        if band_description:
-            for iii in range(raster_handle.count):
-                raster_handle.set_band_description(iii + 1, band_description)
 
 
 def _ensure_nodata_dtype(original_nodata, new_dtype):
@@ -865,9 +811,9 @@ class RasterArray(XRasterBase):
             # converted right before writing.
             rio_nodata = _ensure_nodata_dtype(rio_nodata, dtype)
 
-        with rasterio.open(
-            raster_path,
-            "w",
+        RasterioWriter(raster_path=raster_path).to_raster(
+            xarray_dataarray=self._obj,
+            tags=tags,
             driver=driver,
             height=int(self.height),
             width=int(self.width),
@@ -876,25 +822,6 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
             nodata=rio_nodata,
+            windowed=windowed,
             **out_profile,
-        ) as dst:
-
-            _write_metatata_to_raster(dst, self._obj, tags)
-
-            # write data to raster
-            if windowed:
-                window_iter = dst.block_windows(1)
-            else:
-                window_iter = [(None, None)]
-            for _, window in window_iter:
-                if window is not None:
-                    out_data = self.isel_window(window)
-                else:
-                    out_data = self._obj
-                if self.encoded_nodata is not None:
-                    out_data = out_data.fillna(self.encoded_nodata)
-                data = out_data.values.astype(dtype)
-                if data.ndim == 2:
-                    dst.write(data, 1, window=window)
-                else:
-                    dst.write(data, window=window)
+        )

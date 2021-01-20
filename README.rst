@@ -68,6 +68,9 @@ The *open_rasterio* functionality was adopted from https://github.com/pydata/xar
   - `xarray is licensed <https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/LICENSE>`_ under the Apache License, Version 2.0.
     The xarray license is included as `LICENSE_xarray <https://github.com/corteva/rioxarray/blob/master/LICENSE_xarray>`_.
 
+RasterioWriter dask write functionality was adopted from https://github.com/dymaxionlabs/dask-rasterio
+  - Source file: `write.py <https://github.com/dymaxionlabs/dask-rasterio/blob/8dd7fdece7ad094a41908c0ae6b4fe6ca49cf5e1/dask_rasterio/write.py>`_
+
 
 This package was originally templated with with Cookiecutter_.
 
