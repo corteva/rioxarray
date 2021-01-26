@@ -124,7 +124,7 @@ class RasterioWriter:
         with rasterio.open(self.raster_path, "r+") as rds:
             rds.write(item, window=Window(chx_off, chy_off, chx, chy), indexes=indexes)
 
-    def to_raster(self, xarray_dataarray, tags, windowed, lock, **kwargs):
+    def to_raster(self, xarray_dataarray, tags, windowed, lock, compute, **kwargs):
         """
         This method writes to the raster on disk.
 
@@ -138,6 +138,13 @@ class RasterioWriter:
         lock: boolean or Lock, optional
             Lock to use to write data using dask.
             If not supplied, it will use a single process.
+        compute: bool
+            If True (default) and the data array is a dask array and windowed
+            is True, then compute and save the data immediately. If False,
+            return a dask Delayed object. Call ".compute()" on the Delayed
+            object to compute the result later. Call
+            ``dask.compute(delayed1, delayed2)`` to save multiple delayed
+            files at once.
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
@@ -172,8 +179,9 @@ class RasterioWriter:
                 )
             else:
                 out_dataarray = xarray_dataarray
-            dask.array.store(
+            return dask.array.store(
                 out_dataarray.data.astype(dtype),
                 self,
                 lock=lock,
+                compute=compute,
             )

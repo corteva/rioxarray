@@ -824,6 +824,7 @@ class RasterArray(XRasterBase):
         windowed=False,
         recalc_transform=True,
         lock=None,
+        compute=True,
         **profile_kwargs,
     ):
         """
@@ -850,10 +851,23 @@ class RasterArray(XRasterBase):
         lock: boolean or Lock, optional
             Lock to use to write data using dask.
             If not supplied, it will use a single process for writing.
+        compute: bool
+            If True and the data array is a dask array and windowed
+            is True, then compute and save the data immediately. If False,
+            return a dask Delayed object. Call ".compute()" on the Delayed
+            object to compute the result later. Call
+            ``dask.compute(delayed1, delayed2)`` to save multiple delayed
+            files at once. Default is True.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
+
+        Returns
+        -------
+        :obj:`dask.Delayed`:
+            If the data array is a dask array, windowed is True, and compute
+            is True. Otherwise None is returned.
 
         """
         if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
@@ -893,7 +907,7 @@ class RasterArray(XRasterBase):
             # converted right before writing.
             rio_nodata = _ensure_nodata_dtype(rio_nodata, dtype)
 
-        RasterioWriter(raster_path=raster_path).to_raster(
+        return RasterioWriter(raster_path=raster_path).to_raster(
             xarray_dataarray=self._obj,
             tags=tags,
             driver=driver,
@@ -906,5 +920,6 @@ class RasterArray(XRasterBase):
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,
+            compute=compute,
             **out_profile,
         )
