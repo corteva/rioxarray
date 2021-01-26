@@ -751,7 +751,7 @@ class RasterArray(XRasterBase):
     def to_raster(
         self,
         raster_path,
-        driver="GTiff",
+        driver=None,
         dtype=None,
         tags=None,
         windowed=False,
@@ -767,7 +767,7 @@ class RasterArray(XRasterBase):
             The path to output the raster to.
         driver: str, optional
             The name of the GDAL/rasterio driver to use to export the raster.
-            Default is "GTiff".
+            Default is "GTiff" if rasterio < 1.2 otherwise it will autodetect.
         dtype: str, optional
             The data type to write the raster to. Default is the datasets dtype.
         tags: dict, optional
@@ -783,6 +783,9 @@ class RasterArray(XRasterBase):
             are ignored.
 
         """
+        if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
+            driver = "GTiff"
+
         dtype = str(self._obj.dtype) if dtype is None else dtype
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
