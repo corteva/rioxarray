@@ -32,6 +32,22 @@ class RasterioDatasetDuck:
         res = xds.rio.resolution(recalc=True)
         self.res = (abs(res[0]), abs(res[1]))
         self.transform = xds.rio.transform(recalc=True)
+        try:
+            rio_file = xds._file_obj.acquire()
+            self.profile = rio_file.profile
+            self.colormap = rio_file.colormap
+        except AttributeError:
+            self.profile = {}
+
+            def colormap(_):
+                return None
+
+            self.colormap = colormap
+        self.profile.update(
+            dtype=xds.dtype,
+            crs=xds.rio.crs,
+            nodata=xds.rio.nodata,
+        )
 
     def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.array:
         # pylint: disable=unused-argument
