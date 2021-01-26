@@ -312,7 +312,7 @@ class RasterDataset(XRasterBase):
     def to_raster(
         self,
         raster_path,
-        driver="GTiff",
+        driver=None,
         dtype=None,
         tags=None,
         windowed=False,
@@ -328,7 +328,7 @@ class RasterDataset(XRasterBase):
             The path to output the raster to.
         driver: str, optional
             The name of the GDAL/rasterio driver to use to export the raster.
-            Default is "GTiff".
+            Default is "GTiff" if rasterio < 1.2 otherwise it will autodetect.
         dtype: str, optional
             The data type to write the raster to. Default is the datasets dtype.
         tags: dict, optional

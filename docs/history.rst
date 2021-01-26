@@ -7,6 +7,7 @@ Latest
 - ENH: Add support for merging datasets with different CRS (issue #173)
 - ENH: Add support for using dask in `rio.to_raster` (issue #9)
 - ENH: Use the list version of `transform_geom` with rasterio 1.2+ (issue #180)
+- ENH: Support driver autodetection with rasterio 1.2+ (issue #180)
 - BUG: Allow `rio.write_crs` when spatial dimensions not found (pull #186)
 - BUG: Update to support rasterio 1.2+ merge (issue #180)
 
