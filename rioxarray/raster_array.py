@@ -11,9 +11,11 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import warnings
+from distutils.version import LooseVersion
 from typing import Iterable
 
 import numpy as np
+import rasterio
 import rasterio.warp
 import xarray
 from rasterio.crs import CRS
@@ -591,7 +593,8 @@ class RasterArray(XRasterBase):
         Parameters
         ----------
         geometries: list
-            A list of geojson geometry dicts.
+            A list of geojson geometry dicts or objects with __geom_interface__ with
+            if you have rasterio 1.2+.
         crs: :obj:`rasterio.crs.CRS`, optional
             The CRS of the input geometries. Default is to assume it is the same
             as the dataset.
@@ -620,10 +623,13 @@ class RasterArray(XRasterBase):
             )
         crs = CRS.from_wkt(crs_to_wkt(crs)) if crs is not None else self.crs
         if self.crs != crs:
-            geometries = [
-                rasterio.warp.transform_geom(crs, self.crs, geometry)
-                for geometry in geometries
-            ]
+            if LooseVersion(rasterio.__version__) >= LooseVersion("1.2"):
+                geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)
+            else:
+                geometries = [
+                    rasterio.warp.transform_geom(crs, self.crs, geometry)
+                    for geometry in geometries
+                ]
 
         clip_mask_arr = geometry_mask(
             geometries=geometries,
