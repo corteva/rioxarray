@@ -667,7 +667,7 @@ Attributes:
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>import geopandas
-from shapely.geometry import box, mapping
+from shapely.geometry import box
 </pre></div>
 </div>
 </div>
@@ -690,7 +690,12 @@ from shapely.geometry import box, mapping
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>clipped = xds.rio.clip(geodf.geometry.apply(mapping), geodf.crs, drop=False, invert=True)
+<span></span>clipped = xds.rio.clip(geodf.geometry, geodf.crs, drop=False, invert=True)
+# Note: If you have rasterio &lt; 1.2 you will need convert the geometries to dict-like objects if the projection
+# of the geometries differ from the raster. For example:
+#
+# from shapely.geometry import mapping
+#  geometries = geodf.geometry.apply(mapping)
 </pre></div>
 </div>
 </div>

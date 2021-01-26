@@ -885,7 +885,8 @@ Default is the grid_mapping name of the dataset.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
+<li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts or objects with __geom_interface__ with
+if you have rasterio 1.2+.</li>
 <li><strong>crs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code>, optional) – The CRS of the input geometries. Default is to assume it is the same
 as the dataset.</li>
 <li><strong>all_touched</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
