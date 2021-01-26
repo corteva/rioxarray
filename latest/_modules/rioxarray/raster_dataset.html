@@ -478,7 +478,7 @@
 <div class="viewcode-block" id="RasterDataset.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">raster_path</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -494,7 +494,7 @@
 <span class="sd">            The path to output the raster to.</span>
 <span class="sd">        driver: str, optional</span>
 <span class="sd">            The name of the GDAL/rasterio driver to use to export the raster.</span>
-<span class="sd">            Default is &quot;GTiff&quot;.</span>
+<span class="sd">            Default is &quot;GTiff&quot; if rasterio &lt; 1.2 otherwise it will autodetect.</span>
 <span class="sd">        dtype: str, optional</span>
 <span class="sd">            The data type to write the raster to. Default is the datasets dtype.</span>
 <span class="sd">        tags: dict, optional</span>

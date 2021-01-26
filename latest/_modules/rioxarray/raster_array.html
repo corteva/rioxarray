@@ -917,7 +917,7 @@
 <div class="viewcode-block" id="RasterArray.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">raster_path</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -933,7 +933,7 @@
 <span class="sd">            The path to output the raster to.</span>
 <span class="sd">        driver: str, optional</span>
 <span class="sd">            The name of the GDAL/rasterio driver to use to export the raster.</span>
-<span class="sd">            Default is &quot;GTiff&quot;.</span>
+<span class="sd">            Default is &quot;GTiff&quot; if rasterio &lt; 1.2 otherwise it will autodetect.</span>
 <span class="sd">        dtype: str, optional</span>
 <span class="sd">            The data type to write the raster to. Default is the datasets dtype.</span>
 <span class="sd">        tags: dict, optional</span>
@@ -949,6 +949,9 @@
 <span class="sd">            are ignored.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;1.2&quot;</span><span class="p">):</span>
+            <span class="n">driver</span> <span class="o">=</span> <span class="s2">&quot;GTiff&quot;</span>
+
         <span class="n">dtype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dtype</span>
         <span class="c1"># get the output profile from the rasterio object</span>
         <span class="c1"># if opened with xarray.open_rasterio()</span>
