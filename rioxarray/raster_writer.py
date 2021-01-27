@@ -10,7 +10,6 @@ Source file:
 """
 import rasterio
 from rasterio.windows import Window
-from xarray.backends.locks import SerializableLock
 
 from rioxarray.exceptions import RioXarrayError
 
@@ -85,6 +84,9 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
 
 class RasterioWriter:
     """
+
+    ..versionadded:: 0.2
+
     Rasterio wrapper to allow dask.array.store to do window saving or to
     save using the rasterio write method.
     """
@@ -122,7 +124,7 @@ class RasterioWriter:
         with rasterio.open(self.raster_path, "r+") as rds:
             rds.write(item, window=Window(chx_off, chy_off, chx, chy), indexes=indexes)
 
-    def to_raster(self, xarray_dataarray, tags, windowed, **kwargs):
+    def to_raster(self, xarray_dataarray, tags, windowed, lock, **kwargs):
         """
         This method writes to the raster on disk.
 
@@ -133,6 +135,9 @@ class RasterioWriter:
         windowed: bool
             If True and the data array is not a dask array, it will write
             the data to disk using rasterio windows.
+        lock: boolean or Lock, optional
+            Lock to use to write data using dask.
+            If not supplied, it will use a single process.
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
@@ -141,7 +146,7 @@ class RasterioWriter:
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(rds, xarray_dataarray, tags)
 
-            if not is_dask_collection(xarray_dataarray.data):
+            if not (lock and is_dask_collection(xarray_dataarray.data)):
                 # write data to raster immmediately if not dask array
                 if windowed:
                     window_iter = rds.block_windows(1)
@@ -160,7 +165,7 @@ class RasterioWriter:
                     else:
                         rds.write(data, window=window)
 
-        if is_dask_collection(xarray_dataarray.data):
+        if lock and is_dask_collection(xarray_dataarray.data):
             if xarray_dataarray.rio.encoded_nodata is not None:
                 out_dataarray = xarray_dataarray.fillna(
                     xarray_dataarray.rio.encoded_nodata
@@ -170,5 +175,5 @@ class RasterioWriter:
             dask.array.store(
                 out_dataarray.data.astype(dtype),
                 self,
-                lock=SerializableLock(),
+                lock=lock,
             )
