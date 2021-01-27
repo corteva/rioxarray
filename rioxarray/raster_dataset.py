@@ -317,10 +317,13 @@ class RasterDataset(XRasterBase):
         tags=None,
         windowed=False,
         recalc_transform=True,
+        lock=None,
         **profile_kwargs,
     ):
         """
         Export the Dataset to a raster file. Only works with 2D data.
+
+        ..versionadded:: 0.2 lock
 
         Parameters
         ----------
@@ -335,9 +338,12 @@ class RasterDataset(XRasterBase):
             A dictionary of tags to write to the raster.
         windowed: bool, optional
             If True, it will write using the windows of the output raster.
-            This only works if the output raster is tiled. As such, if you
-            set this to True, the output raster will be tiled.
+            This is useful for loading data in chunks when writing. Does not
+            do anything when writing with dask.
             Default is False.
+        lock: boolean or Lock, optional
+            Lock to use to write data using dask.
+            If not supplied, it will use a single process for writing.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -379,5 +385,6 @@ class RasterDataset(XRasterBase):
             tags=tags,
             windowed=windowed,
             recalc_transform=recalc_transform,
+            lock=lock,
             **profile_kwargs,
         )

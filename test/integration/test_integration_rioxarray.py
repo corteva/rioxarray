@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import threading
 from distutils.version import LooseVersion
 from functools import partial
 
@@ -1017,6 +1018,16 @@ def test_geographic_resample_integer():
         (partial(rioxarray.open_rasterio, masked=True), True, True),
         (partial(rioxarray.open_rasterio, masked=True), False, False),
         (partial(rioxarray.open_rasterio, masked=True, chunks=True), False, False),
+        (
+            partial(
+                rioxarray.open_rasterio,
+                masked=True,
+                chunks=True,
+                lock=threading.Lock(),
+            ),
+            False,
+            False,
+        ),
     ],
 )
 def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
@@ -1063,6 +1074,15 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
         (partial(rioxarray.open_rasterio, masked=True), True),
         (partial(rioxarray.open_rasterio, masked=True), False),
         (partial(rioxarray.open_rasterio, masked=True, chunks=True), False),
+        (
+            partial(
+                rioxarray.open_rasterio,
+                masked=True,
+                chunks=True,
+                lock=threading.Lock(),
+            ),
+            False,
+        ),
     ],
 )
 def test_to_raster_3d(open_method, windowed, tmpdir):
