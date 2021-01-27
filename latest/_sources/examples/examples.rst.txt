@@ -19,6 +19,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    interpolate_na.ipynb
    transform_bounds.ipynb
    COG.ipynb
+   dask_read_write.ipynb
    Example - Zonal Statistics <https://corteva.github.io/geocube/html/examples/zonal_statistics.html>
 
 

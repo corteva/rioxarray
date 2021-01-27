@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Example - Transform Bounds &mdash; rioxarray 0.1.2.dev0 documentation</title>
+  <title>Example - Reading and Writing with Dask &mdash; rioxarray 0.1.2.dev0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Cloud Optimized GeoTiff (COG)" href="COG.html" />
-    <link rel="prev" title="Example - Interpolate Missing Data" href="interpolate_na.html" /> 
+    <link rel="next" title="rioxarray" href="../modules.html" />
+    <link rel="prev" title="Example - Cloud Optimized GeoTiff (COG)" href="COG.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -104,9 +104,15 @@
 <li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Transform Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reading and Writing with Dask</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#No-distrubuted-computing-example">No distrubuted computing example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Multithreaded-example">Multithreaded example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Multiprocessing-example">Multiprocessing example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Multiple-worker-example">Multiple worker example</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
@@ -171,13 +177,13 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Example - Transform Bounds</li>
+      <li>Example - Reading and Writing with Dask</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/examples/transform_bounds.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/dask_read_write.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -460,93 +466,105 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Transform-Bounds">
-<h1>Example - Transform Bounds<a class="headerlink" href="#Example---Transform-Bounds" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Example---Reading-and-Writing-with-Dask">
+<h1>Example - Reading and Writing with Dask<a class="headerlink" href="#Example---Reading-and-Writing-with-Dask" title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
-import xarray
+<span></span>import multiprocessing
+# Linux/OSX:
+import multiprocessing.popen_spawn_posix
+# Windows:
+# import multiprocessing.popen_spawn_win32
+import threading
 
-%matplotlib inline
+from dask.distributed import Client, LocalCluster, Lock
+from dask.utils import SerializableLock
+
+import rioxarray
 </pre></div>
 </div>
 </div>
+<p>When using dask for writing, you should be careful about what lock you use for your process. You need to ensure that you have a lock for each worker, so the more fine-grained the better.</p>
+<p>See docs for:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></li>
+<li>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
+<li>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
+</ul>
+<div class="section" id="No-distrubuted-computing-example">
+<h2>No distrubuted computing example<a class="headerlink" href="#No-distrubuted-computing-example" title="Permalink to this headline">¶</a></h2>
+<p>Note: Without a lock provided, <code class="docutils literal notranslate"><span class="pre">to_raster</span></code> does not use dask to write to disk.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;MODIS_ARRAY.nc&quot;)
+<span></span>xds = rioxarray.open_rasterio(
+    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
+    chunks=True,
+)
+xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
+</div>
+<div class="section" id="Multithreaded-example">
+<h2>Multithreaded example<a class="headerlink" href="#Multithreaded-example" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.bounds()
+<span></span>xds = rioxarray.open_rasterio(
+    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
+    chunks=True,
+)
+xds.rio.to_raster(&quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock())
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(-7274009.649486291, 5003777.3385, -7227678.3778335, 5050108.61015275)
-</pre></div></div>
-</div>
-<p>API Reference: <a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform_bounds"><span class="std std-ref">rio.transform_bounds()</span></a></p>
-<div class="nbinput docutils container">
+<div class="section" id="Multiprocessing-example">
+<h2>Multiprocessing example<a class="headerlink" href="#Multiprocessing-example" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.transform_bounds(
-    &quot;+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84&quot;
-    &quot; +datum=WGS84 +units=m +no_defs&quot;,
-    densify_pts=100,
-)
+<span></span>with LocalCluster() as cluster, Client(cluster) as client:
+    mp_manager = multiprocessing.Manager()
+    xds = rioxarray.open_rasterio(
+        &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
+        chunks=True,
+    ).persist()
+    xds.rio.to_raster(
+        &quot;dask_multiprocess.tif&quot;, tiled=True, lock=mp_manager.Lock(),
+    )
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(-10374232.525903117,
- 5591295.917919335,
- -10232919.684719983,
- 5656912.314724255)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
+<div class="section" id="Multiple-worker-example">
+<h2>Multiple worker example<a class="headerlink" href="#Multiple-worker-example" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.transform_bounds(
-    &quot;+init=epsg:4326&quot;,
-    densify_pts=1,
-)
+<span></span>with LocalCluster() as cluster, Client(cluster) as client:
+    xds = rioxarray.open_rasterio(
+        &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
+        chunks=True,
+    ).persist()
+    xds.rio.to_raster(
+        &quot;dask_multiworker.tif&quot;, tiled=True, lock=Lock(&quot;rio&quot;, client=client),
+    )
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(-93.19331639028637, 44.99999999595885, -91.92388153951472, 45.41666666258786)
-</pre></div></div>
 </div>
 </div>
 
@@ -556,8 +574,8 @@ import xarray
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="COG.html" class="btn btn-neutral float-right" title="Example - Cloud Optimized GeoTiff (COG)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="interpolate_na.html" class="btn btn-neutral float-left" title="Example - Interpolate Missing Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules.html" class="btn btn-neutral float-right" title="rioxarray" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="COG.html" class="btn btn-neutral float-left" title="Example - Cloud Optimized GeoTiff (COG)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -483,10 +483,13 @@
         <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">recalc_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export the Dataset to a raster file. Only works with 2D data.</span>
+
+<span class="sd">        ..versionadded:: 0.2 lock</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -501,9 +504,12 @@
 <span class="sd">            A dictionary of tags to write to the raster.</span>
 <span class="sd">        windowed: bool, optional</span>
 <span class="sd">            If True, it will write using the windows of the output raster.</span>
-<span class="sd">            This only works if the output raster is tiled. As such, if you</span>
-<span class="sd">            set this to True, the output raster will be tiled.</span>
+<span class="sd">            This is useful for loading data in chunks when writing. Does not</span>
+<span class="sd">            do anything when writing with dask.</span>
 <span class="sd">            Default is False.</span>
+<span class="sd">        lock: boolean or Lock, optional</span>
+<span class="sd">            Lock to use to write data using dask.</span>
+<span class="sd">            If not supplied, it will use a single process for writing.</span>
 <span class="sd">        **profile_kwargs</span>
 <span class="sd">            Additional keyword arguments to pass into writing the raster. The</span>
 <span class="sd">            nodata, transform, crs, count, width, and height attributes</span>
@@ -545,6 +551,7 @@
             <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
             <span class="n">windowed</span><span class="o">=</span><span class="n">windowed</span><span class="p">,</span>
             <span class="n">recalc_transform</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">,</span>
+            <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
             <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>

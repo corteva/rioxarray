@@ -1136,8 +1136,9 @@ the data array.</p>
 
 <dl class="method">
 <dt id="rioxarray.raster_array.RasterArray.to_raster">
-<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver=None</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver=None</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>lock=None</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export the DataArray to a raster file.</p>
+<p>..versionadded:: 0.2 lock</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1149,9 +1150,11 @@ Default is “GTiff” if rasterio &lt; 1.2 otherwise it will autodetect.</li>
 <li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
 <li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
 <li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
-This only works if the output raster is tiled. As such, if you
-set this to True, the output raster will be tiled.
+This is useful for loading data in chunks when writing. Does not
+do anything when writing with dask.
 Default is False.</li>
+<li><strong>lock</strong> (<em>boolean</em><em> or </em><em>Lock</em><em>, </em><em>optional</em>) – Lock to use to write data using dask.
+If not supplied, it will use a single process for writing.</li>
 <li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
 nodata, transform, crs, count, width, and height attributes
 are ignored.</li>
@@ -1421,8 +1424,9 @@ reprojected to match match_data_array.</p>
 
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.to_raster">
-<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver=None</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_raster</code><span class="sig-paren">(</span><em>raster_path</em>, <em>driver=None</em>, <em>dtype=None</em>, <em>tags=None</em>, <em>windowed=False</em>, <em>recalc_transform=True</em>, <em>lock=None</em>, <em>**profile_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.to_raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export the Dataset to a raster file. Only works with 2D data.</p>
+<p>..versionadded:: 0.2 lock</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1434,9 +1438,11 @@ Default is “GTiff” if rasterio &lt; 1.2 otherwise it will autodetect.</li>
 <li><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – The data type to write the raster to. Default is the datasets dtype.</li>
 <li><strong>tags</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of tags to write to the raster.</li>
 <li><strong>windowed</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write using the windows of the output raster.
-This only works if the output raster is tiled. As such, if you
-set this to True, the output raster will be tiled.
+This is useful for loading data in chunks when writing. Does not
+do anything when writing with dask.
 Default is False.</li>
+<li><strong>lock</strong> (<em>boolean</em><em> or </em><em>Lock</em><em>, </em><em>optional</em>) – Lock to use to write data using dask.
+If not supplied, it will use a single process for writing.</li>
 <li><strong>**profile_kwargs</strong> – Additional keyword arguments to pass into writing the raster. The
 nodata, transform, crs, count, width, and height attributes
 are ignored.</li>
