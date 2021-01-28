@@ -9,7 +9,7 @@ Latest
 - ENH: Use the list version of `transform_geom` with rasterio 1.2+ (issue #180)
 - ENH: Support driver autodetection with rasterio 1.2+ (issue #180)
 - BUG: Allow `rio.write_crs` when spatial dimensions not found (pull #186)
-- ENH: Allow multithreaded, lockless reads with `rio.read_xarary` (issue #214)
+- ENH: Allow multithreaded, lockless reads with `rio.open_rasterio` (issue #214)
 - BUG: Update to support rasterio 1.2+ merge (issue #180)
 
 0.1.1
