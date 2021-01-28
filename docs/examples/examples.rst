@@ -13,6 +13,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    clip_geom.ipynb
    clip_box.ipynb
    pad_box.ipynb
+   read-locks.ipynb
    reproject.ipynb
    reproject_match.ipynb
    merge.ipynb
