@@ -6,8 +6,10 @@ This file was adopted from: https://github.com/pydata/xarray # noqa
 Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py # noqa
 """
 
+import contextlib
 import os
 import re
+import sys
 import warnings
 from distutils.version import LooseVersion
 
@@ -17,7 +19,7 @@ from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
 from xarray import Dataset, IndexVariable
 from xarray.backends.common import BackendArray
-from xarray.backends.file_manager import CachingFileManager
+from xarray.backends.file_manager import CachingFileManager, FileManager
 from xarray.backends.locks import SerializableLock
 from xarray.coding import times, variables
 from xarray.core import indexing
@@ -29,6 +31,42 @@ from rioxarray.rioxarray import affine_to_coords
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
+
+if sys.version_info >= (3, 7):
+    NO_LOCK = contextlib.nullcontext()
+else:
+
+    class nullcontext(contextlib.AbstractContextManager):
+        def __enter__(self):
+            pass
+
+        def __exit__(self, *excinfo):
+            pass
+
+    NO_LOCK = nullcontext()
+
+
+class URIManager(FileManager):
+    def __init__(
+        self,
+        opener,
+        *args,
+        mode="r",
+        kwargs=None,
+    ):
+        self._opener = opener
+        self._args = args
+        self._mode = mode
+        self._kwargs = {} if kwargs is None else dict(kwargs)
+
+    def acquire(self, needs_lock=True):
+        return self._opener(*self._args, mode=self._mode, kwargs=self._kwargs)
+
+    def acquire_context(self, needs_lock=True):
+        yield self.acquire(needs_lock=needs_lock)
+
+    def close(self, needs_lock=True):
+        pass
 
 
 class RasterioArrayWrapper(BackendArray):
@@ -596,6 +634,7 @@ def open_rasterio(
     variable=None,
     group=None,
     default_name=None,
+    use_files=False,
     **open_kwargs,
 ):
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
@@ -638,11 +677,20 @@ def open_rasterio(
         NumPy arrays when accessed to avoid reading from the underlying data-
         store multiple times. Defaults to True unless you specify the `chunks`
         argument to use dask, in which case it defaults to False.
-    lock: False, True or threading.Lock, optional
-        If chunks is provided, this argument is passed on to
-        :py:func:`dask.array.from_array`. By default, a global lock is
-        used to avoid issues with concurrent access to the same file when using
-        dask's multithreaded backend.
+    lock: bool or dask.utils.SerializableLock, optional
+
+        If chunks is provided, this argument is used to ensure that only one
+        thread per process is reading from a rasterio file object at a time.
+
+        When ``lock=True`` or a lock instance is provided,
+        a :class:`xarray.backends.CachingFileManager` is used to cache File objects.
+        Since rasterio also caches some data, this will make repeated reads from the
+        same object fast.
+
+        When ``lock=False``, no lock is used, allowing for completely parallel reads
+        from multiple threads or processes. However, a new file handle is opened on
+        each request.
+
     masked: bool, optional
         If True, read the mask and set values to NaN. Defaults to False.
     mask_and_scale: bool, optional
@@ -687,16 +735,25 @@ def open_rasterio(
 
     if lock is None:
         lock = RASTERIO_LOCK
+    elif lock is False:
+        lock = NO_LOCK
 
     # ensure default for sharing is False
     # ref https://github.com/mapbox/rasterio/issues/1504
     open_kwargs["sharing"] = open_kwargs.get("sharing", False)
+
     with warnings.catch_warnings(record=True) as rio_warnings:
-        manager = CachingFileManager(
-            rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
-        )
+        if lock is not NO_LOCK:
+            manager = CachingFileManager(
+                rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
+            )
+        else:
+            manager = URIManager(rasterio.open, filename, mode="r", kwargs=open_kwargs)
         riods = manager.acquire()
         captured_warnings = rio_warnings.copy()
+
+    riods = manager.acquire()
+    captured_warnings = rio_warnings.copy()
     # raise the NotGeoreferencedWarning if applicable
     for rio_warning in captured_warnings:
         if not riods.subdatasets or not isinstance(

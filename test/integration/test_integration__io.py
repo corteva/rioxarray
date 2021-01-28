@@ -949,3 +949,10 @@ def test_nc_attr_loading():
         }
         assert str(rds.time.values[0]) == "2016-12-19 10:27:29.687763"
         assert str(rds.time.values[1]) == "2016-12-29 12:52:42.347451"
+
+
+def test_lockless():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunk=True
+    ) as rds:
+        rds.mean().compute()
