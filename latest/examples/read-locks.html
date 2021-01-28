@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Example - Merge &mdash; rioxarray 0.1.2.dev0 documentation</title>
+  <title>Reading COGs in Parallel &mdash; rioxarray 0.1.2.dev0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Interpolate Missing Data" href="interpolate_na.html" />
-    <link rel="prev" title="Example - Reproject Match" href="reproject_match.html" /> 
+    <link rel="next" title="Example - Reproject" href="reproject.html" />
+    <link rel="prev" title="Example - Pad Box" href="pad_box.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,13 +100,16 @@
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
-<li class="toctree-l2"><a class="reference internal" href="read-locks.html">Reading COGs in Parallel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Merge</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-dataset">Load in xarray dataset</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reading COGs in Parallel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Scheduler-Choice">Scheduler Choice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Reading-without-Locks">Reading without Locks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Chunking">Chunking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Caching-Considerations">Caching Considerations</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
+<li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
@@ -175,13 +178,13 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Example - Merge</li>
+      <li>Reading COGs in Parallel</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/examples/merge.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/read-locks.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -464,88 +467,160 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Merge">
-<h1>Example - Merge<a class="headerlink" href="#Example---Merge" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Reading-COGs-in-Parallel">
+<h1>Reading COGs in Parallel<a class="headerlink" href="#Reading-COGs-in-Parallel" title="Permalink to this headline">¶</a></h1>
+<p>COGs can be internally chunked, which makes it possible to read them in parallel from multiple threads. However, the libraries <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> builds on, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">GDAL</span></code>, require some care to be used safely from multiple threads within a single process. By default, <code class="docutils literal notranslate"><span class="pre">rio.open_rasterio</span></code> will acquire a per-process lock when reading a chunk of a COG.</p>
+<p>If you’re using <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> with <a class="reference external" href="http://docs.dask.org/">Dask</a> through the <code class="docutils literal notranslate"><span class="pre">chunks</span></code> keyword, you can also specify the <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> keyword to ensure that reading <em>and</em> operating on your data happen in parallel.</p>
+<div class="section" id="Scheduler-Choice">
+<h2>Scheduler Choice<a class="headerlink" href="#Scheduler-Choice" title="Permalink to this headline">¶</a></h2>
+<p>Dask has <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html">several schedulers</a> which run computations in parallel. Which scheduler is best depends on a variety of factors, including whether your computation holds Python’s Global Interpreter Lock, whether how much data needs to be moved around, and whether you need more than one machine’s computational power. This section about read-locks only applies if you have more than one thread in a process. This will happen with Dask’s <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html#local-threads">local threaded
+scheduler</a> and its <a class="reference external" href="https://distributed.dask.org/en/latest/">distributed scheduler</a> when configured to use more than one thread per worker.</p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> objects will use the local <code class="docutils literal notranslate"><span class="pre">threaded</span></code> scheduler.</p>
+</div>
+<div class="section" id="Reading-without-Locks">
+<h2>Reading without Locks<a class="headerlink" href="#Reading-without-Locks" title="Permalink to this headline">¶</a></h2>
+<p>To read a COG without any locks, you’d specify <code class="docutils literal notranslate"><span class="pre">lock=False</span></code>. This tells <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> to open a new <code class="docutils literal notranslate"><span class="pre">rasterio.DatasetReader</span></code> in each thread, rather than trying to share one amongst multiple threads.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
-import xarray
-from rioxarray.merge import merge_arrays
-# Note: You can merge datasets with the merge_datasets method
+<span></span>import rioxarray
 
-%matplotlib inline
+url = (
+    &quot;https://naipeuwest.blob.core.windows.net/naip/v002/md/2013/md_100cm_2013/&quot;
+    &quot;39076/m_3907617_ne_18_1_20130924.tif&quot;
+)
 </pre></div>
 </div>
 </div>
-<div class="section" id="Load-in-xarray-dataset">
-<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
-<p>API reference:</p>
-<ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.merge.merge_arrays"><span class="std std-ref">rioxarray.merge.merge_arrays</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.merge.merge_datasets"><span class="std std-ref">rioxarray.merge.merge_datasets</span></a></li>
-</ul>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>dem_test = &quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;
-with rioxarray.open_rasterio(dem_test) as rds:
-    arrays = [
-        rds.isel(x=slice(100), y=slice(100)),
-        rds.isel(x=slice(100, 200), y=slice(100, 200)),
-        rds.isel(x=slice(100), y=slice(100, 200)),
-        rds.isel(x=slice(100, 200), y=slice(100)),
-    ]
-    merged = merge_arrays(arrays)
+<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+%time _ = ds.mean().compute()
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.4 s, sys: 361 ms, total: 2.76 s
+Wall time: 3.32 s
+</pre></div></div>
+</div>
+<p>Note: these timings are from a VM in the same Azure data center that’s hosting the COG. Running this locally will give different times.</p>
+</div>
+<div class="section" id="Chunking">
+<h2>Chunking<a class="headerlink" href="#Chunking" title="Permalink to this headline">¶</a></h2>
+<p>For maximum read performance, the chunking pattern you request should align with the internal chunking of the COG. Typically this means reading the data in a “row major” format: your chunks should be as wide as possible along the columns. We did that above with the chunks of <code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">&quot;auto&quot;,</span> <span class="pre">-1)</span></code>. The <code class="docutils literal notranslate"><span class="pre">-1</span></code> says “include all the columns”, and the <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> will make the chunking along the rows as large as possible while staying in a reasonable limit (specified in
+<code class="docutils literal notranslate"><span class="pre">dask.config.get(&quot;array.chunk-size&quot;)</span></code>).</p>
+<p>If we flipped that, and instead read as much of the rows as possible, we’ll see slower performance.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(1, -1, &quot;auto&quot;))
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 8.58 s, sys: 1.08 s, total: 9.66 s
+Wall time: 11.2 s
+</pre></div></div>
+</div>
+<p>That said, reading is typically just the first step in a larger computation. You’d want to consider what chunking is best for your whole computation. See <a class="reference external" href="https://docs.dask.org/en/latest/array-chunks.html">https://docs.dask.org/en/latest/array-chunks.html</a> for more on choosing chunks.</p>
+</div>
+<div class="section" id="Caching-Considerations">
+<h2>Caching Considerations<a class="headerlink" href="#Caching-Considerations" title="Permalink to this headline">¶</a></h2>
+<p>Specifying <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> will disable some internal caching done by xarray or rasterio. For example, the first and second reads here are roughly the same, since nothing is cached.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.49 s, sys: 392 ms, total: 2.88 s
+Wall time: 3.25 s
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>rds.where(rds!=rds.nodata).plot();
+<span></span>%time _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_merge_4_0.png" src="../_images/examples_merge_4_0.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>merged.where(merged!=merged.nodata).plot()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fb8d27c0908&gt;
+CPU times: user 2.48 s, sys: 292 ms, total: 2.78 s
+Wall time: 2.97 s
 </pre></div></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> the initial read is slower (since some threads are waiting around for a lock).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>ds = rioxarray.open_rasterio(url, chunks=(4, &quot;auto&quot;, -1))  # use the default locking
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_merge_5_1.png" src="../_images/examples_merge_5_1.png" />
+<div class="highlight"><pre>
+CPU times: user 2.15 s, sys: 284 ms, total: 2.44 s
+Wall time: 5.03 s
+</pre></div></div>
+</div>
+<p>But thanks to caching, subsequent reads are much faster.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>%time _ = ds.mean().compute()
+</pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 223 ms, sys: 64.9 ms, total: 288 ms
+Wall time: 200 ms
+</pre></div></div>
+</div>
+<p>If you’re reapeatedly reading subsets of the data, consider using <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> or <code class="docutils literal notranslate"><span class="pre">lock=some_lock_object</span></code> to benefit from the caching.</p>
 </div>
 </div>
 
@@ -555,8 +630,8 @@ with rioxarray.open_rasterio(dem_test) as rds:
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="interpolate_na.html" class="btn btn-neutral float-right" title="Example - Interpolate Missing Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="reproject_match.html" class="btn btn-neutral float-left" title="Example - Reproject Match" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reproject.html" class="btn btn-neutral float-right" title="Example - Reproject" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pad_box.html" class="btn btn-neutral float-left" title="Example - Pad Box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

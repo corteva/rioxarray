@@ -172,8 +172,10 @@
 <span class="sd">Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py # noqa</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
 
@@ -183,7 +185,7 @@
 <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="kn">import</span> <span class="n">WarpedVRT</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">IndexVariable</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.common</span> <span class="kn">import</span> <span class="n">BackendArray</span>
-<span class="kn">from</span> <span class="nn">xarray.backends.file_manager</span> <span class="kn">import</span> <span class="n">CachingFileManager</span>
+<span class="kn">from</span> <span class="nn">xarray.backends.file_manager</span> <span class="kn">import</span> <span class="n">CachingFileManager</span><span class="p">,</span> <span class="n">FileManager</span>
 <span class="kn">from</span> <span class="nn">xarray.backends.locks</span> <span class="kn">import</span> <span class="n">SerializableLock</span>
 <span class="kn">from</span> <span class="nn">xarray.coding</span> <span class="kn">import</span> <span class="n">times</span><span class="p">,</span> <span class="n">variables</span>
 <span class="kn">from</span> <span class="nn">xarray.core</span> <span class="kn">import</span> <span class="n">indexing</span>
@@ -195,6 +197,42 @@
 
 <span class="c1"># TODO: should this be GDAL_LOCK instead?</span>
 <span class="n">RASTERIO_LOCK</span> <span class="o">=</span> <span class="n">SerializableLock</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+    <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+
+    <span class="k">class</span> <span class="nc">nullcontext</span><span class="p">(</span><span class="n">contextlib</span><span class="o">.</span><span class="n">AbstractContextManager</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">excinfo</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">URIManager</span><span class="p">(</span><span class="n">FileManager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">opener</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_opener</span> <span class="o">=</span> <span class="n">opener</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">needs_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opener</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mode</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">acquire_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">needs_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">needs_lock</span><span class="o">=</span><span class="n">needs_lock</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">needs_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">pass</span>
 
 
 <span class="k">class</span> <span class="nc">RasterioArrayWrapper</span><span class="p">(</span><span class="n">BackendArray</span><span class="p">):</span>
@@ -762,6 +800,7 @@
     <span class="n">variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">default_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="c1"># pylint: disable=too-many-statements,too-many-locals,too-many-branches</span>
@@ -804,11 +843,20 @@
 <span class="sd">        NumPy arrays when accessed to avoid reading from the underlying data-</span>
 <span class="sd">        store multiple times. Defaults to True unless you specify the `chunks`</span>
 <span class="sd">        argument to use dask, in which case it defaults to False.</span>
-<span class="sd">    lock: False, True or threading.Lock, optional</span>
-<span class="sd">        If chunks is provided, this argument is passed on to</span>
-<span class="sd">        :py:func:`dask.array.from_array`. By default, a global lock is</span>
-<span class="sd">        used to avoid issues with concurrent access to the same file when using</span>
-<span class="sd">        dask&#39;s multithreaded backend.</span>
+<span class="sd">    lock: bool or dask.utils.SerializableLock, optional</span>
+
+<span class="sd">        If chunks is provided, this argument is used to ensure that only one</span>
+<span class="sd">        thread per process is reading from a rasterio file object at a time.</span>
+
+<span class="sd">        When ``lock=True`` or a lock instance is provided,</span>
+<span class="sd">        a :class:`xarray.backends.CachingFileManager` is used to cache File objects.</span>
+<span class="sd">        Since rasterio also caches some data, this will make repeated reads from the</span>
+<span class="sd">        same object fast.</span>
+
+<span class="sd">        When ``lock=False``, no lock is used, allowing for completely parallel reads</span>
+<span class="sd">        from multiple threads or processes. However, a new file handle is opened on</span>
+<span class="sd">        each request.</span>
+
 <span class="sd">    masked: bool, optional</span>
 <span class="sd">        If True, read the mask and set values to NaN. Defaults to False.</span>
 <span class="sd">    mask_and_scale: bool, optional</span>
@@ -853,16 +901,25 @@
 
     <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lock</span> <span class="o">=</span> <span class="n">RASTERIO_LOCK</span>
+    <span class="k">elif</span> <span class="n">lock</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">lock</span> <span class="o">=</span> <span class="n">NO_LOCK</span>
 
     <span class="c1"># ensure default for sharing is False</span>
     <span class="c1"># ref https://github.com/mapbox/rasterio/issues/1504</span>
     <span class="n">open_kwargs</span><span class="p">[</span><span class="s2">&quot;sharing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">open_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sharing&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">rio_warnings</span><span class="p">:</span>
-        <span class="n">manager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span>
-            <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_LOCK</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span>
+                <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">URIManager</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span><span class="p">)</span>
         <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
         <span class="n">captured_warnings</span> <span class="o">=</span> <span class="n">rio_warnings</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+    <span class="n">captured_warnings</span> <span class="o">=</span> <span class="n">rio_warnings</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="c1"># raise the NotGeoreferencedWarning if applicable</span>
     <span class="k">for</span> <span class="n">rio_warning</span> <span class="ow">in</span> <span class="n">captured_warnings</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
