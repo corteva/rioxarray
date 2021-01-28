@@ -25,12 +25,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
+        rasterio-version: [1.2]
         include:
           - os: windows-latest
             python-version: 3.7
           - os: windows-latest
             python-version: 3.8
-
+          - os: ubuntu-latest
+            python-version: 3.7
+            rasterio-version: 1.1
     steps:
       - uses: actions/checkout@v2
 
@@ -44,7 +47,7 @@ jobs:
       - name: Install Env
         shell: bash
         run: |
-          conda create -n test python=${{ matrix.python-version }} rasterio xarray scipy pyproj netcdf4 dask pandoc
+          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray scipy pyproj netcdf4 dask pandoc
           source activate test
           python -m pip install -e .[all]
 

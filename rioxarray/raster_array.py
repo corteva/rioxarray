@@ -11,9 +11,11 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import warnings
+from distutils.version import LooseVersion
 from typing import Iterable
 
 import numpy as np
+import rasterio
 import rasterio.warp
 import xarray
 from rasterio.crs import CRS
@@ -591,7 +593,8 @@ class RasterArray(XRasterBase):
         Parameters
         ----------
         geometries: list
-            A list of geojson geometry dicts.
+            A list of geojson geometry dicts or objects with __geom_interface__ with
+            if you have rasterio 1.2+.
         crs: :obj:`rasterio.crs.CRS`, optional
             The CRS of the input geometries. Default is to assume it is the same
             as the dataset.
@@ -620,10 +623,13 @@ class RasterArray(XRasterBase):
             )
         crs = CRS.from_wkt(crs_to_wkt(crs)) if crs is not None else self.crs
         if self.crs != crs:
-            geometries = [
-                rasterio.warp.transform_geom(crs, self.crs, geometry)
-                for geometry in geometries
-            ]
+            if LooseVersion(rasterio.__version__) >= LooseVersion("1.2"):
+                geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)
+            else:
+                geometries = [
+                    rasterio.warp.transform_geom(crs, self.crs, geometry)
+                    for geometry in geometries
+                ]
 
         clip_mask_arr = geometry_mask(
             geometries=geometries,
@@ -745,15 +751,18 @@ class RasterArray(XRasterBase):
     def to_raster(
         self,
         raster_path,
-        driver="GTiff",
+        driver=None,
         dtype=None,
         tags=None,
         windowed=False,
         recalc_transform=True,
+        lock=None,
         **profile_kwargs,
     ):
         """
         Export the DataArray to a raster file.
+
+        ..versionadded:: 0.2 lock
 
         Parameters
         ----------
@@ -761,22 +770,28 @@ class RasterArray(XRasterBase):
             The path to output the raster to.
         driver: str, optional
             The name of the GDAL/rasterio driver to use to export the raster.
-            Default is "GTiff".
+            Default is "GTiff" if rasterio < 1.2 otherwise it will autodetect.
         dtype: str, optional
             The data type to write the raster to. Default is the datasets dtype.
         tags: dict, optional
             A dictionary of tags to write to the raster.
         windowed: bool, optional
             If True, it will write using the windows of the output raster.
-            This only works if the output raster is tiled. As such, if you
-            set this to True, the output raster will be tiled.
+            This is useful for loading data in chunks when writing. Does not
+            do anything when writing with dask.
             Default is False.
+        lock: boolean or Lock, optional
+            Lock to use to write data using dask.
+            If not supplied, it will use a single process for writing.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
 
         """
+        if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
+            driver = "GTiff"
+
         dtype = str(self._obj.dtype) if dtype is None else dtype
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
@@ -823,5 +838,6 @@ class RasterArray(XRasterBase):
             transform=self.transform(recalc=recalc_transform),
             nodata=rio_nodata,
             windowed=windowed,
+            lock=lock,
             **out_profile,
         )
