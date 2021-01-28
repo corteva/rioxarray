@@ -9,6 +9,7 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 import contextlib
 import os
 import re
+import sys
 import warnings
 from distutils.version import LooseVersion
 
@@ -30,7 +31,18 @@ from rioxarray.rioxarray import affine_to_coords
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
-NO_LOCK = contextlib.nullcontext()
+
+if sys.version_info >= (3, 7):
+    NO_LOCK = contextlib.nullcontext()
+else:
+    class nullcontext(contextlib.AbstractContextManager):
+        def __enter__(self):
+            pass
+
+        def __exit__(self, *excinfo):
+            pass
+    NO_LOCK = nullcontext()
+
 
 
 class URIManager(FileManager):
