@@ -35,14 +35,15 @@ RASTERIO_LOCK = SerializableLock()
 if sys.version_info >= (3, 7):
     NO_LOCK = contextlib.nullcontext()
 else:
+
     class nullcontext(contextlib.AbstractContextManager):
         def __enter__(self):
             pass
 
         def __exit__(self, *excinfo):
             pass
-    NO_LOCK = nullcontext()
 
+    NO_LOCK = nullcontext()
 
 
 class URIManager(FileManager):
