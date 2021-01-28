@@ -118,6 +118,18 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "TomAugspurger",
+      "name": "Tom Augspurger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1312546?v=4",
+      "profile": "https://tomaugspurger.github.io/",
+      "contributions": [
+        "code",
+        "bug",
+        "ideas",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
