@@ -110,7 +110,6 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reading and Writing with Dask</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#No-distributed-computing-example">No distributed computing example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Multithreaded-example">Multithreaded example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Multiprocessing-example">Multiprocessing example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Multiple-worker-example">Multiple worker example</a></li>
 </ul>
 </li>
@@ -522,8 +521,8 @@ xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
 <span></span>xds = rioxarray.open_rasterio(
     &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
     chunks=True,
-    lock=threading.Lock(),
-)
+    lock=False,
+    # lock=threading.Lock(), # when too many file handles open
 xds.rio.to_raster(
     &quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock(),
 )
@@ -531,47 +530,35 @@ xds.rio.to_raster(
 </div>
 </div>
 </div>
-<div class="section" id="Multiprocessing-example">
-<h2>Multiprocessing example<a class="headerlink" href="#Multiprocessing-example" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput nblast docutils container">
+<div class="section" id="Multiple-worker-example">
+<h2>Multiple worker example<a class="headerlink" href="#Multiple-worker-example" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>with LocalCluster() as cluster, Client(cluster) as client:
-    mp_manager = multiprocessing.Manager()
     xds = rioxarray.open_rasterio(
         &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
         chunks=True,
-        lock=mp_manager.Lock()
-    )
-    xds.rio.to_raster(
-        &quot;dask_multiprocess.tif&quot;, tiled=True, lock=mp_manager.Lock(),
-    )
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="Multiple-worker-example">
-<h2>Multiple worker example<a class="headerlink" href="#Multiple-worker-example" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>with LocalCluster() as cluster, Client(cluster) as client:
-    xds = rioxarray.open_rasterio(
-        &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-        chunks=True,
-        lock=Lock(&quot;rio-read&quot;, client=client)
+        lock=False,
+        # lock=Lock(&quot;rio-read&quot;, client=client), # when too many file handles open
     )
     xds.rio.to_raster(
         &quot;dask_multiworker.tif&quot;,
         tiled=True,
-        lock=Lock(&quot;rio-write&quot;, client=client),
+        lock=Lock(&quot;rio&quot;, client=client),
     )
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
 </div>
 </div>
 </div>
