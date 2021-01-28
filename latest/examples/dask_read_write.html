@@ -107,7 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reading and Writing with Dask</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#No-distrubuted-computing-example">No distrubuted computing example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#No-distributed-computing-example">No distributed computing example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Multithreaded-example">Multithreaded example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Multiprocessing-example">Multiprocessing example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Multiple-worker-example">Multiple worker example</a></li>
@@ -487,15 +487,15 @@ import rioxarray
 </pre></div>
 </div>
 </div>
-<p>When using dask for writing, you should be careful about what lock you use for your process. You need to ensure that you have a lock for each worker, so the more fine-grained the better.</p>
+<p>Tips for using dask locks: - Be careful about what lock you use for your process. It is required to have a lock for each worker, so the more fine-grained the better. - The reading and writing processes need the same type of lock. They don’t have to share the same lock, but they do nead a lock of the same type.</p>
 <p>See docs for:</p>
 <ul class="simple">
 <li><a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></li>
 <li>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
 <li>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
 </ul>
-<div class="section" id="No-distrubuted-computing-example">
-<h2>No distrubuted computing example<a class="headerlink" href="#No-distrubuted-computing-example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="No-distributed-computing-example">
+<h2>No distributed computing example<a class="headerlink" href="#No-distributed-computing-example" title="Permalink to this headline">¶</a></h2>
 <p>Note: Without a lock provided, <code class="docutils literal notranslate"><span class="pre">to_raster</span></code> does not use dask to write to disk.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -521,8 +521,11 @@ xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
 <span></span>xds = rioxarray.open_rasterio(
     &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
     chunks=True,
+    lock=threading.Lock(),
 )
-xds.rio.to_raster(&quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock())
+xds.rio.to_raster(
+    &quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock(),
+)
 </pre></div>
 </div>
 </div>
@@ -539,7 +542,8 @@ xds.rio.to_raster(&quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock()
     xds = rioxarray.open_rasterio(
         &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
         chunks=True,
-    ).persist()
+        lock=mp_manager.Lock()
+    )
     xds.rio.to_raster(
         &quot;dask_multiprocess.tif&quot;, tiled=True, lock=mp_manager.Lock(),
     )
@@ -558,9 +562,12 @@ xds.rio.to_raster(&quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock()
     xds = rioxarray.open_rasterio(
         &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
         chunks=True,
-    ).persist()
+        lock=Lock(&quot;rio-read&quot;, client=client)
+    )
     xds.rio.to_raster(
-        &quot;dask_multiworker.tif&quot;, tiled=True, lock=Lock(&quot;rio&quot;, client=client),
+        &quot;dask_multiworker.tif&quot;,
+        tiled=True,
+        lock=Lock(&quot;rio-write&quot;, client=client),
     )
 </pre></div>
 </div>
