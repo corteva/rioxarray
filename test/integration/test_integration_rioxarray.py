@@ -366,16 +366,19 @@ def test_slice_xy(modis_clip):
 
 
 @pytest.mark.parametrize(
-    "open_func",
+    "open_func,from_disk",
     [
-        xarray.open_rasterio,
-        rioxarray.open_rasterio,
-        partial(rioxarray.open_rasterio, parse_coordinates=False),
+        (xarray.open_rasterio, False),
+        (rioxarray.open_rasterio, False),
+        (rioxarray.open_rasterio, True),
+        (partial(rioxarray.open_rasterio, parse_coordinates=False), False),
+        (partial(rioxarray.open_rasterio, parse_coordinates=False), True),
+        (partial(rioxarray.open_rasterio, parse_coordinates=False, masked=True), True),
     ],
 )
-def test_clip_geojson(open_func):
+def test_clip_geojson(open_func, from_disk):
     with open_func(
-        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
     ) as xdi:
         # get subset for testing
         subset = xdi.isel(x=slice(150, 160), y=slice(100, 150))
@@ -384,8 +387,8 @@ def test_clip_geojson(open_func):
         comp_subset.rio.write_transform(inplace=True)
         # add grid mapping for test
         comp_subset.rio.write_crs(subset.rio.crs, inplace=True)
-        # make sure nodata exists for test
-        comp_subset.attrs["_FillValue"] = comp_subset.rio.nodata
+        if comp_subset.rio.encoded_nodata is None:
+            comp_subset.rio.write_nodata(comp_subset.rio.nodata, inplace=True)
 
         geometries = [
             {
@@ -402,8 +405,17 @@ def test_clip_geojson(open_func):
             }
         ]
         # test data array
-        clipped = xdi.rio.clip(geometries)
-        _assert_xarrays_equal(clipped, comp_subset)
+        clipped = xdi.rio.clip(geometries, from_disk=from_disk)
+        if from_disk:
+            _assert_xarrays_equal(clipped[:, 1:, 1:], comp_subset)
+            if comp_subset.rio.encoded_nodata is not None:
+                assert numpy.isnan(clipped.values[:, 0, :]).all()
+                assert numpy.isnan(clipped.values[:, :, 0]).all()
+            else:
+                assert (clipped.values[:, 0, :] == comp_subset.rio.nodata).all()
+                assert (clipped.values[:, :, 0] == comp_subset.rio.nodata).all()
+        else:
+            _assert_xarrays_equal(clipped, comp_subset)
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(geometries)
@@ -421,7 +433,13 @@ def test_clip_geojson(open_func):
 
 
 @pytest.mark.parametrize(
-    "invert, expected_sum", [(False, 2150837592), (True, 535691205)]
+    "invert, from_disk, expected_sum",
+    [
+        (False, False, 2150837592),
+        (True, False, 535691205),
+        (False, True, 2150837592),
+        (True, True, 535691205),
+    ],
 )
 @pytest.mark.parametrize(
     "open_func",
@@ -431,7 +449,7 @@ def test_clip_geojson(open_func):
         partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
-def test_clip_geojson__no_drop(open_func, invert, expected_sum):
+def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum):
     with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
@@ -450,7 +468,9 @@ def test_clip_geojson__no_drop(open_func, invert, expected_sum):
             }
         ]
         # test data array
-        clipped = xdi.rio.clip(geometries, "epsg:4326", drop=False, invert=invert)
+        clipped = xdi.rio.clip(
+            geometries, "epsg:4326", drop=False, invert=invert, from_disk=from_disk
+        )
         assert clipped.rio.crs == xdi.rio.crs
         assert clipped.shape == xdi.shape
         assert clipped.sum().item() == expected_sum

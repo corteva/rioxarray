@@ -16,6 +16,7 @@ from typing import Iterable
 
 import numpy as np
 import rasterio
+import rasterio.mask
 import rasterio.warp
 import xarray
 from rasterio.crs import CRS
@@ -128,6 +129,67 @@ def _ensure_nodata_dtype(original_nodata, new_dtype):
             f"changed to ({nodata}) to match the dtype of the data."
         )
     return nodata
+
+
+def _clip_from_disk(xds, geometries, all_touched, drop, invert):
+    """
+    clip from disk if the file object is available
+    """
+    try:
+        out_image, out_transform = rasterio.mask.mask(
+            xds._file_obj.acquire(),
+            geometries,
+            all_touched=all_touched,
+            invert=invert,
+            crop=drop,
+        )
+        if xds.rio.encoded_nodata is not None and not np.isnan(xds.rio.encoded_nodata):
+            out_image = out_image.astype(np.float64)
+            out_image[out_image == xds.rio.encoded_nodata] = np.nan
+
+        height, width = out_image.shape[-2:]
+        cropped_ds = xarray.DataArray(
+            name=xds.name,
+            data=out_image,
+            coords=_make_coords(xds, out_transform, width, height),
+            dims=xds.dims,
+            attrs=xds.attrs,
+        )
+        cropped_ds.encoding = xds.encoding
+        return cropped_ds
+    except AttributeError:
+        return None
+
+
+def _clip_xarray(xds, geometries, all_touched, drop, invert):
+    """
+    clip the xarray DataArray
+    """
+    clip_mask_arr = geometry_mask(
+        geometries=geometries,
+        out_shape=(int(xds.rio.height), int(xds.rio.width)),
+        transform=xds.rio.transform(recalc=True),
+        invert=not invert,
+        all_touched=all_touched,
+    )
+    clip_mask_xray = xarray.DataArray(
+        clip_mask_arr,
+        dims=(xds.rio.y_dim, xds.rio.x_dim),
+    )
+    cropped_ds = xds.where(clip_mask_xray)
+    if drop:
+        cropped_ds.rio.set_spatial_dims(
+            x_dim=xds.rio.x_dim, y_dim=xds.rio.y_dim, inplace=True
+        )
+        cropped_ds = cropped_ds.rio.isel_window(
+            rasterio.windows.get_data_window(
+                np.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
+            )
+        )
+    if xds.rio.nodata is not None and not np.isnan(xds.rio.nodata):
+        cropped_ds = cropped_ds.fillna(xds.rio.nodata)
+
+    return cropped_ds.astype(xds.dtype)
 
 
 @xarray.register_dataarray_accessor("rio")
@@ -570,7 +632,15 @@ class RasterArray(XRasterBase):
         _add_attrs_proj(cl_array, self._obj)
         return cl_array
 
-    def clip(self, geometries, crs=None, all_touched=False, drop=True, invert=False):
+    def clip(
+        self,
+        geometries,
+        crs=None,
+        all_touched=False,
+        drop=True,
+        invert=False,
+        from_disk=False,
+    ):
         """
         Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -589,6 +659,8 @@ class RasterArray(XRasterBase):
             >>> xds = xarray.open_rasterio('cool_raster.tif')
             >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
 
+
+        .. versionadded:: 0.2 from_disk
 
         Parameters
         ----------
@@ -610,6 +682,10 @@ class RasterArray(XRasterBase):
             If False, pixels that do not overlap shapes will be set as nodata.
             Otherwise, pixels that overlap the shapes will be set as nodata.
             False by default.
+        from_disk: boolean, optional
+            If True, it will clip from disk using rasterio.mask.mask if possible.
+            This is beneficial when the size of the data is larger than memory.
+            Default is False.
 
         Returns
         -------
@@ -630,32 +706,23 @@ class RasterArray(XRasterBase):
                     rasterio.warp.transform_geom(crs, self.crs, geometry)
                     for geometry in geometries
                 ]
-
-        clip_mask_arr = geometry_mask(
-            geometries=geometries,
-            out_shape=(int(self.height), int(self.width)),
-            transform=self.transform(recalc=True),
-            invert=not invert,
-            all_touched=all_touched,
-        )
-        clip_mask_xray = xarray.DataArray(
-            clip_mask_arr,
-            dims=(self.y_dim, self.x_dim),
-        )
-        cropped_ds = self._obj.where(clip_mask_xray)
-        if drop:
-            cropped_ds.rio.set_spatial_dims(
-                x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+        cropped_ds = None
+        if from_disk:
+            cropped_ds = _clip_from_disk(
+                self._obj,
+                geometries=geometries,
+                all_touched=all_touched,
+                drop=drop,
+                invert=invert,
             )
-            cropped_ds = cropped_ds.rio.isel_window(
-                rasterio.windows.get_data_window(
-                    np.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
-                )
+        if cropped_ds is None:
+            cropped_ds = _clip_xarray(
+                self._obj,
+                geometries=geometries,
+                all_touched=all_touched,
+                drop=drop,
+                invert=invert,
             )
-        if self.nodata is not None and not np.isnan(self.nodata):
-            cropped_ds = cropped_ds.fillna(self.nodata)
-
-        cropped_ds = cropped_ds.astype(self._obj.dtype)
 
         if (
             cropped_ds.coords[self.x_dim].size < 1
