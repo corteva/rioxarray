@@ -143,15 +143,11 @@ def _clip_from_disk(xds, geometries, all_touched, drop, invert):
             invert=invert,
             crop=drop,
         )
-        if len(out_image.shape) == 3:
-            height, width = out_image.shape[1:]
-        else:
-            height, width = out_image.shape
-
         if xds.rio.encoded_nodata is not None and not np.isnan(xds.rio.encoded_nodata):
             out_image = out_image.astype(np.float64)
             out_image[out_image == xds.rio.encoded_nodata] = np.nan
 
+        height, width = out_image.shape[-2:]
         cropped_ds = xarray.DataArray(
             name=xds.name,
             data=out_image,
