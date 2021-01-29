@@ -634,7 +634,6 @@ def open_rasterio(
     variable=None,
     group=None,
     default_name=None,
-    use_files=False,
     **open_kwargs,
 ):
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
