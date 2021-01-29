@@ -870,7 +870,7 @@ Default is the grid_mapping name of the dataset.</li>
 <p>This is the GIS extension for <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
 <dl class="method">
 <dt id="rioxarray.raster_array.RasterArray.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em>, <em>from_disk=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> by geojson like geometry dicts.</p>
 <p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
 <p class="rubric">Examples</p>
@@ -885,6 +885,9 @@ Default is the grid_mapping name of the dataset.</li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;cool_raster.tif&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cropped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="o">=</span><span class="n">cropping_geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.2: </span>from_disk</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -904,6 +907,9 @@ Default is True.</li>
 <li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
 Otherwise, pixels that overlap the shapes will be set as nodata.
 False by default.</li>
+<li><strong>from_disk</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, it will clip from disk using rasterio.mask.mask if possible.
+This is beneficial when the size of the data is larger than memory.
+Default is False.</li>
 </ul>
 </td>
 </tr>
@@ -1205,7 +1211,7 @@ If input_nodata is None, it will remove the _FillValue attribute.</li>
 <p>This is the GIS extension for <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em>, <em>from_disk=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> by geojson like geometry dicts.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -1226,6 +1232,9 @@ coordinates.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cropped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="o">=</span><span class="n">cropping_geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.2: </span>from_disk</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1243,6 +1252,9 @@ Default is True.</li>
 <li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
 Otherwise, pixels that overlap the shapes will be set as nodata.
 False by default.</li>
+<li><strong>from_disk</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, it will clip from disk using rasterio.mask.mask if possible.
+This is beneficial when the size of the data is larger than memory.
+Default is False.</li>
 </ul>
 </td>
 </tr>

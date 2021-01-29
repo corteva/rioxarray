@@ -182,6 +182,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">rasterio.mask</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
 <span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
@@ -294,6 +295,67 @@
             <span class="sa">f</span><span class="s2">&quot;changed to (</span><span class="si">{</span><span class="n">nodata</span><span class="si">}</span><span class="s2">) to match the dtype of the data.&quot;</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">nodata</span>
+
+
+<span class="k">def</span> <span class="nf">_clip_from_disk</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    clip from disk if the file object is available</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">,</span> <span class="n">out_transform</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span>
+            <span class="n">xds</span><span class="o">.</span><span class="n">_file_obj</span><span class="o">.</span><span class="n">acquire</span><span class="p">(),</span>
+            <span class="n">geometries</span><span class="p">,</span>
+            <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+            <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+            <span class="n">crop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">):</span>
+            <span class="n">out_image</span> <span class="o">=</span> <span class="n">out_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">out_image</span><span class="p">[</span><span class="n">out_image</span> <span class="o">==</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">out_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">out_image</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">out_transform</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span>
+            <span class="n">dims</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">cropped_ds</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">encoding</span>
+        <span class="k">return</span> <span class="n">cropped_ds</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_clip_xarray</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    clip the xarray DataArray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">clip_mask_arr</span> <span class="o">=</span> <span class="n">geometry_mask</span><span class="p">(</span>
+        <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
+        <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span><span class="p">)),</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">invert</span><span class="o">=</span><span class="ow">not</span> <span class="n">invert</span><span class="p">,</span>
+        <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">clip_mask_xray</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">clip_mask_arr</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clip_mask_xray</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drop</span><span class="p">:</span>
+        <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span>
+            <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
+        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RasterArray"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
@@ -736,7 +798,15 @@
         <span class="n">_add_attrs_proj</span><span class="p">(</span><span class="n">cl_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cl_array</span></div>
 
-<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">geometries</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">from_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.</span>
 
@@ -755,6 +825,8 @@
 <span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
 <span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
 
+
+<span class="sd">        .. versionadded:: 0.2 from_disk</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -776,6 +848,10 @@
 <span class="sd">            If False, pixels that do not overlap shapes will be set as nodata.</span>
 <span class="sd">            Otherwise, pixels that overlap the shapes will be set as nodata.</span>
 <span class="sd">            False by default.</span>
+<span class="sd">        from_disk: boolean, optional</span>
+<span class="sd">            If True, it will clip from disk using rasterio.mask.mask if possible.</span>
+<span class="sd">            This is beneficial when the size of the data is larger than memory.</span>
+<span class="sd">            Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -796,32 +872,23 @@
                     <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">geometry</span> <span class="ow">in</span> <span class="n">geometries</span>
                 <span class="p">]</span>
-
-        <span class="n">clip_mask_arr</span> <span class="o">=</span> <span class="n">geometry_mask</span><span class="p">(</span>
-            <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
-            <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)),</span>
-            <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">invert</span><span class="o">=</span><span class="ow">not</span> <span class="n">invert</span><span class="p">,</span>
-            <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">clip_mask_xray</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-            <span class="n">clip_mask_arr</span><span class="p">,</span>
-            <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span>
-        <span class="p">)</span>
-        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clip_mask_xray</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">drop</span><span class="p">:</span>
-            <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-                <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">from_disk</span><span class="p">:</span>
+            <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">_clip_from_disk</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
+                <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+                <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
+                <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span>
-                <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">)</span>
-                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">cropped_ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">_clip_xarray</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
+                <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+                <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
+                <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
-            <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
-
-        <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">cropped_ds</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span>
