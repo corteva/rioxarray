@@ -220,7 +220,15 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def clip(self, geometries, crs=None, all_touched=False, drop=True, invert=False):
+    def clip(
+        self,
+        geometries,
+        crs=None,
+        all_touched=False,
+        drop=True,
+        invert=False,
+        from_disk=False,
+    ):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
@@ -242,6 +250,9 @@ class RasterDataset(XRasterBase):
             >>> xds = xarray.open_rasterio('cool_raster.tif')
             >>> cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)
 
+
+        .. versionadded:: 0.2 from_disk
+
         Parameters
         ----------
         geometries: list
@@ -261,6 +272,10 @@ class RasterDataset(XRasterBase):
             If False, pixels that do not overlap shapes will be set as nodata.
             Otherwise, pixels that overlap the shapes will be set as nodata.
             False by default.
+        from_disk: boolean, optional
+            If True, it will clip from disk using rasterio.mask.mask if possible.
+            This is beneficial when the size of the data is larger than memory.
+            Default is False.
 
         Returns
         -------
@@ -278,6 +293,7 @@ class RasterDataset(XRasterBase):
                     all_touched=all_touched,
                     drop=drop,
                     invert=invert,
+                    from_disk=from_disk,
                 )
             )
         return clipped_dataset.rio.set_spatial_dims(
