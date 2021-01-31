@@ -1038,9 +1038,11 @@ def test_geographic_resample_integer():
         xarray.open_dataarray,
         partial(rioxarray.open_rasterio, masked=True),
         partial(rioxarray.open_rasterio, masked=True, chunks=True),
-        partial(rioxarray.open_rasterio, masked=True, chunks=True,
-                lock=threading.Lock())
-        ])
+        partial(
+            rioxarray.open_rasterio, masked=True, chunks=True, lock=threading.Lock()
+        ),
+    ],
+)
 @pytest.mark.parametrize(
     "windowed, recalc_transform",
     [
@@ -1054,9 +1056,11 @@ def test_geographic_resample_integer():
         (None, False),
         (threading.Lock(), False),
         (threading.Lock(), True),
-    ]
+    ],
 )
-def test_to_raster(open_method, windowed, recalc_transform, write_lock, compute, tmpdir):
+def test_to_raster(
+    open_method, windowed, recalc_transform, write_lock, compute, tmpdir
+):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with open_method(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
