@@ -139,12 +139,11 @@ class RasterioWriter:
             Lock to use to write data using dask.
             If not supplied, it will use a single process.
         compute: bool
-            If True (default) and the data array is a dask array and windowed
-            is True, then compute and save the data immediately. If False,
-            return a dask Delayed object. Call ".compute()" on the Delayed
-            object to compute the result later. Call
-            ``dask.compute(delayed1, delayed2)`` to save multiple delayed
-            files at once.
+            If True (default) and data is a dask array, then compute and save
+            the data immediately. If False, return a dask Delayed object.
+            Call ".compute()" on the Delayed object to compute the result
+            later. Call ``dask.compute(delayed1, delayed2)`` to save
+            multiple delayed files at once.
         **kwargs
             Keyword arguments to pass into writing the raster.
         """

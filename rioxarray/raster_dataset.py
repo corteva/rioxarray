@@ -362,12 +362,11 @@ class RasterDataset(XRasterBase):
             Lock to use to write data using dask.
             If not supplied, it will use a single process for writing.
         compute: bool
-            If True and the data array is a dask array and windowed
-            is True, then compute and save the data immediately. If False,
-            return a dask Delayed object. Call ".compute()" on the Delayed
-            object to compute the result later. Call
-            ``dask.compute(delayed1, delayed2)`` to save multiple delayed
-            files at once. Default is True.
+            If True and data is a dask array, then compute and save
+            the data immediately. If False, return a dask Delayed object.
+            Call ".compute()" on the Delayed object to compute the result
+            later. Call ``dask.compute(delayed1, delayed2)`` to save
+            multiple delayed files at once. Default is True.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
