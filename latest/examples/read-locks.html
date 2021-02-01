@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Reading COGs in Parallel &mdash; rioxarray 0.2.0 documentation</title>
+  <title>Example - Reading COGs in Parallel &mdash; rioxarray 0.2.0 documentation</title>
   
 
   
@@ -100,7 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Reading COGs in Parallel</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reading COGs in Parallel</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Scheduler-Choice">Scheduler Choice</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Reading-without-Locks">Reading without Locks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Chunking">Chunking</a></li>
@@ -178,7 +178,7 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Reading COGs in Parallel</li>
+      <li>Example - Reading COGs in Parallel</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -467,15 +467,16 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Reading-COGs-in-Parallel">
-<h1>Reading COGs in Parallel<a class="headerlink" href="#Reading-COGs-in-Parallel" title="Permalink to this headline">¶</a></h1>
-<p>COGs can be internally chunked, which makes it possible to read them in parallel from multiple threads. However, the libraries <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> builds on, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">GDAL</span></code>, require some care to be used safely from multiple threads within a single process. By default, <code class="docutils literal notranslate"><span class="pre">rio.open_rasterio</span></code> will acquire a per-process lock when reading a chunk of a COG.</p>
+<div class="section" id="Example---Reading-COGs-in-Parallel">
+<h1>Example - Reading COGs in Parallel<a class="headerlink" href="#Example---Reading-COGs-in-Parallel" title="Permalink to this headline">¶</a></h1>
+<p>Cloud Optimized Geotiffs (COGs) can be internally chunked, which makes it possible to read them in parallel from multiple threads. However, the libraries <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> builds on, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">GDAL</span></code>, require some care to be used safely from multiple threads within a single process. By default, <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a> will acquire a per-process lock when reading a chunk of a COG.</p>
 <p>If you’re using <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> with <a class="reference external" href="http://docs.dask.org/">Dask</a> through the <code class="docutils literal notranslate"><span class="pre">chunks</span></code> keyword, you can also specify the <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> keyword to ensure that reading <em>and</em> operating on your data happen in parallel.</p>
 <div class="section" id="Scheduler-Choice">
 <h2>Scheduler Choice<a class="headerlink" href="#Scheduler-Choice" title="Permalink to this headline">¶</a></h2>
 <p>Dask has <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html">several schedulers</a> which run computations in parallel. Which scheduler is best depends on a variety of factors, including whether your computation holds Python’s Global Interpreter Lock, whether how much data needs to be moved around, and whether you need more than one machine’s computational power. This section about read-locks only applies if you have more than one thread in a process. This will happen with Dask’s <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html#local-threads">local threaded
 scheduler</a> and its <a class="reference external" href="https://distributed.dask.org/en/latest/">distributed scheduler</a> when configured to use more than one thread per worker.</p>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> objects will use the local <code class="docutils literal notranslate"><span class="pre">threaded</span></code> scheduler.</p>
+<p>Note: Also see <a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p>
 </div>
 <div class="section" id="Reading-without-Locks">
 <h2>Reading without Locks<a class="headerlink" href="#Reading-without-Locks" title="Permalink to this headline">¶</a></h2>
