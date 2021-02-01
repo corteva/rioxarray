@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.2.0
 ------
 - ENH: Added `rio.estimate_utm_crs` (issue #181)
