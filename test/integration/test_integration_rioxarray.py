@@ -5,6 +5,7 @@ import threading
 from distutils.version import LooseVersion
 from functools import partial
 
+import dask.array as da
 import numpy
 import pyproj
 import pytest
@@ -12,6 +13,7 @@ import rasterio
 import scipy
 import xarray
 from affine import Affine
+from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from pyproj import CRS as pCRS
 from rasterio.crs import CRS
@@ -1031,34 +1033,44 @@ def test_geographic_resample_integer():
 
 
 @pytest.mark.parametrize(
-    "open_method, windowed, recalc_transform",
+    "open_method",
     [
-        (xarray.open_dataarray, True, True),
-        (xarray.open_dataarray, False, False),
-        (partial(rioxarray.open_rasterio, masked=True), True, True),
-        (partial(rioxarray.open_rasterio, masked=True), False, False),
-        (partial(rioxarray.open_rasterio, masked=True, chunks=True), False, False),
-        (
-            partial(
-                rioxarray.open_rasterio,
-                masked=True,
-                chunks=True,
-                lock=threading.Lock(),
-            ),
-            False,
-            False,
+        xarray.open_dataarray,
+        partial(rioxarray.open_rasterio, masked=True),
+        partial(rioxarray.open_rasterio, masked=True, chunks=True),
+        partial(
+            rioxarray.open_rasterio, masked=True, chunks=True, lock=threading.Lock()
         ),
     ],
 )
-def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
+@pytest.mark.parametrize(
+    "windowed, recalc_transform",
+    [
+        (True, True),
+        (False, False),
+    ],
+)
+@pytest.mark.parametrize(
+    "write_lock, compute",
+    [
+        (None, False),
+        (threading.Lock(), False),
+        (threading.Lock(), True),
+    ],
+)
+def test_to_raster(
+    open_method, windowed, recalc_transform, write_lock, compute, tmpdir
+):
     tmp_raster = tmpdir.join("modis_raster.tif")
     test_tags = {"test": "1"}
     with open_method(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")) as mda:
-        mda.rio.to_raster(
+        delayed = mda.rio.to_raster(
             str(tmp_raster),
             windowed=windowed,
             recalc_transform=recalc_transform,
             tags=test_tags,
+            lock=write_lock,
+            compute=compute,
         )
         xds = mda.copy().squeeze()
         xds_attrs = {
@@ -1076,6 +1088,12 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
             )
         }
 
+    if write_lock is None or not isinstance(xds.data, da.Array) or compute:
+        assert delayed is None
+    else:
+        assert isinstance(delayed, Delayed)
+        delayed.compute()
+
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.count == 1
         assert rds.crs == xds.rio.crs
@@ -1087,35 +1105,44 @@ def test_to_raster(open_method, windowed, recalc_transform, tmpdir):
 
 
 @pytest.mark.parametrize(
-    "open_method, windowed",
+    "open_method",
     [
-        (xarray.open_dataset, True),
-        (xarray.open_dataset, False),
-        (partial(rioxarray.open_rasterio, masked=True), True),
-        (partial(rioxarray.open_rasterio, masked=True), False),
-        (partial(rioxarray.open_rasterio, masked=True, chunks=True), False),
-        (
-            partial(
-                rioxarray.open_rasterio,
-                masked=True,
-                chunks=True,
-                lock=threading.Lock(),
-            ),
-            False,
+        xarray.open_dataset,
+        partial(rioxarray.open_rasterio, masked=True),
+        partial(rioxarray.open_rasterio, masked=True, chunks=True),
+        partial(
+            rioxarray.open_rasterio, masked=True, chunks=True, lock=threading.Lock()
         ),
     ],
 )
-def test_to_raster_3d(open_method, windowed, tmpdir):
+@pytest.mark.parametrize("windowed", [True, False])
+@pytest.mark.parametrize(
+    "write_lock, compute",
+    [
+        (None, False),
+        (threading.Lock(), False),
+        (threading.Lock(), True),
+    ],
+)
+def test_to_raster_3d(open_method, windowed, write_lock, compute, tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with open_method(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
-        xds.rio.to_raster(str(tmp_raster), windowed=windowed)
+        delayed = xds.rio.to_raster(
+            str(tmp_raster), windowed=windowed, lock=write_lock, compute=compute
+        )
         xds_attrs = {
             key: str(value)
             for key, value in xds.attrs.items()
             if key not in ("add_offset", "nodata", "scale_factor", "transform")
         }
+
+    if write_lock is None or not isinstance(xds.data, da.Array) or compute:
+        assert delayed is None
+    else:
+        assert isinstance(delayed, Delayed)
+        delayed.compute()
 
     with rasterio.open(str(tmp_raster)) as rds:
         assert rds.crs == xds.rio.crs

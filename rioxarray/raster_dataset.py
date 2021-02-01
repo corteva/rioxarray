@@ -334,6 +334,7 @@ class RasterDataset(XRasterBase):
         windowed=False,
         recalc_transform=True,
         lock=None,
+        compute=True,
         **profile_kwargs,
     ):
         """
@@ -360,10 +361,22 @@ class RasterDataset(XRasterBase):
         lock: boolean or Lock, optional
             Lock to use to write data using dask.
             If not supplied, it will use a single process for writing.
+        compute: bool, optional
+            If True and data is a dask array, then compute and save
+            the data immediately. If False, return a dask Delayed object.
+            Call ".compute()" on the Delayed object to compute the result
+            later. Call ``dask.compute(delayed1, delayed2)`` to save
+            multiple delayed files at once. Default is True.
         **profile_kwargs
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
+
+        Returns
+        -------
+        :obj:`dask.Delayed`:
+            If the data array is a dask array and compute
+            is True. Otherwise None is returned.
 
         """
         variable_dim = "band_{}".format(uuid4())
@@ -394,7 +407,7 @@ class RasterDataset(XRasterBase):
         if self.crs is not None:
             data_array.rio.write_crs(self.crs, inplace=True)
         # write it to a raster
-        data_array.rio.to_raster(
+        return data_array.rio.to_raster(
             raster_path=raster_path,
             driver=driver,
             dtype=dtype,
@@ -402,5 +415,6 @@ class RasterDataset(XRasterBase):
             windowed=windowed,
             recalc_transform=recalc_transform,
             lock=lock,
+            compute=compute,
             **profile_kwargs,
         )
