@@ -8,7 +8,7 @@ History
 - ENH: Add support for using dask in `rio.to_raster` (issue #9, pull #219, pull #223)
 - ENH: Use the list version of `transform_geom` with rasterio 1.2+ (issue #180)
 - ENH: Support driver autodetection with rasterio 1.2+ (issue #180)
-- ENH: Allow multithreaded, lockless reads with `rio.open_rasterio` (issue #214)
+- ENH: Allow multithreaded, lockless reads with `rioxarray.open_rasterio` (issue #214)
 - ENH: Add support to clip from disk (issue #115)
 - BUG: Allow `rio.write_crs` when spatial dimensions not found (pull #186)
 - BUG: Update to support rasterio 1.2+ merge (issue #180)
