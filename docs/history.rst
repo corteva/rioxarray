@@ -5,7 +5,7 @@ Latest
 ------
 - ENH: Added `rio.estimate_utm_crs` (issue #181)
 - ENH: Add support for merging datasets with different CRS (issue #173)
-- ENH: Add support for using dask in `rio.to_raster` (issue #9)
+- ENH: Add support for using dask in `rio.to_raster` (issue #9, pull #219, pull #223)
 - ENH: Use the list version of `transform_geom` with rasterio 1.2+ (issue #180)
 - ENH: Support driver autodetection with rasterio 1.2+ (issue #180)
 - ENH: Allow multithreaded, lockless reads with `rio.open_rasterio` (issue #214)
