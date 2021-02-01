@@ -865,7 +865,7 @@ class RasterArray(XRasterBase):
         Returns
         -------
         :obj:`dask.Delayed`:
-            If the data array is a dask array, windowed is True, and compute
+            If the data array is a dask array and compute
             is True. Otherwise None is returned.
 
         """
