@@ -24,7 +24,7 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 3. It loads in the CRS, transform, and nodata metadata in standard CF & GDAL locations.
 4. It supports masking and scaling data with the `masked` and `mask_and_scale` kwargs.
 5. It adds the coordinate axis CF metadata.
-6. It loads in raster metadata into the attributes.
+6. It loads raster metadata into the attributes.
 
 
 .. toctree::
