@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- REF: Reduce pyproj.CRS internal usage for speed (issue #241)
 
 0.2.0
 ------

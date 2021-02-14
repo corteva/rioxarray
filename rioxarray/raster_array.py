@@ -19,12 +19,11 @@ import rasterio
 import rasterio.mask
 import rasterio.warp
 import xarray
-from rasterio.crs import CRS
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
 
-from rioxarray.crs import crs_to_wkt
+from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
     MissingCRS,
     NoDataInBounds,
@@ -430,9 +429,8 @@ class RasterArray(XRasterBase):
             Contains the data from the src_data_array, reprojected to match
             match_data_array.
         """
-        dst_crs = crs_to_wkt(match_data_array.rio.crs)
         return self.reproject(
-            dst_crs,
+            match_data_array.rio.crs,
             transform=match_data_array.rio.transform(recalc=True),
             shape=match_data_array.rio.shape,
             resampling=resampling,
@@ -697,7 +695,7 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        crs = CRS.from_wkt(crs_to_wkt(crs)) if crs is not None else self.crs
+        crs = crs_from_user_input(crs) if crs is not None else self.crs
         if self.crs != crs:
             if LooseVersion(rasterio.__version__) >= LooseVersion("1.2"):
                 geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)

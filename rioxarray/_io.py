@@ -291,7 +291,7 @@ NETCDF_DTYPE_MAP = {
     2: np.char,  # NC_CHAR
     3: np.short,  # NC_SHORT
     4: np.int_,  # NC_INT, NC_LONG
-    5: np.float,  # NC_FLOAT
+    5: float,  # NC_FLOAT
     6: np.double,  # NC_DOUBLE
     7: np.ubyte,  # NC_UBYTE
     8: np.ushort,  # NC_USHORT
