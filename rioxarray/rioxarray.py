@@ -12,7 +12,7 @@ import xarray
 from affine import Affine
 from rasterio.crs import CRS
 
-from rioxarray.crs import crs_to_wkt
+from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
     DimensionError,
     DimensionMissingCoordinateError,
@@ -151,6 +151,18 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
+        # look in wkt attributes to avoid using
+        # pyproj CRS if possible for performance
+        for crs_attr in ("spatial_ref", "crs_wkt"):
+            try:
+                self.set_crs(
+                    self._obj.coords[self.grid_mapping].attrs[crs_attr],
+                    inplace=True,
+                )
+                return self._crs
+            except KeyError:
+                pass
+
         # look in grid_mapping
         try:
             self.set_crs(
@@ -207,7 +219,7 @@ class XRasterBase:
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Dataset with crs attribute.
         """
-        crs = CRS.from_wkt(crs_to_wkt(input_crs))
+        crs = crs_from_user_input(input_crs)
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
         return obj
@@ -316,7 +328,7 @@ class XRasterBase:
         data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
         grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
         # spatial_ref is for compatibility with GDAL
-        crs_wkt = crs_to_wkt(data_obj.rio.crs)
+        crs_wkt = data_obj.rio.crs.to_wkt()
         grid_map_attrs["spatial_ref"] = crs_wkt
         grid_map_attrs["crs_wkt"] = crs_wkt
         if transform is not None:
