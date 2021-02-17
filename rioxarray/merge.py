@@ -78,6 +78,12 @@ class RasterioDatasetDuck:
             mask = data_window == nodata
             fill_value = nodata
 
+        # make sure the returned shape matches
+        # the expected shape. This can be the case
+        # when the xarray dataset was squeezed to 2D beforehand
+        if len(out_shape) == 3 and len(data_window.shape) == 2:
+            data_window = data_window.values.reshape((1, out_height, out_width))
+
         return numpy.ma.array(
             data_window, mask=mask, fill_value=fill_value, dtype=self.dtypes[0]
         )
@@ -158,7 +164,6 @@ def merge_arrays(
         rioduckarrays,
         **{key: val for key, val in input_kwargs.items() if val is not None},
     )
-
     # generate merged data array
     representative_array = rioduckarrays[0]._xds
     if parse_coordinates:
@@ -170,6 +175,12 @@ def merge_arrays(
         )
     else:
         coords = _get_nonspatial_coords(representative_array)
+
+    # make sure the output merged data shape is 2D if the
+    # original data was 2D. this can happen if the
+    # xarray datasarray was squeezed.
+    if len(merged_data.shape) == 3 and len(representative_array.shape) == 2:
+        merged_data = merged_data.squeeze()
 
     xda = DataArray(
         name=representative_array.name,
