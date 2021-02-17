@@ -12,6 +12,7 @@ import xarray
 from affine import Affine
 from rasterio.crs import CRS
 
+from rioxarray._options import EXPORT_GRID_MAPPING, get_option
 from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
     DimensionError,
@@ -326,7 +327,10 @@ class XRasterBase:
             )
         # add grid mapping coordinate
         data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
-        grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
+        if get_option(EXPORT_GRID_MAPPING):
+            grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
+        else:
+            grid_map_attrs = {}
         # spatial_ref is for compatibility with GDAL
         crs_wkt = data_obj.rio.crs.to_wkt()
         grid_map_attrs["spatial_ref"] = crs_wkt
