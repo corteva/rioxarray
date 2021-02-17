@@ -9,7 +9,8 @@ from rioxarray.merge import merge_arrays, merge_datasets
 from test.conftest import TEST_INPUT_DATA_DIR
 
 
-def test_merge_arrays():
+@pytest.mark.parametrize("squeeze", [True, False])
+def test_merge_arrays(squeeze):
     dem_test = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
     with open_rasterio(dem_test) as rds:
         rds.attrs = {
@@ -23,6 +24,8 @@ def test_merge_arrays():
             rds.isel(x=slice(100), y=slice(100, 200)),
             rds.isel(x=slice(100, 200), y=slice(100)),
         ]
+        if squeeze:
+            arrays = [array.squeeze() for array in arrays]
         merged = merge_arrays(arrays)
 
     assert_almost_equal(
