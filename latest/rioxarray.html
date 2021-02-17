@@ -100,6 +100,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rioxarray package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-open-rasterio">rioxarray.open_rasterio</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-merge-module">rioxarray.merge module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray-set-options">rioxarray.set_options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-show-versions">rioxarray.show_versions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rioxarray-rio-accessors">rioxarray <cite>rio</cite> accessors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a></li>
@@ -360,6 +361,37 @@ If not set, uses the nodata value in the first input Dataset.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+</div>
+<div class="section" id="rioxarray-set-options">
+<h2>rioxarray.set_options<a class="headerlink" href="#rioxarray-set-options" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rioxarray.set_options">
+<em class="property">class </em><code class="descclassname">rioxarray.</code><code class="descname">set_options</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_options.html#set_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.set_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the global rioxarray option.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>export_grid_mapping</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, this option will export the full Climate and Forecasts (CF)
+grid mapping attributes for the CRS. This is useful if you are exporting
+your file to netCDF using <code class="docutils literal notranslate"><span class="pre">to_netcdf()</span></code>. When disabled, only the <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code>
+and <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> attributes will be written and the program
+will be faster due to not needing to use
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>. Default is True.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage as a context manager:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">export_grid_mapping</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Usage for global settings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rioxarray</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">export_grid_mapping</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
