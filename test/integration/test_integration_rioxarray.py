@@ -1662,6 +1662,17 @@ def test_write_crs_cf():
     assert test_da.spatial_ref.attrs["grid_mapping_name"] == "latitude_longitude"
 
 
+def test_write_crs_cf__disable_grid_mapping():
+    test_da = xarray.DataArray(1)
+    with rioxarray.set_options(export_grid_mapping=False):
+        test_da = test_da.rio.write_crs(4326)
+    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.rio.crs.to_epsg() == 4326
+    assert "spatial_ref" in test_da.spatial_ref.attrs
+    assert "crs_wkt" in test_da.spatial_ref.attrs
+    assert "grid_mapping_name" not in test_da.spatial_ref.attrs
+
+
 def test_write_crs__missing_geospatial_dims():
     test_da = xarray.DataArray(
         [1],

@@ -63,8 +63,9 @@ The *reproject* functionality was adopted from https://github.com/opendatacube/d
   - `datacube is licensed <https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE>`_ under the Apache License, Version 2.0.
     The datacube license is included as `LICENSE_datacube <https://github.com/corteva/rioxarray/blob/master/LICENSE_datacube>`_.
 
-The *open_rasterio* functionality was adopted from https://github.com/pydata/xarray
-  - Source file: `rasterio_.py <https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py>`_
+Adoptions from https://github.com/pydata/xarray:
+  - *open_rasterio*: `rasterio_.py <https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py>`_
+  - *set_options*: `options.py <https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db14500c427f8804e/xarray/core/options.py>`_
   - `xarray is licensed <https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/LICENSE>`_ under the Apache License, Version 2.0.
     The xarray license is included as `LICENSE_xarray <https://github.com/corteva/rioxarray/blob/master/LICENSE_xarray>`_.
 

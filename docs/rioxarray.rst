@@ -15,6 +15,12 @@ rioxarray.merge module
 .. autofunction:: rioxarray.merge.merge_datasets
 
 
+rioxarray.set_options
+-----------------------
+
+.. autoclass:: rioxarray.set_options
+
+
 rioxarray.show_versions
 -----------------------
 
