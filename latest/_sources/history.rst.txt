@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.3.0
 ------
 - REF: Reduce pyproj.CRS internal usage for speed (issue #241)
 - ENH: Add `rioxarray.set_options` to disable exporting CRS CF grid mapping (issue #241)
