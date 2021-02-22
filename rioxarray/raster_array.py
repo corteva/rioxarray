@@ -789,6 +789,12 @@ class RasterArray(XRasterBase):
         :obj:`xarray.DataArray`:
             An interpolated :obj:`xarray.DataArray` object.
         """
+        if self.nodata is None:
+            raise RioXarrayError(
+                "nodata not found. Please set the nodata with 'rio.write_nodata()'."
+                f"{_get_data_var_message(self._obj)}"
+            )
+
         extra_dim = self._check_dimensions()
         if extra_dim:
             interp_data = []

@@ -2290,3 +2290,20 @@ def test_estimate_utm_crs__out_of_bounds():
     else:
         with pytest.raises(RuntimeError, match=r"Unable to determine UTM CRS"):
             xds.rio.estimate_utm_crs()
+
+
+def test_interpolate_na_missing_nodata():
+    test_da = xarray.DataArray(
+        name="missing",
+        data=numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    match = (
+        r"nodata not found\. Please set the nodata with "
+        r"'rio\.write_nodata\(\)'\. Data variable: missing"
+    )
+    with pytest.raises(RioXarrayError, match=match):
+        test_da.rio.interpolate_na()
+    with pytest.raises(RioXarrayError, match=match):
+        test_da.to_dataset().rio.interpolate_na()
