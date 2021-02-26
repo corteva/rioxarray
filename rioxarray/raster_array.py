@@ -136,7 +136,7 @@ def _clip_from_disk(xds, geometries, all_touched, drop, invert):
     """
     try:
         out_image, out_transform = rasterio.mask.mask(
-            xds._file_obj.acquire(),
+            xds.rio._manager.acquire(),
             geometries,
             all_touched=all_touched,
             invert=invert,
@@ -199,6 +199,7 @@ class RasterArray(XRasterBase):
         super().__init__(xarray_obj)
         # properties
         self._nodata = None
+        self._manager = None  # https://github.com/corteva/rioxarray/issues/254
 
     def set_nodata(self, input_nodata, inplace=True):
         """
@@ -278,7 +279,7 @@ class RasterArray(XRasterBase):
         # look in places used by `xarray.open_rasterio`
         if self._nodata is None:
             try:
-                self._nodata = self._obj._file_obj.acquire().nodata
+                self._nodata = self._manager.acquire().nodata
             except AttributeError:
                 try:
                     self._nodata = self._obj.attrs["nodatavals"][0]
@@ -874,7 +875,7 @@ class RasterArray(XRasterBase):
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
         try:
-            out_profile = self._obj._file_obj.acquire().profile
+            out_profile = self._manager.acquire().profile
         except AttributeError:
             out_profile = {}
         out_profile.update(profile_kwargs)

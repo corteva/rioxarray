@@ -265,7 +265,9 @@ def test_open_rasterio_mask_chunk_clip():
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
         assert np.isnan(xdi.values).sum() == 52119
-        assert xdi.encoding == {"_FillValue": 0.0}
+        test_encoding = dict(xdi.encoding)
+        assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
+        assert test_encoding == {"_FillValue": 0.0}
         attrs = dict(xdi.attrs)
         assert_almost_equal(
             tuple(xdi.rio._cached_transform())[:6],
@@ -301,7 +303,9 @@ def test_open_rasterio_mask_chunk_clip():
         # test data array
         clipped = xdi.rio.clip(geometries, comp_subset.rio.crs)
         _assert_xarrays_equal(clipped, comp_subset)
-        assert clipped.encoding == {"_FillValue": 0.0}
+        test_encoding = dict(clipped.encoding)
+        assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
+        assert test_encoding == {"_FillValue": 0.0}
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
@@ -309,7 +313,9 @@ def test_open_rasterio_mask_chunk_clip():
         )
         comp_subset_ds = comp_subset.to_dataset(name="test_data")
         _assert_xarrays_equal(clipped_ds, comp_subset_ds)
-        assert clipped_ds.test_data.encoding == {"_FillValue": 0.0}
+        test_encoding = dict(clipped.encoding)
+        assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
+        assert test_encoding == {"_FillValue": 0.0}
 
 
 ##############################################################################
@@ -873,13 +879,17 @@ def test_open_cog():
 
 
 def test_mask_and_scale():
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     with pytest.warns(SerializationWarning):
-        with rioxarray.open_rasterio(
-            os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), mask_and_scale=True
-        ) as rds:
+        with rioxarray.open_rasterio(test_file, mask_and_scale=True) as rds:
             assert np.nanmin(rds.air_temperature.values) == 248.7
             assert np.nanmax(rds.air_temperature.values) == 302.1
-            assert rds.air_temperature.encoding == {
+            test_encoding = dict(rds.air_temperature.encoding)
+            source = test_encoding.pop("source")
+            assert source.startswith("netcdf:") and source.endswith(
+                "tmmx_20190121.nc:air_temperature"
+            )
+            assert test_encoding == {
                 "_Unsigned": "true",
                 "add_offset": 220.0,
                 "scale_factor": 0.1,
@@ -905,7 +915,12 @@ def test_no_mask_and_scale():
     ) as rds:
         assert np.nanmin(rds.air_temperature.values) == 287
         assert np.nanmax(rds.air_temperature.values) == 821
-        assert rds.air_temperature.encoding == {
+        test_encoding = dict(rds.air_temperature.encoding)
+        source = test_encoding.pop("source")
+        assert source.startswith("netcdf:") and source.endswith(
+            "tmmx_20190121.nc:air_temperature"
+        )
+        assert test_encoding == {
             "_FillValue": 32767.0,
             "missing_value": 32767,
         }
