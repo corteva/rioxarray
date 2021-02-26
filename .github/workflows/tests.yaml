@@ -108,11 +108,11 @@ jobs:
           #   pandas \
           #   scipy;
           python -m pip install --upgrade \
-            git+https://github.com/dask/dask.git@master#egg=dask \
-            git+https://github.com/dask/distributed.git@master#egg=distributed \
-            git+https://github.com/mapbox/rasterio.git@master#egg=rasterio \
-            git+https://github.com/pyproj4/pyproj.git@master#egg=pyproj \
-            git+https://github.com/pydata/xarray.git@master#egg=xarray;
+            git+https://github.com/dask/dask.git@master \
+            git+https://github.com/dask/distributed.git@master \
+            git+https://github.com/mapbox/rasterio.git@master \
+            git+https://github.com/pyproj4/pyproj.git@master \
+            git+https://github.com/pydata/xarray.git@master;
           python -m pip install -e .[all]
 
       - name: Check and Log Environment
