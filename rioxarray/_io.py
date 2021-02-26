@@ -865,6 +865,12 @@ def open_rasterio(
         result = _prepare_dask(result, riods, filename, chunks)
 
     # Make the file closeable
-    result._file_obj = manager
-
+    try:
+        # xarray 0.17 +
+        result.set_close(manager.close)
+    except AttributeError:
+        result._file_obj = manager
+    result.rio._manager = manager
+    # add file path to encoding
+    result.encoding["source"] = riods.name
     return result

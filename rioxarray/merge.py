@@ -33,7 +33,7 @@ class RasterioDatasetDuck:
         self.res = (abs(res[0]), abs(res[1]))
         self.transform = xds.rio.transform(recalc=True)
         try:
-            rio_file = xds._file_obj.acquire()
+            rio_file = xds.rio._manager.acquire()
             self.profile = rio_file.profile
             self.colormap = rio_file.colormap
         except AttributeError:
