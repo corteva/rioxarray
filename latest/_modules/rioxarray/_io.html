@@ -1031,8 +1031,14 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
 
     <span class="c1"># Make the file closeable</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">_file_obj</span> <span class="o">=</span> <span class="n">manager</span>
-
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># xarray 0.17 +</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">set_close</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_file_obj</span> <span class="o">=</span> <span class="n">manager</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">manager</span>
+    <span class="c1"># add file path to encoding</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="n">result</span></div>
 </pre></div>
 

@@ -302,7 +302,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">out_image</span><span class="p">,</span> <span class="n">out_transform</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span>
-            <span class="n">xds</span><span class="o">.</span><span class="n">_file_obj</span><span class="o">.</span><span class="n">acquire</span><span class="p">(),</span>
+            <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">(),</span>
             <span class="n">geometries</span><span class="p">,</span>
             <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
             <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
@@ -365,6 +365,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span>
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># https://github.com/corteva/rioxarray/issues/254</span>
 
 <div class="viewcode-block" id="RasterArray.set_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.set_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -444,7 +445,7 @@
         <span class="c1"># look in places used by `xarray.open_rasterio`</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">_file_obj</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">nodata</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">nodata</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;nodatavals&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -1040,7 +1041,7 @@
         <span class="c1"># get the output profile from the rasterio object</span>
         <span class="c1"># if opened with xarray.open_rasterio()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">out_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">_file_obj</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">profile</span>
+            <span class="n">out_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">profile</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">out_profile</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">out_profile</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">profile_kwargs</span><span class="p">)</span>
