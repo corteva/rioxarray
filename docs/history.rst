@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.3.1
 ------
 - BUG: Compatibility changes with xarray 0.17 (issue #254)
