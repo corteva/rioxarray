@@ -18,22 +18,28 @@ jobs:
 
   test:
     needs: linting
-    name: ${{ matrix.os }}, ${{ matrix.python-version }}
+    name: ${{ matrix.os }} | ${{ matrix.python-version }} | rasterio-${{ matrix.rasterio-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        rasterio-version: [1.2]
+        python-version: [3.7, 3.8, 3.9]
+        rasterio-version: ['*']
+        xarray-version: ['*']
         include:
           - os: windows-latest
             python-version: 3.7
+            rasterio-version: '*'
+            xarray-version: '*'
           - os: windows-latest
             python-version: 3.8
+            rasterio-version: '*'
+            xarray-version: '*'
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: 3.6
             rasterio-version: 1.1
+            xarray-version: 0.16
     steps:
       - uses: actions/checkout@v2
 
@@ -47,7 +53,7 @@ jobs:
       - name: Install Env
         shell: bash
         run: |
-          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray scipy pyproj netcdf4 dask pandoc
+          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} scipy pyproj netcdf4 dask pandoc
           source activate test
           python -m pip install -e .[all]
 
@@ -73,3 +79,52 @@ jobs:
           sphinx-build -b html docs/ docs/_build/
 
       - uses: codecov/codecov-action@v1
+
+
+  test_latest:
+    needs: linting
+    name: Test latest dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          activate-conda: false
+          python-version: 3.8
+          conda-channels: conda-forge
+
+      - name: Install Env
+        shell: bash
+        run: |
+          conda create -n test python=3.8 proj libgdal cython netcdf4 pandas scipy
+          source activate test
+          # python -m pip install \
+          #   --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple \
+          #   --trusted-host pypi.anaconda.org \
+          #   --no-deps --pre --upgrade \
+          #   numpy \
+          #   pandas \
+          #   scipy;
+          python -m pip install --upgrade \
+            git+https://github.com/dask/dask.git@master \
+            git+https://github.com/dask/distributed.git@master \
+            git+https://github.com/mapbox/rasterio.git@master \
+            git+https://github.com/pyproj4/pyproj.git@master \
+            git+https://github.com/pydata/xarray.git@master;
+          python -m pip install -e .[all]
+
+      - name: Check and Log Environment
+        shell: bash
+        run: |
+          source activate test
+          python -V
+          python -c "import rioxarray; rioxarray.show_versions();"
+          conda info
+
+      - name: Test
+        shell: bash
+        run: |
+          source activate test
+          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
