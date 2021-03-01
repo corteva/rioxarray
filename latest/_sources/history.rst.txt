@@ -1,9 +1,10 @@
 History
 =======
 
-Latest
+0.3.1
 ------
 - BUG: Compatibility changes with xarray 0.17 (issue #254)
+- BUG: Raise informative error in interpolate_na if missing nodata (#250)
 
 0.3.0
 ------
