@@ -304,7 +304,7 @@ class XRasterBase:
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Modified dataset with CF compliant CRS information.
-            
+
         Examples
         --------
         Write the CRS of the current `xarray` object:
