@@ -304,6 +304,16 @@ class XRasterBase:
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Modified dataset with CF compliant CRS information.
+
+        Examples
+        --------
+        Write the CRS of the current `xarray` object:
+
+        >>> raster.rio.write_crs("epsg:4326", inplace=True)
+
+        Write the CRS on a copy:
+
+        >>> raster = raster.rio.write_crs("epsg:4326")
         """
         if input_crs is not None:
             data_obj = self.set_crs(input_crs, inplace=inplace)
