@@ -816,7 +816,7 @@
 
 <span class="sd">        from affine import Affine</span>
 <span class="sd">        da = xr.open_rasterio(&#39;path_to_file.tif&#39;)</span>
-<span class="sd">        transform = Affine.from_gdal(*da.attrs[&#39;transform&#39;])</span>
+<span class="sd">        transform = da.rio.transform()</span>
 <span class="sd">        nx, ny = da.sizes[&#39;x&#39;], da.sizes[&#39;y&#39;]</span>
 <span class="sd">        x, y = np.meshgrid(np.arange(nx)+0.5, np.arange(ny)+0.5) * transform</span>
 

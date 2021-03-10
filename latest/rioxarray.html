@@ -220,7 +220,7 @@ for more information).</p>
 <p>You can generate 2D coordinates from the file’s attributes with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
 <span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s1">&#39;path_to_file.tif&#39;</span><span class="p">)</span>
-<span class="n">transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span><span class="o">*</span><span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">])</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
 <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
 <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ny</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">transform</span>
 </pre></div>
@@ -379,7 +379,7 @@ grid mapping attributes for the CRS. This is useful if you are exporting
 your file to netCDF using <code class="docutils literal notranslate"><span class="pre">to_netcdf()</span></code>. When disabled, only the <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code>
 and <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> attributes will be written and the program
 will be faster due to not needing to use
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>. Default is True.</td>
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>. Default is True.</td>
 </tr>
 </tbody>
 </table>
