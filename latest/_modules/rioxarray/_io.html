@@ -847,7 +847,7 @@
 <span class="sd">        If chunks is provided, this argument is used to ensure that only one</span>
 <span class="sd">        thread per process is reading from a rasterio file object at a time.</span>
 
-<span class="sd">        When ``lock=True`` or a lock instance is provided,</span>
+<span class="sd">        By default and when a lock instance is provided,</span>
 <span class="sd">        a :class:`xarray.backends.CachingFileManager` is used to cache File objects.</span>
 <span class="sd">        Since rasterio also caches some data, this will make repeated reads from the</span>
 <span class="sd">        same object fast.</span>
@@ -898,7 +898,7 @@
             <span class="n">warp_extras</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">warp_extras</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">lock</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">lock</span> <span class="o">=</span> <span class="n">RASTERIO_LOCK</span>
     <span class="k">elif</span> <span class="n">lock</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">lock</span> <span class="o">=</span> <span class="n">NO_LOCK</span>

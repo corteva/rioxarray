@@ -4,6 +4,10 @@ History
 Latest
 ------
 
+0.3.2
+-----
+- BUG: handle lock=True in open_rasterio (issue #273)
+
 0.3.1
 ------
 - BUG: Compatibility changes with xarray 0.17 (issue #254)

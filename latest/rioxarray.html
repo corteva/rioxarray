@@ -247,7 +247,7 @@ store multiple times. Defaults to True unless you specify the <cite>chunks</cite
 argument to use dask, in which case it defaults to False.</li>
 <li><strong>lock</strong> (<em>bool</em><em> or </em><em>dask.utils.SerializableLock</em><em>, </em><em>optional</em>) – <p>If chunks is provided, this argument is used to ensure that only one
 thread per process is reading from a rasterio file object at a time.</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> or a lock instance is provided,
+<p>By default and when a lock instance is provided,
 a <code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.backends.CachingFileManager</span></code> is used to cache File objects.
 Since rasterio also caches some data, this will make repeated reads from the
 same object fast.</p>

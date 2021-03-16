@@ -582,7 +582,7 @@ CPU times: user 2.48 s, sys: 292 ms, total: 2.78 s
 Wall time: 2.97 s
 </pre></div></div>
 </div>
-<p>With <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> the initial read is slower (since some threads are waiting around for a lock).</p>
+<p>By default and when a lock is passed in, the initial read is slower (since some threads are waiting around for a lock).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -621,7 +621,7 @@ CPU times: user 223 ms, sys: 64.9 ms, total: 288 ms
 Wall time: 200 ms
 </pre></div></div>
 </div>
-<p>If you’re reapeatedly reading subsets of the data, consider using <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> or <code class="docutils literal notranslate"><span class="pre">lock=some_lock_object</span></code> to benefit from the caching.</p>
+<p>If you’re reapeatedly reading subsets of the data, using the default lock or <code class="docutils literal notranslate"><span class="pre">lock=some_lock_object</span></code> to benefit from the caching.</p>
 </div>
 </div>
 
