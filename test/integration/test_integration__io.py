@@ -971,3 +971,10 @@ def test_lockless():
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunk=True
     ) as rds:
         rds.mean().compute()
+
+
+def test_lock_true():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=True, chunk=True
+    ) as rds:
+        rds.mean().compute()
