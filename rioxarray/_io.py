@@ -681,7 +681,7 @@ def open_rasterio(
         If chunks is provided, this argument is used to ensure that only one
         thread per process is reading from a rasterio file object at a time.
 
-        When ``lock=True`` or a lock instance is provided,
+        By default and when a lock instance is provided,
         a :class:`xarray.backends.CachingFileManager` is used to cache File objects.
         Since rasterio also caches some data, this will make repeated reads from the
         same object fast.
@@ -732,7 +732,7 @@ def open_rasterio(
             warp_extras=vrt.warp_extras,
         )
 
-    if lock is None:
+    if lock in (True, None):
         lock = RASTERIO_LOCK
     elif lock is False:
         lock = NO_LOCK
