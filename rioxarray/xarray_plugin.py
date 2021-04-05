@@ -8,7 +8,9 @@ from . import _io
 class GdalBackend(xr.backends.common.BackendEntrypoint):
     def open_dataset(self, filename_or_obj, drop_variables=None):
         ds = _io.open_rasterio(filename_or_obj).to_dataset("band")
-        return ds.rename({idx: f"band{idx}" for idx in ds.data_vars})
+        ds = ds.rename({idx: f"band{idx}" for idx in ds.data_vars})
+        ds = ds.reset_coords("spatial_ref")
+        return ds
 
     def guess_can_open(self, filename_or_obj):
         try:
