@@ -2,9 +2,9 @@ import os.path
 
 import pytest
 
-xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
-
 from test.conftest import TEST_INPUT_DATA_DIR
+
+xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
 
 
 def test_xarray_open_dataset():
