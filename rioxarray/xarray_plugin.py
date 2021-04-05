@@ -4,11 +4,14 @@ import xarray as xr
 
 from . import _io
 
+CAN_OPEN_EXT = {"geotif", "geotiff", "j2k", "jp2", "tif", "tiff", "vrt"}
+
 
 class GdalBackend(xr.backends.common.BackendEntrypoint):
     def open_dataset(self, filename_or_obj, drop_variables=None):
-        ds = _io.open_rasterio(filename_or_obj).to_dataset("band")
-        ds = ds.rename({idx: f"band{idx}" for idx in ds.data_vars})
+        ds = _io.open_rasterio(filename_or_obj)
+        if isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset(name="band_data")
         ds = ds.reset_coords("spatial_ref")
         return ds
 
@@ -17,4 +20,4 @@ class GdalBackend(xr.backends.common.BackendEntrypoint):
             _, ext = os.path.splitext(filename_or_obj)
         except TypeError:
             return False
-        return ext in {".tif", ".geotif", ".tiff", ".geotiff"}
+        return ext[1:].lower() in CAN_OPEN_EXT
