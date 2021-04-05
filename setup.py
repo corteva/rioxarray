@@ -72,4 +72,5 @@ setup(
     version=get_version(),
     zip_safe=False,
     python_requires=">=3.6",
+    entry_points={"xarray.backends": ["gdal=rioxarray.xarray_plugin:GdalBackend"]},
 )
