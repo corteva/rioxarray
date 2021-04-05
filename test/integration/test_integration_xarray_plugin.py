@@ -1,4 +1,5 @@
 import os.path
+
 import xarray as xr
 
 from test.conftest import TEST_INPUT_DATA_DIR
