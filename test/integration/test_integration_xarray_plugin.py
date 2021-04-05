@@ -1,6 +1,8 @@
 import os.path
 
-import xarray as xr
+import pytest
+
+xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
 
 from test.conftest import TEST_INPUT_DATA_DIR
 
