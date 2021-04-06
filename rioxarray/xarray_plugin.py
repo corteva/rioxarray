@@ -24,6 +24,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
     """
     .. versionadded:: 0.4
     """
+
     def open_dataset(
         self,
         filename_or_obj,
