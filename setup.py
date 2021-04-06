@@ -72,5 +72,7 @@ setup(
     version=get_version(),
     zip_safe=False,
     python_requires=">=3.6",
-    entry_points={"xarray.backends": ["rasterio=rioxarray.xarray_plugin:RasterioBackend"]},
+    entry_points={
+        "xarray.backends": ["rasterio=rioxarray.xarray_plugin:RasterioBackend"]
+    },
 )
