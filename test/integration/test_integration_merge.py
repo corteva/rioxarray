@@ -15,7 +15,6 @@ def test_merge_arrays(squeeze):
     with open_rasterio(dem_test) as rds:
         rds.attrs = {
             "_FillValue": rds.rio.nodata,
-            "grid_mapping": "spatial_ref",
             "crs": rds.attrs["crs"],
         }
         arrays = [
@@ -52,6 +51,7 @@ def test_merge_arrays(squeeze):
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
+    assert merged.encoding["grid_mapping"] == "spatial_ref"
     assert_almost_equal(merged.sum(), 11368261)
 
 
@@ -95,16 +95,15 @@ def test_merge__different_crs(dataset):
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     if dataset:
-        assert merged.attrs == {"grid_mapping": "spatial_ref"}
         assert_almost_equal(merged[merged.rio.vars[0]].sum(), -131013894)
     else:
         assert merged.attrs == {
             "_FillValue": -28672,
             "add_offset": 0.0,
-            "grid_mapping": "spatial_ref",
             "scale_factor": 1.0,
         }
         assert_almost_equal(merged.sum(), -131013894)
+    assert merged.encoding["grid_mapping"] == "spatial_ref"
 
 
 def test_merge_arrays__res():
@@ -112,7 +111,6 @@ def test_merge_arrays__res():
     with open_rasterio(dem_test, masked=True) as rds:
         rds.attrs = {
             "_FillValue": rds.rio.nodata,
-            "grid_mapping": "spatial_ref",
             "crs": rds.attrs["crs"],
         }
         arrays = [
@@ -140,6 +138,7 @@ def test_merge_arrays__res():
     compare_attrs = dict(rds.attrs)
     compare_attrs.pop("crs")
     assert merged.attrs == compare_attrs
+    assert merged.encoding["grid_mapping"] == "spatial_ref"
     assert_almost_equal(nansum(merged), 13760565)
 
 
@@ -193,9 +192,8 @@ def test_merge_datasets():
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
-    base_attrs = dict(rds.attrs)
-    base_attrs["grid_mapping"] = "spatial_ref"
-    assert merged.attrs == base_attrs
+    assert merged.attrs == rds.attrs
+    assert merged.encoding["grid_mapping"] == "spatial_ref"
     assert_almost_equal(merged[data_var].sum(), 4543446965182987)
 
 
@@ -239,7 +237,6 @@ def test_merge_datasets__res():
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
-    base_attrs = dict(rds.attrs)
-    base_attrs["grid_mapping"] = "spatial_ref"
-    assert merged.attrs == base_attrs
+    assert merged.attrs == rds.attrs
+    assert merged.encoding["grid_mapping"] == "spatial_ref"
     assert_almost_equal(merged[data_var].sum(), 974566547463955)
