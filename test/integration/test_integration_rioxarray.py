@@ -2120,6 +2120,34 @@ def test_write_transform():
     assert da.rio.grid_mapping == "spatial_ref"
 
 
+def test_write_read_transform__non_rectilinear():
+    test_affine = Affine.from_gdal(305827, 14, 9, 5223236, 9, -14)
+    ds = xarray.Dataset()
+    ds.rio.write_transform(test_affine, inplace=True)
+    assert ds.spatial_ref.GeoTransform == "305827.0 14.0 9.0 5223236.0 9.0 -14.0"
+    assert ds.rio._cached_transform() == test_affine
+    assert ds.rio.transform() == test_affine
+    assert ds.rio.grid_mapping == "spatial_ref"
+    da = xarray.DataArray(1)
+    da.rio.write_transform(test_affine, inplace=True)
+    assert ds.rio._cached_transform() == test_affine
+    assert ds.rio.transform() == test_affine
+    assert da.spatial_ref.GeoTransform == "305827.0 14.0 9.0 5223236.0 9.0 -14.0"
+    assert da.rio.grid_mapping == "spatial_ref"
+
+
+def test_write_read_transform__non_rectilinear__warning():
+    test_affine = Affine.from_gdal(305827, 14, 9, 5223236, 9, -14)
+    ds = xarray.Dataset()
+    ds.rio.write_transform(test_affine, inplace=True)
+    with pytest.warns(UserWarning, match=r"Non\-rectilinear transform found"):
+        assert ds.rio.transform(recalc=True) == test_affine
+    da = xarray.DataArray(1)
+    da.rio.write_transform(test_affine, inplace=True)
+    with pytest.warns(UserWarning, match=r"Non\-rectilinear transform found"):
+        assert ds.rio.transform(recalc=True) == test_affine
+
+
 def test_missing_transform():
     ds = xarray.Dataset()
     assert ds.rio.transform() == Affine.identity()
