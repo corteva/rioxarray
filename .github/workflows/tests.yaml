@@ -108,8 +108,8 @@ jobs:
           #   pandas \
           #   scipy;
           python -m pip install --upgrade \
-            git+https://github.com/dask/dask.git@master \
-            git+https://github.com/dask/distributed.git@master \
+            git+https://github.com/dask/dask.git@main \
+            git+https://github.com/dask/distributed.git@main \
             git+https://github.com/mapbox/rasterio.git@master \
             git+https://github.com/pyproj4/pyproj.git@master \
             git+https://github.com/pydata/xarray.git@master;
