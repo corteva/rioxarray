@@ -33,7 +33,7 @@ class GdalBackend(xr.backends.common.BackendEntrypoint):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
-        if decode_coords is True or decode_coords == "coordinate":
+        if decode_coords is True or decode_coords == "coordinates":
             ds = ds.reset_coords("spatial_ref")
         return ds
 
