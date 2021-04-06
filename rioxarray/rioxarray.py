@@ -230,10 +230,11 @@ class XRasterBase:
         """
         str: The CF grid_mapping attribute. 'spatial_ref' is the default.
         """
-        try:
-            return self._obj.attrs["grid_mapping"]
-        except KeyError:
-            pass
+        grid_mapping = self._obj.encoding.get(
+            "grid_mapping", self._obj.attrs.get("grid_mapping")
+        )
+        if grid_mapping is not None:
+            return grid_mapping
         grid_mapping = DEFAULT_GRID_MAP
         # search the dataset for the grid mapping name
         if hasattr(self._obj, "data_vars"):
@@ -245,11 +246,12 @@ class XRasterBase:
                     self._obj[var].rio.y_dim
                 except DimensionError:
                     continue
-                try:
-                    grid_mapping = self._obj[var].attrs["grid_mapping"]
+                var_grid_mapping = self._obj[var].encoding.get(
+                    "grid_mapping", self._obj[var].attrs.get("grid_mapping")
+                )
+                if var_grid_mapping is not None:
+                    grid_mapping = var_grid_mapping
                     grid_mappings.add(grid_mapping)
-                except KeyError:
-                    pass
             if len(grid_mappings) > 1:
                 raise RioXarrayError("Multiple grid mappings exist.")
         return grid_mapping
@@ -279,12 +281,22 @@ class XRasterBase:
                 except DimensionError:
                     continue
 
-                data_obj[var].rio.update_attrs(
+                # remove grid_mapping from attributes if it exists
+                # and update the grid_mapping in encoding
+                new_attrs = dict(data_obj[var].attrs)
+                new_attrs.pop("grid_mapping", None)
+                data_obj[var].rio.update_encoding(
                     dict(grid_mapping=grid_mapping_name), inplace=True
-                ).rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
-        return data_obj.rio.update_attrs(
+                ).rio.update_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
+                    x_dim=x_dim, y_dim=y_dim, inplace=True
+                )
+        # remove grid_mapping from attributes if it exists
+        # and update the grid_mapping in encoding
+        new_attrs = dict(data_obj.attrs)
+        new_attrs.pop("grid_mapping", None)
+        return data_obj.rio.update_encoding(
             dict(grid_mapping=grid_mapping_name), inplace=True
-        )
+        ).rio.update_attrs(new_attrs, inplace=True)
 
     def write_crs(self, input_crs=None, grid_mapping_name=None, inplace=False):
         """
@@ -590,6 +602,57 @@ class XRasterBase:
         data_attrs = dict(self._obj.attrs)
         data_attrs.update(**new_attrs)
         return self.set_attrs(data_attrs, inplace=inplace)
+
+    def set_encoding(self, new_encoding, inplace=False):
+        """
+        Set the encoding of the dataset/dataarray and reset
+        rioxarray properties to re-search for them.
+
+        .. versionadded:: 0.4
+
+        Parameters
+        ----------
+        new_encoding: dict
+            A dictionary for encoding.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with new attributes.
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        # set the attributes
+        data_obj.encoding = new_encoding
+        # reset rioxarray properties depending
+        # on attributes to be generated
+        data_obj.rio._nodata = None
+        data_obj.rio._crs = None
+        return data_obj
+
+    def update_encoding(self, new_encoding, inplace=False):
+        """
+        Update the encoding of the dataset/dataarray and reset
+        rioxarray properties to re-search for them.
+
+        .. versionadded:: 0.4
+
+        Parameters
+        ----------
+        new_encoding: dict
+            A dictionary with encoding values to update with.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with updated attributes.
+        """
+        data_encoding = dict(self._obj.encoding)
+        data_encoding.update(**new_encoding)
+        return self.set_encoding(data_encoding, inplace=inplace)
 
     def set_spatial_dims(self, x_dim, y_dim, inplace=True):
         """

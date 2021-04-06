@@ -23,6 +23,7 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
             attr != "_FillValue"
             and attr not in UNWANTED_RIO_ATTRS
             and attr != "creation_date"
+            and attr != "grid_mapping"
         ):
             try:
                 assert_almost_equal(
@@ -80,10 +81,6 @@ def _assert_xarrays_equal(
             "_FillValue", input_xarray.encoding.get("_FillValue")
         )
         assert_array_equal([input_fill_value], [compare_fill_value])
-        assert "grid_mapping" in compare_xarray.attrs
-        assert (
-            input_xarray[input_xarray.attrs["grid_mapping"]]
-            == compare_xarray[compare_xarray.attrs["grid_mapping"]]
-        )
+        assert input_xarray.rio.grid_mapping == compare_xarray.rio.grid_mapping
         for unwanted_attr in UNWANTED_RIO_ATTRS:
             assert unwanted_attr not in input_xarray.attrs

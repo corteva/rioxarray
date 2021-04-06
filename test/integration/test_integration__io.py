@@ -241,7 +241,6 @@ def test_open_group_load_attrs():
         assert sorted(attrs) == [
             "_FillValue",
             "add_offset",
-            "grid_mapping",
             "long_name",
             "scale_factor",
             "units",
@@ -249,7 +248,7 @@ def test_open_group_load_attrs():
         assert attrs["long_name"] == "500m Surface Reflectance Band 5 - first layer"
         assert attrs["units"] == "reflectance"
         assert attrs["_FillValue"] == -28672.0
-        assert attrs["grid_mapping"] == "spatial_ref"
+        assert rds["sur_refl_b05_1"].encoding["grid_mapping"] == "spatial_ref"
 
 
 def test_open_rasterio_mask_chunk_clip():
@@ -267,14 +266,13 @@ def test_open_rasterio_mask_chunk_clip():
         assert np.isnan(xdi.values).sum() == 52119
         test_encoding = dict(xdi.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0}
+        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
         attrs = dict(xdi.attrs)
         assert_almost_equal(
             tuple(xdi.rio._cached_transform())[:6],
             (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387),
         )
         assert attrs == {
-            "grid_mapping": "spatial_ref",
             "add_offset": 0.0,
             "scale_factor": 1.0,
         }
@@ -305,7 +303,7 @@ def test_open_rasterio_mask_chunk_clip():
         _assert_xarrays_equal(clipped, comp_subset)
         test_encoding = dict(clipped.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0}
+        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
@@ -315,7 +313,7 @@ def test_open_rasterio_mask_chunk_clip():
         _assert_xarrays_equal(clipped_ds, comp_subset_ds)
         test_encoding = dict(clipped.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0}
+        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
 
 
 ##############################################################################
@@ -895,6 +893,7 @@ def test_mask_and_scale():
                 "scale_factor": 0.1,
                 "_FillValue": 32767.0,
                 "missing_value": 32767,
+                "grid_mapping": "crs",
             }
             attrs = rds.air_temperature.attrs
             assert attrs == {
@@ -902,7 +901,6 @@ def test_mask_and_scale():
                 "coordinate_system": "WGS84,EPSG:4326",
                 "description": "Daily Maximum Temperature",
                 "dimensions": "lon lat time",
-                "grid_mapping": "crs",
                 "long_name": "tmmx",
                 "standard_name": "tmmx",
                 "units": "K",
@@ -923,6 +921,7 @@ def test_no_mask_and_scale():
         assert test_encoding == {
             "_FillValue": 32767.0,
             "missing_value": 32767,
+            "grid_mapping": "crs",
         }
         attrs = rds.air_temperature.attrs
         assert attrs == {
@@ -932,7 +931,6 @@ def test_no_mask_and_scale():
             "coordinate_system": "WGS84,EPSG:4326",
             "description": "Daily Maximum Temperature",
             "dimensions": "lon lat time",
-            "grid_mapping": "crs",
             "long_name": "tmmx",
             "scale_factor": 0.1,
             "standard_name": "tmmx",
