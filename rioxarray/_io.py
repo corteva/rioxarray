@@ -607,6 +607,8 @@ def _handle_encoding(result, mask_and_scale, masked, da_name):
     """
     Make sure encoding handled properly
     """
+    if "grid_mapping" in result.attrs:
+        variables.pop_to(result.attrs, result.encoding, "grid_mapping", name=da_name)
     if mask_and_scale:
         if "scale_factor" in result.attrs:
             variables.pop_to(
@@ -851,7 +853,6 @@ def open_rasterio(
 
     # handle encoding
     _handle_encoding(result, mask_and_scale, masked, da_name)
-
     # Affine transformation matrix (always available)
     # This describes coefficients mapping pixel coordinates to CRS
     # For serialization store as tuple of 6 floats, the last row being
@@ -865,11 +866,7 @@ def open_rasterio(
         result = _prepare_dask(result, riods, filename, chunks)
 
     # Make the file closeable
-    try:
-        # xarray 0.17 +
-        result.set_close(manager.close)
-    except AttributeError:
-        result._file_obj = manager
+    result.set_close(manager.close)
     result.rio._manager = manager
     # add file path to encoding
     result.encoding["source"] = riods.name

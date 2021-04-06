@@ -1485,7 +1485,7 @@ def test_crs_writer__array__copy():
     test_da.rio._crs = None
     assert test_da.rio.crs is None
     assert "crs" not in test_da.coords
-    assert out_da.attrs["grid_mapping"] == "crs"
+    assert out_da.encoding["grid_mapping"] == "crs"
 
 
 def test_crs_writer__array__inplace():
@@ -1501,7 +1501,7 @@ def test_crs_writer__array__inplace():
     assert out_da.coords["spatial_ref"] == test_da.coords["spatial_ref"]
     test_da.rio._crs = None
     assert test_da.rio.crs.to_epsg() == 4326
-    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.encoding["grid_mapping"] == "spatial_ref"
     assert out_da.attrs == test_da.attrs
     out_da.rio._crs = None
     assert out_da.rio.crs.to_epsg() == 4326
@@ -1520,7 +1520,7 @@ def test_crs_writer__dataset__copy():
     assert "spatial_ref" in out_da.coords["crs"].attrs
     out_da.test.rio._crs = None
     assert out_da.rio.crs.to_epsg() == 4326
-    assert out_da.test.attrs["grid_mapping"] == "crs"
+    assert out_da.test.encoding["grid_mapping"] == "crs"
     # make sure input did not change the dataset
     test_da.test.rio._crs = None
     test_da.rio._crs = None
@@ -1545,7 +1545,7 @@ def test_crs_writer__dataset__inplace():
     test_da.test.rio._crs = None
     test_da.rio._crs = None
     assert test_da.rio.crs.to_epsg() == 4326
-    assert out_da.test.attrs["grid_mapping"] == "spatial_ref"
+    assert out_da.test.encoding["grid_mapping"] == "spatial_ref"
     assert out_da.test.attrs == test_da.test.attrs
 
 
@@ -1648,14 +1648,14 @@ def test_crs_get_custom():
 def test_get_crs_dataset():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(4326)
-    assert test_ds.attrs["grid_mapping"] == "spatial_ref"
+    assert test_ds.encoding["grid_mapping"] == "spatial_ref"
     assert test_ds.rio.crs.to_epsg() == 4326
 
 
 def test_write_crs_cf():
     test_da = xarray.DataArray(1)
     test_da = test_da.rio.write_crs(4326)
-    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.encoding["grid_mapping"] == "spatial_ref"
     assert test_da.rio.crs.to_epsg() == 4326
     assert "spatial_ref" in test_da.spatial_ref.attrs
     assert "crs_wkt" in test_da.spatial_ref.attrs
@@ -1666,7 +1666,7 @@ def test_write_crs_cf__disable_grid_mapping():
     test_da = xarray.DataArray(1)
     with rioxarray.set_options(export_grid_mapping=False):
         test_da = test_da.rio.write_crs(4326)
-    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.encoding["grid_mapping"] == "spatial_ref"
     assert test_da.rio.crs.to_epsg() == 4326
     assert "spatial_ref" in test_da.spatial_ref.attrs
     assert "crs_wkt" in test_da.spatial_ref.attrs
@@ -1687,7 +1687,7 @@ def test_write_crs__missing_geospatial_dims():
 def test_read_crs_cf():
     test_da = xarray.DataArray(1)
     test_da = test_da.rio.write_crs(4326)
-    assert test_da.attrs["grid_mapping"] == "spatial_ref"
+    assert test_da.encoding["grid_mapping"] == "spatial_ref"
     attrs = test_da.spatial_ref.attrs
     attrs.pop("spatial_ref")
     attrs.pop("crs_wkt")
@@ -1697,7 +1697,7 @@ def test_read_crs_cf():
 def test_get_crs_dataset__nonstandard_grid_mapping():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(4326, grid_mapping_name="frank")
-    assert test_ds.attrs["grid_mapping"] == "frank"
+    assert test_ds.encoding["grid_mapping"] == "frank"
     assert test_ds.rio.crs.to_epsg() == 4326
 
 
@@ -1839,7 +1839,7 @@ def test_isel_window():
 def test_write_pyproj_crs_dataset():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(pCRS(4326))
-    assert test_ds.attrs["grid_mapping"] == "spatial_ref"
+    assert test_ds.encoding["grid_mapping"] == "spatial_ref"
     assert test_ds.rio.crs.to_epsg() == 4326
 
 
@@ -2112,12 +2112,12 @@ def test_write_transform():
     ds.rio.write_transform(test_affine, inplace=True)
     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert ds.rio._cached_transform() == test_affine
-    assert ds.grid_mapping == "spatial_ref"
+    assert ds.rio.grid_mapping == "spatial_ref"
     da = xarray.DataArray(1)
     da.rio.write_transform(test_affine, inplace=True)
     assert da.rio._cached_transform() == test_affine
     assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
-    assert da.grid_mapping == "spatial_ref"
+    assert da.rio.grid_mapping == "spatial_ref"
 
 
 def test_missing_transform():

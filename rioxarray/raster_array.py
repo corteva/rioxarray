@@ -50,9 +50,6 @@ def _generate_attrs(src_data_array, dst_nodata):
     if src_data_array.rio.encoded_nodata is None and fill_value is not None:
         new_attrs["_FillValue"] = fill_value
 
-    # add raster spatial information
-    new_attrs["grid_mapping"] = src_data_array.rio.grid_mapping
-
     return new_attrs
 
 
@@ -75,6 +72,7 @@ def _add_attrs_proj(new_data_array, src_data_array):
     new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
+    new_data_array.rio.write_grid_mapping(src_data_array.rio.grid_mapping, inplace=True)
     new_data_array.rio.write_crs(src_data_array.rio.crs, inplace=True)
     new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
