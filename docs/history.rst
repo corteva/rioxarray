@@ -7,6 +7,7 @@ Latest
 0.3.2
 -----
 - BUG: handle lock=True in open_rasterio (issue #273)
+- ENH: enable `engine="rasterio"` via xarray backend API (issue #197 pull #281)
 
 0.3.1
 ------
