@@ -611,6 +611,34 @@ the dataset/data array.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.set_encoding">
+<code class="descname">set_encoding</code><span class="sig-paren">(</span><em>new_encoding</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_encoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the encoding of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.4.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_encoding</strong> (<em>dict</em>) – A dictionary for encoding.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with new attributes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rioxarray.rioxarray.XRasterBase.set_spatial_dims">
 <code class="descname">set_spatial_dims</code><span class="sig-paren">(</span><em>x_dim</em>, <em>y_dim</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.set_spatial_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.set_spatial_dims" title="Permalink to this definition">¶</a></dt>
 <dd><p>This sets the spatial dimensions of the dataset.</p>
@@ -736,6 +764,34 @@ rioxarray properties to re-search for them.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>new_attrs</strong> (<em>dict</em>) – A dictionary of new attributes to update with.</li>
+<li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Modified dataset with updated attributes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rioxarray.rioxarray.XRasterBase.update_encoding">
+<code class="descname">update_encoding</code><span class="sig-paren">(</span><em>new_encoding</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.update_encoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.update_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the encoding of the dataset/dataarray and reset
+rioxarray properties to re-search for them.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.4.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_encoding</strong> (<em>dict</em>) – A dictionary with encoding values to update with.</li>
 <li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</li>
 </ul>
 </td>

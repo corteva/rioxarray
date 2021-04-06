@@ -773,6 +773,8 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make sure encoding handled properly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;grid_mapping&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+        <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mask_and_scale</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;scale_factor&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
             <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
@@ -1017,7 +1019,6 @@
 
     <span class="c1"># handle encoding</span>
     <span class="n">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">)</span>
-
     <span class="c1"># Affine transformation matrix (always available)</span>
     <span class="c1"># This describes coefficients mapping pixel coordinates to CRS</span>
     <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
@@ -1031,11 +1032,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
 
     <span class="c1"># Make the file closeable</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># xarray 0.17 +</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">set_close</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">_file_obj</span> <span class="o">=</span> <span class="n">manager</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">set_close</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
     <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">manager</span>
     <span class="c1"># add file path to encoding</span>
     <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">name</span>

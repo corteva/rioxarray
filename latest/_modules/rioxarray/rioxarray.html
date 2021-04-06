@@ -396,10 +396,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        str: The CF grid_mapping attribute. &#39;spatial_ref&#39; is the default.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="n">grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">grid_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">grid_mapping</span>
         <span class="n">grid_mapping</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span>
         <span class="c1"># search the dataset for the grid mapping name</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
@@ -411,11 +412,12 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
                 <span class="k">except</span> <span class="n">DimensionError</span><span class="p">:</span>
                     <span class="k">continue</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]</span>
+                <span class="n">var_grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">var_grid_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">grid_mapping</span> <span class="o">=</span> <span class="n">var_grid_mapping</span>
                     <span class="n">grid_mappings</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">grid_mapping</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                    <span class="k">pass</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_mappings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;Multiple grid mappings exist.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">grid_mapping</span>
@@ -445,12 +447,22 @@
                 <span class="k">except</span> <span class="n">DimensionError</span><span class="p">:</span>
                     <span class="k">continue</span>
 
-                <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span>
+                <span class="c1"># remove grid_mapping from attributes if it exists</span>
+                <span class="c1"># and update the grid_mapping in encoding</span>
+                <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
                     <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                    <span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+        <span class="c1"># remove grid_mapping from attributes if it exists</span>
+        <span class="c1"># and update the grid_mapping in encoding</span>
+        <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
             <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="XRasterBase.write_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs">[docs]</a>    <span class="k">def</span> <span class="nf">write_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -756,6 +768,57 @@
         <span class="n">data_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="n">data_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_attrs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">data_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.set_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the encoding of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        .. versionadded:: 0.4</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_encoding: dict</span>
+<span class="sd">            A dictionary for encoding.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with new attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># set the attributes</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">new_encoding</span>
+        <span class="c1"># reset rioxarray properties depending</span>
+        <span class="c1"># on attributes to be generated</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.update_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">update_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the encoding of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        .. versionadded:: 0.4</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_encoding: dict</span>
+<span class="sd">            A dictionary with encoding values to update with.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with updated attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_encoding</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="n">data_encoding</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">(</span><span class="n">data_encoding</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="XRasterBase.set_spatial_dims"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims">[docs]</a>    <span class="k">def</span> <span class="nf">set_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
