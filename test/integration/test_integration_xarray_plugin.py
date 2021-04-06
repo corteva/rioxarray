@@ -17,10 +17,8 @@ def test_xarray_open_dataset():
     assert ds.data_vars["band_data"].shape == (1, 500, 500)
     assert "spatial_ref" not in ds.data_vars
     assert "spatial_ref" in ds.coords
-    # uncomment after "grid_mapping" is moved into `encodings`
-    # see: https://github.com/corteva/rioxarray/issues/282#issuecomment-814358516
-    # assert "grid_mapping" not in ds.data_vars["band_data"].attrs
-    # assert "grid_mapping" not in ds.data_vars["band_data"].encoding
+    assert "grid_mapping" not in ds.data_vars["band_data"].attrs
+    assert "grid_mapping" in ds.data_vars["band_data"].encoding
 
     ds = xr.open_dataset(cog_file)
 
