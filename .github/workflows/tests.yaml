@@ -37,9 +37,9 @@ jobs:
             rasterio-version: '*'
             xarray-version: '*'
           - os: ubuntu-latest
-            python-version: 3.6
+            python-version: 3.7
             rasterio-version: 1.1
-            xarray-version: 0.16
+            xarray-version: '*'
     steps:
       - uses: actions/checkout@v2
 

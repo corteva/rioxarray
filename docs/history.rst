@@ -3,6 +3,8 @@ History
 
 Latest
 ------
+- DEP: Python 3.6+ (issue #215)
+- DEP: xarray 0.17+ (needed for issue #282)
 - REF: Store `grid_mapping` in `encoding` instead of `attrs` (issue #282)
 
 0.3.2
