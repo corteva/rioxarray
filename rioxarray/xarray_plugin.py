@@ -4,7 +4,20 @@ import xarray as xr
 
 from . import _io
 
-CAN_OPEN_EXTS = {"geotif", "geotiff", "j2k", "jp2", "tif", "tiff", "vrt"}
+CAN_OPEN_EXTS = {
+    "asc",
+    "geotif",
+    "geotiff",
+    "img",
+    "j2k",
+    "jp2",
+    "jpg",
+    "jpeg",
+    "png",
+    "tif",
+    "tiff",
+    "vrt",
+}
 
 
 class RasterioBackend(xr.backends.common.BackendEntrypoint):
@@ -12,7 +25,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         self,
         filename_or_obj,
         drop_variables=None,
-        mask_and_scale=False,
+        mask_and_scale=True,
         parse_coordinates=None,
         lock=None,
         masked=False,

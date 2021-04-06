@@ -25,5 +25,3 @@ def test_xarray_open_dataset():
     ds = xr.open_dataset(cog_file)
 
     assert isinstance(ds, xr.Dataset)
-
-    ds.to_netcdf("test.nc")
