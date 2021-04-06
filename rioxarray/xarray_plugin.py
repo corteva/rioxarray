@@ -12,6 +12,7 @@ class GdalBackend(xr.backends.common.BackendEntrypoint):
         self,
         filename_or_obj,
         drop_variables=None,
+        decode_coords=True,
         mask_and_scale=False,
         parse_coordinates=None,
         lock=None,
@@ -32,7 +33,8 @@ class GdalBackend(xr.backends.common.BackendEntrypoint):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
-        ds = ds.reset_coords("spatial_ref")
+        if decode_coords is True or decode_coords=="coordinate":
+            ds = ds.reset_coords("spatial_ref")
         return ds
 
     def guess_can_open(self, filename_or_obj):
