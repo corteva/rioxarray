@@ -36,8 +36,10 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         variable=None,
         group=None,
         default_name="band_data",
-        open_kwargs={},
+        open_kwargs=None,
     ):
+        if open_kwargs is None:
+            open_kwargs = {}
         ds = _io.open_rasterio(
             filename_or_obj,
             mask_and_scale=mask_and_scale,
