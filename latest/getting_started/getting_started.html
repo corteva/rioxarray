@@ -216,6 +216,10 @@ that as well.</p>
 <li>It adds the coordinate axis CF metadata.</li>
 <li>It loads raster metadata into the attributes.</li>
 </ol>
+<p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Data management:</span></p>
 <ul>
