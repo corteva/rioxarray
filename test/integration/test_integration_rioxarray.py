@@ -36,6 +36,7 @@ from test.conftest import (
 )
 
 PYPROJ_LT_3 = LooseVersion(pyproj.__version__) < LooseVersion("3")
+RASTERIO_LT_122 = LooseVersion(rasterio.__version__) < LooseVersion("1.2.2")
 
 
 @pytest.fixture(params=[xarray.open_dataset, xarray.open_dataarray])
@@ -300,7 +301,13 @@ def test_clip_box__nodata_error(modis_clip):
         var_match = ""
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
-        with pytest.raises(NoDataInBounds, match=var_match):
+        if RASTERIO_LT_122:
+            expected_exception = NoDataInBounds
+        else:
+            expected_exception = rasterio.errors.WindowError
+            var_match = "Bounds and transform are inconsistent"
+
+        with pytest.raises(expected_exception, match=var_match):
             xdi.rio.clip_box(
                 minx=-8272735.53951584,  # xdi.x[5].values
                 miny=8048371.187465771,  # xdi.y[7].values
@@ -314,13 +321,19 @@ def test_clip_box__one_dimension_error(modis_clip):
         var_match = ""
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
-        # test exception after raster clipped
-        with pytest.raises(
-            OneDimensionalRaster,
-            match=(
+        if RASTERIO_LT_122:
+            expected_exception = OneDimensionalRaster
+            var_match = (
                 "At least one of the clipped raster x,y coordinates has "
                 f"only one point.{var_match}"
-            ),
+            )
+        else:
+            expected_exception = rasterio.errors.WindowError
+            var_match = "Bounds and transform are inconsistent"
+        # test exception after raster clipped
+        with pytest.raises(
+            expected_exception,
+            match=var_match,
         ):
             xdi.rio.clip_box(
                 minx=-7272735.53951584,  # xdi.x[5].values
