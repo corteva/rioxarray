@@ -13,6 +13,17 @@ with the `rio` accessor. The `rio` accessor is activated by importing rioxarray 
     import rioxarray
 
 
+If you use one of xarray's open methods such as ``xarray.open_dataset`` to load netCDF files
+with the default engine, it is recommended to use `decode_coords="all"`. This will load the grid mapping
+variable into coordinates for compatibility with rioxarray.
+
+.. code-block:: python
+
+    import xarray
+
+    xds = xarray.open_dataset("file.nc", decode_coords="all")
+
+
 You can learn how to `clip`, `merge`, and `reproject` rasters in the :ref:`usage_examples`
 section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
 that as well.
@@ -30,7 +41,9 @@ rioxarray 0.4+ enables passing `engine="rasterio"` to ``xarray.open_dataset`` an
 
 .. code-block:: python
 
-    ds = xr.open_dataset("my.tif", engine="rasterio")
+    import xarray
+
+    xds = xarray.open_dataset("my.tif", engine="rasterio")
 
 
 .. toctree::

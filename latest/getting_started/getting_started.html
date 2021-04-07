@@ -204,6 +204,14 @@ with the <cite>rio</cite> accessor. The <cite>rio</cite> accessor is activated b
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
 </pre></div>
 </div>
+<p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files
+with the default engine, it is recommended to use <cite>decode_coords=”all”</cite>. This will load the grid mapping
+variable into coordinates for compatibility with rioxarray.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
+
+<span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;file.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
 section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
 that as well.</p>
@@ -217,7 +225,9 @@ that as well.</p>
 <li>It loads raster metadata into the attributes.</li>
 </ol>
 <p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
+
+<span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">

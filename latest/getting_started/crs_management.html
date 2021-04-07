@@ -99,6 +99,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Accessing-the-CRS-object">Accessing the CRS object</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):">Search order for the CRS (DataArray and Dataset):</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Search-order-for-the-CRS-for-Dataset:">Search order for the CRS for Dataset:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#decode_coords=“all”">decode_coords=“all”</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#API-Documentation">API Documentation</a></li>
 </ul>
 </li>
@@ -470,6 +471,10 @@ div.rendered_html tbody tr:hover {
 <h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline">¶</a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
 </div>
+<div class="section" id="decode_coords=“all”">
+<h3>decode_coords=“all”<a class="headerlink" href="#decode_coords=“all”" title="Permalink to this headline">¶</a></h3>
+<p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files with the default engine, it is recommended to use <code class="docutils literal notranslate"><span class="pre">decode_coords=&quot;all&quot;</span></code>. This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
+</div>
 <div class="section" id="API-Documentation">
 <h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -492,7 +497,7 @@ import xarray
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>rds = xarray.open_dataset(&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;)
+<span></span>rds = xarray.open_dataset(&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;, decode_coords=&quot;all&quot;)
 </pre></div>
 </div>
 </div>
