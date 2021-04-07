@@ -26,7 +26,7 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 5. It adds the coordinate axis CF metadata.
 6. It loads raster metadata into the attributes.
 
-Starting with xarray 0.18.0 rioxarray enables passing `engine="rasterio"` to all xarray open functions:
+rioxarray 0.4+ enables passing `engine="rasterio"` to ``xarray.open_dataset`` and ``xarray.open_mfdataset``:
 
 .. code-block:: python
 
