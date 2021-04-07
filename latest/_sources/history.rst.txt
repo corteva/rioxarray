@@ -8,6 +8,7 @@ Latest
 - REF: Store `grid_mapping` in `encoding` instead of `attrs` (issue #282)
 - ENH: enable `engine="rasterio"` via xarray backend API (issue #197 pull #281)
 - BUG: Return correct transform in `rio.transform` with non-linear transform (discussions #280)
+- BUG: Update to handle WindowError in rasterio 1.2.2 (issue #286)
 
 0.3.2
 -----
