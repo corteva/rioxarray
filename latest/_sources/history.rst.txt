@@ -7,6 +7,7 @@ Latest
 - DEP: xarray 0.17+ (needed for issue #282)
 - REF: Store `grid_mapping` in `encoding` instead of `attrs` (issue #282)
 - ENH: enable `engine="rasterio"` via xarray backend API (issue #197 pull #281)
+- BUG: Return correct transform in `rio.transform` with non-linear transform (discussions #280)
 
 0.3.2
 -----
