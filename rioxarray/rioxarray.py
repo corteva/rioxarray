@@ -3,6 +3,7 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
 import math
+import warnings
 
 import numpy as np
 import pyproj
@@ -492,6 +493,12 @@ class XRasterBase:
         :obj:`affine.Afffine`:
             The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
+        transform = self._cached_transform()
+        if transform and not transform.is_rectilinear:
+            if recalc:
+                warnings.warn("Non-rectilinear transform found. Unable to recalculate.")
+            return transform
+
         try:
             src_left, _, _, src_top = self.bounds(recalc=recalc)
             src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
