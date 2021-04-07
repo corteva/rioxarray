@@ -150,6 +150,17 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "alexamici",
+      "name": "Alessandro Amici",
+      "avatar_url": "https://avatars.githubusercontent.com/u/226037?v=4",
+      "profile": "https://bopen.eu/",
+      "contributions": [
+        "code",
+        "doc",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7
