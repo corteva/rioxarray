@@ -591,19 +591,23 @@ class RasterArray(XRasterBase):
             right = maxx
 
         # pull the data out
-        window = rasterio.windows.from_bounds(
-            left=np.array(left).item(),
-            bottom=np.array(bottom).item(),
-            right=np.array(right).item(),
-            top=np.array(top).item(),
-            transform=self.transform(recalc=True),
-            width=self.width,
-            height=self.height,
-        )
-        cl_array = self.isel_window(window)
+        window_error = None
+        try:
+            window = rasterio.windows.from_bounds(
+                left=np.array(left).item(),
+                bottom=np.array(bottom).item(),
+                right=np.array(right).item(),
+                top=np.array(top).item(),
+                transform=self.transform(recalc=True),
+                width=self.width,
+                height=self.height,
+            )
+            cl_array = self.isel_window(window)
+        except rasterio.errors.WindowError as err:
+            window_error = err
 
         # check that the window has data in it
-        if cl_array.rio.width <= 1 or cl_array.rio.height <= 1:
+        if window_error or cl_array.rio.width <= 1 or cl_array.rio.height <= 1:
             if auto_expand and auto_expand < auto_expand_limit:
                 resolution_x, resolution_y = self.resolution()
                 return self.clip_box(
@@ -614,6 +618,8 @@ class RasterArray(XRasterBase):
                     auto_expand=int(auto_expand) + 1,
                     auto_expand_limit=auto_expand_limit,
                 )
+            if window_error:
+                raise window_error
             if cl_array.rio.width < 1 or cl_array.rio.height < 1:
                 raise NoDataInBounds(
                     f"No data found in bounds.{_get_data_var_message(self._obj)}"
