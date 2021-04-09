@@ -52,18 +52,30 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     dict: x and y coordinate arrays.
 
     """
-    x_coords, _ = affine * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
-    _, y_coords = affine * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+    if affine.is_rectilinear:
+        x_coords, _ = affine * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
+        _, y_coords = affine * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+    else:
+        x_coords, y_coords = affine * np.meshgrid(
+            np.arange(width) + 0.5,
+            np.arange(height) + 0.5,
+        )
     return {y_dim: y_coords, x_dim: x_coords}
 
 
-def _warp_spatial_coords(affine, width, height):
+def _generate_spatial_coords(affine, width, height):
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
-    return {
-        "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
-        "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
-    }
+    if affine.is_rectilinear:
+        return {
+            "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
+            "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
+        }
+    else:
+        return {
+            "xc": (("x", "y"), new_spatial_coords["x"]),
+            "yc": (("x", "y"), new_spatial_coords["y"]),
+        }
 
 
 def _get_nonspatial_coords(src_data_array):
@@ -91,7 +103,7 @@ def _get_nonspatial_coords(src_data_array):
 def _make_coords(src_data_array, dst_affine, dst_width, dst_height):
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
-    new_coords = _warp_spatial_coords(dst_affine, dst_width, dst_height)
+    new_coords = _generate_spatial_coords(dst_affine, dst_width, dst_height)
     new_coords.update(coords)
     return new_coords
 
