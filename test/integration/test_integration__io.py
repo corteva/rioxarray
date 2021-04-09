@@ -976,3 +976,24 @@ def test_lock_true():
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=True, chunk=True
     ) as rds:
         rds.mean().compute()
+
+
+def test_non_rectilinear():
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
+    xds = rioxarray.open_rasterio(test_file)
+    assert xds.rio.shape == (10, 10)
+    with rasterio.open(test_file) as rds:
+        assert rds.transform == xds.rio.transform()
+        for xi, yi in itertools.product(range(rds.width), range(rds.height)):
+            subset = xds.isel(x=xi, y=yi)
+            assert_almost_equal(rds.xy(xi, yi), (subset.xc.item(), subset.yc.item()))
+
+
+def test_non_rectilinear__skip_parse_coordinates():
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
+    xds = rioxarray.open_rasterio(test_file, parse_coordinates=False)
+    assert "xc" not in xds.coords
+    assert "yc" not in xds.coords
+    assert xds.rio.shape == (10, 10)
+    with rasterio.open(test_file) as rds:
+        assert rds.transform == xds.rio.transform()

@@ -27,7 +27,7 @@ from xarray.core.dataarray import DataArray
 from xarray.core.utils import is_scalar
 
 from rioxarray.exceptions import RioXarrayError
-from rioxarray.rioxarray import affine_to_coords
+from rioxarray.rioxarray import _generate_spatial_coords
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
@@ -648,15 +648,6 @@ def open_rasterio(
     <http://web.archive.org/web/20160326194152/http://remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2>`_
     for more information).
 
-    You can generate 2D coordinates from the file's attributes with::
-
-        from affine import Affine
-        da = xr.open_rasterio('path_to_file.tif')
-        transform = da.rio.transform()
-        nx, ny = da.sizes['x'], da.sizes['y']
-        x, y = np.meshgrid(np.arange(nx)+0.5, np.arange(ny)+0.5) * transform
-
-
     Parameters
     ----------
     filename: str, rasterio.DatasetReader, or rasterio.WarpedVRT
@@ -800,19 +791,9 @@ def open_rasterio(
         coords[coord_name] = np.asarray(riods.indexes)
 
     # Get geospatial coordinates
-    transform = _rio_transform(riods)
-    if parse_coordinates and transform.is_rectilinear:
-        # 1d coordinates
-        coords.update(affine_to_coords(riods.transform, riods.width, riods.height))
-    elif parse_coordinates:
-        # 2d coordinates
-        warnings.warn(
-            "The file coordinates' transformation isn't "
-            "rectilinear: xarray won't parse the coordinates "
-            "in this case. Set `parse_coordinates=False` to "
-            "suppress this warning.",
-            RuntimeWarning,
-            stacklevel=3,
+    if parse_coordinates:
+        coords.update(
+            _generate_spatial_coords(_rio_transform(riods), riods.width, riods.height)
         )
 
     unsigned = False
@@ -858,7 +839,7 @@ def open_rasterio(
     # For serialization store as tuple of 6 floats, the last row being
     # always (0, 0, 1) per definition (see
     # https://github.com/sgillies/affine)
-    result.rio.write_transform(riods.transform, inplace=True)
+    result.rio.write_transform(_rio_transform(riods), inplace=True)
     if hasattr(riods, "crs") and riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
 
