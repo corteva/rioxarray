@@ -5,6 +5,9 @@ Getting Started
 
 Welcome! This page aims to help you gain a foundational understanding of rioxarray.
 
+rio accessor
+-------------
+
 rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals.html#extending-xarray>`__
 with the `rio` accessor. The `rio` accessor is activated by importing rioxarray like so:
 
@@ -13,9 +16,21 @@ with the `rio` accessor. The `rio` accessor is activated by importing rioxarray 
     import rioxarray
 
 
-If you use one of xarray's open methods such as ``xarray.open_dataset`` to load netCDF files
-with the default engine, it is recommended to use `decode_coords="all"`. This will load the grid mapping
-variable into coordinates for compatibility with rioxarray.
+You can learn how to `clip`, `merge`, and `reproject` rasters in the :ref:`usage_examples`
+section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
+that as well.
+
+
+Reading Files
+-------------
+
+xarray
+~~~~~~~
+
+Since `rioxarray` is an extension of `xarray`, you can load in files using the standard
+`xarray` open methods. If you use one of xarray's open methods such as ``xarray.open_dataset``
+to load netCDF files with the default engine, it is recommended to use `decode_coords="all"`.
+This will load the grid mapping variable into coordinates for compatibility with rioxarray.
 
 .. code-block:: python
 
@@ -24,9 +39,28 @@ variable into coordinates for compatibility with rioxarray.
     xds = xarray.open_dataset("file.nc", decode_coords="all")
 
 
-You can learn how to `clip`, `merge`, and `reproject` rasters in the :ref:`usage_examples`
-section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
-that as well.
+rioxarray
+~~~~~~~~~~
+
+rioxarray 0.4+ enables passing `engine="rasterio"` to ``xarray.open_dataset``
+and ``xarray.open_mfdataset`` for xarray 0.18+. This uses
+:func:`rioxarray.open_rasterio` as the backend and always returns an ``xarray.Dataset``.
+
+.. code-block:: python
+
+    import xarray
+
+    xds = xarray.open_dataset("my.tif", engine="rasterio")
+
+You can also use :func:`rioxarray.open_rasterio`. This objects returned depend on
+your input file type.
+
+.. code-block:: python
+
+    import rioxarray
+
+    xds = rioxarray.open_rasterio("my.tif")
+
 
 Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 
@@ -36,14 +70,6 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 4. It supports masking and scaling data with the `masked` and `mask_and_scale` kwargs.
 5. It adds the coordinate axis CF metadata.
 6. It loads raster metadata into the attributes.
-
-rioxarray 0.4+ enables passing `engine="rasterio"` to ``xarray.open_dataset`` and ``xarray.open_mfdataset`` for xarray 0.18+:
-
-.. code-block:: python
-
-    import xarray
-
-    xds = xarray.open_dataset("my.tif", engine="rasterio")
 
 
 .. toctree::

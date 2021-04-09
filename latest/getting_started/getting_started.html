@@ -95,9 +95,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rio-accessor">rio accessor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-files">Reading Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#xarray">xarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rioxarray">rioxarray</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Usage Examples</a></li>
@@ -199,22 +207,48 @@
 <div class="section" id="getting-started">
 <span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <p>Welcome! This page aims to help you gain a foundational understanding of rioxarray.</p>
+<div class="section" id="rio-accessor">
+<h2>rio accessor<a class="headerlink" href="#rio-accessor" title="Permalink to this headline">¶</a></h2>
 <p>rioxarray <a class="reference external" href="http://xarray.pydata.org/en/stable/internals.html#extending-xarray">extends xarray</a>
 with the <cite>rio</cite> accessor. The <cite>rio</cite> accessor is activated by importing rioxarray like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
 </pre></div>
 </div>
-<p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files
-with the default engine, it is recommended to use <cite>decode_coords=”all”</cite>. This will load the grid mapping
-variable into coordinates for compatibility with rioxarray.</p>
+<p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
+section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
+that as well.</p>
+</div>
+<div class="section" id="reading-files">
+<h2>Reading Files<a class="headerlink" href="#reading-files" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="xarray">
+<h3>xarray<a class="headerlink" href="#xarray" title="Permalink to this headline">¶</a></h3>
+<p>Since <cite>rioxarray</cite> is an extension of <cite>xarray</cite>, you can load in files using the standard
+<cite>xarray</cite> open methods. If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
+to load netCDF files with the default engine, it is recommended to use <cite>decode_coords=”all”</cite>.
+This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
 
 <span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;file.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
-section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
-that as well.</p>
+</div>
+<div class="section" id="rioxarray">
+<h3>rioxarray<a class="headerlink" href="#rioxarray" title="Permalink to this headline">¶</a></h3>
+<p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
+and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+. This uses
+<a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> as the backend and always returns an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
+
+<span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a>. This objects returned depend on
+your input file type.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
+
+<span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Why use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> instead of <cite>xarray.open_rasterio</cite>?</p>
 <ol class="arabic simple">
 <li>It supports multidimensional datasets such as netCDF.</li>
@@ -224,12 +258,6 @@ that as well.</p>
 <li>It adds the coordinate axis CF metadata.</li>
 <li>It loads raster metadata into the attributes.</li>
 </ol>
-<p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
-
-<span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Data management:</span></p>
 <ul>
@@ -237,6 +265,8 @@ that as well.</p>
 <li class="toctree-l1"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
 </ul>
+</div>
+</div>
 </div>
 </div>
 
