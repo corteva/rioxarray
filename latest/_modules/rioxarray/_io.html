@@ -193,7 +193,7 @@
 <span class="kn">from</span> <span class="nn">xarray.core.utils</span> <span class="kn">import</span> <span class="n">is_scalar</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">RioXarrayError</span>
-<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">affine_to_coords</span>
+<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">_generate_spatial_coords</span>
 
 <span class="c1"># TODO: should this be GDAL_LOCK instead?</span>
 <span class="n">RASTERIO_LOCK</span> <span class="o">=</span> <span class="n">SerializableLock</span><span class="p">()</span>
@@ -814,15 +814,6 @@
 <span class="sd">    &lt;http://web.archive.org/web/20160326194152/http://remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2&gt;`_</span>
 <span class="sd">    for more information).</span>
 
-<span class="sd">    You can generate 2D coordinates from the file&#39;s attributes with::</span>
-
-<span class="sd">        from affine import Affine</span>
-<span class="sd">        da = xr.open_rasterio(&#39;path_to_file.tif&#39;)</span>
-<span class="sd">        transform = da.rio.transform()</span>
-<span class="sd">        nx, ny = da.sizes[&#39;x&#39;], da.sizes[&#39;y&#39;]</span>
-<span class="sd">        x, y = np.meshgrid(np.arange(nx)+0.5, np.arange(ny)+0.5) * transform</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    filename: str, rasterio.DatasetReader, or rasterio.WarpedVRT</span>
@@ -966,19 +957,9 @@
         <span class="n">coords</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">indexes</span><span class="p">)</span>
 
     <span class="c1"># Get geospatial coordinates</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">parse_coordinates</span> <span class="ow">and</span> <span class="n">transform</span><span class="o">.</span><span class="n">is_rectilinear</span><span class="p">:</span>
-        <span class="c1"># 1d coordinates</span>
-        <span class="n">coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">affine_to_coords</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="n">parse_coordinates</span><span class="p">:</span>
-        <span class="c1"># 2d coordinates</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;The file coordinates&#39; transformation isn&#39;t &quot;</span>
-            <span class="s2">&quot;rectilinear: xarray won&#39;t parse the coordinates &quot;</span>
-            <span class="s2">&quot;in this case. Set `parse_coordinates=False` to &quot;</span>
-            <span class="s2">&quot;suppress this warning.&quot;</span><span class="p">,</span>
-            <span class="ne">RuntimeWarning</span><span class="p">,</span>
-            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="k">if</span> <span class="n">parse_coordinates</span><span class="p">:</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">_generate_spatial_coords</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="n">unsigned</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1024,7 +1005,7 @@
     <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
     <span class="c1"># always (0, 0, 1) per definition (see</span>
     <span class="c1"># https://github.com/sgillies/affine)</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
