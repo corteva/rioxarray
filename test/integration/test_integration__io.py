@@ -15,7 +15,7 @@ import pytest
 import rasterio
 import xarray as xr
 from affine import Affine
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.transform import from_origin
 from rasterio.warp import calculate_default_transform
@@ -25,6 +25,7 @@ from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
 from rioxarray._io import build_subdataset_filter
+from rioxarray.rioxarray import DEFAULT_GRID_MAP
 from test.conftest import (
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -178,15 +179,15 @@ def test_build_subdataset_filter(subdataset, variable, group, match):
     ) == match
 
 
-def test_open_variable_filter():
-    with rioxarray.open_rasterio(
+def test_open_variable_filter(open_rasterio):
+    with open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), variable=["blue"]
     ) as rds:
         assert list(rds.data_vars) == ["blue"]
 
 
-def test_open_group_filter__missing():
-    with rioxarray.open_rasterio(
+def test_open_group_filter__missing(open_rasterio):
+    with open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
         variable="blue",
         group=["non-existent"],
@@ -208,8 +209,8 @@ def test_open_multiple_resolution():
     assert rds_list[1].dims == {"y": 2400, "x": 2400, "band": 1}
 
 
-def test_open_group_filter():
-    with rioxarray.open_rasterio(
+def test_open_group_filter(open_rasterio):
+    with open_rasterio(
         os.path.join(
             TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
         ),
@@ -230,11 +231,12 @@ def test_open_group_filter():
         ]
 
 
-def test_open_group_load_attrs():
-    with rioxarray.open_rasterio(
+def test_open_group_load_attrs(open_rasterio):
+    with open_rasterio(
         os.path.join(
             TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
         ),
+        mask_and_scale=False,
         variable="sur_refl_b05_1",
     ) as rds:
         attrs = rds["sur_refl_b05_1"].attrs
@@ -258,6 +260,8 @@ def test_open_rasterio_mask_chunk_clip():
         chunks=True,
         default_name="dem",
     ) as xdi:
+        if isinstance(xdi, xr.Dataset):
+            xdi = xdi.dem
         assert xdi.name == "dem"
         assert str(xdi.dtype) == "float64"
         assert str(xdi.data.dtype) == "float64"
@@ -385,6 +389,7 @@ def create_tmp_geotiff(
             s.write(data, **write_kwargs)
             dx, dy = s.res[0], -s.res[1]
             tt = s.transform
+            crs_wkt = s.crs.to_wkt() if s.crs else None
 
         if not transform_args:
             a, b, c, d = tt.c, tt.f, -tt.e, tt.a
@@ -400,448 +405,450 @@ def create_tmp_geotiff(
                 "x": np.arange(nx) * c + a + dx / 2,
             },
         )
+        if crs_wkt is not None:
+            expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+            expected.coords[DEFAULT_GRID_MAP].attrs["spatial_ref"] = crs_wkt
         yield tmp_file, expected
 
 
-class TestRasterio:
-    def test_serialization(self):
-        with create_tmp_geotiff(additional_attrs={}) as (tmp_file, expected):
-            # Write it to a netcdf and read again (roundtrip)
-            with xr.open_rasterio(tmp_file) as rioda:
-                with create_tmp_file(suffix=".nc") as tmp_nc_file:
-                    rioda.to_netcdf(tmp_nc_file)
-                    with xr.open_dataarray(tmp_nc_file) as ncds:
-                        assert_identical(rioda, ncds)
+def test_serialization():
+    with create_tmp_geotiff(additional_attrs={}) as (tmp_file, expected):
+        # Write it to a netcdf and read again (roundtrip)
+        with rioxarray.open_rasterio(tmp_file, mask_and_scale=True) as rioda:
+            with create_tmp_file(suffix=".nc") as tmp_nc_file:
+                rioda.to_netcdf(tmp_nc_file)
+                with xr.open_dataarray(tmp_nc_file, decode_coords="all") as ncds:
+                    assert_identical(rioda, ncds)
 
-    def test_utm(self):
-        with create_tmp_geotiff() as (tmp_file, expected):
-            with xr.open_rasterio(tmp_file) as rioda:
-                assert_allclose(rioda, expected)
-                assert rioda.attrs["scales"] == (1.0, 1.0, 1.0)
-                assert rioda.attrs["offsets"] == (0.0, 0.0, 0.0)
-                assert rioda.attrs["descriptions"] == ("d1", "d2", "d3")
-                assert rioda.attrs["units"] == ("u1", "u2", "u3")
-                assert isinstance(rioda.attrs["crs"], str)
-                assert isinstance(rioda.attrs["res"], tuple)
-                assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.rio._cached_transform(), Affine)
-                np.testing.assert_array_equal(
-                    rioda.attrs["nodatavals"], [np.NaN, np.NaN, np.NaN]
-                )
 
-            # Check no parse coords
-            with xr.open_rasterio(tmp_file, parse_coordinates=False) as rioda:
-                assert "x" not in rioda.coords
-                assert "y" not in rioda.coords
+def test_utm():
+    with create_tmp_geotiff() as (tmp_file, expected):
+        with rioxarray.open_rasterio(tmp_file) as rioda:
+            assert_allclose(rioda, expected)
+            assert rioda.attrs["scale_factor"] == 1.0
+            assert rioda.attrs["add_offset"] == 0.0
+            assert rioda.attrs["long_name"] == ("d1", "d2", "d3")
+            assert rioda.attrs["units"] == ("u1", "u2", "u3")
+            assert rioda.rio.crs == expected.rio.crs
+            assert_array_equal(rioda.rio.resolution(), expected.rio.resolution())
+            assert isinstance(rioda.rio._cached_transform(), Affine)
+            assert rioda.rio.nodata is None
 
-    def test_platecarree(self):
-        with create_tmp_geotiff(
-            8,
-            10,
-            1,
-            transform_args=[1, 2, 0.5, 2.0],
-            crs="+proj=latlong",
-            open_kwargs={"nodata": -9765},
-        ) as (tmp_file, expected):
-            with xr.open_rasterio(tmp_file) as rioda:
-                assert_allclose(rioda, expected)
-                assert rioda.attrs["scales"] == (1.0,)
-                assert rioda.attrs["offsets"] == (0.0,)
-                assert isinstance(rioda.attrs["descriptions"], tuple)
-                assert isinstance(rioda.attrs["units"], tuple)
-                assert isinstance(rioda.attrs["crs"], str)
-                assert isinstance(rioda.attrs["res"], tuple)
-                assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.rio._cached_transform(), Affine)
-                np.testing.assert_array_equal(rioda.attrs["nodatavals"], [-9765.0])
+        # Check no parse coords
+        with rioxarray.open_rasterio(tmp_file, parse_coordinates=False) as rioda:
+            assert "x" not in rioda.coords
+            assert "y" not in rioda.coords
 
-    def test_notransform(self):
-        # regression test for https://github.com/pydata/xarray/issues/1686
-        # Create a geotiff file
-        with warnings.catch_warnings():
-            # rasterio throws a NotGeoreferencedWarning here, which is
-            # expected since we test rasterio's defaults in this case.
-            warnings.filterwarnings(
-                "ignore",
-                category=UserWarning,
-                message="Dataset has no geotransform set",
-            )
-            with create_tmp_file(suffix=".tif") as tmp_file:
-                # data
-                nx, ny, nz = 4, 3, 3
-                data = np.arange(nx * ny * nz, dtype=rasterio.float32).reshape(
-                    nz, ny, nx
-                )
-                with rasterio.open(
-                    tmp_file,
-                    "w",
-                    driver="GTiff",
-                    height=ny,
-                    width=nx,
-                    count=nz,
-                    dtype=rasterio.float32,
-                ) as s:
-                    s.descriptions = ("nx", "ny", "nz")
-                    s.units = ("cm", "m", "km")
-                    s.write(data)
 
-                # Tests
-                expected = DataArray(
-                    data,
-                    dims=("band", "y", "x"),
-                    coords={
-                        "band": [1, 2, 3],
-                        "y": [0.5, 1.5, 2.5],
-                        "x": [0.5, 1.5, 2.5, 3.5],
-                    },
-                )
-                with xr.open_rasterio(tmp_file) as rioda:
-                    assert_allclose(rioda, expected)
-                    assert rioda.attrs["scales"] == (1.0, 1.0, 1.0)
-                    assert rioda.attrs["offsets"] == (0.0, 0.0, 0.0)
-                    assert rioda.attrs["descriptions"] == ("nx", "ny", "nz")
-                    assert rioda.attrs["units"] == ("cm", "m", "km")
-                    assert isinstance(rioda.attrs["res"], tuple)
-                    assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                    assert isinstance(rioda.rio._cached_transform(), Affine)
+def test_platecarree():
+    with create_tmp_geotiff(
+        8,
+        10,
+        1,
+        transform_args=[1, 2, 0.5, 2.0],
+        crs="+proj=latlong",
+        open_kwargs={"nodata": -9765},
+    ) as (tmp_file, expected):
+        with rioxarray.open_rasterio(tmp_file) as rioda:
+            assert_allclose(rioda, expected)
+            assert rioda.attrs["scale_factor"] == 1.0
+            assert rioda.attrs["add_offset"] == 0.0
+            assert rioda.attrs["long_name"] == "d1"
+            assert rioda.attrs["units"] == "u1"
+            assert rioda.rio.crs == expected.rio.crs
+            assert isinstance(rioda.rio.resolution(), tuple)
+            assert isinstance(rioda.rio._cached_transform(), Affine)
+            assert rioda.rio.nodata == -9765.0
 
-    def test_indexing(self):
-        with create_tmp_geotiff(
-            8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
-        ) as (tmp_file, expected):
-            with xr.open_rasterio(tmp_file, cache=False) as actual:
 
-                # tests
-                # assert_allclose checks all data + coordinates
-                assert_allclose(actual, expected)
-                assert not actual.variable._in_memory
-
-                # Basic indexer
-                ind = {"x": slice(2, 5), "y": slice(5, 7)}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": slice(1, 2), "x": slice(2, 5), "y": slice(5, 7)}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": slice(1, 2), "x": slice(2, 5), "y": 0}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                # orthogonal indexer
-                ind = {
-                    "band": np.array([2, 1, 0]),
-                    "x": np.array([1, 0]),
-                    "y": np.array([0, 2]),
-                }
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": np.array([2, 1, 0]), "x": np.array([1, 0]), "y": 0}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": 0, "x": np.array([0, 0]), "y": np.array([1, 1, 1])}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                # minus-stepped slice
-                ind = {"band": np.array([2, 1, 0]), "x": slice(-1, None, -1), "y": 0}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(-1, 1, -2)}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                # empty selection
-                ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(2, 2, 1)}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {"band": slice(0, 0), "x": 1, "y": 2}
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                # vectorized indexer
-                ind = {
-                    "band": DataArray([2, 1, 0], dims="a"),
-                    "x": DataArray([1, 0, 0], dims="a"),
-                    "y": np.array([0, 2]),
-                }
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                ind = {
-                    "band": DataArray([[2, 1, 0], [1, 0, 2]], dims=["a", "b"]),
-                    "x": DataArray([[1, 0, 0], [0, 1, 0]], dims=["a", "b"]),
-                    "y": 0,
-                }
-                assert_allclose(expected.isel(**ind), actual.isel(**ind))
-                assert not actual.variable._in_memory
-
-                # Selecting lists of bands is fine
-                ex = expected.isel(band=[1, 2])
-                ac = actual.isel(band=[1, 2])
-                assert_allclose(ac, ex)
-                ex = expected.isel(band=[0, 2])
-                ac = actual.isel(band=[0, 2])
-                assert_allclose(ac, ex)
-
-                # Integer indexing
-                ex = expected.isel(band=1)
-                ac = actual.isel(band=1)
-                assert_allclose(ac, ex)
-
-                ex = expected.isel(x=1, y=2)
-                ac = actual.isel(x=1, y=2)
-                assert_allclose(ac, ex)
-
-                ex = expected.isel(band=0, x=1, y=2)
-                ac = actual.isel(band=0, x=1, y=2)
-                assert_allclose(ac, ex)
-
-                # Mixed
-                ex = actual.isel(x=slice(2), y=slice(2))
-                ac = actual.isel(x=[0, 1], y=[0, 1])
-                assert_allclose(ac, ex)
-
-                ex = expected.isel(band=0, x=1, y=slice(5, 7))
-                ac = actual.isel(band=0, x=1, y=slice(5, 7))
-                assert_allclose(ac, ex)
-
-                ex = expected.isel(band=0, x=slice(2, 5), y=2)
-                ac = actual.isel(band=0, x=slice(2, 5), y=2)
-                assert_allclose(ac, ex)
-
-                # One-element lists
-                ex = expected.isel(band=[0], x=slice(2, 5), y=[2])
-                ac = actual.isel(band=[0], x=slice(2, 5), y=[2])
-                assert_allclose(ac, ex)
-
-    def test_caching(self):
-        with create_tmp_geotiff(
-            8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
-        ) as (tmp_file, expected):
-            # Cache is the default
-            with xr.open_rasterio(tmp_file) as actual:
-
-                # This should cache everything
-                assert_allclose(actual, expected)
-
-                # once cached, non-windowed indexing should become possible
-                ac = actual.isel(x=[2, 4])
-                ex = expected.isel(x=[2, 4])
-                assert_allclose(ac, ex)
-
-    def test_chunks(self):
-        with create_tmp_geotiff(
-            8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
-        ) as (tmp_file, expected):
-            # Chunk at open time
-            with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-                assert isinstance(actual.data, dask.array.Array)
-                assert "open_rasterio" in actual.data.name
-
-                # do some arithmetic
-                ac = actual.mean()
-                ex = expected.mean()
-                assert_allclose(ac, ex)
-
-                ac = actual.sel(band=1).mean(dim="x")
-                ex = expected.sel(band=1).mean(dim="x")
-                assert_allclose(ac, ex)
-
-    def test_pickle_rasterio(self):
-        # regression test for https://github.com/pydata/xarray/issues/2121
-        with create_tmp_geotiff() as (tmp_file, expected):
-            with xr.open_rasterio(tmp_file) as rioda:
-                temp = pickle.dumps(rioda)
-                with pickle.loads(temp) as actual:
-                    assert_equal(actual, rioda)
-
-    def test_ENVI_tags(self):
-        # Create an ENVI file with some tags in the ENVI namespace
-        # this test uses a custom driver, so we can't use create_tmp_geotiff
-        with create_tmp_file(suffix=".dat") as tmp_file:
+def test_notransform():
+    # regression test for https://github.com/pydata/xarray/issues/1686
+    # Create a geotiff file
+    with warnings.catch_warnings():
+        # rasterio throws a NotGeoreferencedWarning here, which is
+        # expected since we test rasterio's defaults in this case.
+        warnings.filterwarnings(
+            "ignore",
+            category=UserWarning,
+            message="Dataset has no geotransform set",
+        )
+        with create_tmp_file(suffix=".tif") as tmp_file:
             # data
             nx, ny, nz = 4, 3, 3
             data = np.arange(nx * ny * nz, dtype=rasterio.float32).reshape(nz, ny, nx)
-            transform = from_origin(5000, 80000, 1000, 2000.0)
             with rasterio.open(
                 tmp_file,
                 "w",
-                driver="ENVI",
+                driver="GTiff",
                 height=ny,
                 width=nx,
                 count=nz,
-                crs={
-                    "units": "m",
-                    "no_defs": True,
-                    "ellps": "WGS84",
-                    "proj": "utm",
-                    "zone": 18,
-                },
-                transform=transform,
                 dtype=rasterio.float32,
             ) as s:
-                s.update_tags(
-                    ns="ENVI",
-                    description="{Tagged file}",
-                    wavelength="{123.000000, 234.234000, 345.345678}",
-                    fwhm="{1.000000, 0.234000, 0.000345}",
-                )
+                s.descriptions = ("nx", "ny", "nz")
+                s.units = ("cm", "m", "km")
                 s.write(data)
-                dx, dy = s.res[0], -s.res[1]
 
             # Tests
-            coords = {
-                "band": [1, 2, 3],
-                "y": -np.arange(ny) * 2000 + 80000 + dy / 2,
-                "x": np.arange(nx) * 1000 + 5000 + dx / 2,
-                "wavelength": ("band", np.array([123, 234.234, 345.345678])),
-                "fwhm": ("band", np.array([1, 0.234, 0.000345])),
-            }
-            expected = DataArray(data, dims=("band", "y", "x"), coords=coords)
+            expected = DataArray(
+                data,
+                dims=("band", "y", "x"),
+                coords={
+                    "band": [1, 2, 3],
+                    "y": [0.5, 1.5, 2.5],
+                    "x": [0.5, 1.5, 2.5, 3.5],
+                },
+            )
+            expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+            expected.coords[DEFAULT_GRID_MAP].attrs[
+                "GeoTransform"
+            ] = "0.0 1.0 0.0 0.0 0.0 1.0"
 
-            with xr.open_rasterio(tmp_file) as rioda:
+            with rioxarray.open_rasterio(tmp_file) as rioda:
                 assert_allclose(rioda, expected)
-                assert isinstance(rioda.attrs["crs"], str)
-                assert isinstance(rioda.attrs["res"], tuple)
-                assert isinstance(rioda.attrs["is_tiled"], np.uint8)
+                assert rioda.attrs["scale_factor"] == 1.0
+                assert rioda.attrs["add_offset"] == 0.0
+                assert rioda.attrs["long_name"] == ("nx", "ny", "nz")
+                assert rioda.attrs["units"] == ("cm", "m", "km")
+                assert isinstance(rioda.rio.resolution(), tuple)
                 assert isinstance(rioda.rio._cached_transform(), Affine)
-                # from ENVI tags
-                assert isinstance(rioda.attrs["description"], str)
-                assert isinstance(rioda.attrs["map_info"], str)
-                assert isinstance(rioda.attrs["samples"], str)
 
-    def test_no_mftime(self):
-        # rasterio can accept "filename" urguments that are actually urls,
-        # including paths to remote files.
-        # In issue #1816, we found that these caused dask to break, because
-        # the modification time was used to determine the dask token. This
-        # tests ensure we can still chunk such files when reading with
-        # rasterio.
-        with create_tmp_geotiff(
-            8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
-        ) as (tmp_file, expected):
-            with patch("os.path.getmtime", side_effect=OSError):
-                with xr.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
-                    assert isinstance(actual.data, dask.array.Array)
+
+def test_indexing():
+    with create_tmp_geotiff(
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+    ) as (tmp_file, expected):
+        with rioxarray.open_rasterio(tmp_file, cache=False) as actual:
+
+            # tests
+            # assert_allclose checks all data + coordinates
+            assert_allclose(actual, expected)
+            assert not actual.variable._in_memory
+
+            # Basic indexer
+            ind = {"x": slice(2, 5), "y": slice(5, 7)}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": slice(1, 2), "x": slice(2, 5), "y": slice(5, 7)}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": slice(1, 2), "x": slice(2, 5), "y": 0}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            # orthogonal indexer
+            ind = {
+                "band": np.array([2, 1, 0]),
+                "x": np.array([1, 0]),
+                "y": np.array([0, 2]),
+            }
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": np.array([2, 1, 0]), "x": np.array([1, 0]), "y": 0}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": 0, "x": np.array([0, 0]), "y": np.array([1, 1, 1])}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            # minus-stepped slice
+            ind = {"band": np.array([2, 1, 0]), "x": slice(-1, None, -1), "y": 0}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(-1, 1, -2)}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            # empty selection
+            ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(2, 2, 1)}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {"band": slice(0, 0), "x": 1, "y": 2}
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            # vectorized indexer
+            ind = {
+                "band": DataArray([2, 1, 0], dims="a"),
+                "x": DataArray([1, 0, 0], dims="a"),
+                "y": np.array([0, 2]),
+            }
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            ind = {
+                "band": DataArray([[2, 1, 0], [1, 0, 2]], dims=["a", "b"]),
+                "x": DataArray([[1, 0, 0], [0, 1, 0]], dims=["a", "b"]),
+                "y": 0,
+            }
+            assert_allclose(expected.isel(**ind), actual.isel(**ind))
+            assert not actual.variable._in_memory
+
+            # Selecting lists of bands is fine
+            ex = expected.isel(band=[1, 2])
+            ac = actual.isel(band=[1, 2])
+            assert_allclose(ac, ex)
+            ex = expected.isel(band=[0, 2])
+            ac = actual.isel(band=[0, 2])
+            assert_allclose(ac, ex)
+
+            # Integer indexing
+            ex = expected.isel(band=1)
+            ac = actual.isel(band=1)
+            assert_allclose(ac, ex)
+
+            ex = expected.isel(x=1, y=2)
+            ac = actual.isel(x=1, y=2)
+            assert_allclose(ac, ex)
+
+            ex = expected.isel(band=0, x=1, y=2)
+            ac = actual.isel(band=0, x=1, y=2)
+            assert_allclose(ac, ex)
+
+            # Mixed
+            ex = actual.isel(x=slice(2), y=slice(2))
+            ac = actual.isel(x=[0, 1], y=[0, 1])
+            assert_allclose(ac, ex)
+
+            ex = expected.isel(band=0, x=1, y=slice(5, 7))
+            ac = actual.isel(band=0, x=1, y=slice(5, 7))
+            assert_allclose(ac, ex)
+
+            ex = expected.isel(band=0, x=slice(2, 5), y=2)
+            ac = actual.isel(band=0, x=slice(2, 5), y=2)
+            assert_allclose(ac, ex)
+
+            # One-element lists
+            ex = expected.isel(band=[0], x=slice(2, 5), y=[2])
+            ac = actual.isel(band=[0], x=slice(2, 5), y=[2])
+            assert_allclose(ac, ex)
+
+
+def test_caching():
+    with create_tmp_geotiff(
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+    ) as (tmp_file, expected):
+        # Cache is the default
+        with rioxarray.open_rasterio(tmp_file) as actual:
+
+            # This should cache everything
+            assert_allclose(actual, expected)
+
+            # once cached, non-windowed indexing should become possible
+            ac = actual.isel(x=[2, 4])
+            ex = expected.isel(x=[2, 4])
+            assert_allclose(ac, ex)
+
+
+def test_chunks():
+    with create_tmp_geotiff(
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+    ) as (tmp_file, expected):
+        # Chunk at open time
+        with rioxarray.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
+            assert isinstance(actual.data, dask.array.Array)
+            assert "open_rasterio" in actual.data.name
+
+            # do some arithmetic
+            ac = actual.mean()
+            ex = expected.mean()
+            assert_allclose(ac, ex)
+
+            ac = actual.sel(band=1).mean(dim="x")
+            ex = expected.sel(band=1).mean(dim="x")
+            assert_allclose(ac, ex)
+
+
+def test_pickle_rasterio():
+    # regression test for https://github.com/pydata/xarray/issues/2121
+    with create_tmp_geotiff() as (tmp_file, expected):
+        with rioxarray.open_rasterio(tmp_file) as rioda:
+            temp = pickle.dumps(rioda)
+            with pickle.loads(temp) as actual:
+                assert_equal(actual, rioda)
+
+
+def test_ENVI_tags():
+    # Create an ENVI file with some tags in the ENVI namespace
+    # this test uses a custom driver, so we can't use create_tmp_geotiff
+    with create_tmp_file(suffix=".dat") as tmp_file:
+        # data
+        nx, ny, nz = 4, 3, 3
+        data = np.arange(nx * ny * nz, dtype=rasterio.float32).reshape(nz, ny, nx)
+        transform = from_origin(5000, 80000, 1000, 2000.0)
+        with rasterio.open(
+            tmp_file,
+            "w",
+            driver="ENVI",
+            height=ny,
+            width=nx,
+            count=nz,
+            crs={
+                "units": "m",
+                "no_defs": True,
+                "ellps": "WGS84",
+                "proj": "utm",
+                "zone": 18,
+            },
+            transform=transform,
+            dtype=rasterio.float32,
+        ) as s:
+            s.update_tags(
+                ns="ENVI",
+                description="{Tagged file}",
+                wavelength="{123.000000, 234.234000, 345.345678}",
+                fwhm="{1.000000, 0.234000, 0.000345}",
+            )
+            s.write(data)
+            dx, dy = s.res[0], -s.res[1]
+            crs_wkt = s.crs.to_wkt()
+
+        # Tests
+        coords = {
+            "band": [1, 2, 3],
+            "y": -np.arange(ny) * 2000 + 80000 + dy / 2,
+            "x": np.arange(nx) * 1000 + 5000 + dx / 2,
+            "wavelength": ("band", np.array([123, 234.234, 345.345678])),
+            "fwhm": ("band", np.array([1, 0.234, 0.000345])),
+        }
+        expected = DataArray(data, dims=("band", "y", "x"), coords=coords)
+        expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+        expected.coords[DEFAULT_GRID_MAP].attrs["crs_wkt"] = crs_wkt
+
+        with rioxarray.open_rasterio(tmp_file) as rioda:
+            assert_allclose(rioda, expected)
+            assert rioda.rio.crs == crs_wkt
+            assert isinstance(rioda.rio._cached_transform(), Affine)
+            # from ENVI tags
+            assert isinstance(rioda.attrs["description"], str)
+            assert isinstance(rioda.attrs["map_info"], str)
+            assert isinstance(rioda.attrs["samples"], str)
+
+
+def test_no_mftime():
+    # rasterio can accept "filename" urguments that are actually urls,
+    # including paths to remote files.
+    # In issue #1816, we found that these caused dask to break, because
+    # the modification time was used to determine the dask token. This
+    # tests ensure we can still chunk such files when reading with
+    # rasterio.
+    with create_tmp_geotiff(
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+    ) as (tmp_file, expected):
+        with patch("os.path.getmtime", side_effect=OSError):
+            with rioxarray.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
+                assert isinstance(actual.data, dask.array.Array)
+                assert_allclose(actual, expected)
+
+
+@pytest.mark.xfail(reason="Network could be problematic")
+def test_http_url():
+    # more examples urls here
+    # http://download.osgeo.org/geotiff/samples/
+    url = "http://download.osgeo.org/geotiff/samples/made_up/ntf_nord.tif"
+    with rioxarray.open_rasterio(url) as actual:
+        assert actual.shape == (1, 512, 512)
+    # make sure chunking works
+    with rioxarray.open_rasterio(url, chunks=(1, 256, 256)) as actual:
+        assert isinstance(actual.data, dask.array.Array)
+
+
+def test_rasterio_environment():
+    with create_tmp_geotiff() as (tmp_file, expected):
+        # Should fail with error since suffix not allowed
+        with pytest.raises(Exception):
+            with rasterio.Env(GDAL_SKIP="GTiff"):
+                with rioxarray.open_rasterio(tmp_file) as actual:
                     assert_allclose(actual, expected)
 
-    @pytest.mark.xfail(reason="Network could be problematic")
-    def test_http_url(self):
-        # more examples urls here
-        # http://download.osgeo.org/geotiff/samples/
-        url = "http://download.osgeo.org/geotiff/samples/made_up/ntf_nord.tif"
-        with xr.open_rasterio(url) as actual:
-            assert actual.shape == (1, 512, 512)
-        # make sure chunking works
-        with xr.open_rasterio(url, chunks=(1, 256, 256)) as actual:
-            assert isinstance(actual.data, dask.array.Array)
 
-    def test_rasterio_environment(self):
-        with create_tmp_geotiff() as (tmp_file, expected):
-            # Should fail with error since suffix not allowed
-            with pytest.raises(Exception):
-                with rasterio.Env(GDAL_SKIP="GTiff"):
-                    with xr.open_rasterio(tmp_file) as actual:
-                        assert_allclose(actual, expected)
+@pytest.mark.xfail(
+    rasterio.__version__ == "1.1.1",
+    reason="https://github.com/mapbox/rasterio/issues/1833",
+)
+def test_rasterio_vrt():
+    # tmp_file default crs is UTM: CRS({'init': 'epsg:32618'}
+    with create_tmp_geotiff() as (tmp_file, expected):
+        with rasterio.open(tmp_file) as src:
+            with rasterio.vrt.WarpedVRT(src, crs="epsg:4326") as vrt:
+                # Value of single pixel in center of image
+                lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
+                expected_val = next(vrt.sample([(lon, lat)]))
+                with rioxarray.open_rasterio(vrt) as rds:
+                    actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
 
-    @pytest.mark.xfail(
-        rasterio.__version__ == "1.1.1",
-        reason="https://github.com/mapbox/rasterio/issues/1833",
+                    assert_array_equal(rds.rio.shape, (vrt.height, vrt.width))
+                    assert rds.rio.crs == vrt.crs
+                    assert_array_equal(
+                        tuple(abs(val) for val in rds.rio.resolution()), vrt.res
+                    )
+                    assert expected_val.all() == actual_val.all()
+
+
+def test_rasterio_vrt_with_transform_and_size():
+    # Test open_rasterio() support of WarpedVRT with transform, width and
+    # height (issue #2864)
+    with create_tmp_geotiff() as (tmp_file, expected):
+        with rasterio.open(tmp_file) as src:
+            # Estimate the transform, width and height
+            # for a change of resolution
+            # tmp_file initial res is (1000,2000) (default values)
+            trans, w, h = calculate_default_transform(
+                src.crs, src.crs, src.width, src.height, resolution=500, *src.bounds
+            )
+            with rasterio.vrt.WarpedVRT(src, transform=trans, width=w, height=h) as vrt:
+                with rioxarray.open_rasterio(vrt) as rds:
+                    assert_array_equal(rds.rio.shape, (vrt.height, vrt.width))
+                    assert rds.rio.crs == vrt.crs
+                    assert_array_equal(
+                        tuple(abs(val) for val in rds.rio.resolution()), vrt.res
+                    )
+                    assert rds.rio.transform() == vrt.transform
+
+
+@pytest.mark.xfail(reason="Network could be problematic")
+def test_rasterio_vrt_network():
+    url = "https://storage.googleapis.com/\
+    gcp-public-data-landsat/LC08/01/047/027/\
+    LC08_L1TP_047027_20130421_20170310_01_T1/\
+    LC08_L1TP_047027_20130421_20170310_01_T1_B4.TIF"
+    env = rasterio.Env(
+        GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
+        CPL_VSIL_CURL_USE_HEAD=False,
+        CPL_VSIL_CURL_ALLOWED_EXTENSIONS="TIF",
     )
-    def test_rasterio_vrt(self):
-        # tmp_file default crs is UTM: CRS({'init': 'epsg:32618'}
-        with create_tmp_geotiff() as (tmp_file, expected):
-            with rasterio.open(tmp_file) as src:
-                with rasterio.vrt.WarpedVRT(src, crs="epsg:4326") as vrt:
-                    expected_shape = (vrt.width, vrt.height)
-                    expected_crs = vrt.crs
-                    expected_res = vrt.res
-                    # Value of single pixel in center of image
-                    lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
-                    expected_val = next(vrt.sample([(lon, lat)]))
-                    with xr.open_rasterio(vrt) as rds:
-                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
-                        actual_crs = rds.crs
-                        actual_res = rds.res
-                        actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
+    with env:
+        with rasterio.open(url) as src:
+            with rasterio.vrt.WarpedVRT(src, crs="epsg:4326") as vrt:
+                # Value of single pixel in center of image
+                lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
+                expected_val = next(vrt.sample([(lon, lat)]))
+                with rioxarray.open_rasterio(vrt) as rds:
+                    actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
+                    assert_array_equal(rds.rio.shape, (vrt.height, vrt.width))
+                    assert rds.rio.crs == vrt.crs
+                    assert_array_equal(
+                        tuple(abs(val) for val in rds.rio.resolution()), vrt.res
+                    )
+                    assert_equal(expected_val, actual_val)
 
-                        assert actual_crs == expected_crs
-                        assert actual_res == expected_res
-                        assert actual_shape == expected_shape
-                        assert expected_val.all() == actual_val.all()
 
-    def test_rasterio_vrt_with_transform_and_size(self):
-        # Test open_rasterio() support of WarpedVRT with transform, width and
-        # height (issue #2864)
-        with create_tmp_geotiff() as (tmp_file, expected):
-            with rasterio.open(tmp_file) as src:
-                # Estimate the transform, width and height
-                # for a change of resolution
-                # tmp_file initial res is (1000,2000) (default values)
-                trans, w, h = calculate_default_transform(
-                    src.crs, src.crs, src.width, src.height, resolution=500, *src.bounds
-                )
-                with rasterio.vrt.WarpedVRT(
-                    src, transform=trans, width=w, height=h
-                ) as vrt:
-                    expected_shape = (vrt.width, vrt.height)
-                    expected_res = vrt.res
-                    expected_transform = vrt.transform
-                    with xr.open_rasterio(vrt) as rds:
-                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
-                        actual_res = rds.res
-                        actual_transform = Affine(*rds.transform)
-                        assert actual_res == expected_res
-                        assert actual_shape == expected_shape
-                        assert actual_transform == expected_transform
-
-    @pytest.mark.xfail(reason="Network could be problematic")
-    def test_rasterio_vrt_network(self):
-        url = "https://storage.googleapis.com/\
-        gcp-public-data-landsat/LC08/01/047/027/\
-        LC08_L1TP_047027_20130421_20170310_01_T1/\
-        LC08_L1TP_047027_20130421_20170310_01_T1_B4.TIF"
-        env = rasterio.Env(
-            GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
-            CPL_VSIL_CURL_USE_HEAD=False,
-            CPL_VSIL_CURL_ALLOWED_EXTENSIONS="TIF",
-        )
-        with env:
-            with rasterio.open(url) as src:
-                with rasterio.vrt.WarpedVRT(src, crs="epsg:4326") as vrt:
-                    expected_shape = (vrt.width, vrt.height)
-                    expected_crs = vrt.crs
-                    expected_res = vrt.res
-                    # Value of single pixel in center of image
-                    lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
-                    expected_val = next(vrt.sample([(lon, lat)]))
-                    with xr.open_rasterio(vrt) as rds:
-                        actual_shape = (rds.sizes["x"], rds.sizes["y"])
-                        actual_crs = rds.crs
-                        actual_res = rds.res
-                        actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
-
-                        assert_equal(actual_shape, expected_shape)
-                        assert_equal(actual_crs, expected_crs)
-                        assert_equal(actual_res, expected_res)
-                        assert_equal(expected_val, actual_val)
-
-    def test_rasterio_vrt_with_src_crs(self):
-        # Test open_rasterio() support of WarpedVRT with specified src_crs
-        # create geotiff with no CRS and specify it manually
-        with create_tmp_geotiff(crs=None) as (tmp_file, expected):
-            src_crs = rasterio.crs.CRS.from_epsg(32618)
-            with rasterio.open(tmp_file) as src:
-                assert src.crs is None
-                with rasterio.vrt.WarpedVRT(src, src_crs=src_crs) as vrt:
-                    with rioxarray.open_rasterio(vrt) as rds:
-                        assert rds.rio.crs == src_crs
+def test_rasterio_vrt_with_src_crs():
+    # Test open_rasterio() support of WarpedVRT with specified src_crs
+    # create geotiff with no CRS and specify it manually
+    with create_tmp_geotiff(crs=None) as (tmp_file, expected):
+        src_crs = rasterio.crs.CRS.from_epsg(32618)
+        with rasterio.open(tmp_file) as src:
+            assert src.crs is None
+            with rasterio.vrt.WarpedVRT(src, src_crs=src_crs) as vrt:
+                with rioxarray.open_rasterio(vrt) as rds:
+                    assert rds.rio.crs == src_crs
 
 
 def test_open_cog():
@@ -852,10 +859,10 @@ def test_open_cog():
     assert rdso.shape == (1, 250, 250)
 
 
-def test_mask_and_scale():
+def test_mask_and_scale(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     with pytest.warns(SerializationWarning):
-        with rioxarray.open_rasterio(test_file, mask_and_scale=True) as rds:
+        with open_rasterio(test_file, mask_and_scale=True) as rds:
             assert np.nanmin(rds.air_temperature.values) == 248.7
             assert np.nanmax(rds.air_temperature.values) == 302.1
             test_encoding = dict(rds.air_temperature.encoding)
@@ -883,9 +890,11 @@ def test_mask_and_scale():
             }
 
 
-def test_no_mask_and_scale():
-    with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), masked=True
+def test_no_mask_and_scale(open_rasterio):
+    with open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"),
+        mask_and_scale=False,
+        masked=True,
     ) as rds:
         assert np.nanmin(rds.air_temperature.values) == 287
         assert np.nanmax(rds.air_temperature.values) == 821
@@ -914,20 +923,18 @@ def test_no_mask_and_scale():
         }
 
 
-def test_notgeoreferenced_warning():
+def test_notgeoreferenced_warning(open_rasterio):
     with create_tmp_geotiff(transform_args=None) as (tmp_file, expected):
         with pytest.warns(NotGeoreferencedWarning):
-            rioxarray.open_rasterio(tmp_file)
+            open_rasterio(tmp_file)
 
 
 @pytest.mark.xfail(
     LooseVersion(rasterio.__gdal_version__) < LooseVersion("3.0.4"),
     reason="This was fixed in GDAL 3.0.4",
 )
-def test_nc_attr_loading():
-    with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
-    ) as rds:
+def test_nc_attr_loading(open_rasterio):
+    with open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as rds:
         assert rds.dims == {"y": 10, "x": 10, "time": 2}
         assert rds.attrs == {"coordinates": "spatial_ref"}
         assert rds.y.attrs["units"] == "metre"
@@ -942,14 +949,14 @@ def test_nc_attr_loading():
 
 def test_lockless():
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunk=True
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunks=True
     ) as rds:
         rds.mean().compute()
 
 
 def test_lock_true():
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=True, chunk=True
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=True, chunks=True
     ) as rds:
         rds.mean().compute()
 
@@ -979,9 +986,9 @@ def test_non_rectilinear():
                 assert isinstance(rioda.rio._cached_transform(), Affine)
 
 
-def test_non_rectilinear__load_coords():
+def test_non_rectilinear__load_coords(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
-    xds = rioxarray.open_rasterio(test_file)
+    xds = open_rasterio(test_file)
     assert xds.rio.shape == (10, 10)
     with rasterio.open(test_file) as rds:
         assert rds.transform == xds.rio.transform()
@@ -990,9 +997,9 @@ def test_non_rectilinear__load_coords():
             assert_almost_equal(rds.xy(yi, xi), (subset.xc.item(), subset.yc.item()))
 
 
-def test_non_rectilinear__skip_parse_coordinates():
+def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
-    xds = rioxarray.open_rasterio(test_file, parse_coordinates=False)
+    xds = open_rasterio(test_file, parse_coordinates=False)
     assert "xc" not in xds.coords
     assert "yc" not in xds.coords
     assert xds.rio.shape == (10, 10)

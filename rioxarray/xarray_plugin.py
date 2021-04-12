@@ -3,6 +3,7 @@ import os.path
 import xarray as xr
 
 from . import _io
+from .exceptions import RioXarrayError
 
 CAN_OPEN_EXTS = {
     "asc",
@@ -28,11 +29,13 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
     def open_dataset(
         self,
         filename_or_obj,
-        drop_variables=None,
-        mask_and_scale=True,
+        drop_variables=None,  # SKIP FROM XARRAY
         parse_coordinates=None,
+        chunks=None,
+        cache=None,
         lock=None,
         masked=False,
+        mask_and_scale=True,
         variable=None,
         group=None,
         default_name="band_data",
@@ -53,6 +56,11 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
+        if not isinstance(ds, xr.Dataset):
+            raise RioXarrayError(
+                "Multiple resolution sets found. "
+                "Use 'variable' or 'group' to filter."
+            )
         return ds
 
     def guess_can_open(self, filename_or_obj):
