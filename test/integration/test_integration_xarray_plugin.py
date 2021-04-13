@@ -2,6 +2,7 @@ import os.path
 
 import pytest
 
+from rioxarray.exceptions import RioXarrayError
 from test.conftest import TEST_INPUT_DATA_DIR
 
 # FIXME: change to the next xarray version after release
@@ -24,3 +25,16 @@ def test_xarray_open_dataset():
     ds = xr.open_dataset(cog_file)
 
     assert isinstance(ds, xr.Dataset)
+
+
+def test_open_multiple_resolution():
+    with pytest.raises(
+        RioXarrayError,
+        match="Multiple resolution sets found. Use 'variable' or 'group' to filter.",
+    ):
+        xr.open_dataset(
+            os.path.join(
+                TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
+            ),
+            engine="rasterio",
+        )

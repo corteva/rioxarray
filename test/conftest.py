@@ -1,12 +1,19 @@
 import os
+from distutils.version import LooseVersion
 
+import pyproj
+import pytest
+import rasterio
 from numpy.testing import assert_almost_equal, assert_array_equal
 
+import rioxarray
 from rioxarray.raster_array import UNWANTED_RIO_ATTRS
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "test_data")
 TEST_INPUT_DATA_DIR = os.path.join(TEST_DATA_DIR, "input")
 TEST_COMPARE_DATA_DIR = os.path.join(TEST_DATA_DIR, "compare")
+PYPROJ_LT_3 = LooseVersion(pyproj.__version__) < LooseVersion("3")
+RASTERIO_LT_122 = LooseVersion(rasterio.__version__) < LooseVersion("1.2.2")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)
@@ -24,6 +31,8 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
             and attr not in UNWANTED_RIO_ATTRS
             and attr != "creation_date"
             and attr != "grid_mapping"
+            and attr != "coordinates"
+            and "#" not in attr
         ):
             try:
                 assert_almost_equal(
@@ -84,3 +93,19 @@ def _assert_xarrays_equal(
         assert input_xarray.rio.grid_mapping == compare_xarray.rio.grid_mapping
         for unwanted_attr in UNWANTED_RIO_ATTRS:
             assert unwanted_attr not in input_xarray.attrs
+
+
+def open_rasterio_engine(file_name_or_object, **kwargs):
+    # FIXME: change to the next xarray version after release
+    xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
+    return xr.open_dataset(file_name_or_object, engine="rasterio", **kwargs)
+
+
+@pytest.fixture(
+    params=[
+        rioxarray.open_rasterio,
+        open_rasterio_engine,
+    ]
+)
+def open_rasterio(request):
+    return request.param
