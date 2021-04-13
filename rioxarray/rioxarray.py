@@ -73,8 +73,8 @@ def _generate_spatial_coords(affine, width, height):
         }
     else:
         return {
-            "xc": (("x", "y"), new_spatial_coords["x"]),
-            "yc": (("x", "y"), new_spatial_coords["y"]),
+            "xc": (("y", "x"), new_spatial_coords["x"]),
+            "yc": (("y", "x"), new_spatial_coords["y"]),
         }
 
 
