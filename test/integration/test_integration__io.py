@@ -753,9 +753,12 @@ def test_no_mftime():
 def test_http_url():
     # more examples urls here
     # http://download.osgeo.org/geotiff/samples/
-    url = "http://download.osgeo.org/geotiff/samples/made_up/ntf_nord.tif"
+    url = (
+        "https://github.com/corteva/rioxarray/blob/master/"
+        "test/test_data/input/cog.tif?raw=true"
+    )
     with rioxarray.open_rasterio(url) as actual:
-        assert actual.shape == (1, 512, 512)
+        assert actual.shape == (1, 500, 500)
     # make sure chunking works
     with rioxarray.open_rasterio(url, chunks=(1, 256, 256)) as actual:
         assert isinstance(actual.data, dask.array.Array)
