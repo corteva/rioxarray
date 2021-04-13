@@ -434,30 +434,6 @@ class TestRasterio:
                 assert "x" not in rioda.coords
                 assert "y" not in rioda.coords
 
-    def test_non_rectilinear(self):
-        # Create a geotiff file with 2d coordinates
-        with create_tmp_geotiff(
-            transform=from_origin(0, 3, 1, 1).rotation(45), crs=None
-        ) as (tmp_file, _):
-            # Default is to not parse coords
-            with xr.open_rasterio(tmp_file) as rioda:
-                assert "x" not in rioda.coords
-                assert "y" not in rioda.coords
-                assert "crs" not in rioda.attrs
-                assert rioda.attrs["scales"] == (1.0, 1.0, 1.0)
-                assert rioda.attrs["offsets"] == (0.0, 0.0, 0.0)
-                assert rioda.attrs["descriptions"] == ("d1", "d2", "d3")
-                assert rioda.attrs["units"] == ("u1", "u2", "u3")
-                assert isinstance(rioda.attrs["res"], tuple)
-                assert isinstance(rioda.attrs["is_tiled"], np.uint8)
-                assert isinstance(rioda.rio._cached_transform(), Affine)
-
-            # See if a warning is raised if we force it
-            with pytest.warns(Warning, match="transformation isn't rectilinear"):
-                with xr.open_rasterio(tmp_file, parse_coordinates=True) as rioda:
-                    assert "x" not in rioda.coords
-                    assert "y" not in rioda.coords
-
     def test_platecarree(self):
         with create_tmp_geotiff(
             8,
@@ -979,6 +955,31 @@ def test_lock_true():
 
 
 def test_non_rectilinear():
+    # Create a geotiff file with 2d coordinates
+    with create_tmp_geotiff(
+        transform=from_origin(0, 3, 1, 1).rotation(45), crs=None
+    ) as (tmp_file, _):
+        with rasterio.open(tmp_file) as rds:
+            with rioxarray.open_rasterio(tmp_file) as rioda:
+                for xi, yi in itertools.product(range(rds.width), range(rds.height)):
+                    subset = rioda.isel(x=xi, y=yi)
+                    assert_almost_equal(
+                        rds.xy(yi, xi), (subset.xc.item(), subset.yc.item())
+                    )
+                assert "x" not in rioda.coords
+                assert "y" not in rioda.coords
+                assert "xc" in rioda.coords
+                assert "yc" in rioda.coords
+                assert rioda.rio.crs is None
+                assert rioda.attrs["scale_factor"] == 1.0
+                assert rioda.attrs["add_offset"] == 0.0
+                assert rioda.attrs["long_name"] == ("d1", "d2", "d3")
+                assert rioda.attrs["units"] == ("u1", "u2", "u3")
+                assert isinstance(rioda.rio.resolution(), tuple)
+                assert isinstance(rioda.rio._cached_transform(), Affine)
+
+
+def test_non_rectilinear__load_coords():
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
     xds = rioxarray.open_rasterio(test_file)
     assert xds.rio.shape == (10, 10)
@@ -986,7 +987,7 @@ def test_non_rectilinear():
         assert rds.transform == xds.rio.transform()
         for xi, yi in itertools.product(range(rds.width), range(rds.height)):
             subset = xds.isel(x=xi, y=yi)
-            assert_almost_equal(rds.xy(xi, yi), (subset.xc.item(), subset.yc.item()))
+            assert_almost_equal(rds.xy(yi, xi), (subset.xc.item(), subset.yc.item()))
 
 
 def test_non_rectilinear__skip_parse_coordinates():
