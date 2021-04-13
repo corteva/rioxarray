@@ -10,6 +10,7 @@ Latest
 - ENH: Generate 2D coordinates for non-rectilinear sources (issue #290)
 - BUG: Return correct transform in `rio.transform` with non-rectilinear transform (discussions #280)
 - BUG: Update to handle WindowError in rasterio 1.2.2 (issue #286)
+- BUG: Don't generate x,y coords in `rio` methods if not previously there (pull #294)
 
 0.3.2
 -----

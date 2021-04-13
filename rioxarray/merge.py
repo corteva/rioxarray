@@ -264,6 +264,7 @@ def merge_datasets(
             merged_data[data_var].rio.transform(),
             merged_data[data_var].shape[-1],
             merged_data[data_var].shape[-2],
+            force_generate=True,
         ),
         attrs=representative_ds.attrs,
     )

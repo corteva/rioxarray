@@ -576,7 +576,7 @@ def test_reproject(modis_reproject):
     "open_func",
     [
         rioxarray.open_rasterio,
-        # partial(rioxarray.open_rasterio, parse_coordinates=False), TODO: Fix
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
 def test_reproject_3d(open_func, modis_reproject_3d):
@@ -586,18 +586,19 @@ def test_reproject_3d(open_func, modis_reproject_3d):
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
-        assert mds_repr.coords[mds_repr.rio.x_dim].attrs == {
-            "long_name": "longitude",
-            "standard_name": "longitude",
-            "units": "degrees_east",
-            "axis": "X",
-        }
-        assert mds_repr.coords[mds_repr.rio.y_dim].attrs == {
-            "long_name": "latitude",
-            "standard_name": "latitude",
-            "units": "degrees_north",
-            "axis": "Y",
-        }
+        if mdc.rio.x_dim in mdc.coords:
+            assert mds_repr.coords[mds_repr.rio.x_dim].attrs == {
+                "long_name": "longitude",
+                "standard_name": "longitude",
+                "units": "degrees_east",
+                "axis": "X",
+            }
+            assert mds_repr.coords[mds_repr.rio.y_dim].attrs == {
+                "long_name": "latitude",
+                "standard_name": "latitude",
+                "units": "degrees_north",
+                "axis": "Y",
+            }
 
 
 def test_reproject__grid_mapping(modis_reproject):
@@ -725,18 +726,19 @@ def test_reproject_match(modis_reproject_match):
         mds_repr = mda.rio.reproject_match(mdm)
         # test
         _assert_xarrays_equal(mds_repr, mdc)
-        assert mds_repr.coords[mds_repr.rio.x_dim].attrs == {
-            "axis": "X",
-            "long_name": "x coordinate of projection",
-            "standard_name": "projection_x_coordinate",
-            "units": "metre",
-        }
-        assert mds_repr.coords[mds_repr.rio.y_dim].attrs == {
-            "axis": "Y",
-            "long_name": "y coordinate of projection",
-            "standard_name": "projection_y_coordinate",
-            "units": "metre",
-        }
+        if mdc.rio.x_dim in mdc.coords:
+            assert mds_repr.coords[mds_repr.rio.x_dim].attrs == {
+                "axis": "X",
+                "long_name": "x coordinate of projection",
+                "standard_name": "projection_x_coordinate",
+                "units": "metre",
+            }
+            assert mds_repr.coords[mds_repr.rio.y_dim].attrs == {
+                "axis": "Y",
+                "long_name": "y coordinate of projection",
+                "standard_name": "projection_y_coordinate",
+                "units": "metre",
+            }
 
 
 def test_reproject_match__masked(modis_reproject_match):
