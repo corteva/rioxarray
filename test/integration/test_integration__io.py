@@ -747,7 +747,9 @@ def test_no_mftime():
                 assert_allclose(actual, expected)
 
 
-@pytest.mark.xfail(reason="Network could be problematic")
+@pytest.mark.xfail(
+    error=rasterio.errors.RasterioIOError, reason="Network could be problematic"
+)
 def test_http_url():
     # more examples urls here
     # http://download.osgeo.org/geotiff/samples/
