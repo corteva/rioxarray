@@ -100,12 +100,19 @@ def _get_nonspatial_coords(src_data_array):
     return coords
 
 
-def _make_coords(src_data_array, dst_affine, dst_width, dst_height):
+def _make_coords(
+    src_data_array, dst_affine, dst_width, dst_height, force_generate=False
+):
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
-    new_coords = _generate_spatial_coords(dst_affine, dst_width, dst_height)
-    new_coords.update(coords)
-    return new_coords
+    if force_generate or (
+        src_data_array.rio.x_dim in src_data_array.coords
+        and src_data_array.rio.y_dim in src_data_array.coords
+    ):
+        new_coords = _generate_spatial_coords(dst_affine, dst_width, dst_height)
+        new_coords.update(coords)
+        return new_coords
+    return coords
 
 
 def _get_data_var_message(obj):
