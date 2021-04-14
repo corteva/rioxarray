@@ -23,13 +23,15 @@ CAN_OPEN_EXTS = {
 
 class RasterioBackend(xr.backends.common.BackendEntrypoint):
     """
+    Requires xarray 0.18+
+
     .. versionadded:: 0.4
     """
 
     def open_dataset(
         self,
         filename_or_obj,
-        drop_variables=None,  # SKIP FROM XARRAY
+        drop_variables=None,
         parse_coordinates=None,
         chunks=None,
         cache=None,
@@ -45,10 +47,12 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             open_kwargs = {}
         ds = _io.open_rasterio(
             filename_or_obj,
-            mask_and_scale=mask_and_scale,
             parse_coordinates=parse_coordinates,
+            chunks=chunks,
+            cache=cache,
             lock=lock,
             masked=masked,
+            mask_and_scale=mask_and_scale,
             variable=variable,
             group=group,
             default_name=default_name,
@@ -56,6 +60,8 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
+        if drop_variables is not None:
+            ds = ds.drop_vars(drop_variables)
         if not isinstance(ds, xr.Dataset):
             raise RioXarrayError(
                 "Multiple resolution sets found. "
