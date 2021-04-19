@@ -24,6 +24,7 @@ from xarray.backends.locks import SerializableLock
 from xarray.coding import times, variables
 from xarray.core import indexing
 from xarray.core.dataarray import DataArray
+from xarray.core.dtypes import maybe_promote
 from xarray.core.utils import is_scalar
 
 from rioxarray.exceptions import RioXarrayError
@@ -110,8 +111,12 @@ class RasterioArrayWrapper(BackendArray):
                 variables.SerializationWarning,
                 stacklevel=3,
             )
+        self._fill_value = riods.nodata
         if self._dtype is None:
-            self._dtype = np.dtype("float64") if self.masked else dtype
+            if self.masked:
+                self._dtype, self._fill_value = maybe_promote(dtype)
+            else:
+                self._dtype = dtype
 
     @property
     def dtype(self):
@@ -119,6 +124,13 @@ class RasterioArrayWrapper(BackendArray):
         Data type of the array
         """
         return self._dtype
+
+    @property
+    def fill_value(self):
+        """
+        Fill value of the array
+        """
+        return self._fill_value
 
     @property
     def shape(self):
@@ -199,7 +211,7 @@ class RasterioArrayWrapper(BackendArray):
                     riods = WarpedVRT(riods, **self.vrt_params)
                 out = riods.read(band_key, window=window, masked=self.masked)
                 if self.masked:
-                    out = np.ma.filled(out.astype(self.dtype), np.nan)
+                    out = np.ma.filled(out.astype(self.dtype), self.fill_value)
                 if self.mask_and_scale:
                     for band in np.atleast_1d(band_key):
                         band_iii = band - 1
