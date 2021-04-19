@@ -22,6 +22,7 @@ import xarray
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
+from xarray.core.dtypes import get_fill_value
 
 from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
@@ -264,7 +265,7 @@ class RasterArray(XRasterBase):
             return None if self._nodata is False else self._nodata
 
         if self.encoded_nodata is not None:
-            self._nodata = np.nan
+            self._nodata = get_fill_value(self._obj.dtype)
         else:
             self._nodata = self._obj.attrs.get(
                 "_FillValue",

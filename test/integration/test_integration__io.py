@@ -263,8 +263,8 @@ def test_open_rasterio_mask_chunk_clip():
         if isinstance(xdi, xr.Dataset):
             xdi = xdi.dem
         assert xdi.name == "dem"
-        assert str(xdi.dtype) == "float64"
-        assert str(xdi.data.dtype) == "float64"
+        assert str(xdi.dtype) == "float32"
+        assert str(xdi.data.dtype) == "float32"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
         assert np.isnan(xdi.values).sum() == 52119
@@ -868,8 +868,8 @@ def test_mask_and_scale(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     with pytest.warns(SerializationWarning):
         with open_rasterio(test_file, mask_and_scale=True) as rds:
-            assert np.nanmin(rds.air_temperature.values) == 248.7
-            assert np.nanmax(rds.air_temperature.values) == 302.1
+            assert np.nanmin(rds.air_temperature.values) == np.float32(248.7)
+            assert np.nanmax(rds.air_temperature.values) == np.float32(302.1)
             test_encoding = dict(rds.air_temperature.encoding)
             source = test_encoding.pop("source")
             assert source.startswith("netcdf:") and source.endswith(
