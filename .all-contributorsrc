@@ -161,6 +161,15 @@
         "doc",
         "test"
       ]
+    },
+    {
+      "login": "remi-braun",
+      "name": "remi-braun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/67311115?v=4",
+      "profile": "https://github.com/remi-braun",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

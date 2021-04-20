@@ -29,6 +29,9 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://sites.google.com/view/raybellwaves/home"><img src="https://avatars.githubusercontent.com/u/17162724?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ray Bell</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=raybellwaves" title="Documentation">📖</a></td>
         <td align="center"><a href="https://bopen.eu/"><img src="https://avatars.githubusercontent.com/u/226037?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alessandro Amici</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=alexamici" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=alexamici" title="Documentation">📖</a> <a href="https://github.com/corteva/rioxarray/commits?author=alexamici" title="Tests">⚠️</a></td>
     </tr>
+    <tr>
+        <td align="center"><a href="https://github.com/remi-braun"><img src="https://avatars.githubusercontent.com/u/67311115?v=4?s=100" width="100px;" alt=""/><br /><sub><b>remi-braun</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=remi-braun" title="Documentation">📖</a></td>
+    </tr>
     </table>
 
     <!-- markdownlint-restore -->
