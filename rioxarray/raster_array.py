@@ -887,7 +887,6 @@ class RasterArray(XRasterBase):
             if dtype is None
             else dtype
         )
-        dtype = str(self._obj.dtype) if dtype is None else dtype
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
         try:
