@@ -1143,6 +1143,7 @@ def test_to_raster(
                 "res",
                 "scale_factor",
                 "transform",
+                "grid_mapping",
             )
         }
 
@@ -1166,7 +1167,7 @@ def test_to_raster(
 @pytest.mark.parametrize(
     "open_method",
     [
-        xarray.open_dataset,
+        partial(xarray.open_dataset, decode_coords="all"),
         partial(rioxarray.open_rasterio, masked=True),
         partial(rioxarray.open_rasterio, masked=True, chunks=True),
         partial(
@@ -1195,7 +1196,8 @@ def test_to_raster_3d(open_method, windowed, write_lock, compute, tmpdir):
         xds_attrs = {
             key: str(value)
             for key, value in xds.attrs.items()
-            if key not in ("add_offset", "nodata", "scale_factor", "transform")
+            if key
+            not in ("add_offset", "nodata", "scale_factor", "transform", "grid_mapping")
         }
 
     if write_lock is None or not isinstance(xds.data, da.Array) or compute:
@@ -1229,7 +1231,7 @@ def test_to_raster__custom_description(tmpdir):
         xds_attrs = {
             key: str(value)
             for key, value in xds.attrs.items()
-            if key not in ("nodata", "long_name")
+            if key not in ("nodata", "long_name", "grid_mapping")
         }
 
     with rasterio.open(str(tmp_raster)) as rds:
