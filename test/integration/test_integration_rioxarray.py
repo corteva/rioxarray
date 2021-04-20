@@ -1160,6 +1160,7 @@ def test_to_raster(
         assert_array_equal(rds.read(1), xds.fillna(xds.rio.encoded_nodata).values)
         assert rds.count == 1
         assert rds.tags() == {"AREA_OR_POINT": "Area", **test_tags, **xds_attrs}
+        assert rds.dtypes == ("int16",)
 
 
 @pytest.mark.parametrize(
