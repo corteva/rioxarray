@@ -270,7 +270,11 @@ def test_open_rasterio_mask_chunk_clip():
         assert np.isnan(xdi.values).sum() == 52119
         test_encoding = dict(xdi.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
+        assert test_encoding == {
+            "_FillValue": 0.0,
+            "grid_mapping": "spatial_ref",
+            "dtype": "uint16",
+        }
         attrs = dict(xdi.attrs)
         assert_almost_equal(
             tuple(xdi.rio._cached_transform())[:6],
@@ -307,7 +311,11 @@ def test_open_rasterio_mask_chunk_clip():
         _assert_xarrays_equal(clipped, comp_subset)
         test_encoding = dict(clipped.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
+        assert test_encoding == {
+            "_FillValue": 0.0,
+            "grid_mapping": "spatial_ref",
+            "dtype": "uint16",
+        }
 
         # test dataset
         clipped_ds = xdi.to_dataset(name="test_data").rio.clip(
@@ -317,7 +325,11 @@ def test_open_rasterio_mask_chunk_clip():
         _assert_xarrays_equal(clipped_ds, comp_subset_ds)
         test_encoding = dict(clipped.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
-        assert test_encoding == {"_FillValue": 0.0, "grid_mapping": "spatial_ref"}
+        assert test_encoding == {
+            "_FillValue": 0.0,
+            "grid_mapping": "spatial_ref",
+            "dtype": "uint16",
+        }
 
 
 ##############################################################################
@@ -882,6 +894,7 @@ def test_mask_and_scale(open_rasterio):
                 "_FillValue": 32767.0,
                 "missing_value": 32767,
                 "grid_mapping": "crs",
+                "dtype": "uint16",
             }
             attrs = rds.air_temperature.attrs
             assert attrs == {
@@ -912,6 +925,7 @@ def test_no_mask_and_scale(open_rasterio):
             "_FillValue": 32767.0,
             "missing_value": 32767,
             "grid_mapping": "crs",
+            "dtype": "uint16",
         }
         attrs = rds.air_temperature.attrs
         assert attrs == {
