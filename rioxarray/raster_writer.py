@@ -10,6 +10,7 @@ Source file:
 """
 import rasterio
 from rasterio.windows import Window
+from xarray.conventions import encode_cf_variable
 
 from rioxarray.exceptions import RioXarrayError
 
@@ -40,23 +41,30 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     try:
         raster_handle.scales = tags["scales"]
     except KeyError:
-        try:
-            raster_handle.scales = (tags["scale_factor"],) * raster_handle.count
-        except KeyError:
-            pass
+        scale_factor = tags.get(
+            "scale_factor", xarray_dataset.encoding.get("scale_factor")
+        )
+        if scale_factor is not None:
+            raster_handle.scales = (scale_factor,) * raster_handle.count
     try:
         raster_handle.offsets = tags["offsets"]
     except KeyError:
-        try:
-            raster_handle.offsets = (tags["add_offset"],) * raster_handle.count
-        except KeyError:
-            pass
+        add_offset = tags.get("add_offset", xarray_dataset.encoding.get("add_offset"))
+        if add_offset is not None:
+            raster_handle.offsets = (add_offset,) * raster_handle.count
 
     # filter out attributes that should be written in a different location
     skip_tags = (
         UNWANTED_RIO_ATTRS
         + FILL_VALUE_NAMES
-        + ("transform", "scales", "scale_factor", "add_offset", "offsets")
+        + (
+            "transform",
+            "scales",
+            "scale_factor",
+            "add_offset",
+            "offsets",
+            "grid_mapping",
+        )
     )
     # this is for when multiple values are used
     # in this case, it will be stored in the raster description
@@ -151,7 +159,6 @@ class RasterioWriter:
         # generate initial output file
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(rds, xarray_dataarray, tags)
-
             if not (lock and is_dask_collection(xarray_dataarray.data)):
                 # write data to raster immmediately if not dask array
                 if windowed:
@@ -163,23 +170,15 @@ class RasterioWriter:
                         out_data = xarray_dataarray.rio.isel_window(window)
                     else:
                         out_data = xarray_dataarray
-                    if xarray_dataarray.rio.encoded_nodata is not None:
-                        out_data = out_data.fillna(xarray_dataarray.rio.encoded_nodata)
-                    data = out_data.values.astype(dtype)
+                    data = encode_cf_variable(out_data).values.astype(dtype)
                     if data.ndim == 2:
                         rds.write(data, 1, window=window)
                     else:
                         rds.write(data, window=window)
 
         if lock and is_dask_collection(xarray_dataarray.data):
-            if xarray_dataarray.rio.encoded_nodata is not None:
-                out_dataarray = xarray_dataarray.fillna(
-                    xarray_dataarray.rio.encoded_nodata
-                )
-            else:
-                out_dataarray = xarray_dataarray
             return dask.array.store(
-                out_dataarray.data.astype(dtype),
+                encode_cf_variable(xarray_dataarray).data.astype(dtype),
                 self,
                 lock=lock,
                 compute=compute,

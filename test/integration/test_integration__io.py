@@ -942,6 +942,21 @@ def test_no_mask_and_scale(open_rasterio):
         }
 
 
+def test_mask_and_scale__to_raster(open_rasterio, tmp_path):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    tmp_output = tmp_path / "tmmx_20190121.tif"
+    with pytest.warns(SerializationWarning):
+        with open_rasterio(test_file, mask_and_scale=True) as rds:
+            rds.air_temperature.rio.to_raster(str(tmp_output))
+            with rasterio.open(str(tmp_output)) as riofh:
+                assert riofh.scales == (0.1,)
+                assert riofh.offsets == (220.0,)
+                assert riofh.nodata == 32767.0
+                data = riofh.read(1, masked=True)
+                assert data.min() == 287
+                assert data.max() == 821
+
+
 def test_notgeoreferenced_warning(open_rasterio):
     with create_tmp_geotiff(transform_args=None) as (tmp_file, expected):
         with pytest.warns(NotGeoreferencedWarning):
