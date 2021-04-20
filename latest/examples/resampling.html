@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Example - Reproject Match &mdash; rioxarray 0.3.2.dev0 documentation</title>
+  <title>Example - Resampling &mdash; rioxarray 0.3.2.dev0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example - Merge" href="merge.html" />
-    <link rel="prev" title="Example - Reproject" href="reproject.html" /> 
+    <link rel="next" title="Example - Convert dataset to raster (GeoTiff)" href="convert_to_raster.html" />
+    <link rel="prev" title="Usage Examples" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -96,18 +96,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="resampling.html">Example - Resampling</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Resampling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-dataset">Load in xarray dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Resampling">Resampling</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="read-locks.html">Example - Reading COGs in Parallel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reproject Match</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-datasets">Load in xarray datasets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Reproject-Match">Reproject Match</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
@@ -177,13 +177,13 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Example - Reproject Match</li>
+      <li>Example - Resampling</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/examples/reproject_match.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/resampling.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -466,68 +466,45 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Reproject-Match">
-<h1>Example - Reproject Match<a class="headerlink" href="#Example---Reproject-Match" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Example---Resampling">
+<h1>Example - Resampling<a class="headerlink" href="#Example---Resampling" title="Permalink to this headline">¶</a></h1>
+<p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.reproject</span></code>:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject"><span class="std std-ref">DataArray.reproject</span></a></li>
+<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject"><span class="std std-ref">Dataset.reproject</span></a></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
-import xarray
+<span></span>import rioxarray
 
 %matplotlib inline
 </pre></div>
 </div>
 </div>
-<div class="section" id="Load-in-xarray-datasets">
-<h2>Load in xarray datasets<a class="headerlink" href="#Load-in-xarray-datasets" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Load-in-xarray-dataset">
+<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
+<p>See docs for <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
+<p>Notes:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY.nc&quot;)
-xds_match = xarray.open_dataarray(&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;)
+<span></span>xds = rioxarray.open_rasterio(
+    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
+    masked=True,
+)
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (y: 200, x: 200)&gt;
-array([[ nan,  nan,  nan, ..., 656., 656., 554.],
-       [ nan,  nan,  nan, ..., 694., 694., 642.],
-       [ nan,  nan,  nan, ..., 456., 575., 642.],
-       ...,
-       [993., 817., 817., ..., 471., 479., 498.],
-       [893., 893., 816., ..., 479., 479., 469.],
-       [816., 816., 832., ..., 515., 469., 485.]], dtype=float32)
-Coordinates:
-  * y        (y) float64 5.05e+06 5.05e+06 5.05e+06 ... 5.004e+06 5.004e+06
-  * x        (x) float64 -7.274e+06 -7.274e+06 ... -7.228e+06 -7.228e+06
-Attributes:
-    crs:        +a=6371007.181 +b=6371007.181 +lon_0=0 +no_defs +proj=sinu +u...
-    res:        [231.65635826 231.65635826]
-    is_tiled:   0
-    nodata:     -28672.0
-    transform:  [ 2.31656358e+02  0.00000000e+00 -7.27400965e+06  0.00000000e...
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -536,19 +513,42 @@ Attributes:
 </div>
 </div>
 <div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.collections.QuadMesh at 0x1d845213780&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_resampling_4_1.png" src="../_images/examples_resampling_4_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Resampling">
+<h2>Resampling<a class="headerlink" href="#Resampling" title="Permalink to this headline">¶</a></h2>
+<p>In order to copy <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>’s behavior stated <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/resampling.html">here</a>, you can:</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98d0a1c50&gt;
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_5_1.png" src="../_images/examples_reproject_match_5_1.png" />
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from rasterio.enums import Resampling
+
+# Reproject
+upscale_factor = 2
+new_width = xds.rio.width * upscale_factor
+new_height = xds.rio.height * upscale_factor
+
+xds_upsampled = xds.rio.reproject(xds.rio.crs,
+                                  shape=(new_height, new_width),
+                                  resampling=Resampling.bilinear)
+
+</pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -556,7 +556,7 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_match
+<span></span>xds.shape
 </pre></div>
 </div>
 </div>
@@ -566,24 +566,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ..., 1146.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1146., 1262.,  735.],
-       [  nan,   nan,   nan, ...,  912., 1024.,  853.]], dtype=float32)
-Coordinates:
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-    spatial_ref  int64 ...
-Attributes:
-    crs:           +datum=WGS84 +no_defs +proj=utm +units=m +zone=15
-    res:           [386.65122672 386.65122672]
-    is_tiled:      0
-    transform:     [ 3.86651227e+02  0.00000000e+00  4.85124883e+05  0.000000...
-    grid_mapping:  spatial_ref
+(1, 245, 574)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -591,49 +574,43 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_match.plot()
+<span></span>xds_upsampled.shape
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98d010630&gt;
+(1, 490, 1148)
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_7_1.png" src="../_images/examples_reproject_match_7_1.png" />
-</div>
-</div>
-</div>
-<div class="section" id="Reproject-Match">
-<h2>Reproject Match<a class="headerlink" href="#Reproject-Match" title="Permalink to this headline">¶</a></h2>
-<p>API Reference:</p>
-<ul class="simple">
-<li>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match"><span class="std std-ref">rio.reproject_match()</span></a></li>
-<li>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match"><span class="std std-ref">rio.reproject_match()</span></a></li>
-</ul>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match = xds.rio.reproject_match(xds_match)
+<span></span>xds.rio.resolution()
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(3.0, -3.0)
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match
+<span></span>xds_upsampled.rio.resolution()
 </pre></div>
 </div>
 </div>
@@ -643,47 +620,16 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,  581., ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,  682., ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ...,  821.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1024.,  853.,  583.],
-       [  nan,   nan,   nan, ...,  867.,  804.,  706.]], dtype=float32)
-Coordinates:
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
-    spatial_ref  int64 0
-Attributes:
-    transform:     (386.65122672362685, 0.0, 485124.8828918401, 0.0, -386.651...
-    _FillValue:    -28672
-    grid_mapping:  spatial_ref
+(1.5, -1.5)
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match.plot()
+<span></span>
 </pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98c72c908&gt;
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_11_1.png" src="../_images/examples_reproject_match_11_1.png" />
 </div>
 </div>
 </div>
@@ -695,8 +641,8 @@ Attributes:
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="merge.html" class="btn btn-neutral float-right" title="Example - Merge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="reproject.html" class="btn btn-neutral float-left" title="Example - Reproject" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="convert_to_raster.html" class="btn btn-neutral float-right" title="Example - Convert dataset to raster (GeoTiff)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Usage Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
