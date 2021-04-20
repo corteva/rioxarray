@@ -882,6 +882,11 @@ class RasterArray(XRasterBase):
         if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
             driver = "GTiff"
 
+        dtype = (
+            self._obj.encoding.get("dtype", str(self._obj.dtype))
+            if dtype is None
+            else dtype
+        )
         dtype = str(self._obj.dtype) if dtype is None else dtype
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
