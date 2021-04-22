@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Example - Reproject Match &mdash; rioxarray 0.3.2.dev0 documentation</title>
+  <title>Example - Reproject Match (For Raster Calculations/Stacking) &mdash; rioxarray 0.3.2.dev0 documentation</title>
   
 
   
@@ -103,9 +103,10 @@
 <li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
 <li class="toctree-l2"><a class="reference internal" href="read-locks.html">Example - Reading COGs in Parallel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reproject Match</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reproject Match (For Raster Calculations/Stacking)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Load-in-xarray-datasets">Load in xarray datasets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Reproject-Match">Reproject Match</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Raster-Calculations">Raster Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
@@ -177,7 +178,7 @@
         
           <li><a href="examples.html">Usage Examples</a> &raquo;</li>
         
-      <li>Example - Reproject Match</li>
+      <li>Example - Reproject Match (For Raster Calculations/Stacking)</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -466,8 +467,10 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Reproject-Match">
-<h1>Example - Reproject Match<a class="headerlink" href="#Example---Reproject-Match" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Example---Reproject-Match-(For-Raster-Calculations/Stacking)">
+<h1>Example - Reproject Match (For Raster Calculations/Stacking)<a class="headerlink" href="#Example---Reproject-Match-(For-Raster-Calculations/Stacking)" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">rio.reproject_match</span></code> will reproject to match the resolution, projection, and region of another raster.</p>
+<p>This is useful for raster caclulations and stacking rasters.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -476,79 +479,57 @@ div.rendered_html tbody tr:hover {
 <span></span>import rioxarray # for the extension to load
 import xarray
 
+import matplotlib.pyplot as plt
+
 %matplotlib inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>def print_raster(raster):
+    print(
+        f&quot;shape: {raster.rio.shape}\n&quot;
+        f&quot;resolution: {raster.rio.resolution()}\n&quot;
+        f&quot;bounds: {raster.rio.bounds()}\n&quot;
+        f&quot;sum: {raster.sum().item()}\n&quot;
+        f&quot;CRS: {raster.rio.crs}\n&quot;
+    )
 </pre></div>
 </div>
 </div>
 <div class="section" id="Load-in-xarray-datasets">
 <h2>Load in xarray datasets<a class="headerlink" href="#Load-in-xarray-datasets" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY.nc&quot;)
-xds_match = xarray.open_dataarray(&quot;/mnt/c/Users/snowal/scripts/rioxarray/test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;)
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds
+<span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
+xds_match = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;)
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (y: 200, x: 200)&gt;
-array([[ nan,  nan,  nan, ..., 656., 656., 554.],
-       [ nan,  nan,  nan, ..., 694., 694., 642.],
-       [ nan,  nan,  nan, ..., 456., 575., 642.],
-       ...,
-       [993., 817., 817., ..., 471., 479., 498.],
-       [893., 893., 816., ..., 479., 479., 469.],
-       [816., 816., 832., ..., 515., 469., 485.]], dtype=float32)
-Coordinates:
-  * y        (y) float64 5.05e+06 5.05e+06 5.05e+06 ... 5.004e+06 5.004e+06
-  * x        (x) float64 -7.274e+06 -7.274e+06 ... -7.228e+06 -7.228e+06
-Attributes:
-    crs:        +a=6371007.181 +b=6371007.181 +lon_0=0 +no_defs +proj=sinu +u...
-    res:        [231.65635826 231.65635826]
-    is_tiled:   0
-    nodata:     -28672.0
-    transform:  [ 2.31656358e+02  0.00000000e+00 -7.27400965e+06  0.00000000e...
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.plot()
+<span></span>fig, axes = plt.subplots(ncols=2, figsize=(12,4))
+xds.plot(ax=axes[0])
+xds_match.plot(ax=axes[1])
+plt.draw()
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98d0a1c50&gt;
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_5_1.png" src="../_images/examples_reproject_match_5_1.png" />
+<img alt="../_images/examples_reproject_match_5_0.png" src="../_images/examples_reproject_match_5_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -556,60 +537,37 @@ Attributes:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_match
+<span></span>print(&quot;Original Raster:\n----------------\n&quot;)
+print_raster(xds)
+print(&quot;Raster to Match:\n----------------\n&quot;)
+print_raster(xds_match)
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ..., 1146.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1146., 1262.,  735.],
-       [  nan,   nan,   nan, ...,  912., 1024.,  853.]], dtype=float32)
-Coordinates:
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-    spatial_ref  int64 ...
-Attributes:
-    crs:           +datum=WGS84 +no_defs +proj=utm +units=m +zone=15
-    res:           [386.65122672 386.65122672]
-    is_tiled:      0
-    transform:     [ 3.86651227e+02  0.00000000e+00  4.85124883e+05  0.000000...
-    grid_mapping:  spatial_ref
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_match.plot()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98d010630&gt;
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_7_1.png" src="../_images/examples_reproject_match_7_1.png" />
-</div>
+<div class="highlight"><pre>
+Original Raster:
+----------------
+
+shape: (200, 200)
+resolution: (231.6563582639561, -231.65635826375018)
+bounds: (-7274009.649486291, 5003777.3385, -7227678.3778335, 5050108.61015275)
+sum: 23209796.0
+CRS: PROJCS[&#34;unknown&#34;,GEOGCS[&#34;unknown&#34;,DATUM[&#34;unknown&#34;,SPHEROID[&#34;unknown&#34;,6371007.181,0]],PRIMEM[&#34;Greenwich&#34;,0,AUTHORITY[&#34;EPSG&#34;,&#34;8901&#34;]],UNIT[&#34;degree&#34;,0.0174532925199433,AUTHORITY[&#34;EPSG&#34;,&#34;9122&#34;]]],PROJECTION[&#34;Sinusoidal&#34;],PARAMETER[&#34;longitude_of_center&#34;,0],PARAMETER[&#34;false_easting&#34;,0],PARAMETER[&#34;false_northing&#34;,0],UNIT[&#34;metre&#34;,1,AUTHORITY[&#34;EPSG&#34;,&#34;9001&#34;]],AXIS[&#34;Easting&#34;,EAST],AXIS[&#34;Northing&#34;,NORTH]]
+
+Raster to Match:
+----------------
+
+shape: (100, 150)
+resolution: (386.65122672362685, -386.65122672362685)
+bounds: (485124.8828918401, 4990535.635952473, 543122.5669003841, 5029200.758624835)
+sum: 4903477.0
+CRS: EPSG:32615
+
+</pre></div></div>
 </div>
 </div>
 <div class="section" id="Reproject-Match">
@@ -620,7 +578,7 @@ Attributes:
 <li>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match"><span class="std std-ref">rio.reproject_match()</span></a></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -629,61 +587,106 @@ Attributes:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match
+<span></span>print(&quot;Reprojected Raster:\n-------------------\n&quot;)
+print_raster(xds_repr_match)
+print(&quot;Raster to Match:\n----------------\n&quot;)
+print_raster(xds_match)
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;xarray.DataArray (y: 100, x: 150)&gt;
-array([[  nan,   nan,  581., ...,   nan,   nan,   nan],
-       [  nan,   nan,   nan, ...,   nan,   nan,   nan],
-       [  nan,   nan,  682., ...,   nan,   nan,   nan],
-       ...,
-       [  nan,   nan,   nan, ...,  821.,  821.,  583.],
-       [  nan,   nan,   nan, ..., 1024.,  853.,  583.],
-       [  nan,   nan,   nan, ...,  867.,  804.,  706.]], dtype=float32)
-Coordinates:
-  * x            (x) float64 4.853e+05 4.857e+05 ... 5.425e+05 5.429e+05
-  * y            (y) float64 5.029e+06 5.029e+06 ... 4.991e+06 4.991e+06
-    spatial_ref  int64 0
-Attributes:
-    transform:     (386.65122672362685, 0.0, 485124.8828918401, 0.0, -386.651...
-    _FillValue:    -28672
-    grid_mapping:  spatial_ref
+Reprojected Raster:
+-------------------
+
+shape: (100, 150)
+resolution: (386.6512267236268, -386.6512267236231)
+bounds: (485124.8828918401, 4990535.635952473, 543122.5669003841, 5029200.758624835)
+sum: 4930593.0
+CRS: EPSG:32615
+
+Raster to Match:
+----------------
+
+shape: (100, 150)
+resolution: (386.65122672362685, -386.65122672362685)
+bounds: (485124.8828918401, 4990535.635952473, 543122.5669003841, 5029200.758624835)
+sum: 4903477.0
+CRS: EPSG:32615
+
 </pre></div></div>
+</div>
+</div>
+<div class="section" id="Raster-Calculations">
+<h2>Raster Calculations<a class="headerlink" href="#Raster-Calculations" title="Permalink to this headline">¶</a></h2>
+<p>Now that the rasters have the same projection, resolution, and extents, you can do raster calculations.</p>
+<p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">assign_coords</span></code> to make the coordinates the exact same due to tiny differences in the coordinate values due to floating precision (<a class="reference external" href="https://github.com/corteva/rioxarray/issues/298">issue 298</a>).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>xds_repr_match = xds_repr_match.assign_coords({
+    &quot;x&quot;: xds_match.x,
+    &quot;y&quot;: xds_match.y,
+})
+xds_sum = xds_repr_match + xds_match
+</pre></div>
+</div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match.plot()
+<span></span>print(&quot;Sum Raster:\n-----------\n&quot;)
+print_raster(xds_sum)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd98c72c908&gt;
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_reproject_match_11_1.png" src="../_images/examples_reproject_match_11_1.png" />
+<div class="highlight"><pre>
+Sum Raster:
+-----------
+
+shape: (100, 150)
+resolution: (386.6512267236268, -386.6512267236231)
+bounds: (485124.8828918401, 4990535.635952473, 543122.5669003841, 5029200.758624835)
+sum: 9814687.0
+CRS: EPSG:32615
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>fig, axes = plt.subplots(ncols=3, figsize=(16,4))
+
+xds_repr_match.plot(ax=axes[0])
+xds_match.plot(ax=axes[1])
+xds_sum.plot(ax=axes[2])
+
+plt.draw()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_reproject_match_13_0.png" src="../_images/examples_reproject_match_13_0.png" />
 </div>
 </div>
 </div>
