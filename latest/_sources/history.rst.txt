@@ -8,6 +8,7 @@ Latest
 - REF: Store `grid_mapping` in `encoding` instead of `attrs` (issue #282)
 - ENH: enable `engine="rasterio"` via xarray backend API (issue #197 pull #281)
 - ENH: Generate 2D coordinates for non-rectilinear sources (issue #290)
+- ENH: Add `encoded` kwarg to `rio.write_nodata` (discussions #313)
 - BUG: Use float32 for smaller dtypes when masking (discussions #302)
 - BUG: Return correct transform in `rio.transform` with non-rectilinear transform (discussions #280)
 - BUG: Update to handle WindowError in rasterio 1.2.2 (issue #286)

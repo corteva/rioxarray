@@ -1280,7 +1280,7 @@ is True. Otherwise None is returned.</p>
 
 <dl class="method">
 <dt id="rioxarray.raster_array.RasterArray.write_nodata">
-<code class="descname">write_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_nodata</code><span class="sig-paren">(</span><em>input_nodata</em>, <em>encoded=False</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.write_nodata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.write_nodata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the nodata to the DataArray in a CF compliant manner.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1289,6 +1289,9 @@ is True. Otherwise None is returned.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>input_nodata</strong> (<em>object</em>) – Nodata value for the DataArray.
 If input_nodata is None, it will remove the _FillValue attribute.</li>
+<li><strong>encoded</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write the nodata value in the encoding and remove
+the fill value from the attributes. This is useful for masking
+with nodata. Default is False.</li>
 <li><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing DataArray. Default is False.</li>
 </ul>
 </td>
@@ -1301,6 +1304,21 @@ If input_nodata is None, it will remove the _FillValue attribute.</li>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
+<p>To write the nodata value if it is missing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To write the nodata value on a copy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">raster</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="o">-</span><span class="mi">9999</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To mask with nodata:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nodata</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raster</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">raster</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">,</span> <span class="n">encoded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
