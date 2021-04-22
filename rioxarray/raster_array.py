@@ -221,7 +221,7 @@ class RasterArray(XRasterBase):
         obj.rio._nodata = input_nodata
         return obj
 
-    def write_nodata(self, input_nodata, inplace=False):
+    def write_nodata(self, input_nodata, encoded=False, inplace=False):
         """
         Write the nodata to the DataArray in a CF compliant manner.
 
@@ -230,6 +230,10 @@ class RasterArray(XRasterBase):
         input_nodata: object
             Nodata value for the DataArray.
             If input_nodata is None, it will remove the _FillValue attribute.
+        encoded: bool, optional
+            If True, it will write the nodata value in the encoding and remove
+            the fill value from the attributes. This is useful for masking
+            with nodata. Default is False.
         inplace: bool, optional
             If True, it will write to the existing DataArray. Default is False.
 
@@ -237,17 +241,44 @@ class RasterArray(XRasterBase):
         -------
         :obj:`xarray.DataArray`:
             Modified DataArray with CF compliant nodata information.
+
+        Examples
+        --------
+        To write the nodata value if it is missing:
+
+        >>> raster.rio.write_nodata(-9999, inplace=True)
+
+        To write the nodata value on a copy:
+
+        >>> raster = raster.rio.write_nodata(-9999)
+
+        To mask with nodata:
+
+        >>> nodata = raster.rio.nodata
+        >>> raster = raster.where(raster != nodata)
+        >>> raster.rio.write_nodata(nodata, encoded=True, inplace=True)
+
         """
         data_obj = self._get_obj(inplace=inplace)
         input_nodata = False if input_nodata is None else input_nodata
         if input_nodata is not False:
             input_nodata = _ensure_nodata_dtype(input_nodata, self._obj.dtype)
-            data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
-        else:
-            new_vars = dict(data_obj.attrs)
-            new_vars.pop("_FillValue", None)
-            data_obj.rio.set_attrs(new_vars, inplace=True)
-        data_obj.rio.set_nodata(input_nodata, inplace=True)
+            if encoded:
+                data_obj.rio.update_encoding(
+                    dict(_FillValue=input_nodata), inplace=True
+                )
+            else:
+                data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
+        if input_nodata is False or encoded:
+            new_attrs = dict(data_obj.attrs)
+            new_attrs.pop("_FillValue", None)
+            data_obj.rio.set_attrs(new_attrs, inplace=True)
+        if input_nodata is False and encoded:
+            new_encoding = dict(data_obj.encoding)
+            new_encoding.pop("_FillValue", None)
+            data_obj.rio.set_encoding(new_encoding, inplace=True)
+        if not encoded:
+            data_obj.rio.set_nodata(input_nodata, inplace=True)
         return data_obj
 
     @property
