@@ -1791,7 +1791,7 @@ def test_nodata_setter__copy():
     assert out_ds.rio.nodata == -1
 
 
-def test_nodata_writer__array__copy():
+def test_write_nodata__array__copy():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("y", "x"),
@@ -1809,7 +1809,7 @@ def test_nodata_writer__array__copy():
     assert "_FillValue" not in test_da.attrs
 
 
-def test_nodata_writer__array__inplace():
+def test_write_nodata__array__inplace():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("y", "x"),
@@ -1826,7 +1826,7 @@ def test_nodata_writer__array__inplace():
     assert out_da.rio.nodata == -1
 
 
-def test_nodata_writer__missing():
+def test_write_nodata__missing():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("y", "x"),
@@ -1834,9 +1834,10 @@ def test_nodata_writer__missing():
     )
     test_da.rio.write_nodata(None)
     assert not test_da.attrs
+    assert not test_da.encoding
 
 
-def test_nodata_writer__remove():
+def test_write_nodata__remove():
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("y", "x"),
@@ -1849,8 +1850,28 @@ def test_nodata_writer__remove():
     assert not test_nd.attrs
 
 
+def test_write_nodata__encoded():
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    )
+    test_nd = test_da.rio.write_nodata(-1, inplace=True)
+    assert test_nd.attrs["_FillValue"] == -1
+    test_nd = test_da.rio.write_nodata(-1, encoded=True, inplace=True)
+    assert not test_nd.attrs
+    assert test_nd.encoding["_FillValue"] == -1
+    assert test_nd.rio.encoded_nodata == -1
+    assert numpy.isnan(test_nd.rio.nodata)
+    test_nd.rio.write_nodata(None, encoded=True, inplace=True)
+    assert not test_nd.attrs
+    assert not test_nd.encoding
+    assert test_nd.rio.encoded_nodata is None
+    assert test_nd.rio.nodata is None
+
+
 @pytest.mark.parametrize("nodata", [-1.1, "-1.1"])
-def test_nodata_writer__different_dtype(nodata):
+def test_write_nodata__different_dtype(nodata):
     test_da = xarray.DataArray(
         numpy.zeros((5, 5), dtype=int),
         dims=("y", "x"),
