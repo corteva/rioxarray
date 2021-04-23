@@ -41,6 +41,8 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         variable=None,
         group=None,
         default_name="band_data",
+        decode_times=True,
+        decode_timedelta=None,
         open_kwargs=None,
     ):
         if open_kwargs is None:
@@ -56,6 +58,8 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             variable=variable,
             group=group,
             default_name=default_name,
+            decode_times=decode_times,
+            decode_timedelta=decode_timedelta,
             **open_kwargs,
         )
         if isinstance(ds, xr.DataArray):
