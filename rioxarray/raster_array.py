@@ -357,7 +357,21 @@ class RasterArray(XRasterBase):
         transform: optional
             The destination transform.
         resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+            0: Nearest neighbor resampling (default, fastest algorithm, worst interpolation quality).
+            1: Bilinear resampling.
+            2: Cubic resampling.
+            3: Cubic spline resampling.
+            4: Lanczos windowed sinc resampling.
+            5: Average resampling, computes the weighted average of all non-NODATA contributing pixels.
+            6: Mode resampling, selects the value which appears most often of all the sampled points.
+            8: Maximum resampling, selects the maximum value from all non-NODATA contributing pixels. (GDAL >= 2.2)
+            9: Minimum resampling, selects the minimum value from all non-NODATA contributing pixels. (GDAL >= 2.2)
+            10: Median resampling, selects the median value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            11: Q1, first quartile resampling, selects the first quartile value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            12: Q3, third quartile resampling, selects the third quartile value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            13: Sum, compute the weighted sum of all non-NODATA contributing pixels. (GDAL >= 3.3)
+            14: RMS, root mean square / quadratic mean of all non-NODATA contributing pixels. (GDAL >= 3.3)
+            Method 7 (gauss), not available. See rasterio.warp.reproject for more details.
 
 
         Returns
@@ -451,7 +465,21 @@ class RasterArray(XRasterBase):
         match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             DataArray of the target resolution and projection.
         resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+            0: Nearest neighbor resampling (default, fastest algorithm, worst interpolation quality).
+            1: Bilinear resampling.
+            2: Cubic resampling.
+            3: Cubic spline resampling.
+            4: Lanczos windowed sinc resampling.
+            5: Average resampling, computes the weighted average of all non-NODATA contributing pixels.
+            6: Mode resampling, selects the value which appears most often of all the sampled points.
+            8: Maximum resampling, selects the maximum value from all non-NODATA contributing pixels. (GDAL >= 2.2)
+            9: Minimum resampling, selects the minimum value from all non-NODATA contributing pixels. (GDAL >= 2.2)
+            10: Median resampling, selects the median value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            11: Q1, first quartile resampling, selects the first quartile value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            12: Q3, third quartile resampling, selects the third quartile value of all non-NODATA contributing pixels. (GDAL >= 2.2)
+            13: Sum, compute the weighted sum of all non-NODATA contributing pixels. (GDAL >= 3.3)
+            14: RMS, root mean square / quadratic mean of all non-NODATA contributing pixels. (GDAL >= 3.3)
+            Method 7 (gauss), not available. See rasterio.warp.reproject for more details.
 
 
         Returns
