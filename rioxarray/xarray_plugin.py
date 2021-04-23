@@ -60,13 +60,13 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
-        if drop_variables is not None:
-            ds = ds.drop_vars(drop_variables)
         if not isinstance(ds, xr.Dataset):
             raise RioXarrayError(
                 "Multiple resolution sets found. "
                 "Use 'variable' or 'group' to filter."
             )
+        if drop_variables is not None:
+            ds = ds.drop_vars(drop_variables)
         return ds
 
     def guess_can_open(self, filename_or_obj):

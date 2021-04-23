@@ -65,4 +65,5 @@ def test_open_multiple_resolution():
                 TEST_INPUT_DATA_DIR, "MOD09GA.A2008296.h14v17.006.2015181011753.hdf"
             ),
             engine="rasterio",
+            drop_variables="QC_500m_1",
         )
