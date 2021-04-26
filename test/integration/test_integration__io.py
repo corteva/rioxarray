@@ -981,6 +981,27 @@ def test_nc_attr_loading(open_rasterio):
         assert str(rds.time.values[1]) == "2016-12-29 12:52:42.347451"
 
 
+@pytest.mark.xfail(
+    LooseVersion(rasterio.__gdal_version__) < LooseVersion("3.0.4"),
+    reason="This was fixed in GDAL 3.0.4",
+)
+def test_nc_attr_loading__disable_decode_times(open_rasterio):
+    with open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), decode_times=False
+    ) as rds:
+        assert rds.dims == {"y": 10, "x": 10, "time": 2}
+        assert rds.attrs == {"coordinates": "spatial_ref"}
+        assert rds.y.attrs["units"] == "metre"
+        assert rds.x.attrs["units"] == "metre"
+        assert rds.time.encoding == {}
+        assert np.isnan(rds.time.attrs.pop("_FillValue"))
+        assert rds.time.attrs == {
+            "units": "seconds since 2016-12-19T10:27:29.687763",
+            "calendar": "proleptic_gregorian",
+        }
+        assert_array_equal(rds.time.values, [0, 872712.659688])
+
+
 def test_lockless():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunks=True

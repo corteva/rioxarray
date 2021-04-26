@@ -26,6 +26,7 @@ from xarray.core import indexing
 from xarray.core.dataarray import DataArray
 from xarray.core.dtypes import maybe_promote
 from xarray.core.utils import is_scalar
+from xarray.core.variable import as_variable
 
 from rioxarray.exceptions import RioXarrayError
 from rioxarray.rioxarray import _generate_spatial_coords
@@ -452,60 +453,37 @@ def _get_rasterio_attrs(riods):
     return attrs
 
 
-def _decode_datetime_cf(data_array):
+def _decode_datetime_cf(data_array, decode_times, decode_timedelta):
     """
     Decide the datetime based on CF conventions
     """
-    for coord in data_array.coords:
-        # stage 1: timedelta
-        if (
-            "units" in data_array[coord].attrs
-            and data_array[coord].attrs["units"] in times.TIME_UNITS
-        ):
-            units = times.pop_to(
-                data_array[coord].attrs, data_array[coord].encoding, "units"
-            )
-            new_values = times.decode_cf_timedelta(
-                data_array[coord].values, units=units
-            )
-            data_array = data_array.assign_coords(
-                {
-                    coord: IndexVariable(
-                        dims=data_array[coord].dims,
-                        data=new_values.astype(np.dtype("timedelta64[ns]")),
-                        attrs=data_array[coord].attrs,
-                        encoding=data_array[coord].encoding,
-                    )
-                }
-            )
+    if decode_timedelta is None:
+        decode_timedelta = decode_times
 
-        # stage 2: datetime
-        if (
-            "units" in data_array[coord].attrs
-            and "since" in data_array[coord].attrs["units"]
+    for coord in data_array.coords:
+        time_var = None
+        if decode_times and "since" in data_array[coord].attrs.get("units", ""):
+            time_var = times.CFDatetimeCoder(use_cftime=True).decode(
+                as_variable(data_array[coord]), name=coord
+            )
+        elif (
+            decode_timedelta
+            and data_array[coord].attrs.get("units") in times.TIME_UNITS
         ):
-            units = times.pop_to(
-                data_array[coord].attrs, data_array[coord].encoding, "units"
+            time_var = times.CFTimedeltaCoder().decode(
+                as_variable(data_array[coord]), name=coord
             )
-            calendar = times.pop_to(
-                data_array[coord].attrs, data_array[coord].encoding, "calendar"
-            )
-            dtype = times._decode_cf_datetime_dtype(
-                data_array[coord].values, units, calendar, True
-            )
-            new_values = times.decode_cf_datetime(
-                data_array[coord].values,
-                units=units,
-                calendar=calendar,
-                use_cftime=True,
+        if time_var is not None:
+            dimensions, data, attributes, encoding = variables.unpack_for_decoding(
+                time_var
             )
             data_array = data_array.assign_coords(
                 {
                     coord: IndexVariable(
-                        dims=data_array[coord].dims,
-                        data=new_values.astype(dtype),
-                        attrs=data_array[coord].attrs,
-                        encoding=data_array[coord].encoding,
+                        dims=dimensions,
+                        data=data,
+                        attrs=attributes,
+                        encoding=encoding,
                     )
                 }
             )
@@ -539,6 +517,9 @@ def _load_subdatasets(
     lock,
     masked,
     mask_and_scale,
+    decode_times,
+    decode_timedelta,
+    **open_kwargs,
 ):
     """
     Load in rasterio subdatasets
@@ -562,6 +543,9 @@ def _load_subdatasets(
             masked=masked,
             mask_and_scale=mask_and_scale,
             default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
+            decode_times=decode_times,
+            decode_timedelta=decode_timedelta,
+            **open_kwargs,
         )
         if shape not in dim_groups:
             dim_groups[shape] = {rioda.name: rioda}
@@ -648,6 +632,8 @@ def open_rasterio(
     variable=None,
     group=None,
     default_name=None,
+    decode_times=True,
+    decode_timedelta=None,
     **open_kwargs,
 ):
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
@@ -706,6 +692,14 @@ def open_rasterio(
         Group name or names to use to filter loading.
     default_name: str, optional
         The name of the data array if none exists. Default is None.
+    decode_times: bool, optional
+        If True, decode times encoded in the standard NetCDF datetime format
+        into datetime objects. Otherwise, leave them encoded as numbers.
+    decode_timedelta: bool, optional
+        If True, decode variables and coordinates with time units in
+        {“days”, “hours”, “minutes”, “seconds”, “milliseconds”, “microseconds”}
+        into timedelta objects. If False, leave them encoded as numbers.
+        If None (default), assume the same value of decode_time.
     **open_kwargs: kwargs, optional
         Optional keyword arguments to pass into rasterio.open().
 
@@ -777,6 +771,9 @@ def open_rasterio(
             lock=lock,
             masked=masked,
             mask_and_scale=mask_and_scale,
+            decode_times=decode_times,
+            decode_timedelta=decode_timedelta,
+            **open_kwargs,
         )
 
     if vrt_params is not None:
@@ -840,7 +837,9 @@ def open_rasterio(
 
     # update attributes from NetCDF attributess
     _load_netcdf_attrs(riods.tags(), result)
-    result = _decode_datetime_cf(result)
+    result = _decode_datetime_cf(
+        result, decode_times=decode_times, decode_timedelta=decode_timedelta
+    )
 
     # make sure the _FillValue is correct dtype
     if "_FillValue" in attrs:
