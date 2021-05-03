@@ -30,6 +30,7 @@ from rioxarray.exceptions import (
 from rioxarray.rioxarray import _make_coords
 from test.conftest import (
     PYPROJ_LT_3,
+    RASTERIO_EQ_122,
     RASTERIO_LT_122,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -350,15 +351,15 @@ def test_clip_box__one_dimension_error(modis_clip):
         var_match = ""
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
-        if RASTERIO_LT_122:
+        if RASTERIO_EQ_122:
+            expected_exception = rasterio.errors.WindowError
+            var_match = "Bounds and transform are inconsistent"
+        else:
             expected_exception = OneDimensionalRaster
             var_match = (
                 "At least one of the clipped raster x,y coordinates has "
                 f"only one point.{var_match}"
             )
-        else:
-            expected_exception = rasterio.errors.WindowError
-            var_match = "Bounds and transform are inconsistent"
         # test exception after raster clipped
         with pytest.raises(
             expected_exception,
