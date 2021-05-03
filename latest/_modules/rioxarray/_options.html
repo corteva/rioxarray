@@ -204,7 +204,7 @@
     <span class="k">return</span> <span class="n">OPTIONS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="set_options"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.set_options">[docs]</a><span class="k">class</span> <span class="nc">set_options</span><span class="p">:</span>
+<div class="viewcode-block" id="set_options"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.set_options">[docs]</a><span class="k">class</span> <span class="nc">set_options</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-name</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the global rioxarray option.</span>
 
@@ -246,7 +246,7 @@
         <span class="k">return</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="k">global</span> <span class="n">OPTIONS</span>
+        <span class="k">global</span> <span class="n">OPTIONS</span>  <span class="c1"># pylint: disable=global-statement</span>
         <span class="n">OPTIONS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old</span></div>
 </pre></div>
 

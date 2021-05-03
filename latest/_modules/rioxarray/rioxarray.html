@@ -170,6 +170,7 @@
 <span class="sd">This module is an extension for xarray to provide rasterio capabilities</span>
 <span class="sd">to xarray datasets/dataarrays.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: disable=too-many-lines</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -239,11 +240,10 @@
             <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
             <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
         <span class="p">}</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
-            <span class="s2">&quot;yc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
-        <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
+        <span class="s2">&quot;yc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
+    <span class="p">}</span>
 
 
 <span class="k">def</span> <span class="nf">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">):</span>

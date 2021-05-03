@@ -177,7 +177,6 @@
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
 
@@ -201,22 +200,14 @@
 
 <span class="c1"># TODO: should this be GDAL_LOCK instead?</span>
 <span class="n">RASTERIO_LOCK</span> <span class="o">=</span> <span class="n">SerializableLock</span><span class="p">()</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
-    <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
-<span class="k">else</span><span class="p">:</span>
-
-    <span class="k">class</span> <span class="nc">nullcontext</span><span class="p">(</span><span class="n">contextlib</span><span class="o">.</span><span class="n">AbstractContextManager</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">pass</span>
-
-        <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">excinfo</span><span class="p">):</span>
-            <span class="k">pass</span>
-
-    <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+<span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
 
 
 <span class="k">class</span> <span class="nc">URIManager</span><span class="p">(</span><span class="n">FileManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The URI manager is used for lockless reading</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">opener</span><span class="p">,</span>
@@ -241,6 +232,8 @@
 
 <span class="k">class</span> <span class="nc">RasterioArrayWrapper</span><span class="p">(</span><span class="n">BackendArray</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A wrapper around rasterio dataset objects&quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
