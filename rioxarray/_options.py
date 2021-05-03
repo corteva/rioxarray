@@ -36,7 +36,7 @@ def get_option(key: str) -> Any:
     return OPTIONS[key]
 
 
-class set_options:
+class set_options:  # pylint: disable=invalid-name
     """
     Set the global rioxarray option.
 
@@ -78,5 +78,5 @@ class set_options:
         return
 
     def __exit__(self, exc_type, exc_value, traceback):
-        global OPTIONS
+        global OPTIONS  # pylint: disable=global-statement
         OPTIONS = self.old

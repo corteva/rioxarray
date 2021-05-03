@@ -1,3 +1,7 @@
+"""
+This module allows for open_rasterio to be used with the xarray open methods
+through a backend entrypoint.
+"""
 import os.path
 
 import xarray as xr
@@ -28,7 +32,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
     .. versionadded:: 0.4
     """
 
-    def open_dataset(
+    def open_dataset(  # pylint: disable=arguments-differ
         self,
         filename_or_obj,
         drop_variables=None,
@@ -47,7 +51,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
     ):
         if open_kwargs is None:
             open_kwargs = {}
-        ds = _io.open_rasterio(
+        rds = _io.open_rasterio(
             filename_or_obj,
             parse_coordinates=parse_coordinates,
             chunks=chunks,
@@ -62,20 +66,20 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             decode_timedelta=decode_timedelta,
             **open_kwargs,
         )
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
-        if not isinstance(ds, xr.Dataset):
+        if isinstance(rds, xr.DataArray):
+            rds = rds.to_dataset()
+        if not isinstance(rds, xr.Dataset):
             raise RioXarrayError(
                 "Multiple resolution sets found. "
                 "Use 'variable' or 'group' to filter."
             )
         if drop_variables is not None:
-            ds = ds.drop_vars(drop_variables)
-        return ds
+            rds = rds.drop_vars(drop_variables)
+        return rds
 
-    def guess_can_open(self, filename_or_obj):
+    def guess_can_open(self, store_spec):
         try:
-            _, ext = os.path.splitext(filename_or_obj)
+            _, ext = os.path.splitext(store_spec)
         except TypeError:
             return False
         return ext[1:].lower() in CAN_OPEN_EXTS

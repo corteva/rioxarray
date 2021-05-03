@@ -2,6 +2,7 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
+# pylint: disable=too-many-lines
 import math
 import warnings
 
@@ -71,11 +72,10 @@ def _generate_spatial_coords(affine, width, height):
             "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
             "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
         }
-    else:
-        return {
-            "xc": (("y", "x"), new_spatial_coords["x"]),
-            "yc": (("y", "x"), new_spatial_coords["y"]),
-        }
+    return {
+        "xc": (("y", "x"), new_spatial_coords["x"]),
+        "yc": (("y", "x"), new_spatial_coords["y"]),
+    }
 
 
 def _get_nonspatial_coords(src_data_array):

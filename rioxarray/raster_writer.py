@@ -183,3 +183,4 @@ class RasterioWriter:
                 lock=lock,
                 compute=compute,
             )
+        return None

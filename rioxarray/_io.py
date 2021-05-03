@@ -9,7 +9,6 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 import contextlib
 import os
 import re
-import sys
 import warnings
 from distutils.version import LooseVersion
 
@@ -33,22 +32,14 @@ from rioxarray.rioxarray import _generate_spatial_coords
 
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
-
-if sys.version_info >= (3, 7):
-    NO_LOCK = contextlib.nullcontext()
-else:
-
-    class nullcontext(contextlib.AbstractContextManager):
-        def __enter__(self):
-            pass
-
-        def __exit__(self, *excinfo):
-            pass
-
-    NO_LOCK = nullcontext()
+NO_LOCK = contextlib.nullcontext()
 
 
 class URIManager(FileManager):
+    """
+    The URI manager is used for lockless reading
+    """
+
     def __init__(
         self,
         opener,
@@ -73,6 +64,8 @@ class URIManager(FileManager):
 
 class RasterioArrayWrapper(BackendArray):
     """A wrapper around rasterio dataset objects"""
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
