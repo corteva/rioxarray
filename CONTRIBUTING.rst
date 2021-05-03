@@ -26,13 +26,13 @@ If you are reporting a bug, please include:
 Fix Bugs
 ~~~~~~~~
 
-Look through the GitLab issues for bugs. Anything tagged with "bug" and "help
+Look through the GitHub issues for bugs. Anything tagged with "bug" and "help
 wanted" is open to whoever wants to implement it.
 
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitLab issues for features. Anything tagged with "enhancement"
+Look through the GitHub issues for features. Anything tagged with "enhancement"
 and "help wanted" is open to whoever wants to implement it.
 
 Write Documentation
@@ -64,42 +64,46 @@ Ready to contribute? Here's how to set up `rioxarray` for local development.
 
     $ git clone git@github.com:your_name_here/rioxarray.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Create a python virtual environment
 
-    $ python -m venv rioxarray_env
+Using conda::
+
     $ cd rioxarray/
+    $ conda env create
+    $ conda activate rioxarray
+
+Using python::
+
+    $ cd rioxarray/
+    $ python -m venv venv
+    $ . venv/bin/activate
+
+4. Install your local copy into a virtualenv.
+
     $ pip install -e .[dev]
 
-4. Setup pre-commit hooks::
+5. Setup pre-commit hooks::
 
-   $ pre-commit install
-   $ pre-commit autoupdate
+    $ pre-commit install
 
-5. Create a branch for local development::
+6. Create a branch for local development::
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
-6. When you're done making changes, check that your changes pass flake8, are black formatter,
-   and the tests pass::
+7. When you're done making changes, check that the tests pass::
 
-    $ make check
-    $ make test
-
-   Or, if you cannot run makefile commands::
-
-    $ flake8 rioxarray/ test/
-    $ black --check .
     $ py.test
 
-7. Commit your changes and push your branch to GitLab::
+8. Commit your changes and push your branch to GitHub (this should trigger pre-commit checks)::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-8. Submit a pull request through the GitHub website.
+9. Submit a pull request through the GitHub website.
+
 
 Pull Request Guidelines
 -----------------------
@@ -110,7 +114,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.6-3.9.
+3. The pull request should work for Python 3.7-3.9.
 
 Tips
 ----
