@@ -82,8 +82,8 @@ class RasterDataset(XRasterBase):
             together with resolution.
         transform: optional
             The destination transform.
-        resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+        resampling: rasterio.enums.Resampling, optional
+            See :func:`rasterio.warp.reproject` for more details.
 
 
         Returns
@@ -121,8 +121,8 @@ class RasterDataset(XRasterBase):
         ----------
         match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             Dataset with the target resolution and projection.
-        resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+        resampling: rasterio.enums.Resampling, optional
+            See :func:`rasterio.warp.reproject` for more details.
 
 
         Returns

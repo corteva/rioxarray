@@ -16,8 +16,8 @@ from rioxarray.rioxarray import _get_nonspatial_coords, _make_coords
 class RasterioDatasetDuck:
     """
     This class is to provide the attributes and methods necessary
-    to make the rasterio.merge.merge function think that
-    the xarray.DataArray is a rasterio Dataset.
+    to make the :func:`rasterio.merge.merge` function think that
+    the :obj:`xarray.DataArray` is a :obj:`rasterio.io.DatasetReader`.
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -102,14 +102,13 @@ def merge_arrays(
     """
     Merge data arrays geospatially.
 
-    Uses rasterio.merge.merge:
-        https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
+    Uses :func:`rasterio.merge.merge`
 
     .. versionadded:: 0.2 crs
 
     Parameters
     ----------
-    dataarrays: list
+    dataarrays: List[xarray.DataArray]
         List of xarray.DataArray's with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, and dimensions as the others in the array.
@@ -209,14 +208,13 @@ def merge_datasets(
     """
     Merge datasets geospatially.
 
-    Uses rasterio.merge.merge:
-        https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge
+    Uses :func:`rasterio.merge.merge`
 
     .. versionadded:: 0.2 crs
 
     Parameters
     ----------
-    datasets: list
+    datasets: List[xarray.Dataset]
         List of xarray.Dataset's with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, dimensions, and data_vars as the others in the array.

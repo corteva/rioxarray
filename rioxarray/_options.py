@@ -45,9 +45,9 @@ class set_options:  # pylint: disable=invalid-name
     export_grid_mapping: bool, optional
         If True, this option will export the full Climate and Forecasts (CF)
         grid mapping attributes for the CRS. This is useful if you are exporting
-        your file to netCDF using ``to_netcdf()``. When disabled, only the ``crs_wkt``
-        and ``spatial_ref`` attributes will be written and the program
-        will be faster due to not needing to use
+        your file to netCDF using :meth:`xarray.Dataset.to_netcdf()`. When disabled,
+        only the ``crs_wkt`` and ``spatial_ref`` attributes will be written and the
+        program will be faster due to not needing to use
         :meth:`pyproj.CRS.to_cf() <pyproj.crs.CRS.to_cf>`. Default is True.
 
 
