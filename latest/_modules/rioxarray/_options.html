@@ -213,9 +213,9 @@
 <span class="sd">    export_grid_mapping: bool, optional</span>
 <span class="sd">        If True, this option will export the full Climate and Forecasts (CF)</span>
 <span class="sd">        grid mapping attributes for the CRS. This is useful if you are exporting</span>
-<span class="sd">        your file to netCDF using ``to_netcdf()``. When disabled, only the ``crs_wkt``</span>
-<span class="sd">        and ``spatial_ref`` attributes will be written and the program</span>
-<span class="sd">        will be faster due to not needing to use</span>
+<span class="sd">        your file to netCDF using :meth:`xarray.Dataset.to_netcdf()`. When disabled,</span>
+<span class="sd">        only the ``crs_wkt`` and ``spatial_ref`` attributes will be written and the</span>
+<span class="sd">        program will be faster due to not needing to use</span>
 <span class="sd">        :meth:`pyproj.CRS.to_cf() &lt;pyproj.crs.CRS.to_cf&gt;`. Default is True.</span>
 
 

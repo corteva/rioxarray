@@ -184,8 +184,8 @@
 <span class="k">class</span> <span class="nc">RasterioDatasetDuck</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class is to provide the attributes and methods necessary</span>
-<span class="sd">    to make the rasterio.merge.merge function think that</span>
-<span class="sd">    the xarray.DataArray is a rasterio Dataset.</span>
+<span class="sd">    to make the :func:`rasterio.merge.merge` function think that</span>
+<span class="sd">    the :obj:`xarray.DataArray` is a :obj:`rasterio.io.DatasetReader`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># pylint: disable=too-many-instance-attributes</span>
@@ -270,14 +270,13 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge data arrays geospatially.</span>
 
-<span class="sd">    Uses rasterio.merge.merge:</span>
-<span class="sd">        https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</span>
+<span class="sd">    Uses :func:`rasterio.merge.merge`</span>
 
 <span class="sd">    .. versionadded:: 0.2 crs</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataarrays: list</span>
+<span class="sd">    dataarrays: List[xarray.DataArray]</span>
 <span class="sd">        List of xarray.DataArray&#39;s with all geo attributes.</span>
 <span class="sd">        The first one is assumed to have the same</span>
 <span class="sd">        CRS, dtype, and dimensions as the others in the array.</span>
@@ -377,14 +376,13 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge datasets geospatially.</span>
 
-<span class="sd">    Uses rasterio.merge.merge:</span>
-<span class="sd">        https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge</span>
+<span class="sd">    Uses :func:`rasterio.merge.merge`</span>
 
 <span class="sd">    .. versionadded:: 0.2 crs</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    datasets: list</span>
+<span class="sd">    datasets: List[xarray.Dataset]</span>
 <span class="sd">        List of xarray.Dataset&#39;s with all geo attributes.</span>
 <span class="sd">        The first one is assumed to have the same</span>
 <span class="sd">        CRS, dtype, dimensions, and data_vars as the others in the array.</span>

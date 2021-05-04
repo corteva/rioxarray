@@ -250,8 +250,8 @@
 <span class="sd">            together with resolution.</span>
 <span class="sd">        transform: optional</span>
 <span class="sd">            The destination transform.</span>
-<span class="sd">        resampling: Resampling method, optional</span>
-<span class="sd">            See rasterio.warp.reproject for more details.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
 
 
 <span class="sd">        Returns</span>
@@ -289,8 +289,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
 <span class="sd">            Dataset with the target resolution and projection.</span>
-<span class="sd">        resampling: Resampling method, optional</span>
-<span class="sd">            See rasterio.warp.reproject for more details.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
 
 
 <span class="sd">        Returns</span>
