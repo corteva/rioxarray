@@ -42,7 +42,11 @@ extensions = [
     "nbsphinx",
 ]
 
-intersphinx_mapping = {"pyproj": ("https://pyproj4.github.io/pyproj/stable/", None)}
+intersphinx_mapping = {
+    "pyproj": ("https://pyproj4.github.io/pyproj/stable/", None),
+    "rasterio": ("https://rasterio.readthedocs.io/en/stable/", None),
+    "xarray": ("http://xarray.pydata.org/en/stable/", None),
+}
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

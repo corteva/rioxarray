@@ -641,7 +641,7 @@ def open_rasterio(
 
     Parameters
     ----------
-    filename: str, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename: str, rasterio.io.DatasetReader, or rasterio.vrt.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
     parse_coordinates: bool, optional
         Whether to parse the x and y coordinates out of the file's

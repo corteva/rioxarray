@@ -334,7 +334,7 @@ class RasterArray(XRasterBase):
         """
         Reproject :obj:`xarray.DataArray` objects
 
-        Powered by `rasterio.warp.reproject`
+        Powered by :func:`rasterio.warp.reproject`
 
         .. note:: Only 2D/3D arrays with dimensions 'x'/'y' are currently supported.
             Requires either a grid mapping variable with 'spatial_ref' or
@@ -356,8 +356,8 @@ class RasterArray(XRasterBase):
             together with resolution.
         transform: optional
             The destination transform.
-        resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+        resampling: rasterio.enums.Resampling, optional
+            See :func:`rasterio.warp.reproject` for more details.
 
 
         Returns
@@ -439,7 +439,7 @@ class RasterArray(XRasterBase):
         Reproject a DataArray object to match the resolution, projection,
         and region of another DataArray.
 
-        Powered by `rasterio.warp.reproject`
+        Powered by :func:`rasterio.warp.reproject`
 
         .. note:: Only 2D/3D arrays with dimensions 'x'/'y' are currently supported.
             Requires either a grid mapping variable with 'spatial_ref' or
@@ -450,8 +450,8 @@ class RasterArray(XRasterBase):
         ----------
         match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             DataArray of the target resolution and projection.
-        resampling: Resampling method, optional
-            See rasterio.warp.reproject for more details.
+        resampling: rasterio.enums.Resampling, optional
+            See :func:`rasterio.warp.reproject` for more details.
 
 
         Returns
