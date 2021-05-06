@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.4.0
 ------
 - DEP: Python 3.7+ (issue #215)
