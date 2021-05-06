@@ -52,6 +52,7 @@ clean-test: ## remove test and coverage artifacts
 clean-docs: ## remove builds
 	rm -fr docs/_build/
 	rm -fr docs/examples/.ipynb_checkpoints/
+	rm -fr docs/getting_started/.ipynb_checkpoints/
 
 lint: ## check style with flake8
 	flake8 rioxarray/ test/
