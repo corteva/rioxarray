@@ -8,5 +8,4 @@ recursive-exclude test *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst *.ipynb conf.py Makefile make.bat *.jpg *.png *.gif
-prune docs/*/.ipynb_checkpoints/
+recusive-prune docs/
