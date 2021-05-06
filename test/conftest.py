@@ -97,8 +97,7 @@ def _assert_xarrays_equal(
 
 
 def open_rasterio_engine(file_name_or_object, **kwargs):
-    # FIXME: change to the next xarray version after release
-    xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
+    xr = pytest.importorskip("xarray", minversion="0.18")
     return xr.open_dataset(file_name_or_object, engine="rasterio", **kwargs)
 
 
