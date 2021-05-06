@@ -5,8 +5,7 @@ import pytest
 from rioxarray.exceptions import RioXarrayError
 from test.conftest import TEST_INPUT_DATA_DIR
 
-# FIXME: change to the next xarray version after release
-xr = pytest.importorskip("xarray", minversion="0.17.1.dev0")
+xr = pytest.importorskip("xarray", minversion="0.18")
 
 
 def test_xarray_open_dataset():
