@@ -3,7 +3,7 @@ History
 
 0.4.0
 ------
-- DEP: Python 3.6+ (issue #215)
+- DEP: Python 3.7+ (issue #215)
 - DEP: xarray 0.17+ (needed for issue #282)
 - REF: Store `grid_mapping` in `encoding` instead of `attrs` (issue #282)
 - ENH: enable `engine="rasterio"` via xarray backend API (issue #197 pull #281)
