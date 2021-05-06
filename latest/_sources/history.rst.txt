@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.4.0
 ------
 - DEP: Python 3.6+ (issue #215)
 - DEP: xarray 0.17+ (needed for issue #282)
