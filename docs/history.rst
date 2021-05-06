@@ -15,9 +15,6 @@ History
 - BUG: Update to handle WindowError in rasterio 1.2.2 (issue #286)
 - BUG: Don't generate x,y coords in `rio` methods if not previously there (pull #294)
 - BUG: Preserve original data type for writing to disk (issue #305)
-
-0.3.2
------
 - BUG: handle lock=True in open_rasterio (issue #273)
 
 0.3.1
