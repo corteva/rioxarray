@@ -38,6 +38,10 @@ jobs:
             xarray-version: '*'
           - os: ubuntu-latest
             python-version: 3.7
+            rasterio-version: '*'
+            xarray-version: 0.17
+          - os: ubuntu-latest
+            python-version: 3.7
             rasterio-version: 1.1
             xarray-version: '*'
           - os: ubuntu-latest
