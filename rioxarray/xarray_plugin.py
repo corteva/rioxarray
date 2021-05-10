@@ -2,6 +2,7 @@
 This module allows for open_rasterio to be used with the xarray open methods
 through a backend entrypoint.
 """
+# pylint: disable=arguments-differ
 import os.path
 
 import xarray as xr
@@ -32,7 +33,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
     .. versionadded:: 0.4
     """
 
-    def open_dataset(  # pylint: disable=arguments-differ
+    def open_dataset(
         self,
         filename_or_obj,
         drop_variables=None,
