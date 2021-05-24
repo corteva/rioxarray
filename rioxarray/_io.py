@@ -70,7 +70,6 @@ class ThreadURIManager:
         """
         if self._file_handle is not None:
             return self._file_handle
-        print("OPEN")
         self._file_handle = self._opener(*self._args, mode=self._mode, **self._kwargs)
         return self._file_handle
 
@@ -79,7 +78,6 @@ class ThreadURIManager:
         Close file handle.
         """
         if self._file_handle is not None:
-            print("CLOSE")
             self._file_handle.close()
             self._file_handle = None
 
