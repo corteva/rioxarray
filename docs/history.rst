@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: pass kwargs with lock=False (issue #344)
 
 0.4.0
 ------
