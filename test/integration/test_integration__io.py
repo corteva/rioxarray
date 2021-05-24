@@ -759,6 +759,7 @@ def test_no_mftime():
                 assert_allclose(actual, expected)
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.xfail(
     error=rasterio.errors.RasterioIOError, reason="Network could be problematic"
 )
@@ -829,7 +830,10 @@ def test_rasterio_vrt_with_transform_and_size():
                     assert rds.rio.transform() == vrt.transform
 
 
-@pytest.mark.xfail(reason="Network could be problematic")
+@pytest.mark.timeout(30)
+@pytest.mark.xfail(
+    error=rasterio.errors.RasterioIOError, reason="Network could be problematic"
+)
 def test_rasterio_vrt_network():
     url = "https://storage.googleapis.com/\
     gcp-public-data-landsat/LC08/01/047/027/\
