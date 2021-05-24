@@ -1009,14 +1009,14 @@ def test_nc_attr_loading__disable_decode_times(open_rasterio):
 
 def test_lockless():
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=False, chunks=True
+        os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"), lock=False, chunks=True
     ) as rds:
         rds.mean().compute()
 
 
 def test_lock_true():
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), lock=True, chunks=True
+        os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"), lock=True, chunks=True
     ) as rds:
         rds.mean().compute()
 

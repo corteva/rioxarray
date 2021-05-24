@@ -9,6 +9,7 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 import contextlib
 import os
 import re
+import threading
 import warnings
 from distutils.version import LooseVersion
 
@@ -35,6 +36,63 @@ RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
 
 
+class FileHandleLocal(threading.local):
+    """
+    This contains the thread local ThreadURIManager
+    """
+
+    def __init__(self):  # pylint: disable=super-init-not-called
+        self.thread_manager = None  # Initialises in each thread
+
+
+class ThreadURIManager:
+    """
+    This handles opening & closing file handles in each thread.
+    """
+
+    def __init__(
+        self,
+        opener,
+        *args,
+        mode="r",
+        kwargs=None,
+    ):
+        self._opener = opener
+        self._args = args
+        self._mode = mode
+        self._kwargs = {} if kwargs is None else dict(kwargs)
+        self._file_handle = None
+
+    @property
+    def file_handle(self):
+        """
+        File handle returned by the opener.
+        """
+        if self._file_handle is not None:
+            return self._file_handle
+        print("OPEN")
+        self._file_handle = self._opener(*self._args, mode=self._mode, **self._kwargs)
+        return self._file_handle
+
+    def close(self):
+        """
+        Close file handle.
+        """
+        if self._file_handle is not None:
+            print("CLOSE")
+            self._file_handle.close()
+            self._file_handle = None
+
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        self.close()
+
+
 class URIManager(FileManager):
     """
     The URI manager is used for lockless reading
@@ -51,15 +109,39 @@ class URIManager(FileManager):
         self._args = args
         self._mode = mode
         self._kwargs = {} if kwargs is None else dict(kwargs)
+        self._local = FileHandleLocal()
 
     def acquire(self, needs_lock=True):
-        return self._opener(*self._args, mode=self._mode, **self._kwargs)
+        if self._local.thread_manager is None:
+            self._local.thread_manager = ThreadURIManager(
+                self._opener, *self._args, mode=self._mode, kwargs=self._kwargs
+            )
+        return self._local.thread_manager.file_handle
 
+    @contextlib.contextmanager
     def acquire_context(self, needs_lock=True):
-        yield self.acquire(needs_lock=needs_lock)
+        try:
+            yield self.acquire(needs_lock=needs_lock)
+        except Exception:
+            self.close(needs_lock=needs_lock)
+            raise
 
     def close(self, needs_lock=True):
-        pass
+        if self._local.thread_manager is not None:
+            self._local.thread_manager.close()
+            self._local.thread_manager = None
+
+    def __del__(self):
+        self.close(needs_lock=False)
+
+    def __getstate__(self):
+        """State for pickling."""
+        return (self._opener, self._args, self._mode, self._kwargs)
+
+    def __setstate__(self, state):
+        """Restore from a pickle."""
+        opener, args, mode, kwargs = state
+        self.__init__(opener, *args, mode=mode, kwargs=kwargs)
 
 
 class RasterioArrayWrapper(BackendArray):
