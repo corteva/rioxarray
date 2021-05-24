@@ -53,7 +53,7 @@ class URIManager(FileManager):
         self._kwargs = {} if kwargs is None else dict(kwargs)
 
     def acquire(self, needs_lock=True):
-        return self._opener(*self._args, mode=self._mode, kwargs=self._kwargs)
+        return self._opener(*self._args, mode=self._mode, **self._kwargs)
 
     def acquire_context(self, needs_lock=True):
         yield self.acquire(needs_lock=needs_lock)

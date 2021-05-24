@@ -872,11 +872,12 @@ def test_rasterio_vrt_with_src_crs():
                     assert rds.rio.crs == src_crs
 
 
-def test_open_cog():
+@pytest.mark.parametrize("lock", [True, False])
+def test_open_cog(lock):
     cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
     rdsm = rioxarray.open_rasterio(cog_file)
     assert rdsm.shape == (1, 500, 500)
-    rdso = rioxarray.open_rasterio(cog_file, overview_level=0)
+    rdso = rioxarray.open_rasterio(cog_file, lock=lock, overview_level=0)
     assert rdso.shape == (1, 250, 250)
 
 
