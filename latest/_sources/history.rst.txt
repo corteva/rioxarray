@@ -4,6 +4,7 @@ History
 Latest
 ------
 - BUG: pass kwargs with lock=False (issue #344)
+- BUG: Close file handle with lock=False (pull #346)
 
 0.4.0
 ------
