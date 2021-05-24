@@ -1,9 +1,6 @@
 History
 =======
 
-Latest
-------
-
 0.4.1
 ------
 - BUG: pass kwargs with lock=False (issue #344)
