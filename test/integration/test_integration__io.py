@@ -884,7 +884,13 @@ def test_rasterio_vrt_gcps(tmp_path):
     ]
     crs = CRS.from_epsg(32618)
     with rasterio.open(
-        tiffname, mode="w", height=800, width=800, count=3, dtype=np.uint8
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=np.uint8,
+        driver="GTiff",
     ) as source:
         source.gcps = (src_gcps, crs)
 
