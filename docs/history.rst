@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Improve WarpedVRT support for gcps (pull #351)
 
 0.4.1
 ------

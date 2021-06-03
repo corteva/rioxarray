@@ -790,8 +790,8 @@ def open_rasterio(
         vrt = filename
         filename = vrt.src_dataset.name
         vrt_params = dict(
-            src_crs=vrt.src_crs.to_string(),
-            crs=vrt.crs.to_string(),
+            src_crs=vrt.src_crs.to_string() if vrt.src_crs else None,
+            crs=vrt.crs.to_string() if vrt.crs else None,
             resampling=vrt.resampling,
             tolerance=vrt.tolerance,
             src_nodata=vrt.src_nodata,
