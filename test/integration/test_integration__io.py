@@ -16,6 +16,8 @@ import rasterio
 import xarray as xr
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
+from rasterio.control import GroundControlPoint
+from rasterio.crs import CRS
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.transform import from_origin
 from rasterio.warp import calculate_default_transform
@@ -870,6 +872,40 @@ def test_rasterio_vrt_with_src_crs():
             with rasterio.vrt.WarpedVRT(src, src_crs=src_crs) as vrt:
                 with rioxarray.open_rasterio(vrt) as rds:
                     assert rds.rio.crs == src_crs
+
+
+def test_rasterio_vrt_gcps(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
+        GroundControlPoint(row=0, col=800, x=338353, y=2785790, z=0),
+        GroundControlPoint(row=800, col=800, x=297939, y=2618518, z=0),
+        GroundControlPoint(row=800, col=0, x=115698, y=2651448, z=0),
+    ]
+    crs = CRS.from_epsg(32618)
+    with rasterio.open(
+        tiffname, mode="w", height=800, width=800, count=3, dtype=np.uint8
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    with rasterio.open(tiffname) as src:
+        # NOTE: Eventually src_crs will not need to be provided
+        # https://github.com/mapbox/rasterio/pull/2193
+        with rasterio.vrt.WarpedVRT(src, src_crs=crs) as vrt:
+            with rioxarray.open_rasterio(vrt) as rds:
+                assert rds.rio.height == 923
+                assert rds.rio.width == 1027
+                assert rds.rio.crs == crs
+                assert rds.rio.transform().almost_equals(
+                    Affine(
+                        216.8587081056465,
+                        0.0,
+                        115698.25,
+                        0.0,
+                        -216.8587081056465,
+                        2818720.0,
+                    )
+                )
 
 
 @pytest.mark.parametrize("lock", [True, False])
