@@ -174,11 +174,11 @@ class RasterioArrayWrapper(BackendArray):
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
 
-        if dtypes[0] == 'complex_int16':
-            dtype = np.dtype('complex64')
+        if dtypes[0] == "complex_int16":
+            dtype = np.dtype("complex64")
         else:
             dtype = np.dtype(dtypes[0])
-        
+
         # handle unsigned case
         if mask_and_scale and unsigned and dtype.kind == "i":
             self._dtype = np.dtype("u%s" % dtype.itemsize)
