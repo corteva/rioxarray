@@ -156,7 +156,7 @@ class RasterioWriter:
             Keyword arguments to pass into writing the raster.
         """
         numpy_dtype = kwargs["dtype"]
-        if xarray_dataarray.encoding["_rasterio_dtype"] == "complex_int16":
+        if xarray_dataarray.encoding.get("_rasterio_dtype") == "complex_int16":
             kwargs["dtype"] = "complex_int16"
         # generate initial output file
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:

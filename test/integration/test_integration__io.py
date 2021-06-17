@@ -276,6 +276,7 @@ def test_open_rasterio_mask_chunk_clip():
             "_FillValue": 0.0,
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
+            "_rasterio_dtype": "uint16",
         }
         attrs = dict(xdi.attrs)
         assert_almost_equal(
@@ -317,6 +318,7 @@ def test_open_rasterio_mask_chunk_clip():
             "_FillValue": 0.0,
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
+            "_rasterio_dtype": "uint16",
         }
 
         # test dataset
@@ -331,6 +333,7 @@ def test_open_rasterio_mask_chunk_clip():
             "_FillValue": 0.0,
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
+            "_rasterio_dtype": "uint16",
         }
 
 
@@ -942,6 +945,7 @@ def test_mask_and_scale(open_rasterio):
                 "missing_value": 32767,
                 "grid_mapping": "crs",
                 "dtype": "uint16",
+                "_rasterio_dtype": "uint16",
             }
             attrs = rds.air_temperature.attrs
             assert attrs == {
@@ -973,6 +977,7 @@ def test_no_mask_and_scale(open_rasterio):
             "missing_value": 32767,
             "grid_mapping": "crs",
             "dtype": "uint16",
+            "_rasterio_dtype": "uint16",
         }
         attrs = rds.air_temperature.attrs
         assert attrs == {
