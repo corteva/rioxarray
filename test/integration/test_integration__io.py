@@ -1109,16 +1109,21 @@ def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
         assert rds.transform == xds.rio.transform()
 
 
+@pytest.mark.xfail(
+    rasterio.__version__ < "1.2.5",
+    reason="https://github.com/mapbox/rasterio/issues/2206",
+)
 def test_complex_dtype(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     xds = rioxarray.open_rasterio(test_file)
     assert xds.rio.shape == (100, 100)
     assert xds.dtype == "complex64"
 
-    # NOTE: waiting on https://github.com/mapbox/rasterio/issues/2206
-    # tmp_output = tmp_path / "tmp_cint16.tif"
-    # with pytest.warns(SerializationWarning):
-    #    xds.rio.to_raster(str(tmp_output), dtype='complex_int16')
-    #    with rasterio.open(str(tmp_output)) as riofh:
-    #        print(riofh.profile)
-    #        assert riofh.dtype == 'complex_int16'
+    tmp_output = tmp_path / "tmp_cint16.tif"
+    with pytest.warns(SerializationWarning):
+        xds.rio.to_raster(str(tmp_output))
+        with rasterio.open(str(tmp_output)) as riofh:
+            data = riofh.read()
+            assert "complex_int16" in riofh.dtypes
+            assert riofh.nodata is None
+            assert data.dtype == "complex64"

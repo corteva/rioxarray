@@ -155,7 +155,9 @@ class RasterioWriter:
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
-        dtype = kwargs["dtype"]
+        numpy_dtype = kwargs["dtype"]
+        if xarray_dataarray.encoding["_rasterio_dtype"] == "complex_int16":
+            kwargs["dtype"] = "complex_int16"
         # generate initial output file
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(rds, xarray_dataarray, tags)
@@ -170,7 +172,7 @@ class RasterioWriter:
                         out_data = xarray_dataarray.rio.isel_window(window)
                     else:
                         out_data = xarray_dataarray
-                    data = encode_cf_variable(out_data).values.astype(dtype)
+                    data = encode_cf_variable(out_data).values.astype(numpy_dtype)
                     if data.ndim == 2:
                         rds.write(data, 1, window=window)
                     else:
@@ -178,7 +180,7 @@ class RasterioWriter:
 
         if lock and is_dask_collection(xarray_dataarray.data):
             return dask.array.store(
-                encode_cf_variable(xarray_dataarray).data.astype(dtype),
+                encode_cf_variable(xarray_dataarray).data.astype(numpy_dtype),
                 self,
                 lock=lock,
                 compute=compute,

@@ -886,6 +886,10 @@ def open_rasterio(
     encoding = {}
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
+
+    # rasterio has some non-numpy dtype names (complex_int16 -> np.complex64)
+    encoding["_rasterio_dtype"] = str(riods.dtypes[0])
+    # .encoding["dtype"] used by xarray write methods
     if masked:
         encoding["dtype"] = str(riods.dtypes[0])
 
