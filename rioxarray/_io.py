@@ -174,10 +174,7 @@ class RasterioArrayWrapper(BackendArray):
         if not np.all(np.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
 
-        if dtypes[0] == "complex_int16":
-            dtype = np.dtype("complex64")
-        else:
-            dtype = np.dtype(dtypes[0])
+        dtype = _rasterio_to_numpy_dtype(dtypes)
 
         # handle unsigned case
         if mask_and_scale and unsigned and dtype.kind == "i":
@@ -336,6 +333,17 @@ def _parse_envi(meta):
     parse = {"wavelength": parsevec, "fwhm": parsevec}
     parsed_meta = {key: parse.get(key, default)(value) for key, value in meta.items()}
     return parsed_meta
+
+
+def _rasterio_to_numpy_dtype(dtypes):
+    """Numpy dtype from first entry of rasterio dataset.dtypes"""
+    # rasterio has some special dtype names (complex_int16 -> np.complex64)
+    if dtypes[0] == "complex_int16":
+        dtype = np.dtype("complex64")
+    else:
+        dtype = np.dtype(dtypes[0])
+
+    return dtype
 
 
 def _to_numeric(value):
@@ -887,11 +895,8 @@ def open_rasterio(
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
-    # rasterio has some non-numpy dtype names (complex_int16 -> np.complex64)
-    encoding["_rasterio_dtype"] = str(riods.dtypes[0])
-    # .encoding["dtype"] used by xarray write methods
     if masked:
-        encoding["dtype"] = str(riods.dtypes[0])
+        encoding["dtype"] = _rasterio_to_numpy_dtype(riods.dtypes)
 
     da_name = attrs.pop("NETCDF_VARNAME", default_name)
     data = indexing.LazilyOuterIndexedArray(
