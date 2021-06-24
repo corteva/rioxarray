@@ -178,7 +178,6 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
 
@@ -199,7 +198,12 @@
     <span class="n">OneDimensionalRaster</span><span class="p">,</span>
     <span class="n">RioXarrayError</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">rioxarray.raster_writer</span> <span class="kn">import</span> <span class="n">FILL_VALUE_NAMES</span><span class="p">,</span> <span class="n">UNWANTED_RIO_ATTRS</span><span class="p">,</span> <span class="n">RasterioWriter</span>
+<span class="kn">from</span> <span class="nn">rioxarray.raster_writer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FILL_VALUE_NAMES</span><span class="p">,</span>
+    <span class="n">UNWANTED_RIO_ATTRS</span><span class="p">,</span>
+    <span class="n">RasterioWriter</span><span class="p">,</span>
+    <span class="n">_ensure_nodata_dtype</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span><span class="p">,</span> <span class="n">_get_data_var_message</span><span class="p">,</span> <span class="n">_make_coords</span>
 
 
@@ -280,26 +284,6 @@
         <span class="o">**</span><span class="n">resolution_or_width_height</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span>
-
-
-<span class="k">def</span> <span class="nf">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">,</span> <span class="n">new_dtype</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert the nodata to the new datatype and raise warning</span>
-<span class="sd">    if the value of the nodata value changed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Complex-valued rasters can have real-valued nodata</span>
-    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">):</span>
-        <span class="n">nodata</span> <span class="o">=</span> <span class="n">original_nodata</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">original_nodata</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">)</span>
-        <span class="n">nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">new_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">original_nodata</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="ow">and</span> <span class="n">original_nodata</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The nodata value (</span><span class="si">{</span><span class="n">original_nodata</span><span class="si">}</span><span class="s2">) has been automatically &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;changed to (</span><span class="si">{</span><span class="n">nodata</span><span class="si">}</span><span class="s2">) to match the dtype of the data.&quot;</span>
-            <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">nodata</span>
 
 
 <span class="k">def</span> <span class="nf">_clip_from_disk</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="p">):</span>
@@ -1086,11 +1070,6 @@
         <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;1.2&quot;</span><span class="p">):</span>
             <span class="n">driver</span> <span class="o">=</span> <span class="s2">&quot;GTiff&quot;</span>
 
-        <span class="n">dtype</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">dtype</span>
-        <span class="p">)</span>
         <span class="c1"># get the output profile from the rasterio object</span>
         <span class="c1"># if opened with xarray.open_rasterio()</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1118,11 +1097,6 @@
         <span class="n">rio_nodata</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">rio_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Ensure dtype of output data matches the expected dtype.</span>
-            <span class="c1"># This check is added here as the dtype of the data is</span>
-            <span class="c1"># converted right before writing.</span>
-            <span class="n">rio_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">rio_nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">RasterioWriter</span><span class="p">(</span><span class="n">raster_path</span><span class="o">=</span><span class="n">raster_path</span><span class="p">)</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
             <span class="n">xarray_dataarray</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
