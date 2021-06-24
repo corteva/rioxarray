@@ -15,6 +15,7 @@ TEST_COMPARE_DATA_DIR = os.path.join(TEST_DATA_DIR, "compare")
 PYPROJ_LT_3 = LooseVersion(pyproj.__version__) < LooseVersion("3")
 RASTERIO_LT_122 = LooseVersion(rasterio.__version__) < LooseVersion("1.2.2")
 RASTERIO_EQ_122 = LooseVersion(rasterio.__version__) == LooseVersion("1.2.2")
+RASTERIO_GE_125 = LooseVersion(rasterio.__version__) >= LooseVersion("1.2.5")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)
