@@ -170,6 +170,17 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "scottyhq",
+      "name": "Scott Henderson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3924836?v=4",
+      "profile": "http://scottyhq.github.io/",
+      "contributions": [
+        "bug",
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7

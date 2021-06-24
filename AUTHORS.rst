@@ -31,6 +31,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
     </tr>
     <tr>
         <td align="center"><a href="https://github.com/remi-braun"><img src="https://avatars.githubusercontent.com/u/67311115?v=4?s=100" width="100px;" alt=""/><br /><sub><b>remi-braun</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=remi-braun" title="Documentation">📖</a></td>
+        <td align="center"><a href="http://scottyhq.github.io/"><img src="https://avatars.githubusercontent.com/u/3924836?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scott Henderson</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3Ascottyhq" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=scottyhq" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=scottyhq" title="Tests">⚠️</a></td>
     </tr>
     </table>
 
