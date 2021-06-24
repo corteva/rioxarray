@@ -8,6 +8,9 @@ Source file:
 - https://github.com/dymaxionlabs/dask-rasterio/blob/8dd7fdece7ad094a41908c0ae6b4fe6ca49cf5e1/dask_rasterio/write.py  # noqa: E501
 
 """
+import warnings
+
+import numpy
 import rasterio
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
@@ -90,6 +93,66 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
                 raster_handle.set_band_description(iii + 1, band_description)
 
 
+def _ensure_nodata_dtype(original_nodata, new_dtype):
+    """
+    Convert the nodata to the new datatype and raise warning
+    if the value of the nodata value changed.
+    """
+    # Complex-valued rasters can have real-valued nodata
+    if str(new_dtype).startswith("c"):
+        nodata = original_nodata
+    else:
+        original_nodata = float(original_nodata)
+        nodata = numpy.dtype(new_dtype).type(original_nodata)
+        if not numpy.isnan(nodata) and original_nodata != nodata:
+            warnings.warn(
+                f"The nodata value ({original_nodata}) has been automatically "
+                f"changed to ({nodata}) to match the dtype of the data."
+            )
+
+    return nodata
+
+
+def _get_dtypes(rasterio_dtype, encoded_rasterio_dtype, dataarray_dtype):
+    """
+    Determines the rasterio dtype and numpy dtypes based on
+    the rasterio dtype and the encoded rasterio dtype.
+
+    Parameters
+    ----------
+    rasterio_dtype: Union[str, numpy.dtype]
+        The rasterio dtype to write to.
+    encoded_rasterio_dtype: Union[str, numpy.dtype, None]
+        The value of the original rasterio dtype in the encoding.
+    dataarray_dtype: Union[str, numpy.dtype]
+        The value of the dtype of the data array.
+
+    Returns
+    -------
+    Tuple[Union[str, numpy.dtype], Union[str, numpy.dtype]]:
+        The rasterio dtype and numpy dtype.
+    """
+    # SCENARIO 1: User wants to write to complex_int16
+    if rasterio_dtype == "complex_int16":
+        numpy_dtype = "complex64"
+    # SCENARIO 2: File originally in complext_int16 and dtype unchanged
+    elif (
+        rasterio_dtype is None
+        and encoded_rasterio_dtype == "complex_int16"
+        and str(dataarray_dtype) == "complex64"
+    ):
+        numpy_dtype = "complex64"
+        rasterio_dtype = "complex_int16"
+    # SCENARIO 3: rasterio dtype not provided
+    elif rasterio_dtype is None:
+        numpy_dtype = dataarray_dtype
+        rasterio_dtype = dataarray_dtype
+    # SCENARIO 4: rasterio dtype and numpy dtype are the same
+    else:
+        numpy_dtype = rasterio_dtype
+    return rasterio_dtype, numpy_dtype
+
+
 class RasterioWriter:
     """
 
@@ -159,10 +222,17 @@ class RasterioWriter:
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
-        if str(kwargs["dtype"]) == "complex_int16":
-            numpy_dtype = "complex64"
-        else:
-            numpy_dtype = kwargs["dtype"]
+        kwargs["dtype"], numpy_dtype = _get_dtypes(
+            kwargs["dtype"],
+            xarray_dataarray.encoding.get("rasterio_dtype"),
+            xarray_dataarray.encoding.get("dtype", str(xarray_dataarray.dtype)),
+        )
+
+        if kwargs["nodata"] is not None:
+            # Ensure dtype of output data matches the expected dtype.
+            # This check is added here as the dtype of the data is
+            # converted right before writing.
+            kwargs["nodata"] = _ensure_nodata_dtype(kwargs["nodata"], numpy_dtype)
 
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(rds, xarray_dataarray, tags)

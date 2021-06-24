@@ -896,7 +896,7 @@ def open_rasterio(
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
     if masked:
-        encoding["dtype"] = _rasterio_to_numpy_dtype(riods.dtypes)
+        encoding["dtype"] = str(_rasterio_to_numpy_dtype(riods.dtypes))
 
     da_name = attrs.pop("NETCDF_VARNAME", default_name)
     data = indexing.LazilyOuterIndexedArray(
@@ -950,4 +950,5 @@ def open_rasterio(
     result.rio._manager = manager
     # add file path to encoding
     result.encoding["source"] = riods.name
+    result.encoding["rasterio_dtype"] = str(riods.dtypes[0])
     return result
