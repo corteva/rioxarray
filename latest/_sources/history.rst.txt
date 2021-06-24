@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: support GDAL CInt16, rasterio complex_int16 (pull #353)
 
 0.4.2
 ------

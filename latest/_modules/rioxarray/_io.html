@@ -342,7 +342,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">==</span> <span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All bands should have the same dtype&quot;</span><span class="p">)</span>
 
-        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
+
         <span class="c1"># handle unsigned case</span>
         <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="n">unsigned</span> <span class="ow">and</span> <span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span>
@@ -500,6 +501,17 @@
     <span class="n">parse</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;wavelength&quot;</span><span class="p">:</span> <span class="n">parsevec</span><span class="p">,</span> <span class="s2">&quot;fwhm&quot;</span><span class="p">:</span> <span class="n">parsevec</span><span class="p">}</span>
     <span class="n">parsed_meta</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">parse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="k">return</span> <span class="n">parsed_meta</span>
+
+
+<span class="k">def</span> <span class="nf">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Numpy dtype from first entry of rasterio dataset.dtypes&quot;&quot;&quot;</span>
+    <span class="c1"># rasterio has some special dtype names (complex_int16 -&gt; np.complex64)</span>
+    <span class="k">if</span> <span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;complex_int16&quot;</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;complex64&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">dtype</span>
 
 
 <span class="k">def</span> <span class="nf">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -1050,8 +1062,9 @@
     <span class="n">encoding</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="s2">&quot;_Unsigned&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
         <span class="n">unsigned</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;_Unsigned&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+
     <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
-        <span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
 
     <span class="n">da_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_VARNAME&quot;</span><span class="p">,</span> <span class="n">default_name</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">LazilyOuterIndexedArray</span><span class="p">(</span>
