@@ -126,7 +126,7 @@ jobs:
             git+https://github.com/dask/distributed.git@main \
             git+https://github.com/mapbox/rasterio.git@master \
             git+https://github.com/pyproj4/pyproj.git@master \
-            git+https://github.com/pydata/xarray.git@master;
+            git+https://github.com/pydata/xarray.git@main;
           python -m pip install -e .[all]
 
       - name: Check and Log Environment
