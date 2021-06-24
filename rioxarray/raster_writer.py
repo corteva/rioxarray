@@ -152,11 +152,18 @@ class RasterioWriter:
             Call ".compute()" on the Delayed object to compute the result
             later. Call ``dask.compute(delayed1, delayed2)`` to save
             multiple delayed files at once.
+        dtype: np.dtype
+            Numpy-compliant dtype used to save raster. If data is not already
+            represented by this dtype in memory it is recast. dtype='complex_int16'
+            is a special case to write in-memory np.complex64 to CInt16.
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
-        dtype = kwargs["dtype"]
-        # generate initial output file
+        if str(kwargs["dtype"]) == "complex_int16":
+            numpy_dtype = "complex64"
+        else:
+            numpy_dtype = kwargs["dtype"]
+
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(rds, xarray_dataarray, tags)
             if not (lock and is_dask_collection(xarray_dataarray.data)):
@@ -170,7 +177,7 @@ class RasterioWriter:
                         out_data = xarray_dataarray.rio.isel_window(window)
                     else:
                         out_data = xarray_dataarray
-                    data = encode_cf_variable(out_data).values.astype(dtype)
+                    data = encode_cf_variable(out_data).values.astype(numpy_dtype)
                     if data.ndim == 2:
                         rds.write(data, 1, window=window)
                     else:
@@ -178,7 +185,7 @@ class RasterioWriter:
 
         if lock and is_dask_collection(xarray_dataarray.data):
             return dask.array.store(
-                encode_cf_variable(xarray_dataarray).data.astype(dtype),
+                encode_cf_variable(xarray_dataarray).data.astype(numpy_dtype),
                 self,
                 lock=lock,
                 compute=compute,

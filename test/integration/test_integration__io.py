@@ -1107,3 +1107,87 @@ def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
     assert xds.rio.shape == (10, 10)
     with rasterio.open(test_file) as rds:
         assert rds.transform == xds.rio.transform()
+
+
+@pytest.mark.xfail(
+    rasterio.__version__ < "1.2.4",
+    reason="https://github.com/mapbox/rasterio/issues/2182",
+)
+def test_cint16_dtype(tmp_path):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    xds = rioxarray.open_rasterio(test_file)
+    assert xds.rio.shape == (100, 100)
+    assert xds.dtype == "complex64"
+
+    tmp_output = tmp_path / "tmp_cint16.tif"
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+    with rasterio.open(str(tmp_output)) as riofh:
+        data = riofh.read()
+        assert "complex_int16" in riofh.dtypes
+        assert data.dtype == "complex64"
+
+
+@pytest.mark.xfail(
+    rasterio.__version__ < "1.2.5",
+    reason="https://github.com/mapbox/rasterio/issues/2206",
+)
+def test_cint16_dtype_nodata(tmp_path):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    xds = rioxarray.open_rasterio(test_file)
+    assert xds.rio.nodata == 0
+
+    tmp_output = tmp_path / "tmp_cint16.tif"
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+    with rasterio.open(str(tmp_output)) as riofh:
+        assert riofh.nodata == 0
+
+    # Assign nodata=None
+    tmp_output = tmp_path / "tmp_cint16_nodata.tif"
+    xds.rio.write_nodata(None, inplace=True)
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+    with rasterio.open(str(tmp_output)) as riofh:
+        assert riofh.nodata is None
+
+
+def test_cint16_dtype_masked(tmp_path):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    xds = rioxarray.open_rasterio(test_file, masked=True)
+    assert xds.rio.shape == (100, 100)
+    assert xds.dtype == "complex64"
+    assert xds.rio.encoded_nodata == 0
+    assert np.isnan(xds.rio.nodata)
+
+    tmp_output = tmp_path / "tmp_cint16.tif"
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+    with rasterio.open(str(tmp_output)) as riofh:
+        data = riofh.read()
+        assert "complex_int16" in riofh.dtypes
+        assert riofh.nodata == 0
+        assert data.dtype == "complex64"
+
+
+def test_cint16_promote_dtype(tmp_path):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    xds = rioxarray.open_rasterio(test_file)
+
+    tmp_output = tmp_path / "tmp_cfloat64.tif"
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output))
+    with rasterio.open(str(tmp_output)) as riofh:
+        data = riofh.read()
+        assert "complex64" in riofh.dtypes
+        assert riofh.nodata == 0
+        assert data.dtype == "complex64"
+
+    tmp_output = tmp_path / "tmp_cfloat128.tif"
+    with pytest.warns(NotGeoreferencedWarning):
+        xds.rio.to_raster(str(tmp_output), dtype="complex128")
+    with rasterio.open(str(tmp_output)) as riofh:
+        data = riofh.read()
+        assert "complex128" in riofh.dtypes
+        assert riofh.nodata == 0
+        assert data.dtype == "complex128"

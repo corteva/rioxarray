@@ -119,13 +119,18 @@ def _ensure_nodata_dtype(original_nodata, new_dtype):
     Convert the nodata to the new datatype and raise warning
     if the value of the nodata value changed.
     """
-    original_nodata = float(original_nodata)
-    nodata = np.dtype(new_dtype).type(original_nodata)
-    if not np.isnan(nodata) and original_nodata != nodata:
-        warnings.warn(
-            f"The nodata value ({original_nodata}) has been automatically "
-            f"changed to ({nodata}) to match the dtype of the data."
-        )
+    # Complex-valued rasters can have real-valued nodata
+    if str(new_dtype).startswith("c"):
+        nodata = original_nodata
+    else:
+        original_nodata = float(original_nodata)
+        nodata = np.dtype(new_dtype).type(original_nodata)
+        if not np.isnan(nodata) and original_nodata != nodata:
+            warnings.warn(
+                f"The nodata value ({original_nodata}) has been automatically "
+                f"changed to ({nodata}) to match the dtype of the data."
+            )
+
     return nodata
 
 
