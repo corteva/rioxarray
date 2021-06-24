@@ -6,7 +6,7 @@ from numpy.testing import assert_almost_equal
 
 from rioxarray import open_rasterio
 from rioxarray.merge import merge_arrays, merge_datasets
-from test.conftest import TEST_INPUT_DATA_DIR
+from test.conftest import RASTERIO_GE_125, TEST_INPUT_DATA_DIR
 
 
 @pytest.mark.parametrize("squeeze", [True, False])
@@ -27,10 +27,27 @@ def test_merge_arrays(squeeze):
             arrays = [array.squeeze() for array in arrays]
         merged = merge_arrays(arrays)
 
-    assert_almost_equal(
-        merged.rio.bounds(),
-        (-7274009.649486291, 5003545.682141737, -7227446.721475236, 5050108.61015275),
-    )
+    if RASTERIO_GE_125:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (-7274009.6494863, 5003777.3385, -7227678.3778335, 5050108.6101528),
+        )
+        assert merged.rio.shape == (200, 200)
+        assert_almost_equal(merged.sum(), 22865733)
+
+    else:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (
+                -7274009.649486291,
+                5003545.682141737,
+                -7227446.721475236,
+                5050108.61015275,
+            ),
+        )
+        assert merged.rio.shape == (201, 201)
+        assert_almost_equal(merged.sum(), 11368261)
+
     assert_almost_equal(
         tuple(merged.rio.transform()),
         (
@@ -46,13 +63,11 @@ def test_merge_arrays(squeeze):
         ),
     )
     assert merged.rio._cached_transform() == merged.rio.transform()
-    assert merged.rio.shape == (201, 201)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
     assert merged.encoding["grid_mapping"] == "spatial_ref"
-    assert_almost_equal(merged.sum(), 11368261)
 
 
 @pytest.mark.parametrize("dataset", [True, False])
@@ -72,10 +87,26 @@ def test_merge__different_crs(dataset):
             merged = merge_datasets(arrays, crs=crs)
         else:
             merged = merge_arrays(arrays, crs=crs)
-    assert_almost_equal(
-        merged.rio.bounds(),
-        (-7300984.0238134, 5003618.5908794, -7223500.6583578, 5050108.6101528),
-    )
+
+    if dataset:
+        test_sum = merged[merged.rio.vars[0]].sum()
+    else:
+        test_sum = merged.sum()
+
+    if RASTERIO_GE_125:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (-7300984.0238134, 5003618.5908794, -7224054.1109682, 5050108.6101528),
+        )
+        assert merged.rio.shape == (84, 139)
+        assert_almost_equal(test_sum, -128605446)
+    else:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (-7300984.0238134, 5003618.5908794, -7223500.6583578, 5050108.6101528),
+        )
+        assert merged.rio.shape == (84, 140)
+        assert_almost_equal(test_sum, -131013894)
     assert_almost_equal(
         tuple(merged.rio.transform()),
         (
@@ -90,19 +121,15 @@ def test_merge__different_crs(dataset):
             1.0,
         ),
     )
-    assert merged.rio.shape == (84, 140)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
-    if dataset:
-        assert_almost_equal(merged[merged.rio.vars[0]].sum(), -131013894)
-    else:
+    if not dataset:
         assert merged.attrs == {
             "_FillValue": -28672,
             "add_offset": 0.0,
             "scale_factor": 1.0,
         }
-        assert_almost_equal(merged.sum(), -131013894)
     assert merged.encoding["grid_mapping"] == "spatial_ref"
 
 
@@ -121,16 +148,24 @@ def test_merge_arrays__res():
         ]
         merged = merge_arrays(arrays, res=(300, 300))
 
-    assert_almost_equal(
-        merged.rio.bounds(),
-        (-7274009.6494863, 5003308.6101528, -7227209.6494863, 5050108.6101528),
-    )
+    if RASTERIO_GE_125:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (-7274009.6494863, 5003608.6101528, -7227509.6494863, 5050108.6101528),
+        )
+        assert merged.rio.shape == (155, 155)
+    else:
+        assert_almost_equal(
+            merged.rio.bounds(),
+            (-7274009.6494863, 5003308.6101528, -7227209.6494863, 5050108.6101528),
+        )
+        assert merged.rio.shape == (156, 156)
+
     assert_almost_equal(
         tuple(merged.rio.transform()),
         (300.0, 0.0, -7274009.649486291, 0.0, -300.0, 5050108.61015275, 0.0, 0.0, 1.0),
     )
     assert merged.rio._cached_transform() == merged.rio.transform()
-    assert merged.rio.shape == (156, 156)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
@@ -170,10 +205,20 @@ def test_merge_datasets():
         "sur_refl_b07_1",
     ]
     data_var = data_vars[0]
-    assert_almost_equal(
-        merged[data_var].rio.bounds(),
-        (-4447802.078667, -10008017.989716524, -3335388.246283474, -8895604.157333),
-    )
+    if RASTERIO_GE_125:
+        assert_almost_equal(
+            merged[data_var].rio.bounds(),
+            (-4447802.078667, -10007554.677, -3335851.559, -8895604.157333),
+        )
+        assert merged.rio.shape == (2400, 2400)
+        assert_almost_equal(merged[data_var].sum(), 4539666606551516)
+    else:
+        assert_almost_equal(
+            merged[data_var].rio.bounds(),
+            (-4447802.078667, -10008017.989716524, -3335388.246283474, -8895604.157333),
+        )
+        assert merged.rio.shape == (2401, 2401)
+        assert_almost_equal(merged[data_var].sum(), 4543446965182987)
     assert_almost_equal(
         tuple(merged[data_var].rio.transform()),
         (
@@ -188,13 +233,11 @@ def test_merge_datasets():
             1.0,
         ),
     )
-    assert merged.rio.shape == (2401, 2401)
     assert merged.coords["band"].values == [1]
     assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
     assert merged.rio.crs == rds.rio.crs
     assert merged.attrs == rds.attrs
     assert merged.encoding["grid_mapping"] == "spatial_ref"
-    assert_almost_equal(merged[data_var].sum(), 4543446965182987)
 
 
 @pytest.mark.xfail(os.name == "nt", reason="On windows the merged data is different.")
