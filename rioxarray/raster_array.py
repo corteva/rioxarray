@@ -10,7 +10,6 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
-import warnings
 from distutils.version import LooseVersion
 from typing import Iterable
 
@@ -31,7 +30,12 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.raster_writer import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS, RasterioWriter
+from rioxarray.raster_writer import (
+    FILL_VALUE_NAMES,
+    UNWANTED_RIO_ATTRS,
+    RasterioWriter,
+    _ensure_nodata_dtype,
+)
 from rioxarray.rioxarray import XRasterBase, _get_data_var_message, _make_coords
 
 
@@ -112,26 +116,6 @@ def _make_dst_affine(
         **resolution_or_width_height,
     )
     return dst_affine, dst_width, dst_height
-
-
-def _ensure_nodata_dtype(original_nodata, new_dtype):
-    """
-    Convert the nodata to the new datatype and raise warning
-    if the value of the nodata value changed.
-    """
-    # Complex-valued rasters can have real-valued nodata
-    if str(new_dtype).startswith("c"):
-        nodata = original_nodata
-    else:
-        original_nodata = float(original_nodata)
-        nodata = np.dtype(new_dtype).type(original_nodata)
-        if not np.isnan(nodata) and original_nodata != nodata:
-            warnings.warn(
-                f"The nodata value ({original_nodata}) has been automatically "
-                f"changed to ({nodata}) to match the dtype of the data."
-            )
-
-    return nodata
 
 
 def _clip_from_disk(xds, geometries, all_touched, drop, invert):
@@ -918,11 +902,6 @@ class RasterArray(XRasterBase):
         if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
             driver = "GTiff"
 
-        dtype = (
-            self._obj.encoding.get("dtype", str(self._obj.dtype))
-            if dtype is None
-            else dtype
-        )
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
         try:
@@ -950,11 +929,6 @@ class RasterArray(XRasterBase):
         rio_nodata = (
             self.encoded_nodata if self.encoded_nodata is not None else self.nodata
         )
-        if rio_nodata is not None:
-            # Ensure dtype of output data matches the expected dtype.
-            # This check is added here as the dtype of the data is
-            # converted right before writing.
-            rio_nodata = _ensure_nodata_dtype(rio_nodata, dtype)
 
         return RasterioWriter(raster_path=raster_path).to_raster(
             xarray_dataarray=self._obj,
