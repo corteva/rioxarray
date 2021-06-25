@@ -1114,10 +1114,13 @@ def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
         assert rds.transform == xds.rio.transform()
 
 
-@pytest.mark.xfail(
+cint_skip = pytest.mark.skip(
     rasterio.__version__ < "1.2.4",
     reason="https://github.com/mapbox/rasterio/issues/2182",
 )
+
+
+@cint_skip
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
@@ -1135,7 +1138,7 @@ def test_cint16_dtype(dtype, tmp_path):
         assert data.dtype == "complex64"
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     rasterio.__version__ < "1.2.5",
     reason="https://github.com/mapbox/rasterio/issues/2206",
 )
@@ -1159,6 +1162,7 @@ def test_cint16_dtype_nodata(tmp_path):
         assert riofh.nodata is None
 
 
+@cint_skip
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype_masked(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
@@ -1178,6 +1182,7 @@ def test_cint16_dtype_masked(dtype, tmp_path):
         assert data.dtype == "complex64"
 
 
+@cint_skip
 def test_cint16_promote_dtype(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     xds = rioxarray.open_rasterio(test_file)
