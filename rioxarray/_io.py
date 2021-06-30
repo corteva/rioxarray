@@ -835,8 +835,6 @@ def open_rasterio(
         riods = manager.acquire()
         captured_warnings = rio_warnings.copy()
 
-    riods = manager.acquire()
-    captured_warnings = rio_warnings.copy()
     # raise the NotGeoreferencedWarning if applicable
     for rio_warning in captured_warnings:
         if not riods.subdatasets or not isinstance(
