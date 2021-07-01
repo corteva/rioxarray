@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: Remove duplicate acquire in open_rasterio
 
 0.4.3
 ------
