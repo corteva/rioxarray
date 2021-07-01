@@ -1003,8 +1003,6 @@
         <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
         <span class="n">captured_warnings</span> <span class="o">=</span> <span class="n">rio_warnings</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="n">riods</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-    <span class="n">captured_warnings</span> <span class="o">=</span> <span class="n">rio_warnings</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="c1"># raise the NotGeoreferencedWarning if applicable</span>
     <span class="k">for</span> <span class="n">rio_warning</span> <span class="ow">in</span> <span class="n">captured_warnings</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
