@@ -414,7 +414,7 @@ class XRasterBase:
             raise RuntimeError("crs must be set to estimate UTM CRS.")
 
         # ensure using geographic coordinates
-        if self.crs.is_geographic:
+        if self.crs.is_geographic:  # pylint: disable=no-member
             minx, miny, maxx, maxy = self.bounds(recalc=True)
         else:
             minx, miny, maxx, maxy = self.transform_bounds("EPSG:4326", recalc=True)

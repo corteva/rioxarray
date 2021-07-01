@@ -78,9 +78,9 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             rds = rds.drop_vars(drop_variables)
         return rds
 
-    def guess_can_open(self, store_spec):
+    def guess_can_open(self, filename_or_obj):  # pylint: disable=arguments-renamed
         try:
-            _, ext = os.path.splitext(store_spec)
+            _, ext = os.path.splitext(filename_or_obj)
         except TypeError:
             return False
         return ext[1:].lower() in CAN_OPEN_EXTS
