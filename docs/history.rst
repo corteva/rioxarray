@@ -3,7 +3,9 @@ History
 
 Latest
 ------
-- BUG: Remove duplicate acquire in open_rasterio
+- ENH: Allow passing in kwargs to reproject & overide nodata. Provide
+default nodata based on dtype. (issue ##369)
+- BUG: Remove duplicate acquire in open_rasterio (pull #364)
 
 0.4.3
 ------

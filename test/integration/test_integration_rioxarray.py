@@ -721,10 +721,10 @@ def test_reproject__no_nodata(modis_reproject):
         # replace -9999 with original _FillValue for testing
         if hasattr(mds_repr, "variables"):
             for var in mds_repr.rio.vars:
-                mds_repr[var].values[mds_repr[var].values == -9999] = orig_fill
+                mds_repr[var].values[mds_repr[var].values == -32768] = orig_fill
         else:
-            mds_repr.values[mds_repr.values == -9999] = orig_fill
-        _mod_attr(mdc, "_FillValue", val=-9999)
+            mds_repr.values[mds_repr.values == -32768] = orig_fill
+        _mod_attr(mdc, "_FillValue", val=-32768)
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 
@@ -1069,6 +1069,7 @@ def test_geographic_reproject__missing_nodata():
         mds_repr = mda.rio.reproject("epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
+        _mod_attr(mdc, "_FillValue", val=65535)
         _assert_xarrays_equal(mds_repr, mdc, precision=4)
 
 

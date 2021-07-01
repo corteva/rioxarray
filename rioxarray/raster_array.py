@@ -18,6 +18,7 @@ import rasterio
 import rasterio.mask
 import rasterio.warp
 import xarray
+from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
 from scipy.interpolate import griddata
@@ -37,6 +38,24 @@ from rioxarray.raster_writer import (
     _ensure_nodata_dtype,
 )
 from rioxarray.rioxarray import XRasterBase, _get_data_var_message, _make_coords
+
+# DTYPE TO NODATA MAP
+# Based on: https://github.com/OSGeo/gdal/blob/
+# cde27dc7641964a872efdc6bbcf5e3d3f7ab9cfd/gdal/
+# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L62
+_NODATA_DTYPE_MAP = {
+    1: 255,  # GDT_Byte
+    2: 65535,  # GDT_UInt16
+    3: -32768,  # GDT_Int16
+    4: 4294967293,  # GDT_UInt32
+    5: -2147483647,  # GDT_Int32
+    6: 3.402823466e38,  # GDT_Float32
+    7: 1.7976931348623158e308,  # GDT_Float64
+    8: -32768,  # GDT_CInt16
+    9: -2147483647,  # GDT_CInt32
+    10: 3.402823466e38,  # GDT_CFloat32
+    11: 1.7976931348623158e308,  # GDT_CFloat64
+}
 
 
 def _generate_attrs(src_data_array, dst_nodata):
@@ -318,7 +337,9 @@ class RasterArray(XRasterBase):
         resolution=None,
         shape=None,
         transform=None,
+        nodata=None,
         resampling=Resampling.nearest,
+        **kwargs,
     ):
         """
         Reproject :obj:`xarray.DataArray` objects
@@ -332,6 +353,7 @@ class RasterArray(XRasterBase):
 
         .. versionadded:: 0.0.27 shape
         .. versionadded:: 0.0.28 transform
+        .. versionadded:: 0.5.0 nodata, kwargs
 
         Parameters
         ----------
@@ -343,10 +365,21 @@ class RasterArray(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        transform: optional
+        transform: Affine, optional
             The destination transform.
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
+        nodata: float, optional
+            The nodata value used to initialize the destination;
+            it will remain in all areas not covered by the reprojected source.
+            Defaults to the nodata value of the source image if none provided
+            and exists or attempts to find an appropriate value by dtype.
+        **kwargs: dict
+            Additional keyword arguments to pass into :func:`rasterio.warp.reproject`.
+            To override:
+            - src_transform: `rio.write_transform`
+            - src_crs: `rio.write_crs`
+            - src_nodata: `rio.write_nodata`
 
 
         Returns
@@ -382,22 +415,24 @@ class RasterArray(XRasterBase):
         else:
             dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
 
-        dst_nodata = self._obj.dtype.type(
-            self.nodata if self.nodata is not None else -9999
+        default_nodata = (
+            _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
+            if self.nodata is None
+            else self.nodata
         )
-        src_nodata = self._obj.dtype.type(
-            self.nodata if self.nodata is not None else dst_nodata
-        )
+        dst_nodata = default_nodata if nodata is None else nodata
+
         rasterio.warp.reproject(
             source=self._obj.values,
             destination=dst_data,
             src_transform=src_affine,
             src_crs=self.crs,
-            src_nodata=src_nodata,
+            src_nodata=self.nodata,
             dst_transform=dst_affine,
             dst_crs=dst_crs,
             dst_nodata=dst_nodata,
             resampling=resampling,
+            **kwargs,
         )
         # add necessary attributes
         new_attrs = _generate_attrs(self._obj, dst_nodata)
