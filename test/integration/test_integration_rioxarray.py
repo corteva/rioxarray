@@ -15,6 +15,7 @@ from affine import Affine
 from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from pyproj import CRS as pCRS
+from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
 
@@ -699,7 +700,8 @@ def test_reproject__no_transform(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_reproject__no_nodata(modis_reproject):
+@pytest.mark.parametrize("nodata", [None, -9999])
+def test_reproject__no_nodata(nodata, modis_reproject):
     mask_args = (
         dict(masked=False, mask_and_scale=False)
         if "rasterio" in str(modis_reproject["open"])
@@ -712,19 +714,20 @@ def test_reproject__no_nodata(modis_reproject):
         _del_attr(mda, "_FillValue")
         _del_attr(mda, "nodata")
         # reproject
-        mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
+        mds_repr = mda.rio.reproject(modis_reproject["to_proj"], nodata=nodata)
 
         # overwrite test dataset
         # if isinstance(modis_reproject['open'], xarray.DataArray):
         #    mds_repr.to_netcdf(modis_reproject['compare'])
 
         # replace -9999 with original _FillValue for testing
+        fill_nodata = -32768 if nodata is None else nodata
         if hasattr(mds_repr, "variables"):
             for var in mds_repr.rio.vars:
-                mds_repr[var].values[mds_repr[var].values == -9999] = orig_fill
+                mds_repr[var].values[mds_repr[var].values == fill_nodata] = orig_fill
         else:
-            mds_repr.values[mds_repr.values == -9999] = orig_fill
-        _mod_attr(mdc, "_FillValue", val=-9999)
+            mds_repr.values[mds_repr.values == fill_nodata] = orig_fill
+        _mod_attr(mdc, "_FillValue", val=fill_nodata)
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 
@@ -748,6 +751,47 @@ def test_reproject__no_nodata_masked(modis_reproject):
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
+
+
+def test_reproject__gcps_kwargs(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
+        GroundControlPoint(row=0, col=800, x=338353, y=2785790, z=0),
+        GroundControlPoint(row=800, col=800, x=297939, y=2618518, z=0),
+        GroundControlPoint(row=800, col=0, x=115698, y=2651448, z=0),
+    ]
+    crs = CRS.from_epsg(32618)
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=numpy.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    rds = rioxarray.open_rasterio(tiffname)
+    rds.rio.write_crs(crs, inplace=True)
+    rds = rds.rio.reproject(
+        crs,
+        gcps=src_gcps,
+    )
+    assert rds.rio.height == 923
+    assert rds.rio.width == 1027
+    assert rds.rio.crs == crs
+    assert rds.rio.transform().almost_equals(
+        Affine(
+            216.8587081056465,
+            0.0,
+            115698.25,
+            0.0,
+            -216.8587081056465,
+            2818720.0,
+        )
+    )
 
 
 def test_reproject_match(modis_reproject_match):
@@ -1069,6 +1113,7 @@ def test_geographic_reproject__missing_nodata():
         mds_repr = mda.rio.reproject("epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
+        _mod_attr(mdc, "_FillValue", val=65535)
         _assert_xarrays_equal(mds_repr, mdc, precision=4)
 
 
