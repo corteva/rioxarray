@@ -226,6 +226,8 @@
         <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject :class:`xarray.Dataset` objects</span>
@@ -237,6 +239,7 @@
 
 <span class="sd">        .. versionadded:: 0.0.27 shape</span>
 <span class="sd">        .. versionadded:: 0.0.28 transform</span>
+<span class="sd">        .. versionadded:: 0.5.0 nodata, kwargs</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -252,7 +255,17 @@
 <span class="sd">            The destination transform.</span>
 <span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
 <span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
-
+<span class="sd">        nodata: float, optional</span>
+<span class="sd">            The nodata value used to initialize the destination;</span>
+<span class="sd">            it will remain in all areas not covered by the reprojected source.</span>
+<span class="sd">            Defaults to the nodata value of the source image if none provided</span>
+<span class="sd">            and exists or attempts to find an appropriate value by dtype.</span>
+<span class="sd">        **kwargs: dict</span>
+<span class="sd">            Additional keyword arguments to pass into :func:`rasterio.warp.reproject`.</span>
+<span class="sd">            To override:</span>
+<span class="sd">            - src_transform: `rio.write_transform`</span>
+<span class="sd">            - src_crs: `rio.write_crs`</span>
+<span class="sd">            - src_nodata: `rio.write_nodata`</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
@@ -270,6 +283,8 @@
                     <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
                     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
                     <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
+                    <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span></div>

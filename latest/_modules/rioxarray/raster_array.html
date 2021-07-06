@@ -186,6 +186,7 @@
 <span class="kn">import</span> <span class="nn">rasterio.mask</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">from</span> <span class="nn">rasterio.dtypes</span> <span class="kn">import</span> <span class="n">dtype_rev</span>
 <span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
 <span class="kn">from</span> <span class="nn">rasterio.features</span> <span class="kn">import</span> <span class="n">geometry_mask</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
@@ -205,6 +206,24 @@
     <span class="n">_ensure_nodata_dtype</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span><span class="p">,</span> <span class="n">_get_data_var_message</span><span class="p">,</span> <span class="n">_make_coords</span>
+
+<span class="c1"># DTYPE TO NODATA MAP</span>
+<span class="c1"># Based on: https://github.com/OSGeo/gdal/blob/</span>
+<span class="c1"># cde27dc7641964a872efdc6bbcf5e3d3f7ab9cfd/gdal/</span>
+<span class="c1"># swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L62</span>
+<span class="n">_NODATA_DTYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="mi">255</span><span class="p">,</span>  <span class="c1"># GDT_Byte</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="mi">65535</span><span class="p">,</span>  <span class="c1"># GDT_UInt16</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="o">-</span><span class="mi">32768</span><span class="p">,</span>  <span class="c1"># GDT_Int16</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="mi">4294967293</span><span class="p">,</span>  <span class="c1"># GDT_UInt32</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span>  <span class="c1"># GDT_Int32</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_Float32</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_Float64</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="o">-</span><span class="mi">32768</span><span class="p">,</span>  <span class="c1"># GDT_CInt16</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span>  <span class="c1"># GDT_CInt32</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_CFloat32</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_CFloat64</span>
+<span class="p">}</span>
 
 
 <span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">):</span>
@@ -255,10 +274,10 @@
 
 
 <span class="k">def</span> <span class="nf">_make_dst_affine</span><span class="p">(</span>
-    <span class="n">src_data_array</span><span class="p">,</span> <span class="n">src_crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dst_shape</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">src_data_array</span><span class="p">,</span> <span class="n">src_crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dst_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Determine the affine of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
-    <span class="n">src_bounds</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
+    <span class="n">src_bounds</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
     <span class="n">src_height</span><span class="p">,</span> <span class="n">src_width</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">dst_shape</span> <span class="k">if</span> <span class="n">dst_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="c1"># pylint: disable=isinstance-second-argument-not-valid-type</span>
@@ -266,22 +285,21 @@
         <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">res_val</span> <span class="ow">in</span> <span class="n">dst_resolution</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">dst_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dst_resolution</span><span class="p">)</span>
-    <span class="n">resolution_or_width_height</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;resolution&quot;</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;dst_height&quot;</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;dst_width&quot;</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span>
-        <span class="p">]</span>
-        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;resolution&quot;</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;dst_height&quot;</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;dst_width&quot;</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
     <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">calculate_default_transform</span><span class="p">(</span>
         <span class="n">src_crs</span><span class="p">,</span>
         <span class="n">dst_crs</span><span class="p">,</span>
         <span class="n">src_width</span><span class="p">,</span>
         <span class="n">src_height</span><span class="p">,</span>
         <span class="o">*</span><span class="n">src_bounds</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">resolution_or_width_height</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span>
 
@@ -487,6 +505,8 @@
         <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject :obj:`xarray.DataArray` objects</span>
@@ -500,6 +520,7 @@
 
 <span class="sd">        .. versionadded:: 0.0.27 shape</span>
 <span class="sd">        .. versionadded:: 0.0.28 transform</span>
+<span class="sd">        .. versionadded:: 0.5.0 nodata, kwargs</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -511,10 +532,21 @@
 <span class="sd">        shape: tuple(int, int), optional</span>
 <span class="sd">            Shape of the destination in pixels (dst_height, dst_width). Cannot be used</span>
 <span class="sd">            together with resolution.</span>
-<span class="sd">        transform: optional</span>
+<span class="sd">        transform: Affine, optional</span>
 <span class="sd">            The destination transform.</span>
 <span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
 <span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
+<span class="sd">        nodata: float, optional</span>
+<span class="sd">            The nodata value used to initialize the destination;</span>
+<span class="sd">            it will remain in all areas not covered by the reprojected source.</span>
+<span class="sd">            Defaults to the nodata value of the source image if none provided</span>
+<span class="sd">            and exists or attempts to find an appropriate value by dtype.</span>
+<span class="sd">        **kwargs: dict</span>
+<span class="sd">            Additional keyword arguments to pass into :func:`rasterio.warp.reproject`.</span>
+<span class="sd">            To override:</span>
+<span class="sd">            - src_transform: `rio.write_transform`</span>
+<span class="sd">            - src_crs: `rio.write_crs`</span>
+<span class="sd">            - src_nodata: `rio.write_nodata`</span>
 
 
 <span class="sd">        Returns</span>
@@ -529,10 +561,10 @@
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;rio.write_crs()&#39;.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">src_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">shape</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">transform</span>
@@ -550,22 +582,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dst_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 
-        <span class="n">dst_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="o">-</span><span class="mi">9999</span>
+        <span class="n">default_nodata</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_NODATA_DTYPE_MAP</span><span class="p">[</span><span class="n">dtype_rev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
         <span class="p">)</span>
-        <span class="n">src_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dst_nodata</span>
-        <span class="p">)</span>
+        <span class="n">dst_nodata</span> <span class="o">=</span> <span class="n">default_nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
+
         <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">destination</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
             <span class="n">src_transform</span><span class="o">=</span><span class="n">src_affine</span><span class="p">,</span>
             <span class="n">src_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-            <span class="n">src_nodata</span><span class="o">=</span><span class="n">src_nodata</span><span class="p">,</span>
+            <span class="n">src_nodata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
             <span class="n">dst_transform</span><span class="o">=</span><span class="n">dst_affine</span><span class="p">,</span>
             <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
             <span class="n">dst_nodata</span><span class="o">=</span><span class="n">dst_nodata</span><span class="p">,</span>
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># add necessary attributes</span>
         <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">)</span>

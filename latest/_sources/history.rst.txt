@@ -3,7 +3,10 @@ History
 
 Latest
 ------
-- BUG: Remove duplicate acquire in open_rasterio
+- ENH: Allow passing in kwargs to `rio.reproject` (issue #369; pull #370)
+- ENH: Allow nodata override and provide default nodata based on dtype in `rio.reproject` (pull #370)
+- ENH: Add support for passing in gcps to rio.reproject (issue #339; pull #370)
+- BUG: Remove duplicate acquire in open_rasterio (pull #364)
 
 0.4.3
 ------

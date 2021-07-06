@@ -1137,7 +1137,7 @@ set, and np.nan otherwise.</li>
 
 <dl class="method">
 <dt id="rioxarray.raster_array.RasterArray.reproject">
-<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em>, <em>nodata=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.18.3.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> objects</p>
 <p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
 <div class="admonition note">
@@ -1153,6 +1153,9 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.5.0: </span>nodata, kwargs</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1163,8 +1166,17 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 (e.g. degrees or metres).</li>
 <li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
 together with resolution.</li>
-<li><strong>transform</strong> (<em>optional</em>) – The destination transform.</li>
+<li><strong>transform</strong> (<em>Affine</em><em>, </em><em>optional</em>) – The destination transform.</li>
 <li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.6)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – The nodata value used to initialize the destination;
+it will remain in all areas not covered by the reprojected source.
+Defaults to the nodata value of the source image if none provided
+and exists or attempts to find an appropriate value by dtype.</li>
+<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
+To override:
+- src_transform: <cite>rio.write_transform</cite>
+- src_crs: <cite>rio.write_crs</cite>
+- src_nodata: <cite>rio.write_nodata</cite></li>
 </ul>
 </td>
 </tr>
@@ -1488,7 +1500,7 @@ same coordinates.</p>
 
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.reproject">
-<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em>, <em>nodata=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.18.3.dev1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -1503,6 +1515,9 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.0.28: </span>transform</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.5.0: </span>nodata, kwargs</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1515,6 +1530,15 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 together with resolution.</li>
 <li><strong>transform</strong> (<em>optional</em>) – The destination transform.</li>
 <li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.6)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – The nodata value used to initialize the destination;
+it will remain in all areas not covered by the reprojected source.
+Defaults to the nodata value of the source image if none provided
+and exists or attempts to find an appropriate value by dtype.</li>
+<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
+To override:
+- src_transform: <cite>rio.write_transform</cite>
+- src_crs: <cite>rio.write_crs</cite>
+- src_nodata: <cite>rio.write_nodata</cite></li>
 </ul>
 </td>
 </tr>
