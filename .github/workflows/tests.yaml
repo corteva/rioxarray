@@ -60,7 +60,7 @@ jobs:
       - name: Install Env
         shell: bash
         run: |
-          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} scipy pyproj netcdf4 dask pandoc
+          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} 'libgdal<3.3' scipy pyproj netcdf4 dask pandoc
           source activate test
           python -m pip install -e .[all]
 
