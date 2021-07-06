@@ -106,10 +106,10 @@ def _add_attrs_proj(new_data_array, src_data_array):
 
 
 def _make_dst_affine(
-    src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None
+    src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None, **kwargs
 ):
     """Determine the affine of the new projected `xarray.DataArray`"""
-    src_bounds = src_data_array.rio.bounds()
+    src_bounds = () if "gcps" in kwargs else src_data_array.rio.bounds()
     src_height, src_width = src_data_array.rio.shape
     dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
     # pylint: disable=isinstance-second-argument-not-valid-type
@@ -117,22 +117,21 @@ def _make_dst_affine(
         dst_resolution = tuple(abs(res_val) for res_val in dst_resolution)
     elif dst_resolution is not None:
         dst_resolution = abs(dst_resolution)
-    resolution_or_width_height = {
-        k: v
-        for k, v in [
-            ("resolution", dst_resolution),
-            ("dst_height", dst_height),
-            ("dst_width", dst_width),
-        ]
-        if v is not None
-    }
+
+    for key, value in (
+        ("resolution", dst_resolution),
+        ("dst_height", dst_height),
+        ("dst_width", dst_width),
+    ):
+        if value is not None:
+            kwargs[key] = value
     dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
         src_crs,
         dst_crs,
         src_width,
         src_height,
         *src_bounds,
-        **resolution_or_width_height,
+        **kwargs,
     )
     return dst_affine, dst_width, dst_height
 
@@ -337,8 +336,8 @@ class RasterArray(XRasterBase):
         resolution=None,
         shape=None,
         transform=None,
-        nodata=None,
         resampling=Resampling.nearest,
+        nodata=None,
         **kwargs,
     ):
         """
@@ -394,10 +393,10 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        src_affine = self.transform(recalc=True)
+        src_affine = None if "gcps" in kwargs else self.transform(recalc=True)
         if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
-                self._obj, self.crs, dst_crs, resolution, shape
+                self._obj, self.crs, dst_crs, resolution, shape, **kwargs
             )
         else:
             dst_affine = transform

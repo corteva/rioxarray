@@ -58,6 +58,8 @@ class RasterDataset(XRasterBase):
         shape=None,
         transform=None,
         resampling=Resampling.nearest,
+        nodata=None,
+        **kwargs,
     ):
         """
         Reproject :class:`xarray.Dataset` objects
@@ -69,6 +71,7 @@ class RasterDataset(XRasterBase):
 
         .. versionadded:: 0.0.27 shape
         .. versionadded:: 0.0.28 transform
+        .. versionadded:: 0.5.0 nodata, kwargs
 
         Parameters
         ----------
@@ -84,7 +87,17 @@ class RasterDataset(XRasterBase):
             The destination transform.
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
-
+        nodata: float, optional
+            The nodata value used to initialize the destination;
+            it will remain in all areas not covered by the reprojected source.
+            Defaults to the nodata value of the source image if none provided
+            and exists or attempts to find an appropriate value by dtype.
+        **kwargs: dict
+            Additional keyword arguments to pass into :func:`rasterio.warp.reproject`.
+            To override:
+            - src_transform: `rio.write_transform`
+            - src_crs: `rio.write_crs`
+            - src_nodata: `rio.write_nodata`
 
         Returns
         --------
@@ -102,6 +115,8 @@ class RasterDataset(XRasterBase):
                     shape=shape,
                     transform=transform,
                     resampling=resampling,
+                    nodata=nodata,
+                    **kwargs,
                 )
             )
         return resampled_dataset
