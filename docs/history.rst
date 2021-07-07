@@ -7,6 +7,7 @@ Latest
 - ENH: Allow nodata override and provide default nodata based on dtype in `rio.reproject` (pull #370)
 - ENH: Add support for passing in gcps to rio.reproject (issue #339; pull #370)
 - BUG: Remove duplicate acquire in open_rasterio (pull #364)
+- BUG: Fix exporting dataset to raster with non-standard dimensions (issue #372)
 
 0.4.3
 ------

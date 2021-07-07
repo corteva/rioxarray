@@ -2182,6 +2182,18 @@ def test_nonstandard_dims_find_dims__axis():
         assert xds.rio.y_dim == "lat"
 
 
+def test_nonstandard_dims_to_raster__dataset(tmp_path):
+    with xarray.open_dataset(
+        os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc"), decode_coords="all"
+    ) as xds:
+        xds.attrs.pop("grid_mapping")
+        xds.coords["lon"].attrs = {}
+        xds.coords["lat"].attrs = {}
+        xds.squeeze().rio.set_spatial_dims(x_dim="lon", y_dim="lat").rio.to_raster(
+            tmp_path / "test.tif"
+        )
+
+
 def test_missing_crs_error_msg():
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")

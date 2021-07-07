@@ -422,7 +422,11 @@ class RasterDataset(XRasterBase):
         if self.crs is not None:
             data_array.rio.write_crs(self.crs, inplace=True)
         # write it to a raster
-        return data_array.rio.to_raster(
+        return data_array.rio.set_spatial_dims(
+            x_dim=self.x_dim,
+            y_dim=self.y_dim,
+            inplace=True,
+        ).rio.to_raster(
             raster_path=raster_path,
             driver=driver,
             dtype=dtype,
