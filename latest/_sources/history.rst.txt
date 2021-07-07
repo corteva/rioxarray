@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.5.0
 ------
 - ENH: Allow passing in kwargs to `rio.reproject` (issue #369; pull #370)
