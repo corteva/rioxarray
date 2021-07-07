@@ -30,7 +30,7 @@ rioxarray.show_versions
 rioxarray `rio` accessors
 --------------------------
 
-rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals.html#extending-xarray>`__
+rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals/extending-xarray.html>`__
 with the `rio` accessor. The `rio` accessor is activated by importing rioxarray like so:
 
 .. code-block:: python
