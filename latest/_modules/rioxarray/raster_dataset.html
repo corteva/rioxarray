@@ -590,7 +590,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># write it to a raster</span>
-        <span class="k">return</span> <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span>
+            <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
             <span class="n">raster_path</span><span class="o">=</span><span class="n">raster_path</span><span class="p">,</span>
             <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
