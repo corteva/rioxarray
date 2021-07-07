@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.5.0
 ------
 - ENH: Allow passing in kwargs to `rio.reproject` (issue #369; pull #370)
 - ENH: Allow nodata override and provide default nodata based on dtype in `rio.reproject` (pull #370)
