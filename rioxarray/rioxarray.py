@@ -918,7 +918,7 @@ class XRasterBase:
         row_slice = slice(int(row_start), int(row_stop))
         col_slice = slice(int(col_start), int(col_stop))
         return (
-            self._obj.pad_box(self._obj.rio.window_bounds(window))                 
+            self._obj.rio.pad_box(*rasterio.windows.bounds(window, self.transform(recalc=True)))
             .isel({self.y_dim: row_slice, self.x_dim: col_slice})
             .copy()  # this is to prevent sharing coordinates with the original dataset
             .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
