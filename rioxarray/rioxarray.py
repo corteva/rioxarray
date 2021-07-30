@@ -942,8 +942,7 @@ class XRasterBase:
             return array_subset.rio.pad_box(
                 *rasterio.windows.bounds(window, self.transform(recalc=True))
             )
-        else:
-            return array_subset
+        return array_subset
 
     def slice_xy(self, minx, miny, maxx, maxy):
         """Slice the array by x,y bounds.
