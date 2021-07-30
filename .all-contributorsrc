@@ -181,6 +181,17 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "AndrewAnnex",
+      "name": "Andrew Annex",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2126916?v=4",
+      "profile": "http://andrewannex.com/",
+      "contributions": [
+        "code",
+        "doc",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7
