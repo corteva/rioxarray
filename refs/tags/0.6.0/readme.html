@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>rioxarray README &mdash; rioxarray 0.6.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to rioxarray’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rioxarray
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">rioxarray README</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bugs-questions">Bugs/Questions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#credits">Credits</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rioxarray</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>rioxarray README</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/readme.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="rioxarray-readme">
+<h1>rioxarray README<a class="headerlink" href="#rioxarray-readme" title="Permalink to this headline">¶</a></h1>
+<p>rasterio xarray extension.</p>
+<a class="reference external image-reference" href="https://gitter.im/rioxarray/community?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img alt="Join the chat at https://gitter.im/rioxarray/community" src="https://badges.gitter.im/rioxarray/community.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/corteva/rioxarray/blob/master/AUTHORS.rst"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square" /></a>
+<a class="reference external image-reference" href="https://github.com/corteva/rioxarray/blob/master/LICENSE"><img alt="https://img.shields.io/badge/License-Apache%202.0-blue.svg" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/rioxarray"><img alt="https://img.shields.io/pypi/v/rioxarray.svg" src="https://img.shields.io/pypi/v/rioxarray.svg" /></a>
+<a class="reference external image-reference" href="https://pepy.tech/project/rioxarray"><img alt="https://pepy.tech/badge/rioxarray" src="https://pepy.tech/badge/rioxarray" /></a>
+<a class="reference external image-reference" href="https://anaconda.org/conda-forge/rioxarray"><img alt="https://img.shields.io/conda/vn/conda-forge/rioxarray.svg" src="https://img.shields.io/conda/vn/conda-forge/rioxarray.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/corteva/rioxarray/actions?query=workflow%3ATests"><img alt="https://github.com/corteva/rioxarray/workflows/Tests/badge.svg" src="https://github.com/corteva/rioxarray/workflows/Tests/badge.svg" /></a>
+<a class="reference external image-reference" href="https://ci.appveyor.com/project/snowman2/rioxarray"><img alt="https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true" src="https://ci.appveyor.com/api/projects/status/e6sr22mkpen261c1/branch/master?svg=true" /></a>
+<a class="reference external image-reference" href="https://codecov.io/gh/corteva/rioxarray"><img alt="https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg" src="https://codecov.io/gh/corteva/rioxarray/branch/master/graph/badge.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/pre-commit/pre-commit"><img alt="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white" /></a>
+<a class="reference external image-reference" href="https://github.com/python/black"><img alt="https://img.shields.io/badge/code%20style-black-000000.svg" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<a class="reference external image-reference" href="https://zenodo.org/badge/latestdoi/181693881"><img alt="https://zenodo.org/badge/181693881.svg" src="https://zenodo.org/badge/181693881.svg" /></a>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Stable: <a class="reference external" href="https://corteva.github.io/rioxarray/stable/">https://corteva.github.io/rioxarray/stable/</a></li>
+<li>Latest: <a class="reference external" href="https://corteva.github.io/rioxarray/latest/">https://corteva.github.io/rioxarray/latest/</a></li>
+</ul>
+</div>
+<div class="section" id="bugs-questions">
+<h2>Bugs/Questions<a class="headerlink" href="#bugs-questions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Report bugs/feature requests: <a class="reference external" href="https://github.com/corteva/rioxarray/issues">https://github.com/corteva/rioxarray/issues</a></li>
+<li>Ask questions: <a class="reference external" href="https://github.com/corteva/rioxarray/discussions">https://github.com/corteva/rioxarray/discussions</a></li>
+<li>Ask developer questions: <a class="reference external" href="https://gitter.im/rioxarray/community">https://gitter.im/rioxarray/community</a></li>
+<li>Ask questions from the GIS community: <a class="reference external" href="https://gis.stackexchange.com/questions/tagged/rioxarray">https://gis.stackexchange.com/questions/tagged/rioxarray</a></li>
+</ul>
+</div>
+<div class="section" id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>The <em>reproject</em> functionality was adopted from <a class="reference external" href="https://github.com/opendatacube/datacube-core">https://github.com/opendatacube/datacube-core</a></dt>
+<dd><ul class="first last simple">
+<li>Source file: <a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/084c84d78cb6e1326c7fbbe79c5b5d0bef37c078/datacube/api/geo_xarray.py">geo_xarray.py</a></li>
+<li><a class="reference external" href="https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE">datacube is licensed</a> under the Apache License, Version 2.0.
+The datacube license is included as <a class="reference external" href="https://github.com/corteva/rioxarray/blob/master/LICENSE_datacube">LICENSE_datacube</a>.</li>
+</ul>
+</dd>
+<dt>Adoptions from <a class="reference external" href="https://github.com/pydata/xarray">https://github.com/pydata/xarray</a>:</dt>
+<dd><ul class="first last simple">
+<li><em>open_rasterio</em>: <a class="reference external" href="https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py">rasterio_.py</a></li>
+<li><em>set_options</em>: <a class="reference external" href="https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db14500c427f8804e/xarray/core/options.py">options.py</a></li>
+<li><a class="reference external" href="https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/LICENSE">xarray is licensed</a> under the Apache License, Version 2.0.
+The xarray license is included as <a class="reference external" href="https://github.com/corteva/rioxarray/blob/master/LICENSE_xarray">LICENSE_xarray</a>.</li>
+</ul>
+</dd>
+<dt>RasterioWriter dask write functionality was adopted from <a class="reference external" href="https://github.com/dymaxionlabs/dask-rasterio">https://github.com/dymaxionlabs/dask-rasterio</a></dt>
+<dd><ul class="first last simple">
+<li>Source file: <a class="reference external" href="https://github.com/dymaxionlabs/dask-rasterio/blob/8dd7fdece7ad094a41908c0ae6b4fe6ca49cf5e1/dask_rasterio/write.py">write.py</a></li>
+</ul>
+</dd>
+</dl>
+<p>This package was originally templated with with <a class="reference external" href="https://github.com/audreyr/cookiecutter">Cookiecutter</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to rioxarray’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, rioxarray Contributors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
