@@ -925,7 +925,6 @@ class XRasterBase:
                 *rasterio.windows.bounds(window, self.transform(recalc=True))
             )
         return (
-            # I can't have any negative indexes
             array_subset.isel({self.y_dim: row_slice, self.x_dim: col_slice})
             .copy()  # this is to prevent sharing coordinates with the original dataset
             .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
