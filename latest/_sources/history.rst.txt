@@ -1,9 +1,10 @@
 History
 =======
 
-Latest
+0.6.0
 ------
 - ENH: Add pad option to `rio.isel_window` (issue #381; pull #383)
+- BUG: Fix negative start in row or col window offsets in `rio.isel_window` (issue #381; pull #383)
 
 0.5.0
 ------
