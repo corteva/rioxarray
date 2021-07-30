@@ -894,9 +894,11 @@ class XRasterBase:
 
         return left, bottom, right, top
 
-    def isel_window(self, window):
+    def isel_window(self, window, pad=False):
         """
         Use a rasterio.window.Window to select a subset of the data.
+
+        .. versionadded:: 0.6.0 pad
 
         .. warning:: Float indices are converted to integers.
 
@@ -904,6 +906,8 @@ class XRasterBase:
         ----------
         window: :class:`rasterio.window.Window`
             The window of the dataset to read.
+        pad: bool, default=False
+            Set to True to expand returned DataArray to dimensions of the window
 
         Returns
         -------
@@ -911,13 +915,13 @@ class XRasterBase:
             The data in the window.
         """
         (row_start, row_stop), (col_start, col_stop) = window.toranges()
-        row_start = math.ceil(row_start) if row_start < 0 else math.floor(row_start)
+        row_start = 0 if row_start < 0 else math.floor(row_start)
         row_stop = math.floor(row_stop) if row_stop < 0 else math.ceil(row_stop)
-        col_start = math.ceil(col_start) if col_start < 0 else math.floor(col_start)
+        col_start = 0 if col_start < 0 else math.floor(col_start)
         col_stop = math.floor(col_stop) if col_stop < 0 else math.ceil(col_stop)
         row_slice = slice(int(row_start), int(row_stop))
         col_slice = slice(int(col_start), int(col_stop))
-        return (
+        array_subset = (
             self._obj.isel({self.y_dim: row_slice, self.x_dim: col_slice})
             .copy()  # this is to prevent sharing coordinates with the original dataset
             .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
@@ -934,6 +938,11 @@ class XRasterBase:
                 inplace=True,
             )
         )
+        if pad:
+            return array_subset.rio.pad_box(
+                *rasterio.windows.bounds(window, self.transform(recalc=True))
+            )
+        return array_subset
 
     def slice_xy(self, minx, miny, maxx, maxy):
         """Slice the array by x,y bounds.

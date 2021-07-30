@@ -1965,6 +1965,26 @@ def test_isel_window():
         ).all()
 
 
+def test_isel_window_wpad():
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
+    ) as mda:
+        w1 = Window.from_slices(
+            slice(-5, 10), slice(-5, 10), height=15, width=15, boundless=True
+        )
+        wb1 = rasterio.windows.bounds(w1, mda.rio.transform(recalc=True))
+        res1 = mda.rio.isel_window(w1, pad=True)
+        exp1 = mda.rio.pad_box(*wb1).isel(x=slice(0, 15), y=slice(0, 15))
+        assert (res1 == exp1).all()
+        w2 = Window.from_slices(
+            slice(195, 210), slice(195, 210), height=15, width=15, boundless=True
+        )
+        wb2 = rasterio.windows.bounds(w2, mda.rio.transform(recalc=True))
+        res2 = mda.rio.isel_window(w2, pad=True)
+        exp2 = mda.rio.pad_box(*wb2).isel(x=slice(195, 210), y=slice(195, 210))
+        assert (res2 == exp2).all()
+
+
 def test_write_pyproj_crs_dataset():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(pCRS(4326))
