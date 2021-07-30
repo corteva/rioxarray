@@ -927,7 +927,9 @@ class XRasterBase:
         col_slice = slice(int(col_start), int(col_stop))
         array_subset = self._obj
         if pad:
-            array_subset = array_subset.rio.pad_box(*rasterio.windows.bounds(window, self.transform(recalc=True)))
+            array_subset = array_subset.rio.pad_box(
+                *rasterio.windows.bounds(window, self.transform(recalc=True))
+            )
         return (
             # I can't have any negative indexes
             array_subset.isel({self.y_dim: row_slice, self.x_dim: col_slice})
