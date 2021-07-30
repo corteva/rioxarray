@@ -913,16 +913,10 @@ class XRasterBase:
             The data in the window.
         """
         (row_start, row_stop), (col_start, col_stop) = window.toranges()
-        row_start = math.ceil(row_start) if row_start < 0 else math.floor(row_start)
+        row_start = 0 if row_start < 0 else math.floor(row_start)
         row_stop = math.floor(row_stop) if row_stop < 0 else math.ceil(row_stop)
-        col_start = math.ceil(col_start) if col_start < 0 else math.floor(col_start)
+        col_start = 0 if col_start < 0 else math.floor(col_start)
         col_stop = math.floor(col_stop) if col_stop < 0 else math.ceil(col_stop)
-        if row_start < 0:
-            row_stop -= row_start
-            row_start = 0
-        if col_start < 0:
-            col_stop -= col_start
-            col_start = 0
         row_slice = slice(int(row_start), int(row_stop))
         col_slice = slice(int(col_start), int(col_stop))
         array_subset = self._obj
