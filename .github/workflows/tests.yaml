@@ -114,15 +114,15 @@ jobs:
         run: |
           conda config --add channels conda-forge
           conda config --set channel_priority strict
-          conda create -n test python=3.8 proj libgdal cython netcdf4 pandas scipy
+          conda create -n test python=3.8 proj libgdal cython netcdf4
           source activate test
-          # python -m pip install \
-          #   --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple \
-          #   --trusted-host pypi.anaconda.org \
-          #   --no-deps --pre --upgrade \
-          #   numpy \
-          #   pandas \
-          #   scipy;
+          python -m pip install \
+            --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple \
+            --trusted-host pypi.anaconda.org \
+            --no-deps --pre --upgrade \
+            numpy \
+            pandas \
+            scipy;
           python -m pip install --upgrade \
             git+https://github.com/dask/dask.git@main \
             git+https://github.com/dask/distributed.git@main \
