@@ -906,7 +906,7 @@ class XRasterBase:
         ----------
         window: :class:`rasterio.window.Window`
             The window of the dataset to read.
-        pad: bool
+        pad: bool, default=False
             Set to True to expand returned DataArray to dimensions of the window
 
         Returns
