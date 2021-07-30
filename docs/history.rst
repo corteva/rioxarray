@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- ENH: Add pad option to `rio.isel_window` (issue #381; pull #383)
 
 0.5.0
 ------
