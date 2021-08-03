@@ -288,11 +288,9 @@ class RasterioArrayWrapper(BackendArray):
                 if self.masked:
                     out = np.ma.filled(out.astype(self.dtype), self.fill_value)
                 if self.mask_and_scale:
-                    for band in np.atleast_1d(band_key):
-                        band_iii = band - 1
-                        out[band_iii] = (
-                            out[band_iii] * riods.scales[band_iii]
-                            + riods.offsets[band_iii]
+                    for iii, band_iii in enumerate(np.atleast_1d(band_key) - 1):
+                        out[iii] = (
+                            out[iii] * riods.scales[band_iii] + riods.offsets[band_iii]
                         )
 
         if squeeze_axis:
