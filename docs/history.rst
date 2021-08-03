@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Fix indexing error when `mask_and_scale=True` was combined with band dim chunking (issue #387, pull #388)
 
 0.6.0
 ------
