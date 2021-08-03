@@ -682,6 +682,23 @@ def test_chunks():
             assert_allclose(ac, ex)
 
 
+def test_chunks_with_mask_and_scale():
+    with create_tmp_geotiff(
+        10, 10, 4, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+    ) as (tmp_file, expected):
+        # Chunk at open time
+        with rioxarray.open_rasterio(
+            tmp_file, mask_and_scale=True, chunks=(1, 2, 2)
+        ) as actual:
+            assert isinstance(actual.data, dask.array.Array)
+            assert "open_rasterio" in actual.data.name
+
+            # do some arithmetic
+            ac = actual.mean().compute()
+            ex = expected.mean()
+            assert_allclose(ac, ex)
+
+
 def test_pickle_rasterio():
     # regression test for https://github.com/pydata/xarray/issues/2121
     with create_tmp_geotiff() as (tmp_file, expected):
