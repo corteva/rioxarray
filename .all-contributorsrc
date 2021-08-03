@@ -192,6 +192,17 @@
         "doc",
         "test"
       ]
+    },
+    {
+      "login": "fbunt",
+      "name": "Fred Bunt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7178572?v=4",
+      "profile": "https://github.com/fbunt",
+      "contributions": [
+        "bug",
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
