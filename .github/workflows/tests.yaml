@@ -60,7 +60,7 @@ jobs:
       - name: Install Env
         shell: bash
         run: |
-          conda config --add channels conda-forge
+          conda config --prepend channels conda-forge
           conda config --set channel_priority strict
           conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} scipy pyproj netcdf4 dask pandoc
           source activate test
@@ -112,7 +112,7 @@ jobs:
       - name: Install Env
         shell: bash
         run: |
-          conda config --add channels conda-forge
+          conda config --prepend channels conda-forge
           conda config --set channel_priority strict
           conda create -n test python=3.8 proj libgdal cython netcdf4
           source activate test
