@@ -213,7 +213,9 @@
 <li>Use <a class="reference external" href="https://conda.io/en/latest/">conda</a> with the <a class="reference external" href="https://conda-forge.org/">conda-forge</a> channel:</li>
 </ol>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge rioxarray
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --prepend channels conda-forge
+conda config --set channel_priority strict
+conda install rioxarray
 </pre></div>
 </div>
 </div></blockquote>
