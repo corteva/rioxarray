@@ -19,7 +19,9 @@ Stable release
 
   .. code-block:: bash
 
-      conda install -c conda-forge rioxarray
+      conda config --prepend channels conda-forge
+      conda config --set channel_priority strict
+      conda install rioxarray
 
 
 From source
