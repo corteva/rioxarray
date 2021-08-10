@@ -307,7 +307,9 @@ class RasterDataset(XRasterBase):
             else:
                 clipped_dataset[var] = (
                     self._obj[var]
-                    .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                    .rio.set_spatial_dims(
+                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+                    )
                     .rio.clip(
                         geometries,
                         crs=crs,
