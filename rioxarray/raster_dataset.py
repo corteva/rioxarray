@@ -243,13 +243,11 @@ class RasterDataset(XRasterBase):
         drop=True,
         invert=False,
         from_disk=False,
-        clip_vars=None,
     ):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
-        .. warning:: Only works if all variables in the dataset have the same
-                     coordinates, otherwise specify them in clip_vars
+        .. warning:: Clips vars that have both x and y dims. Others are appended as is.
 
         Powered by `rasterio.features.geometry_mask`.
 
@@ -292,8 +290,6 @@ class RasterDataset(XRasterBase):
             If True, it will clip from disk using rasterio.mask.mask if possible.
             This is beneficial when the size of the data is larger than memory.
             Default is False.
-        clip_vars: :obj:`list` of :obj:`str`, optional
-            if set, only those vars will be clipped, all others are just appended to the xarray.
 
         Returns
         -------
@@ -302,14 +298,10 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            if clip_vars and var not in clip_vars:
-                clipped_dataset[var] = self._obj[var]
-            else:
+            if hasattr(self._obj[var], self.x_dim) and hasattr(self._obj[var], self.y_dim):
                 clipped_dataset[var] = (
                     self._obj[var]
-                    .rio.set_spatial_dims(
-                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-                    )
+                    .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
                     .rio.clip(
                         geometries,
                         crs=crs,
@@ -319,6 +311,8 @@ class RasterDataset(XRasterBase):
                         from_disk=from_disk,
                     )
                 )
+            else:
+                clipped_dataset[var] = self._obj[var]
         return clipped_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
