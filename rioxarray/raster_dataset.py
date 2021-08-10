@@ -193,8 +193,7 @@ class RasterDataset(XRasterBase):
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
         """Clip the :class:`xarray.Dataset` by a bounding box.
 
-        .. warning:: Only works if all variables in the dataset have the
-                     same coordinates.
+        .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
 
         Parameters
         ----------
@@ -219,18 +218,23 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            clipped_dataset[var] = (
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.clip_box(
-                    minx,
-                    miny,
-                    maxx,
-                    maxy,
-                    auto_expand=auto_expand,
-                    auto_expand_limit=auto_expand_limit,
+            if hasattr(self._obj[var], self.x_dim) and hasattr(self._obj[var], self.y_dim):
+                clipped_dataset[var] = (
+                    self._obj[var]
+                    .rio.set_spatial_dims(
+                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+                    )
+                    .rio.clip_box(
+                        minx,
+                        miny,
+                        maxx,
+                        maxy,
+                        auto_expand=auto_expand,
+                        auto_expand_limit=auto_expand_limit,
+                    )
                 )
-            )
+            else:
+                clipped_dataset[var] = self._obj[var]
         return clipped_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
@@ -247,7 +251,7 @@ class RasterDataset(XRasterBase):
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
 
-        .. warning:: Clips vars that have both x and y dims. Others are appended as is.
+        .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
 
         Powered by `rasterio.features.geometry_mask`.
 
@@ -279,7 +283,7 @@ class RasterDataset(XRasterBase):
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
         drop: bool, optional
-            If True, drop the data outside of the extent of the mask geoemtries
+            If True, drop the data outside of the extent of the mask geometries
             Otherwise, it will return the same raster with the data masked.
             Default is True.
         invert: boolean, optional
@@ -301,7 +305,9 @@ class RasterDataset(XRasterBase):
             if hasattr(self._obj[var], self.x_dim) and hasattr(self._obj[var], self.y_dim):
                 clipped_dataset[var] = (
                     self._obj[var]
-                    .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
+                    .rio.set_spatial_dims(
+                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
+                    )
                     .rio.clip(
                         geometries,
                         crs=crs,
