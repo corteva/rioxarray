@@ -298,6 +298,37 @@ def test_clip_box(modis_clip):
         assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
+        # check for variables without spatial dims
+        times = numpy.arange(6)
+        x = numpy.linspace(425493.18381405, 425532.18381405, num=6)
+        y = numpy.linspace(4615295.54054639, 4615514.54054639, num=6)
+        print(x, y)
+        ds = xarray.Dataset(
+            {
+                "stuff": xarray.DataArray(
+                    data=numpy.zeros((6, 6, 6), dtype=float),
+                    dims=["time", "x", "y"],
+                    coords={
+                        "time": times,
+                        "x": x,
+                        "y": y,
+                    },
+                )
+            }
+        )
+        ds.rio.set_spatial_dims(x_dim="x", y_dim="y", inplace=True)
+        ds.rio.write_crs("EPSG:26915", inplace=True)
+        ds["meta"] = ("time", numpy.random.random(6))
+
+        assert ds.stuff.shape == (6, 6, 6)
+        clip_ds = ds.rio.clip_box(
+            minx=425500.18381405,
+            miny=4615395.54054639,
+            maxx=425520.18381405,
+            maxy=4615414.54054639,
+        )
+        assert clip_ds.stuff.shape == (6, 3, 2)
+        assert "meta" in clip_ds.data_vars
 
 
 def test_clip_box__auto_expand(modis_clip):
@@ -484,6 +515,7 @@ def test_clip_geojson(open_func, from_disk):
             clipped_ds.rio.transform(),
             (3.0, 0.0, 425500.68381405267, 0.0, -3.0, 4615477.040546387, 0.0, 0.0, 1.0),
         )
+        # check for variables without spatial dims
         times = numpy.arange(6)
         x = numpy.linspace(425493.18381405, 425532.18381405, num=6)
         y = numpy.linspace(4615295.54054639, 4615514.54054639, num=6)
