@@ -489,10 +489,10 @@ def test_clip_geojson(open_func, from_disk):
 @pytest.mark.parametrize(
     "invert, from_disk, expected_sum",
     [
-        (False, False, 2150801411),  # 2150837592),
-        (True, False, 535727386),  # 535691205),
-        (False, True, 2150801411),  # 2150837592),
-        (True, True, 535727386),  # 535691205),
+        (False, False, 2150837592),
+        (True, False, 535691205),
+        (False, True, 2150837592),
+        (True, True, 535691205),
     ],
 )
 @pytest.mark.parametrize(

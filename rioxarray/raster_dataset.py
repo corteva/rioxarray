@@ -218,8 +218,7 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            if hasattr(self._obj[var], self.x_dim) \
-                    and hasattr(self._obj[var], self.y_dim):
+            if self.x_dim in self._obj[var].dims and self.y_dim in self._obj[var].dims:
                 clipped_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(
@@ -303,8 +302,7 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            if hasattr(self._obj[var], self.x_dim) \
-                    and hasattr(self._obj[var], self.y_dim):
+            if self.x_dim in self._obj[var].dims and self.y_dim in self._obj[var].dims:
                 clipped_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(
