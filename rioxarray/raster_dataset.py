@@ -191,7 +191,7 @@ class RasterDataset(XRasterBase):
         )
 
     def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
-        """Clip the :class:`xarray.Dataset` by a bounding box.
+        """Clip the :class:`xarray.Dataset` by a bounding box in dimensions 'x'/'y'.
 
         .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
 
@@ -249,7 +249,7 @@ class RasterDataset(XRasterBase):
         from_disk=False,
     ):
         """
-        Crops a :class:`xarray.Dataset` by geojson like geometry dicts.
+        Crops a :class:`xarray.Dataset` by geojson like geometry dicts in dimensions 'x'/'y'.
 
         .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
 
