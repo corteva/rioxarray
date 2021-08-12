@@ -21,6 +21,7 @@ from rioxarray.exceptions import (
     DimensionMissingCoordinateError,
     InvalidDimensionOrder,
     MissingCRS,
+    MissingSpatialDimensionError,
     NoDataInBounds,
     OneDimensionalRaster,
     RioXarrayError,
@@ -123,6 +124,34 @@ def _get_data_var_message(obj):
         return f" Data variable: {obj.name}" if obj.name else ""
     except AttributeError:
         return ""
+
+
+def _get_spatial_dims(obj: xarray.Dataset, var: str):
+    """
+    Retrieve the spatial dimensions of the dataset
+    """
+    try:
+        return obj[var].rio.x_dim, obj[var].rio.y_dim
+    except MissingSpatialDimensionError as err:
+        try:
+            obj[var].rio.set_spatial_dims(
+                x_dim=obj.rio.x_dim, y_dim=obj.rio.x_dim, inplace=True
+            )
+            return obj.rio.x_dim, obj.rio.y_dim
+        except MissingSpatialDimensionError:
+            raise err from None
+
+
+def _has_spatial_dims(obj: xarray.Dataset, var: str):
+    """
+    Check to see if the variable in the Dataset has spatial dimensions
+    """
+    try:
+        # pylint: disable=pointless-statement
+        _get_spatial_dims(obj, var)
+    except MissingSpatialDimensionError:
+        return False
+    return True
 
 
 class XRasterBase:
@@ -260,11 +289,7 @@ class XRasterBase:
         if hasattr(self._obj, "data_vars"):
             grid_mappings = set()
             for var in self._obj.data_vars:
-                try:
-                    # pylint: disable=pointless-statement
-                    self._obj[var].rio.x_dim
-                    self._obj[var].rio.y_dim
-                except DimensionError:
+                if not _has_spatial_dims(self._obj, var):
                     continue
                 var_grid_mapping = self._obj[var].encoding.get(
                     "grid_mapping", self._obj[var].attrs.get("grid_mapping")
@@ -296,11 +321,9 @@ class XRasterBase:
         if hasattr(data_obj, "data_vars"):
             for var in data_obj.data_vars:
                 try:
-                    x_dim = data_obj[var].rio.x_dim
-                    y_dim = data_obj[var].rio.y_dim
-                except DimensionError:
+                    x_dim, y_dim = _get_spatial_dims(data_obj, var)
+                except MissingSpatialDimensionError:
                     continue
-
                 # remove grid_mapping from attributes if it exists
                 # and update the grid_mapping in encoding
                 new_attrs = dict(data_obj[var].attrs)
@@ -704,13 +727,13 @@ class XRasterBase:
         if x_dim in data_obj.dims:
             data_obj.rio._x_dim = x_dim
         else:
-            raise DimensionError(
+            raise MissingSpatialDimensionError(
                 f"x dimension ({x_dim}) not found.{_get_data_var_message(data_obj)}"
             )
         if y_dim in data_obj.dims:
             data_obj.rio._y_dim = y_dim
         else:
-            raise DimensionError(
+            raise MissingSpatialDimensionError(
                 f"y dimension ({y_dim}) not found.{_get_data_var_message(data_obj)}"
             )
         return data_obj
@@ -720,7 +743,7 @@ class XRasterBase:
         """str: The dimension for the X-axis."""
         if self._x_dim is not None:
             return self._x_dim
-        raise DimensionError(
+        raise MissingSpatialDimensionError(
             "x dimension not found. 'rio.set_spatial_dims()' or "
             "using 'rename()' to change the dimension name to 'x' can address this."
             f"{_get_data_var_message(self._obj)}"
@@ -731,7 +754,7 @@ class XRasterBase:
         """str: The dimension for the Y-axis."""
         if self._y_dim is not None:
             return self._y_dim
-        raise DimensionError(
+        raise MissingSpatialDimensionError(
             "y dimension not found. 'rio.set_spatial_dims()' or "
             "using 'rename()' to change the dimension name to 'y' can address this."
             f"{_get_data_var_message(self._obj)}"
