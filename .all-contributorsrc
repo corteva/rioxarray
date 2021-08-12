@@ -203,6 +203,18 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "MarkusZehner",
+      "name": "Markus Zehner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56972144?v=4",
+      "profile": "https://github.com/MarkusZehner",
+      "contributions": [
+        "bug",
+        "code",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
