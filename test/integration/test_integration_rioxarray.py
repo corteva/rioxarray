@@ -411,24 +411,6 @@ def test_slice_xy(modis_clip):
         clipped_ds.to_netcdf(modis_clip["output"])
 
 
-@pytest.fixture
-def geometries():
-    return [
-        {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [425499.18381405267, 4615331.540546387],
-                    [425499.18381405267, 4615478.540546387],
-                    [425526.18381405267, 4615478.540546387],
-                    [425526.18381405267, 4615331.540546387],
-                    [425499.18381405267, 4615331.540546387],
-                ]
-            ],
-        }
-    ]
-
-
 @pytest.mark.parametrize("from_disk", [True, False])
 @pytest.mark.parametrize(
     "open_func",
@@ -441,7 +423,7 @@ def geometries():
         partial(open_rasterio_engine, parse_coordinates=False, mask_and_scale=False),
     ],
 )
-def test_clip_geojson(open_func, from_disk, geometries):
+def test_clip_geojson(open_func, from_disk):
     with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
     ) as xdi:
@@ -457,6 +439,20 @@ def test_clip_geojson(open_func, from_disk, geometries):
         if comp_subset.rio.encoded_nodata is None:
             comp_subset.rio.write_nodata(comp_subset.rio.nodata, inplace=True)
 
+        geometries = [
+            {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [425499.18381405267, 4615331.540546387],
+                        [425499.18381405267, 4615478.540546387],
+                        [425526.18381405267, 4615478.540546387],
+                        [425526.18381405267, 4615331.540546387],
+                        [425499.18381405267, 4615331.540546387],
+                    ]
+                ],
+            }
+        ]
         # test data array
         clipped = xdi.rio.clip(geometries, from_disk=from_disk)
         if from_disk and not isinstance(clipped, xarray.Dataset):
@@ -506,10 +502,24 @@ def test_clip_geojson(open_func, from_disk, geometries):
         partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
-def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum, geometries):
+def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum):
     with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
+        geometries = [
+            {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [-93.880889448126, 41.68465068553298],
+                        [-93.89966980835203, 41.68465068553298],
+                        [-93.89966980835203, 41.689430423525266],
+                        [-93.880889448126, 41.689430423525266],
+                        [-93.880889448126, 41.68465068553298],
+                    ]
+                ],
+            }
+        ]
         # test data array
         clipped = xdi.rio.clip(
             geometries, "epsg:4326", drop=False, invert=invert, from_disk=from_disk
@@ -532,18 +542,15 @@ def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum, geome
 
 @pytest.fixture
 def dummy_dataset_non_geospatial():
-    times = numpy.arange(6)
-    x = numpy.linspace(425493.18381405, 425532.18381405, num=6)
-    y = numpy.linspace(4615295.54054639, 4615514.54054639, num=6)
     ds = xarray.Dataset(
         {
             "stuff": xarray.DataArray(
                 data=numpy.zeros((6, 6, 6), dtype=float),
                 dims=["time", "x", "y"],
                 coords={
-                    "time": times,
-                    "x": x,
-                    "y": y,
+                    "time": numpy.arange(6),
+                    "x": numpy.linspace(425493.18381405, 425532.18381405, num=6),
+                    "y": numpy.linspace(4615295.54054639, 4615514.54054639, num=6),
                 },
             )
         }
@@ -554,8 +561,22 @@ def dummy_dataset_non_geospatial():
     return ds
 
 
-def test_clip__non_geospatial(dummy_dataset_non_geospatial, geometries):
+def test_clip__non_geospatial(dummy_dataset_non_geospatial):
     # check for variables without spatial dims
+    geometries = [
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [425499.18381405267, 4615331.540546387],
+                    [425499.18381405267, 4615478.540546387],
+                    [425526.18381405267, 4615478.540546387],
+                    [425526.18381405267, 4615331.540546387],
+                    [425499.18381405267, 4615331.540546387],
+                ]
+            ],
+        }
+    ]
     ds = dummy_dataset_non_geospatial
     assert ds.stuff.shape == (6, 6, 6)
     ds_clip = ds.rio.clip(geometries)
