@@ -8,8 +8,9 @@ import numpy as np
 import xarray
 from rasterio.enums import Resampling
 
-from rioxarray.exceptions import RioXarrayError
-from rioxarray.rioxarray import XRasterBase
+from rioxarray._options import SKIP_MISSING_SPATIAL_DIMS, get_option
+from rioxarray.exceptions import MissingSpatialDimensionError, RioXarrayError
+from rioxarray.rioxarray import XRasterBase, _get_spatial_dims
 
 
 @xarray.register_dataset_accessor("rio")
@@ -65,6 +66,7 @@ class RasterDataset(XRasterBase):
         Reproject :class:`xarray.Dataset` objects
 
         .. note:: Only 2D/3D arrays with dimensions 'x'/'y' are currently supported.
+            Others are appended as is.
             Requires either a grid mapping variable with 'spatial_ref' or
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
@@ -106,19 +108,27 @@ class RasterDataset(XRasterBase):
         """
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            resampled_dataset[var] = (
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.reproject(
-                    dst_crs,
-                    resolution=resolution,
-                    shape=shape,
-                    transform=transform,
-                    resampling=resampling,
-                    nodata=nodata,
-                    **kwargs,
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                resampled_dataset[var] = (
+                    self._obj[var]
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
+                    .rio.reproject(
+                        dst_crs,
+                        resolution=resolution,
+                        shape=shape,
+                        transform=transform,
+                        resampling=resampling,
+                        nodata=nodata,
+                        **kwargs,
+                    )
                 )
-            )
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                resampled_dataset[var] = self._obj[var].copy()
         return resampled_dataset
 
     def reproject_match(self, match_data_array, resampling=Resampling.nearest):
@@ -127,6 +137,7 @@ class RasterDataset(XRasterBase):
         and region of another DataArray.
 
         .. note:: Only 2D/3D arrays with dimensions 'x'/'y' are currently supported.
+            Others are appended as is.
             Requires either a grid mapping variable with 'spatial_ref' or
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
@@ -148,11 +159,19 @@ class RasterDataset(XRasterBase):
         """
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            resampled_dataset[var] = (
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.reproject_match(match_data_array, resampling=resampling)
-            )
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                resampled_dataset[var] = (
+                    self._obj[var]
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
+                    .rio.reproject_match(match_data_array, resampling=resampling)
+                )
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                resampled_dataset[var] = self._obj[var].copy()
         return resampled_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
@@ -162,6 +181,8 @@ class RasterDataset(XRasterBase):
 
         .. warning:: Only works if all variables in the dataset have the
                      same coordinates.
+
+        .. warning:: Pads variables that have dimensions 'x'/'y'. Others are appended as is.
 
         Parameters
         ----------
@@ -181,11 +202,19 @@ class RasterDataset(XRasterBase):
         """
         padded_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            padded_dataset[var] = (
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.pad_box(minx, miny, maxx, maxy)
-            )
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                padded_dataset[var] = (
+                    self._obj[var]
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
+                    .rio.pad_box(minx, miny, maxx, maxy)
+                )
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                padded_dataset[var] = self._obj[var].copy()
         return padded_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
@@ -218,12 +247,11 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            if self.x_dim in self._obj[var].dims and self.y_dim in self._obj[var].dims:
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
                 clipped_dataset[var] = (
                     self._obj[var]
-                    .rio.set_spatial_dims(
-                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-                    )
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
                     .rio.clip_box(
                         minx,
                         miny,
@@ -233,8 +261,12 @@ class RasterDataset(XRasterBase):
                         auto_expand_limit=auto_expand_limit,
                     )
                 )
-            else:
-                clipped_dataset[var] = self._obj[var]
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                clipped_dataset[var] = self._obj[var].copy()
         return clipped_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
@@ -302,12 +334,11 @@ class RasterDataset(XRasterBase):
         """
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            if self.x_dim in self._obj[var].dims and self.y_dim in self._obj[var].dims:
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
                 clipped_dataset[var] = (
                     self._obj[var]
-                    .rio.set_spatial_dims(
-                        x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-                    )
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
                     .rio.clip(
                         geometries,
                         crs=crs,
@@ -317,8 +348,12 @@ class RasterDataset(XRasterBase):
                         from_disk=from_disk,
                     )
                 )
-            else:
-                clipped_dataset[var] = self._obj[var]
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                clipped_dataset[var] = self._obj[var].copy()
         return clipped_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
@@ -326,6 +361,8 @@ class RasterDataset(XRasterBase):
     def interpolate_na(self, method="nearest"):
         """
         This method uses `scipy.interpolate.griddata` to interpolate missing data.
+
+        .. warning:: Interpolates variables that have dimensions 'x'/'y'. Others are appended as is.
 
         Parameters
         ----------
@@ -339,11 +376,19 @@ class RasterDataset(XRasterBase):
         """
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            interpolated_dataset[var] = (
-                self._obj[var]
-                .rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
-                .rio.interpolate_na(method=method)
-            )
+            try:
+                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                interpolated_dataset[var] = (
+                    self._obj[var]
+                    .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
+                    .rio.interpolate_na(method=method)
+                )
+            except MissingSpatialDimensionError:
+                if len(self._obj[var].dims) >= 2 and not get_option(
+                    SKIP_MISSING_SPATIAL_DIMS
+                ):
+                    raise
+                interpolated_dataset[var] = self._obj[var].copy()
         return interpolated_dataset.rio.set_spatial_dims(
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )

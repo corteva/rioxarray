@@ -4,6 +4,7 @@ History
 Latest
 ------
 - BUG: `rio.clip` and `rio.clip_box` skip non-geospatial arrays in datasets when clipping (pull #392)
+- ENH: Add option for users to skip variables without spatial dimensions (pull #395)
 
 0.6.1
 ------

@@ -19,6 +19,10 @@ class DimensionError(RioXarrayError):
     """This is raised when there are more dimensions than is supported by the method"""
 
 
+class MissingSpatialDimensionError(DimensionError):
+    """This is raised when the dimension cannot be found"""
+
+
 class TooManyDimensions(DimensionError):
     """This is raised when there are more dimensions than is supported by the method"""
 

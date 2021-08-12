@@ -21,9 +21,9 @@ from rasterio.windows import Window
 
 import rioxarray
 from rioxarray.exceptions import (
-    DimensionError,
     DimensionMissingCoordinateError,
     MissingCRS,
+    MissingSpatialDimensionError,
     NoDataInBounds,
     OneDimensionalRaster,
     RioXarrayError,
@@ -546,18 +546,29 @@ def dummy_dataset_non_geospatial():
         {
             "stuff": xarray.DataArray(
                 data=numpy.zeros((6, 6, 6), dtype=float),
-                dims=["time", "x", "y"],
+                dims=["time", "y", "x"],
                 coords={
                     "time": numpy.arange(6),
+                    "y": numpy.linspace(4615514.54054639, 4615295.54054639, num=6),
                     "x": numpy.linspace(425493.18381405, 425532.18381405, num=6),
-                    "y": numpy.linspace(4615295.54054639, 4615514.54054639, num=6),
                 },
-            )
+                attrs={
+                    "_FillValue": -1,
+                },
+            ),
+            "non_geo_stuff": xarray.DataArray(
+                data=numpy.zeros((6, 6), dtype=float),
+                dims=["time", "bb"],
+                coords={
+                    "time": numpy.arange(6),
+                    "bb": numpy.arange(6),
+                },
+            ),
+            "meta": ("time", numpy.random.random(6)),
         }
     )
     ds.rio.set_spatial_dims(x_dim="x", y_dim="y", inplace=True)
     ds.rio.write_crs("EPSG:26915", inplace=True)
-    ds["meta"] = ("time", numpy.random.random(6))
     return ds
 
 
@@ -579,22 +590,132 @@ def test_clip__non_geospatial(dummy_dataset_non_geospatial):
     ]
     ds = dummy_dataset_non_geospatial
     assert ds.stuff.shape == (6, 6, 6)
-    ds_clip = ds.rio.clip(geometries)
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.clip(geometries)
+
+    ds_clip = ds[["stuff", "meta"]].rio.clip(geometries)
     assert ds_clip.stuff.shape == (6, 4, 4)
     assert "meta" in ds_clip.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_clip = ds.rio.clip(geometries)
+        assert ds_clip.stuff.shape == (6, 4, 4)
+        assert "meta" in ds_clip.data_vars
+        assert "non_geo_stuff" in ds_clip.data_vars
 
 
 def test_clip_box__non_geospatial(dummy_dataset_non_geospatial):
     ds = dummy_dataset_non_geospatial
     assert ds.stuff.shape == (6, 6, 6)
-    ds_clip_box = ds.rio.clip_box(
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.clip_box(
+            minx=425500.18381405,
+            miny=4615395.54054639,
+            maxx=425520.18381405,
+            maxy=4615414.54054639,
+        )
+
+    ds_clip_box = ds[["stuff", "meta"]].rio.clip_box(
         minx=425500.18381405,
         miny=4615395.54054639,
         maxx=425520.18381405,
         maxy=4615414.54054639,
     )
-    assert ds_clip_box.stuff.shape == (6, 3, 2)
+    assert ds_clip_box.stuff.shape == (6, 2, 3)
     assert "meta" in ds_clip_box.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_clip_box = ds.rio.clip_box(
+            minx=425500.18381405,
+            miny=4615395.54054639,
+            maxx=425520.18381405,
+            maxy=4615414.54054639,
+        )
+        assert ds_clip_box.stuff.shape == (6, 2, 3)
+        assert "meta" in ds_clip_box.data_vars
+        assert "non_geo_stuff" in ds_clip_box.data_vars
+
+
+def test_reproject__non_geospatial(dummy_dataset_non_geospatial):
+    ds = dummy_dataset_non_geospatial
+    assert ds.stuff.shape == (6, 6, 6)
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.reproject("EPSG:4326")
+
+    ds_reproject = ds[["stuff", "meta"]].rio.reproject("EPSG:4326")
+    assert ds_reproject.stuff.shape == (6, 8, 2)
+    assert "meta" in ds_reproject.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_reproject = ds.rio.reproject("EPSG:4326")
+        assert ds_reproject.stuff.shape == (6, 8, 2)
+        assert "meta" in ds_reproject.data_vars
+        assert "non_geo_stuff" in ds_reproject.data_vars
+
+
+def test_reproject_match__non_geospatial(dummy_dataset_non_geospatial):
+    ds = dummy_dataset_non_geospatial
+    assert ds.stuff.shape == (6, 6, 6)
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.reproject_match(ds)
+
+    ds_reproject = ds[["stuff", "meta"]].rio.reproject_match(ds)
+    assert ds_reproject.stuff.shape == (6, 6, 6)
+    assert "meta" in ds_reproject.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_reproject = ds.rio.reproject_match(ds)
+        assert ds_reproject.stuff.shape == (6, 6, 6)
+        assert "meta" in ds_reproject.data_vars
+        assert "non_geo_stuff" in ds_reproject.data_vars
+
+
+def test_interpolate_na__non_geospatial(dummy_dataset_non_geospatial):
+    ds = dummy_dataset_non_geospatial
+    assert ds.stuff.shape == (6, 6, 6)
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.interpolate_na()
+
+    ds_interp = ds[["stuff", "meta"]].rio.interpolate_na()
+    assert ds_interp.stuff.shape == (6, 6, 6)
+    assert "meta" in ds_interp.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_interp = ds.rio.interpolate_na()
+        assert ds_interp.stuff.shape == (6, 6, 6)
+        assert "meta" in ds_interp.data_vars
+        assert "non_geo_stuff" in ds_interp.data_vars
+
+
+def test_pad_box__non_geospatial(dummy_dataset_non_geospatial):
+    ds = dummy_dataset_non_geospatial
+    assert ds.stuff.shape == (6, 6, 6)
+    with pytest.raises(MissingSpatialDimensionError):
+        ds.rio.pad_box(*ds.rio.bounds())
+
+    ds_pad_box = (
+        ds[["stuff", "meta"]]
+        .rio.clip_box(
+            minx=425500.18381405,
+            miny=4615395.54054639,
+            maxx=425520.18381405,
+            maxy=4615414.54054639,
+        )
+        .rio.pad_box(*ds.rio.bounds())
+    )
+    assert ds_pad_box.stuff.shape == (6, 6, 6)
+    assert "meta" in ds_pad_box.data_vars
+
+    with rioxarray.set_options(skip_missing_spatial_dims=True):
+        ds_pad_box = ds.rio.clip_box(
+            minx=425500.18381405,
+            miny=4615395.54054639,
+            maxx=425520.18381405,
+            maxy=4615414.54054639,
+        ).rio.pad_box(*ds.rio.bounds())
+        assert ds_pad_box.stuff.shape == (6, 6, 6)
+        assert "meta" in ds_pad_box.data_vars
+        assert "non_geo_stuff" in ds_pad_box.data_vars
 
 
 @pytest.mark.parametrize(
@@ -1542,18 +1663,18 @@ def test_to_raster__different_dtype(tmp_path, windowed):
 
 def test_missing_spatial_dimensions():
     test_ds = xarray.Dataset()
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_ds.rio.shape
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_ds.rio.width
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_ds.rio.height
     test_da = xarray.DataArray(1)
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.shape
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.width
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.height
 
 
@@ -1569,11 +1690,11 @@ def test_set_spatial_dims():
     assert test_da_copy.rio.width == 5
     assert test_da_copy.rio.height == 5
     assert test_da_copy.rio.shape == (5, 5)
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.shape
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.width
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.height
 
     test_da.rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=True)
@@ -1586,14 +1707,14 @@ def test_set_spatial_dims():
 
 def test_set_spatial_dims__missing():
     test_ds = xarray.Dataset()
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_ds.rio.set_spatial_dims(x_dim="lon", y_dim="lat")
     test_da = xarray.DataArray(
         numpy.zeros((5, 5)),
         dims=("lat", "lon"),
         coords={"lat": numpy.arange(1, 6), "lon": numpy.arange(2, 7)},
     )
-    with pytest.raises(DimensionError):
+    with pytest.raises(MissingSpatialDimensionError):
         test_da.rio.set_spatial_dims(x_dim="long", y_dim="lati")
 
 
@@ -2215,9 +2336,11 @@ def test_nonstandard_dims_error_msg():
     ) as xds:
         xds.coords["lon"].attrs = {}
         xds.coords["lat"].attrs = {}
-        with pytest.raises(DimensionError, match="x dimension not found"):
+        with pytest.raises(MissingSpatialDimensionError, match="x dimension not found"):
             xds.rio.width
-        with pytest.raises(DimensionError, match="Data variable: analysed_sst"):
+        with pytest.raises(
+            MissingSpatialDimensionError, match="Data variable: analysed_sst"
+        ):
             xds.analysed_sst.rio.width
 
 

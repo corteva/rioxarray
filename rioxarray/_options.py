@@ -9,9 +9,11 @@ Source file: https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db1450
 from typing import Any
 
 EXPORT_GRID_MAPPING = "export_grid_mapping"
+SKIP_MISSING_SPATIAL_DIMS = "skip_missing_spatial_dims"
 
 OPTIONS = {
     EXPORT_GRID_MAPPING: True,
+    SKIP_MISSING_SPATIAL_DIMS: False,
 }
 OPTION_NAMES = set(OPTIONS)
 
@@ -23,6 +25,8 @@ VALIDATORS = {
 def get_option(key: str) -> Any:
     """
     Get the global rioxarray option.
+
+    .. versionadded:: 0.3.0
 
     Parameters
     ----------
@@ -40,15 +44,22 @@ class set_options:  # pylint: disable=invalid-name
     """
     Set the global rioxarray option.
 
+    .. versionadded:: 0.3.0
+    .. versionadded:: 0.7.0 skip_missing_spatial_dims
+
     Parameters
     ----------
-    export_grid_mapping: bool, optional
+    export_grid_mapping: bool, default=True
         If True, this option will export the full Climate and Forecasts (CF)
         grid mapping attributes for the CRS. This is useful if you are exporting
         your file to netCDF using :meth:`xarray.Dataset.to_netcdf()`. When disabled,
         only the ``crs_wkt`` and ``spatial_ref`` attributes will be written and the
         program will be faster due to not needing to use
-        :meth:`pyproj.CRS.to_cf() <pyproj.crs.CRS.to_cf>`. Default is True.
+        :meth:`pyproj.CRS.to_cf() <pyproj.crs.CRS.to_cf>`.
+    skip_missing_spatial_dims: bool, default=False
+        If True, it will not perform spatial operations on variables
+        within a :class:`xarray.Dataset` if the spatial dimensions
+        are not found.
 
 
     Usage as a context manager::
