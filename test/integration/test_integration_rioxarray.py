@@ -1064,7 +1064,7 @@ def test_interpolate_na(interpolate_na):
 
 
 @pytest.mark.xfail(
-    LooseVersion(scipy.__version__) < LooseVersion("1.5.0")
+    LooseVersion(scipy.__version__) < LooseVersion("1.7.0")
     or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
