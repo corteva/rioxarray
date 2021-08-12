@@ -540,22 +540,7 @@ def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum):
         assert clipped_ds.test_data.rio.nodata == xdi.rio.nodata
 
 
-def test_clip_clip_box__non_geospatial():
-    # check for variables without spatial dims
-    geometries = [
-        {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [425499.18381405267, 4615331.540546387],
-                    [425499.18381405267, 4615478.540546387],
-                    [425526.18381405267, 4615478.540546387],
-                    [425526.18381405267, 4615331.540546387],
-                    [425499.18381405267, 4615331.540546387],
-                ]
-            ],
-        }
-    ]
+def dummy_dataset_non_geospatial():
     times = numpy.arange(6)
     x = numpy.linspace(425493.18381405, 425532.18381405, num=6)
     y = numpy.linspace(4615295.54054639, 4615514.54054639, num=6)
@@ -575,11 +560,34 @@ def test_clip_clip_box__non_geospatial():
     ds.rio.set_spatial_dims(x_dim="x", y_dim="y", inplace=True)
     ds.rio.write_crs("EPSG:26915", inplace=True)
     ds["meta"] = ("time", numpy.random.random(6))
+    return ds
 
+
+def test_clip__non_geospatial():
+    # check for variables without spatial dims
+    geometries = [
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [425499.18381405267, 4615331.540546387],
+                    [425499.18381405267, 4615478.540546387],
+                    [425526.18381405267, 4615478.540546387],
+                    [425526.18381405267, 4615331.540546387],
+                    [425499.18381405267, 4615331.540546387],
+                ]
+            ],
+        }
+    ]
+    ds = dummy_dataset_non_geospatial()
     assert ds.stuff.shape == (6, 6, 6)
     ds_clip = ds.rio.clip(geometries)
     assert ds_clip.stuff.shape == (6, 4, 4)
     assert "meta" in ds_clip.data_vars
+
+
+def test_clip_box__non_geospatial():
+    ds = dummy_dataset_non_geospatial()
     ds_clip_box = ds.rio.clip_box(
         minx=425500.18381405,
         miny=4615395.54054639,
