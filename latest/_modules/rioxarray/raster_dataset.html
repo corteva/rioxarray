@@ -176,8 +176,9 @@
 <span class="kn">import</span> <span class="nn">xarray</span>
 <span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
 
-<span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">RioXarrayError</span>
-<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span>
+<span class="kn">from</span> <span class="nn">rioxarray._options</span> <span class="kn">import</span> <span class="n">SKIP_MISSING_SPATIAL_DIMS</span><span class="p">,</span> <span class="n">get_option</span>
+<span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">MissingSpatialDimensionError</span><span class="p">,</span> <span class="n">RioXarrayError</span>
+<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span><span class="p">,</span> <span class="n">_get_spatial_dims</span>
 
 
 <div class="viewcode-block" id="RasterDataset"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
@@ -233,6 +234,7 @@
 <span class="sd">        Reproject :class:`xarray.Dataset` objects</span>
 
 <span class="sd">        .. note:: Only 2D/3D arrays with dimensions &#39;x&#39;/&#39;y&#39; are currently supported.</span>
+<span class="sd">            Others are appended as is.</span>
 <span class="sd">            Requires either a grid mapping variable with &#39;spatial_ref&#39; or</span>
 <span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
@@ -274,19 +276,27 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">resampled_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
-                    <span class="n">dst_crs</span><span class="p">,</span>
-                    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-                    <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-                    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
-                    <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
-                    <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+                        <span class="n">dst_crs</span><span class="p">,</span>
+                        <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+                        <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
+                        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span></div>
 
 <div class="viewcode-block" id="RasterDataset.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
@@ -295,6 +305,7 @@
 <span class="sd">        and region of another DataArray.</span>
 
 <span class="sd">        .. note:: Only 2D/3D arrays with dimensions &#39;x&#39;/&#39;y&#39; are currently supported.</span>
+<span class="sd">            Others are appended as is.</span>
 <span class="sd">            Requires either a grid mapping variable with &#39;spatial_ref&#39; or</span>
 <span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
@@ -316,11 +327,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">resampled_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
@@ -330,6 +349,8 @@
 
 <span class="sd">        .. warning:: Only works if all variables in the dataset have the</span>
 <span class="sd">                     same coordinates.</span>
+
+<span class="sd">        .. warning:: Pads variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -349,11 +370,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">padded_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">padded_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
@@ -386,12 +415,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
                 <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-                        <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip_box</span><span class="p">(</span>
                         <span class="n">minx</span><span class="p">,</span>
                         <span class="n">miny</span><span class="p">,</span>
@@ -401,8 +429,12 @@
                         <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
@@ -470,12 +502,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
                 <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-                        <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
                         <span class="n">geometries</span><span class="p">,</span>
                         <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
@@ -485,8 +516,12 @@
                         <span class="n">from_disk</span><span class="o">=</span><span class="n">from_disk</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
@@ -494,6 +529,8 @@
 <div class="viewcode-block" id="RasterDataset.interpolate_na"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.interpolate_na">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method uses `scipy.interpolate.griddata` to interpolate missing data.</span>
+
+<span class="sd">        .. warning:: Interpolates variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -507,11 +544,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">interpolated_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>

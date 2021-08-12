@@ -189,6 +189,7 @@
     <span class="n">DimensionMissingCoordinateError</span><span class="p">,</span>
     <span class="n">InvalidDimensionOrder</span><span class="p">,</span>
     <span class="n">MissingCRS</span><span class="p">,</span>
+    <span class="n">MissingSpatialDimensionError</span><span class="p">,</span>
     <span class="n">NoDataInBounds</span><span class="p">,</span>
     <span class="n">OneDimensionalRaster</span><span class="p">,</span>
     <span class="n">RioXarrayError</span><span class="p">,</span>
@@ -291,6 +292,34 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot; Data variable: </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_get_spatial_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the spatial dimensions of the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
+    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                <span class="n">x_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
+        <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">err</span> <span class="kn">from</span> <span class="bp">None</span>
+
+
+<span class="k">def</span> <span class="nf">_has_spatial_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check to see if the variable in the Dataset has spatial dimensions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># pylint: disable=pointless-statement</span>
+        <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
@@ -428,11 +457,7 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
             <span class="n">grid_mappings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="c1"># pylint: disable=pointless-statement</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
-                <span class="k">except</span> <span class="n">DimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="n">var_grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
@@ -464,11 +489,9 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">x_dim</span> <span class="o">=</span> <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span>
-                    <span class="n">y_dim</span> <span class="o">=</span> <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
-                <span class="k">except</span> <span class="n">DimensionError</span><span class="p">:</span>
+                    <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
                     <span class="k">continue</span>
-
                 <span class="c1"># remove grid_mapping from attributes if it exists</span>
                 <span class="c1"># and update the grid_mapping in encoding</span>
                 <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
@@ -872,13 +895,13 @@
         <span class="k">if</span> <span class="n">x_dim</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
             <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">x_dim</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;x dimension (</span><span class="si">{</span><span class="n">x_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">data_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">y_dim</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
             <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">y_dim</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;y dimension (</span><span class="si">{</span><span class="n">y_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">data_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
@@ -888,7 +911,7 @@
         <span class="sd">&quot;&quot;&quot;str: The dimension for the X-axis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span>
-        <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
             <span class="s2">&quot;x dimension not found. &#39;rio.set_spatial_dims()&#39; or &quot;</span>
             <span class="s2">&quot;using &#39;rename()&#39; to change the dimension name to &#39;x&#39; can address this.&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -899,7 +922,7 @@
         <span class="sd">&quot;&quot;&quot;str: The dimension for the Y-axis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span>
-        <span class="k">raise</span> <span class="n">DimensionError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
             <span class="s2">&quot;y dimension not found. &#39;rio.set_spatial_dims()&#39; or &quot;</span>
             <span class="s2">&quot;using &#39;rename()&#39; to change the dimension name to &#39;y&#39; can address this.&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>

@@ -364,16 +364,28 @@ If not set, uses the nodata value in the first input Dataset.</li>
 <dt id="rioxarray.set_options">
 <em class="property">class </em><code class="descclassname">rioxarray.</code><code class="descname">set_options</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/_options.html#set_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.set_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the global rioxarray option.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.3.0.</span></p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.7.0: </span>skip_missing_spatial_dims</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>export_grid_mapping</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, this option will export the full Climate and Forecasts (CF)
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>export_grid_mapping</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, this option will export the full Climate and Forecasts (CF)
 grid mapping attributes for the CRS. This is useful if you are exporting
 your file to netCDF using <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html#xarray.Dataset.to_netcdf" title="(in xarray v0.19.1.dev6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf()</span></code></a>. When disabled,
 only the <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> attributes will be written and the
 program will be faster due to not needing to use
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.1.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>. Default is True.</td>
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.1.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>.</li>
+<li><strong>skip_missing_spatial_dims</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, it will not perform spatial operations on variables
+within a <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> if the spatial dimensions
+are not found.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1460,6 +1472,10 @@ an exception.</li>
 <dt id="rioxarray.raster_dataset.RasterDataset.interpolate_na">
 <code class="descname">interpolate_na</code><span class="sig-paren">(</span><em>method='nearest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.interpolate_na" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method uses <cite>scipy.interpolate.griddata</cite> to interpolate missing data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Interpolates variables that have dimensions ‘x’/’y’. Others are appended as is.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1482,6 +1498,10 @@ an exception.</li>
 <p class="first admonition-title">Warning</p>
 <p class="last">Only works if all variables in the dataset have the
 same coordinates.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Pads variables that have dimensions ‘x’/’y’. Others are appended as is.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1512,6 +1532,7 @@ same coordinates.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Others are appended as is.
 Requires either a grid mapping variable with ‘spatial_ref’ or
 a ‘crs’ attribute to be set containing a valid CRS.
 If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
@@ -1567,6 +1588,7 @@ and region of another DataArray.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
+Others are appended as is.
 Requires either a grid mapping variable with ‘spatial_ref’ or
 a ‘crs’ attribute to be set containing a valid CRS.
 If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
@@ -1681,6 +1703,13 @@ is True. Otherwise None is returned.</p>
 <em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">MissingCRS</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#MissingCRS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.MissingCRS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.RioXarrayError</span></code></a></p>
 <p>Missing the CRS in the dataset.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rioxarray.exceptions.MissingSpatialDimensionError">
+<em class="property">exception </em><code class="descclassname">rioxarray.exceptions.</code><code class="descname">MissingSpatialDimensionError</code><a class="reference internal" href="_modules/rioxarray/exceptions.html#MissingSpatialDimensionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.exceptions.MissingSpatialDimensionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.DimensionError" title="rioxarray.exceptions.DimensionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">rioxarray.exceptions.DimensionError</span></code></a></p>
+<p>This is raised when the dimension cannot be found</p>
 </dd></dl>
 
 <dl class="exception">

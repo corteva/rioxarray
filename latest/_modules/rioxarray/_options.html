@@ -177,9 +177,11 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="n">EXPORT_GRID_MAPPING</span> <span class="o">=</span> <span class="s2">&quot;export_grid_mapping&quot;</span>
+<span class="n">SKIP_MISSING_SPATIAL_DIMS</span> <span class="o">=</span> <span class="s2">&quot;skip_missing_spatial_dims&quot;</span>
 
 <span class="n">OPTIONS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">EXPORT_GRID_MAPPING</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">OPTION_NAMES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">OPTIONS</span><span class="p">)</span>
 
@@ -191,6 +193,8 @@
 <span class="k">def</span> <span class="nf">get_option</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the global rioxarray option.</span>
+
+<span class="sd">    .. versionadded:: 0.3.0</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -208,15 +212,22 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the global rioxarray option.</span>
 
+<span class="sd">    .. versionadded:: 0.3.0</span>
+<span class="sd">    .. versionadded:: 0.7.0 skip_missing_spatial_dims</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    export_grid_mapping: bool, optional</span>
+<span class="sd">    export_grid_mapping: bool, default=True</span>
 <span class="sd">        If True, this option will export the full Climate and Forecasts (CF)</span>
 <span class="sd">        grid mapping attributes for the CRS. This is useful if you are exporting</span>
 <span class="sd">        your file to netCDF using :meth:`xarray.Dataset.to_netcdf()`. When disabled,</span>
 <span class="sd">        only the ``crs_wkt`` and ``spatial_ref`` attributes will be written and the</span>
 <span class="sd">        program will be faster due to not needing to use</span>
-<span class="sd">        :meth:`pyproj.CRS.to_cf() &lt;pyproj.crs.CRS.to_cf&gt;`. Default is True.</span>
+<span class="sd">        :meth:`pyproj.CRS.to_cf() &lt;pyproj.crs.CRS.to_cf&gt;`.</span>
+<span class="sd">    skip_missing_spatial_dims: bool, default=False</span>
+<span class="sd">        If True, it will not perform spatial operations on variables</span>
+<span class="sd">        within a :class:`xarray.Dataset` if the spatial dimensions</span>
+<span class="sd">        are not found.</span>
 
 
 <span class="sd">    Usage as a context manager::</span>
