@@ -35,7 +35,7 @@
         <script type="text/javascript" src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -1354,11 +1354,10 @@ with nodata. Default is False.</li>
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.clip">
 <code class="descname">clip</code><span class="sig-paren">(</span><em>geometries</em>, <em>crs=None</em>, <em>all_touched=False</em>, <em>drop=True</em>, <em>invert=False</em>, <em>from_disk=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops a <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> by geojson like geometry dicts.</p>
+<dd><p>Crops a <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> by geojson like geometry dicts in dimensions ‘x’/’y’.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Only works if all variables in the dataset have the same
-coordinates.</p>
+<p class="last">Clips variables that have dimensions ‘x’/’y’. Others are appended as is.</p>
 </div>
 <p>Powered by <cite>rasterio.features.geometry_mask</cite>.</p>
 <p class="rubric">Examples</p>
@@ -1388,7 +1387,7 @@ as the dataset.</li>
 <li><strong>all_touched</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
 false, only pixels whose center is within the polygon or that
 are selected by Bresenham’s line algorithm will be burned in.</li>
-<li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geoemtries
+<li><strong>drop</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drop the data outside of the extent of the mask geometries
 Otherwise, it will return the same raster with the data masked.
 Default is True.</li>
 <li><strong>invert</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If False, pixels that do not overlap shapes will be set as nodata.
@@ -1413,11 +1412,10 @@ Default is False.</li>
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.clip_box">
 <code class="descname">clip_box</code><span class="sig-paren">(</span><em>minx</em>, <em>miny</em>, <em>maxx</em>, <em>maxy</em>, <em>auto_expand=False</em>, <em>auto_expand_limit=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.clip_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.clip_box" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clip the <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> by a bounding box.</p>
+<dd><p>Clip the <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> by a bounding box in dimensions ‘x’/’y’.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Only works if all variables in the dataset have the
-same coordinates.</p>
+<p class="last">Clips variables that have dimensions ‘x’/’y’. Others are appended as is.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

@@ -35,7 +35,7 @@
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -359,10 +359,9 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterDataset.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.Dataset` by a bounding box.</span>
+        <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.Dataset` by a bounding box in dimensions &#39;x&#39;/&#39;y&#39;.</span>
 
-<span class="sd">        .. warning:: Only works if all variables in the dataset have the</span>
-<span class="sd">                     same coordinates.</span>
+<span class="sd">        .. warning:: Clips variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -387,18 +386,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip_box</span><span class="p">(</span>
-                    <span class="n">minx</span><span class="p">,</span>
-                    <span class="n">miny</span><span class="p">,</span>
-                    <span class="n">maxx</span><span class="p">,</span>
-                    <span class="n">maxy</span><span class="p">,</span>
-                    <span class="n">auto_expand</span><span class="o">=</span><span class="n">auto_expand</span><span class="p">,</span>
-                    <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                        <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip_box</span><span class="p">(</span>
+                        <span class="n">minx</span><span class="p">,</span>
+                        <span class="n">miny</span><span class="p">,</span>
+                        <span class="n">maxx</span><span class="p">,</span>
+                        <span class="n">maxy</span><span class="p">,</span>
+                        <span class="n">auto_expand</span><span class="o">=</span><span class="n">auto_expand</span><span class="p">,</span>
+                        <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
@@ -413,10 +417,9 @@
         <span class="n">from_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Crops a :class:`xarray.Dataset` by geojson like geometry dicts.</span>
+<span class="sd">        Crops a :class:`xarray.Dataset` by geojson like geometry dicts in dimensions &#39;x&#39;/&#39;y&#39;.</span>
 
-<span class="sd">        .. warning:: Only works if all variables in the dataset have the same</span>
-<span class="sd">                     coordinates.</span>
+<span class="sd">        .. warning:: Clips variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
 
 <span class="sd">        Powered by `rasterio.features.geometry_mask`.</span>
 
@@ -448,7 +451,7 @@
 <span class="sd">            false, only pixels whose center is within the polygon or that</span>
 <span class="sd">            are selected by Bresenham&#39;s line algorithm will be burned in.</span>
 <span class="sd">        drop: bool, optional</span>
-<span class="sd">            If True, drop the data outside of the extent of the mask geoemtries</span>
+<span class="sd">            If True, drop the data outside of the extent of the mask geometries</span>
 <span class="sd">            Otherwise, it will return the same raster with the data masked.</span>
 <span class="sd">            Default is True.</span>
 <span class="sd">        invert: boolean, optional</span>
@@ -467,18 +470,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
-                    <span class="n">geometries</span><span class="p">,</span>
-                    <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
-                    <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
-                    <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
-                    <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
-                    <span class="n">from_disk</span><span class="o">=</span><span class="n">from_disk</span><span class="p">,</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                        <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                        <span class="n">geometries</span><span class="p">,</span>
+                        <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+                        <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+                        <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
+                        <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+                        <span class="n">from_disk</span><span class="o">=</span><span class="n">from_disk</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
             <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
