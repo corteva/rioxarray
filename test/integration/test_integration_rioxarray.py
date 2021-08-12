@@ -506,10 +506,24 @@ def test_clip_geojson(open_func, from_disk, geometries):
         partial(rioxarray.open_rasterio, parse_coordinates=False),
     ],
 )
-def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum, geometries):
+def test_clip_geojson__no_drop(open_func, invert, from_disk, expected_sum):
     with open_func(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     ) as xdi:
+        geometries = [
+            {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [-93.880889448126, 41.68465068553298],
+                        [-93.89966980835203, 41.68465068553298],
+                        [-93.89966980835203, 41.689430423525266],
+                        [-93.880889448126, 41.689430423525266],
+                        [-93.880889448126, 41.68465068553298],
+                    ]
+                ],
+            }
+        ]
         # test data array
         clipped = xdi.rio.clip(
             geometries, "epsg:4326", drop=False, invert=invert, from_disk=from_disk
