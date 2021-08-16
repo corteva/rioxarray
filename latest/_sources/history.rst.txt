@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.7.0
 ------
 - BUG: `rio.clip` and `rio.clip_box` skip non-geospatial arrays in datasets when clipping (pull #392)
