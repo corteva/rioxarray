@@ -2630,11 +2630,11 @@ def test_estimate_utm_crs():
         with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
             xds.rio.estimate_utm_crs()
     else:
-        assert xds.rio.estimate_utm_crs() == CRS.from_epsg(32618)
+        assert xds.rio.estimate_utm_crs().to_epsg() in (32618, 32655)
         assert xds.rio.reproject("EPSG:4326").rio.estimate_utm_crs() == CRS.from_epsg(
             32618
         )
-        assert xds.rio.estimate_utm_crs("NAD83") == CRS.from_epsg(26918)
+        assert xds.rio.estimate_utm_crs("WGS 72") in (32218, 32255)
 
 
 @pytest.mark.skipif(PYPROJ_LT_3, reason="pyproj 3+ required")
