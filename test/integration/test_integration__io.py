@@ -365,7 +365,7 @@ def create_tmp_geotiff(
     nz=3,
     transform=None,
     transform_args=[5000, 80000, 1000, 2000.0],
-    crs={"units": "m", "no_defs": True, "ellps": "WGS84", "proj": "utm", "zone": 18},
+    crs="EPSG:32618",
     open_kwargs=None,
     additional_attrs=None,
 ):
@@ -463,7 +463,7 @@ def test_platecarree():
         10,
         1,
         transform_args=[1, 2, 0.5, 2.0],
-        crs="+proj=latlong",
+        crs="EPSG:4326",
         open_kwargs={"nodata": -9765},
     ) as (tmp_file, expected):
         with rioxarray.open_rasterio(tmp_file) as rioda:
@@ -533,7 +533,7 @@ def test_notransform():
 
 def test_indexing():
     with create_tmp_geotiff(
-        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         with rioxarray.open_rasterio(tmp_file, cache=False) as actual:
 
@@ -649,7 +649,7 @@ def test_indexing():
 
 def test_caching():
     with create_tmp_geotiff(
-        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         # Cache is the default
         with rioxarray.open_rasterio(tmp_file) as actual:
@@ -665,7 +665,7 @@ def test_caching():
 
 def test_chunks():
     with create_tmp_geotiff(
-        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         # Chunk at open time
         with rioxarray.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
@@ -684,7 +684,7 @@ def test_chunks():
 
 def test_chunks_with_mask_and_scale():
     with create_tmp_geotiff(
-        10, 10, 4, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+        10, 10, 4, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         # Chunk at open time
         with rioxarray.open_rasterio(
@@ -723,13 +723,7 @@ def test_ENVI_tags():
             height=ny,
             width=nx,
             count=nz,
-            crs={
-                "units": "m",
-                "no_defs": True,
-                "ellps": "WGS84",
-                "proj": "utm",
-                "zone": 18,
-            },
+            crs="EPSG:32618",
             transform=transform,
             dtype=rasterio.float32,
         ) as s:
@@ -773,7 +767,7 @@ def test_no_mftime():
     # tests ensure we can still chunk such files when reading with
     # rasterio.
     with create_tmp_geotiff(
-        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="+proj=latlong"
+        8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         with patch("os.path.getmtime", side_effect=OSError):
             with rioxarray.open_rasterio(tmp_file, chunks=(1, 2, 2)) as actual:
