@@ -2,10 +2,9 @@
 """
 This module contains helper methods for rasterio.crs.CRS.
 """
-from distutils.version import LooseVersion
-
 import rasterio
 import rasterio.crs
+from packaging import version
 from pyproj import CRS
 from rasterio.errors import CRSError
 
@@ -40,6 +39,6 @@ def crs_from_user_input(crs_input):
         pass
     # use pyproj for edge cases
     crs = CRS.from_user_input(crs_input)
-    if LooseVersion(rasterio.__gdal_version__) > LooseVersion("3.0.0"):
+    if version.parse(rasterio.__gdal_version__) > version.parse("3.0.0"):
         return rasterio.crs.CRS.from_wkt(crs.to_wkt())
     return rasterio.crs.CRS.from_wkt(crs.to_wkt("WKT1_GDAL"))

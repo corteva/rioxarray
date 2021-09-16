@@ -2,7 +2,6 @@ import json
 import os
 import platform
 import threading
-from distutils.version import LooseVersion
 from functools import partial
 
 import dask.array as da
@@ -14,6 +13,7 @@ import xarray
 from affine import Affine
 from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
+from packaging import version
 from pyproj import CRS as pCRS
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
@@ -1185,7 +1185,7 @@ def test_interpolate_na(interpolate_na):
 
 
 @pytest.mark.xfail(
-    LooseVersion(scipy.__version__) < LooseVersion("1.7.0")
+    version.parse(scipy.__version__) < version.parse("1.7.0")
     or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
