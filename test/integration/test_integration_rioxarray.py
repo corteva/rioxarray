@@ -2477,15 +2477,19 @@ def test_write_read_transform__non_rectilinear():
     assert da.rio.grid_mapping == "spatial_ref"
 
 
-def test_write_read_transform__non_rectilinear__warning():
+def test_write_read_transform__non_rectilinear__rotation__warning():
     test_affine = Affine.from_gdal(305827, 14, 9, 5223236, 9, -14)
     ds = xarray.Dataset()
     ds.rio.write_transform(test_affine, inplace=True)
-    with pytest.warns(UserWarning, match=r"Non\-rectilinear transform found"):
+    with pytest.warns(
+        UserWarning, match=r"Transform that is non\-rectilinear or with rotation found"
+    ):
         assert ds.rio.transform(recalc=True) == test_affine
     da = xarray.DataArray(1)
     da.rio.write_transform(test_affine, inplace=True)
-    with pytest.warns(UserWarning, match=r"Non\-rectilinear transform found"):
+    with pytest.warns(
+        UserWarning, match=r"Transform that is non\-rectilinear or with rotation found"
+    ):
         assert ds.rio.transform(recalc=True) == test_affine
 
 
