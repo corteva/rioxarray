@@ -6,7 +6,6 @@ import shutil
 import sys
 import tempfile
 import warnings
-from distutils.version import LooseVersion
 from unittest.mock import patch
 
 import dask.array
@@ -16,6 +15,7 @@ import rasterio
 import xarray as xr
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
+from packaging import version
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.errors import NotGeoreferencedWarning
@@ -1027,7 +1027,7 @@ def test_notgeoreferenced_warning(open_rasterio):
 
 
 @pytest.mark.xfail(
-    LooseVersion(rasterio.__gdal_version__) < LooseVersion("3.0.4"),
+    version.parse(rasterio.__gdal_version__) < version.parse("3.0.4"),
     reason="This was fixed in GDAL 3.0.4",
 )
 def test_nc_attr_loading(open_rasterio):
@@ -1045,7 +1045,7 @@ def test_nc_attr_loading(open_rasterio):
 
 
 @pytest.mark.xfail(
-    LooseVersion(rasterio.__gdal_version__) < LooseVersion("3.0.4"),
+    version.parse(rasterio.__gdal_version__) < version.parse("3.0.4"),
     reason="This was fixed in GDAL 3.0.4",
 )
 def test_nc_attr_loading__disable_decode_times(open_rasterio):

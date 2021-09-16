@@ -11,10 +11,10 @@ import os
 import re
 import threading
 import warnings
-from distutils.version import LooseVersion
 
 import numpy as np
 import rasterio
+from packaging import version
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
 from xarray import Dataset, IndexVariable
@@ -664,7 +664,7 @@ def _prepare_dask(result, riods, filename, chunks):
         import dask
         from dask.array.core import normalize_chunks
 
-        if LooseVersion(dask.__version__) < LooseVersion("0.18.0"):
+        if version.parse(dask.__version__) < version.parse("0.18.0"):
             msg = (
                 "Automatic chunking requires dask.__version__ >= 0.18.0 . "
                 "You currently have version %s" % dask.__version__

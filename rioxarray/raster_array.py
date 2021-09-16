@@ -10,7 +10,6 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
-from distutils.version import LooseVersion
 from typing import Iterable
 
 import numpy as np
@@ -18,6 +17,7 @@ import rasterio
 import rasterio.mask
 import rasterio.warp
 import xarray
+from packaging import version
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
@@ -757,7 +757,7 @@ class RasterArray(XRasterBase):
             )
         crs = crs_from_user_input(crs) if crs is not None else self.crs
         if self.crs != crs:
-            if LooseVersion(rasterio.__version__) >= LooseVersion("1.2"):
+            if version.parse(rasterio.__version__) >= version.parse("1.2"):
                 geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)
             else:
                 geometries = [
@@ -933,7 +933,9 @@ class RasterArray(XRasterBase):
             is True. Otherwise None is returned.
 
         """
-        if driver is None and LooseVersion(rasterio.__version__) < LooseVersion("1.2"):
+        if driver is None and version.parse(rasterio.__version__) < version.parse(
+            "1.2"
+        ):
             driver = "GTiff"
 
         # get the output profile from the rasterio object
