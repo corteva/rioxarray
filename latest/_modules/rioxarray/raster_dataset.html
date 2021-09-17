@@ -125,9 +125,7 @@
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">crs_i</span> <span class="o">==</span> <span class="n">crs</span> <span class="k">for</span> <span class="n">crs_i</span> <span class="ow">in</span> <span class="n">crs_list</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
-                <span class="s2">&quot;CRS in DataArrays differ in the Dataset: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crs_list</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CRS in DataArrays differ in the Dataset: </span><span class="si">{</span><span class="n">crs_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
 <div class="viewcode-block" id="RasterDataset.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
@@ -525,7 +523,7 @@
 <span class="sd">            is True. Otherwise None is returned.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">variable_dim</span> <span class="o">=</span> <span class="s2">&quot;band_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="n">variable_dim</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">variable_dim</span><span class="p">)</span>
         <span class="c1"># write data array names to raster</span>
         <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_array</span><span class="p">[</span><span class="n">variable_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -548,7 +546,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
                 <span class="s2">&quot;All nodata values must be the same when exporting to raster. &quot;</span>
-                <span class="s2">&quot;Current values: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodatavals</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s2">&quot;Current values: </span><span class="si">{</span><span class="n">nodatavals</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
