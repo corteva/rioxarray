@@ -31,6 +31,45 @@ from rioxarray.exceptions import (
 DEFAULT_GRID_MAP = "spatial_ref"
 
 
+def _affine_has_rotation(affine) -> bool:
+    """
+    Determine if the affine has rotation.
+
+    Parameters
+    ----------
+    affine: :obj:`affine.Affine`
+        The affine of the grid.
+
+    Returns
+    -------
+    bool
+    """
+    return affine.b == affine.d != 0
+
+
+def _resolution(affine):
+    """
+    Determine if the resolution of the affine.
+    If it has rotation, the sign of the resolution is lost.
+
+    Based on: https://github.com/mapbox/rasterio/blob/6185a4e4ad72b5669066d2d5004bf46d94a6d298/rasterio/_base.pyx#L943-L951
+
+    Parameters
+    ----------
+    affine: :obj:`affine.Affine`
+        The affine of the grid.
+
+    x_resolution, y_resolution: float
+        The resolution of the affine.
+    """
+    if not _affine_has_rotation(affine):
+        return affine.a, affine.e
+    return (
+        math.sqrt(affine.a ** 2 + affine.d ** 2),
+        math.sqrt(affine.b ** 2 + affine.e ** 2),
+    )
+
+
 def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     """Generate 1d pixel centered coordinates from affine.
 
@@ -54,13 +93,14 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     dict: x and y coordinate arrays.
 
     """
-    if affine.is_rectilinear:
-        x_coords, _ = affine * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
-        _, y_coords = affine * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+    transform = affine * affine.translation(0.5, 0.5)
+    if affine.is_rectilinear and not _affine_has_rotation(affine):
+        x_coords, _ = transform * (np.arange(width), np.zeros(width))
+        _, y_coords = transform * (np.zeros(height), np.arange(height))
     else:
-        x_coords, y_coords = affine * np.meshgrid(
-            np.arange(width) + 0.5,
-            np.arange(height) + 0.5,
+        x_coords, y_coords = transform * np.meshgrid(
+            np.arange(width),
+            np.arange(height),
         )
     return {y_dim: y_coords, x_dim: x_coords}
 
@@ -68,7 +108,7 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
 def _generate_spatial_coords(affine, width, height):
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
-    if affine.is_rectilinear:
+    if new_spatial_coords["x"].ndim == 1:
         return {
             "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
             "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
@@ -536,9 +576,14 @@ class XRasterBase:
             The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         transform = self._cached_transform()
-        if transform and not transform.is_rectilinear:
+        if transform and (
+            not transform.is_rectilinear or _affine_has_rotation(transform)
+        ):
             if recalc:
-                warnings.warn("Non-rectilinear transform found. Unable to recalculate.")
+                warnings.warn(
+                    "Transform that is non-rectilinear or with rotation found. "
+                    "Unable to recalculate."
+                )
             return transform
 
         try:
@@ -845,6 +890,9 @@ class XRasterBase:
 
     def resolution(self, recalc=False):
         """
+        Determine if the resolution of the grid.
+        If the transformation has rotation, the sign of the resolution is lost.
+
         Parameters
         ----------
         recalc: bool, optional
@@ -861,9 +909,7 @@ class XRasterBase:
         if (
             not recalc or self.width == 1 or self.height == 1
         ) and transform is not None:
-            resolution_x = transform.a
-            resolution_y = transform.e
-            return resolution_x, resolution_y
+            return _resolution(transform)
 
         # if the coordinates of the spatial dimensions are missing
         # use the cached transform resolution
@@ -872,9 +918,7 @@ class XRasterBase:
         except DimensionMissingCoordinateError:
             if transform is None:
                 raise
-            resolution_x = transform.a
-            resolution_y = transform.e
-            return resolution_x, resolution_y
+            return _resolution(transform)
 
         if self.width == 1 or self.height == 1:
             raise OneDimensionalRaster(

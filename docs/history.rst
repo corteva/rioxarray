@@ -3,6 +3,8 @@ History
 
 Latest
 ------
+- BUG: Handle transforms with rotation (pull #401)
+
 
 0.7.0
 ------

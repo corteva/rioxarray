@@ -1125,6 +1125,27 @@ def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
         assert rds.transform == xds.rio.transform()
 
 
+def test_rotation_affine():
+    with create_tmp_geotiff(
+        transform=Affine(0.0, -10.0, 1743817.4113815, -10.0, -0.0, 5435582.5113815),
+        crs=None,
+    ) as (tmp_file, _):
+        with rasterio.open(tmp_file) as rds:
+            with rioxarray.open_rasterio(tmp_file) as rioda:
+                for xi, yi in itertools.product(range(rds.width), range(rds.height)):
+                    subset = rioda.isel(x=xi, y=yi)
+                    assert_almost_equal(
+                        rds.xy(yi, xi), (subset.xc.item(), subset.yc.item())
+                    )
+            assert rioda.rio.transform() == rds.transform
+            with pytest.warns(
+                UserWarning,
+                match=r"Transform that is non\-rectilinear or with rotation found",
+            ):
+                assert rioda.rio.transform(recalc=True) == rds.transform
+            assert rioda.rio.resolution() == (10, 10)
+
+
 cint_skip = pytest.mark.skip(
     rasterio.__version__ < "1.2.4",
     reason="https://github.com/mapbox/rasterio/issues/2182",
