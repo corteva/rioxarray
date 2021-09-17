@@ -842,20 +842,20 @@ class XRasterBase:
                 f"{_get_data_var_message(self._obj)}"
             )
         if extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
+            dim_info = (extra_dims[0], self.y_dim, self.x_dim)
             raise InvalidDimensionOrder(
-                "Invalid dimension order. Expected order: {0}. "
-                "You can use `DataArray.transpose{0}`"
-                " to reorder your dimensions.".format(
-                    (extra_dims[0], self.y_dim, self.x_dim)
-                )
-                + f"{_get_data_var_message(self._obj)}"
+                f"Invalid dimension order. Expected order: {dim_info}. "
+                f"You can use `DataArray.transpose{dim_info}`"
+                " to reorder your dimensions."
+                f"{_get_data_var_message(self._obj)}"
             )
         if not extra_dims and self._obj.dims != (self.y_dim, self.x_dim):
+            dim_info = (self.y_dim, self.x_dim)
             raise InvalidDimensionOrder(
-                "Invalid dimension order. Expected order: {0}"
-                "You can use `DataArray.transpose{0}` "
-                "to reorder your dimensions.".format((self.y_dim, self.x_dim))
-                + f"{_get_data_var_message(self._obj)}"
+                f"Invalid dimension order. Expected order: {dim_info}. "
+                f"You can use `DataArray.transpose{dim_info}`"
+                " to reorder your dimensions."
+                f"{_get_data_var_message(self._obj)}"
             )
         return extra_dims[0] if extra_dims else None
 
