@@ -178,11 +178,11 @@ class RasterioArrayWrapper(BackendArray):
 
         # handle unsigned case
         if mask_and_scale and unsigned and dtype.kind == "i":
-            self._dtype = np.dtype("u%s" % dtype.itemsize)
+            self._dtype = np.dtype(f"u{dtype.itemsize}")
         elif mask_and_scale and unsigned:
             warnings.warn(
-                "variable %r has _Unsigned attribute but is not "
-                "of integer type. Ignoring attribute." % name,
+                f"variable {name!r} has _Unsigned attribute but is not "
+                "of integer type. Ignoring attribute.",
                 variables.SerializationWarning,
                 stacklevel=3,
             )
@@ -667,7 +667,7 @@ def _prepare_dask(result, riods, filename, chunks):
         if version.parse(dask.__version__) < version.parse("0.18.0"):
             msg = (
                 "Automatic chunking requires dask.__version__ >= 0.18.0 . "
-                "You currently have version %s" % dask.__version__
+                f"You currently have version {dask.__version__}"
             )
             raise NotImplementedError(msg)
         block_shape = (1,) + riods.block_shapes[0]
@@ -678,7 +678,7 @@ def _prepare_dask(result, riods, filename, chunks):
             previous_chunks=tuple((c,) for c in block_shape),
         )
     token = tokenize(filename, mtime, chunks)
-    name_prefix = "open_rasterio-%s" % token
+    name_prefix = f"open_rasterio-{token}"
     return result.chunk(chunks, name_prefix=name_prefix, token=token)
 
 

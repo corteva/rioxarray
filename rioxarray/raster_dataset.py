@@ -47,9 +47,7 @@ class RasterDataset(XRasterBase):
         if all(crs_i == crs for crs_i in crs_list):
             self._crs = crs
         else:
-            raise RioXarrayError(
-                "CRS in DataArrays differ in the Dataset: {}".format(crs_list)
-            )
+            raise RioXarrayError(f"CRS in DataArrays differ in the Dataset: {crs_list}")
         return self._crs
 
     def reproject(
@@ -447,7 +445,7 @@ class RasterDataset(XRasterBase):
             is True. Otherwise None is returned.
 
         """
-        variable_dim = "band_{}".format(uuid4())
+        variable_dim = f"band_{uuid4()}"
         data_array = self._obj.to_array(dim=variable_dim)
         # write data array names to raster
         data_array.attrs["long_name"] = data_array[variable_dim].values.tolist()
@@ -470,7 +468,7 @@ class RasterDataset(XRasterBase):
         else:
             raise RioXarrayError(
                 "All nodata values must be the same when exporting to raster. "
-                "Current values: {}".format(nodatavals)
+                f"Current values: {nodatavals}"
             )
         if self.crs is not None:
             data_array.rio.write_crs(self.crs, inplace=True)
