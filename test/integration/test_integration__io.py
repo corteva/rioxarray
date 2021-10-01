@@ -245,6 +245,7 @@ def test_open_group_load_attrs(open_rasterio):
         assert sorted(attrs) == [
             "_FillValue",
             "add_offset",
+            "colorinterp",
             "long_name",
             "scale_factor",
             "units",
@@ -285,6 +286,7 @@ def test_open_rasterio_mask_chunk_clip():
         )
         assert attrs == {
             "add_offset": 0.0,
+            "colorinterp": (rasterio.enums.ColorInterp.gray,),
             "scale_factor": 1.0,
         }
 
