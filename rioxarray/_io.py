@@ -532,6 +532,12 @@ def _get_rasterio_attrs(riods):
             attrs["units"] = riods.units[0]
         else:
             attrs["units"] = riods.units
+    if hasattr(riods, "colormap"):
+        # A dict containing the colormap for a band
+        attrs["colormap"] = riods.colormap(1)
+    if hasattr(riods, "colorinterp") and any(riods.colorinterp):
+        # A tuple of the band's colorinterp property
+        attrs["colorinterp"] = riods.colorinterp
 
     return attrs
 
