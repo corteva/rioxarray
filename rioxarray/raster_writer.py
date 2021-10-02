@@ -56,6 +56,18 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
         if add_offset is not None:
             raster_handle.offsets = (add_offset,) * raster_handle.count
 
+    # write colorinterp and colormap
+    # see https://rasterio.readthedocs.io/en/latest/topics/color.html
+    try:
+        raster_handle.colorinterp = tags["colorinterp"]
+    except KeyError:
+        pass
+    try:
+        colormap = tags["colormap"]
+        raster_handle.write_colormap(1, colormap)
+    except KeyError:
+        pass
+
     # filter out attributes that should be written in a different location
     skip_tags = (
         UNWANTED_RIO_ATTRS
@@ -66,6 +78,8 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
             "scale_factor",
             "add_offset",
             "offsets",
+            "colorinterp",
+            "colormap",
             "grid_mapping",
         )
     )

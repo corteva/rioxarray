@@ -1022,6 +1022,19 @@ def test_mask_and_scale__to_raster(open_rasterio, tmp_path):
                 assert data.max() == 821
 
 
+def test_colorinterp_and_colormap_to_raster(open_rasterio, tmp_path):
+    test_file = "https://oceania.generic-mapping-tools.org/server/earth/earth_day/earth_day_01d_p.tif"
+    tmp_output = tmp_path / "new_earth_day_01d_p.tif"
+    with open_rasterio(test_file) as rds:
+        rds.rio.to_raster(str(tmp_output))
+        with rasterio.open(str(tmp_output)) as riofh:
+            assert riofh.shape == (180, 360)
+            assert riofh.colorinterp == (rasterio.enums.ColorInterp.palette,)
+            colormap = riofh.colormap(1)
+            assert isinstance(colormap, dict)
+            assert len(colormap) == 256
+
+
 def test_notgeoreferenced_warning(open_rasterio):
     with create_tmp_geotiff(transform_args=None) as (tmp_file, expected):
         with pytest.warns(NotGeoreferencedWarning):
