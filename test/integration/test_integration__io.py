@@ -1026,6 +1026,7 @@ def test_colorinterp_and_colormap_to_raster(open_rasterio, tmp_path):
     test_file = "https://oceania.generic-mapping-tools.org/server/earth/earth_day/earth_day_01d_p.tif"
     tmp_output = tmp_path / "new_earth_day_01d_p.tif"
     with open_rasterio(test_file) as rds:
+        rds = rds.band_data if hasattr(rds, "band_data") else rds
         rds.rio.to_raster(str(tmp_output))
         with rasterio.open(str(tmp_output)) as riofh:
             assert riofh.shape == (180, 360)
