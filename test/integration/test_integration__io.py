@@ -1028,6 +1028,20 @@ def test_notgeoreferenced_warning(open_rasterio):
             open_rasterio(tmp_file)
 
 
+def test_geotiff_attr_loading(open_rasterio):
+    with open_rasterio(
+        "https://oceania.generic-mapping-tools.org/server/earth/earth_day/earth_day_01d_p.tif"
+    ) as rds:
+        rds = rds.band_data if hasattr(rds, "band_data") else rds
+
+        assert rds.dims == ("band", "y", "x")
+        assert rds.shape == (1, 180, 360)
+        # assert rds.attrs["scale_factor"] == 1.0
+        # assert rds.attrs["add_offset"] == 0.0
+        assert isinstance(rds.attrs["colormap"], dict)
+        assert rds.attrs["colorinterp"] == (rasterio.enums.ColorInterp.palette,)
+
+
 @pytest.mark.xfail(
     version.parse(rasterio.__gdal_version__) < version.parse("3.0.4"),
     reason="This was fixed in GDAL 3.0.4",
