@@ -60,9 +60,6 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     # see https://rasterio.readthedocs.io/en/latest/topics/color.html
     try:
         raster_handle.colorinterp = tags["colorinterp"]
-    except KeyError:
-        pass
-    try:
         colormap = tags["colormap"]
         raster_handle.write_colormap(1, colormap)
     except KeyError:
