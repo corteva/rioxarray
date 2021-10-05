@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- DEP: Make scipy an optional dependency (issue #413)
 
 0.7.1
 ------

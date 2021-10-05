@@ -983,6 +983,10 @@ an exception.</li>
 <dt id="rioxarray.raster_array.RasterArray.interpolate_na">
 <code class="descname">interpolate_na</code><span class="sig-paren">(</span><em>method='nearest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.interpolate_na" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method uses scipy.interpolate.griddata to interpolate missing data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">scipy is an optional dependency.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1381,6 +1385,10 @@ an exception.</li>
 <dt id="rioxarray.raster_dataset.RasterDataset.interpolate_na">
 <code class="descname">interpolate_na</code><span class="sig-paren">(</span><em>method='nearest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.interpolate_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.interpolate_na" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method uses <cite>scipy.interpolate.griddata</cite> to interpolate missing data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">scipy is an optional dependency.</p>
+</div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Interpolates variables that have dimensions ‘x’/’y’. Others are appended as is.</p>
