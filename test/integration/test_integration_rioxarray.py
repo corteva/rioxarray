@@ -8,7 +8,6 @@ import dask.array as da
 import numpy
 import pytest
 import rasterio
-import scipy
 import xarray
 from affine import Affine
 from dask.delayed import Delayed
@@ -38,6 +37,15 @@ from test.conftest import (
     _assert_xarrays_equal,
     open_rasterio_engine,
 )
+
+try:
+    import scipy
+
+    SCIPY_VERSION = scipy.__version__
+    SCIPY_INSTALLED = True
+except ModuleNotFoundError:
+    SCIPY_VERSION = "0.0.0"
+    SCIPY_INSTALLED = False
 
 
 @pytest.fixture(
@@ -73,6 +81,7 @@ def modis_reproject_3d():
     ]
 )
 def interpolate_na(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_INTERPOLATE.nc"),
@@ -82,6 +91,7 @@ def interpolate_na(request):
 
 @pytest.fixture
 def interpolate_na_3d():
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "PLANET_SCOPE_3D_INTERPOLATE.nc"),
@@ -96,6 +106,7 @@ def interpolate_na_3d():
     ]
 )
 def interpolate_na_filled(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(
@@ -107,6 +118,7 @@ def interpolate_na_filled(request):
 
 @pytest.fixture
 def interpolate_na_veris():
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "veris.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "veris_interpolate.nc"),
@@ -122,6 +134,7 @@ def interpolate_na_veris():
     ]
 )
 def interpolate_na_nan(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_INTERPOLATE_NAN.nc"),
@@ -671,6 +684,7 @@ def test_reproject_match__non_geospatial(dummy_dataset_non_geospatial):
 
 
 def test_interpolate_na__non_geospatial(dummy_dataset_non_geospatial):
+    pytest.importorskip("scipy")
     ds = dummy_dataset_non_geospatial
     assert ds.stuff.shape == (6, 6, 6)
     with pytest.raises(MissingSpatialDimensionError):
@@ -1184,8 +1198,15 @@ def test_interpolate_na(interpolate_na):
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
+@pytest.mark.skipif(SCIPY_INSTALLED, reason="Only test if scipy is not installed.")
+def test_interpolate_na__missing_scipy():
+    xds = xarray.open_dataarray(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"))
+    with pytest.raises(ModuleNotFoundError, match=r"rioxarray\[interp\]"):
+        xds.rio.interpolate_na()
+
+
 @pytest.mark.xfail(
-    version.parse(scipy.__version__) < version.parse("1.7.0")
+    version.parse(SCIPY_VERSION) < version.parse("1.7.0")
     or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
@@ -1296,6 +1317,7 @@ def test_geographic_reproject__missing_nodata():
 
 
 def test_geographic_resample_integer():
+    pytest.importorskip("scipy")
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
@@ -2278,6 +2300,7 @@ def test_nonstandard_dims_reproject__array():
 
 
 def test_nonstandard_dims_interpolate_na__dataset():
+    pytest.importorskip("scipy")
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
@@ -2291,6 +2314,7 @@ def test_nonstandard_dims_interpolate_na__dataset():
 
 
 def test_nonstandard_dims_interpolate_na__array():
+    pytest.importorskip("scipy")
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
@@ -2666,6 +2690,7 @@ def test_estimate_utm_crs__out_of_bounds():
 
 
 def test_interpolate_na_missing_nodata():
+    pytest.importorskip("scipy")
     test_da = xarray.DataArray(
         name="missing",
         data=numpy.zeros((5, 5)),

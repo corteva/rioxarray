@@ -18,7 +18,7 @@ jobs:
 
   test:
     needs: linting
-    name: ${{ matrix.os }} | ${{ matrix.python-version }} | rasterio-${{ matrix.rasterio-version }}
+    name: ${{ matrix.os }} | ${{ matrix.python-version }} | rasterio-${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -27,27 +27,38 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
         rasterio-version: ['*']
         xarray-version: ['*']
+        run-with-scipy: ['YES']
         include:
           - os: windows-latest
             python-version: 3.7
             rasterio-version: '*'
             xarray-version: '*'
+            run-with-scipy: 'YES'
           - os: windows-latest
             python-version: 3.8
             rasterio-version: '*'
             xarray-version: '*'
+            run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.7
             rasterio-version: '*'
             xarray-version: 0.17
+            run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.7
             rasterio-version: 1.1
             xarray-version: '*'
+            run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.7
             rasterio-version: 1.2.1
             xarray-version: '*'
+            run-with-scipy: 'YES'
+          - os: ubuntu-latest
+            python-version: 3.8
+            rasterio-version: '*'
+            xarray-version: '*'
+            run-with-scipy: 'NO'
     steps:
       - uses: actions/checkout@v2
 
@@ -62,9 +73,11 @@ jobs:
         run: |
           conda config --prepend channels conda-forge
           conda config --set channel_priority strict
-          conda create -n test python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} scipy pyproj netcdf4 dask pandoc
+          export INSTALL_DEPS='python=${{ matrix.python-version }} rasterio=${{ matrix.rasterio-version }} xarray=${{ matrix.xarray-version }} pyproj netcdf4 dask pandoc'
+          [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
+          conda create -n test $INSTALL_DEPS
           source activate test
-          python -m pip install -e .[all]
+          python -m pip install -e .[dev,doc]
 
       - name: Check and Log Environment
         shell: bash
