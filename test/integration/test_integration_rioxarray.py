@@ -1977,7 +1977,7 @@ def test_read_crs_cf():
     attrs = test_da.spatial_ref.attrs
     attrs.pop("spatial_ref")
     attrs.pop("crs_wkt")
-    assert test_da.rio.crs.to_epsg() == 4326
+    assert test_da.rio.crs.is_geographic
 
 
 def test_get_crs_dataset__nonstandard_grid_mapping():
