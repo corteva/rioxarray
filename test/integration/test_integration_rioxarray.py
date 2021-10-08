@@ -2477,10 +2477,12 @@ def test_write_transform():
     ds.rio.write_transform(test_affine, inplace=True)
     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert ds.rio._cached_transform() == test_affine
+    assert ds.rio.transform() == test_affine
     assert ds.rio.grid_mapping == "spatial_ref"
     da = xarray.DataArray(1)
     da.rio.write_transform(test_affine, inplace=True)
     assert da.rio._cached_transform() == test_affine
+    assert da.rio.transform() == test_affine
     assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert da.rio.grid_mapping == "spatial_ref"
 
