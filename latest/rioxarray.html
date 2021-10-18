@@ -131,7 +131,7 @@ for more information).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>str</em><em>, </em><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader" title="(in rasterio v1.2.9)"><em>rasterio.io.DatasetReader</em></a><em>, or </em><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.vrt.html#rasterio.vrt.WarpedVRT" title="(in rasterio v1.2.9)"><em>rasterio.vrt.WarpedVRT</em></a>) – Path to the file to open. Or already open rasterio dataset.</li>
+<li><strong>filename</strong> (<em>str</em><em>, </em><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader" title="(in rasterio v1.2.10)"><em>rasterio.io.DatasetReader</em></a><em>, or </em><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.vrt.html#rasterio.vrt.WarpedVRT" title="(in rasterio v1.2.10)"><em>rasterio.vrt.WarpedVRT</em></a>) – Path to the file to open. Or already open rasterio dataset.</li>
 <li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to parse the x and y coordinates out of the file’s
 <code class="docutils literal notranslate"><span class="pre">transform</span></code> attribute or not. The default is to automatically
 parse the coordinates only if they are rectilinear (1D).
@@ -189,7 +189,7 @@ If None (default), assume the same value of decode_time.</li>
 <dt id="rioxarray.merge.merge_arrays">
 <code class="descclassname">rioxarray.merge.</code><code class="descname">merge_arrays</code><span class="sig-paren">(</span><em>dataarrays: Iterable[xarray.core.dataarray.DataArray], bounds: Optional[Tuple] = None, res: Optional[Tuple] = None, nodata: Optional[float] = None, precision: Optional[float] = None, method: Union[str, Callable, None] = None, crs: Optional[rasterio.crs.CRS] = None, parse_coordinates: bool = True</em><span class="sig-paren">)</span> &#x2192; xarray.core.dataarray.DataArray<a class="reference internal" href="_modules/rioxarray/merge.html#merge_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_arrays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge data arrays geospatially.</p>
-<p>Uses <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.merge.merge()</span></code></a></p>
+<p>Uses <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.merge.merge()</span></code></a></p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.2: </span>crs</p>
 </div>
@@ -210,7 +210,7 @@ If a single value is passed, output pixels will be square.</li>
 If not set, uses the nodata value in the first input DataArray.</li>
 <li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
 <li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
-<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><em>rasterio.crs.CRS</em></a><em>, </em><em>optional</em>) – Output CRS. If not set, the CRS of the first DataArray is used.</li>
+<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><em>rasterio.crs.CRS</em></a><em>, </em><em>optional</em>) – Output CRS. If not set, the CRS of the first DataArray is used.</li>
 <li><strong>parse_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, it will disable loading spatial coordinates.</li>
 </ul>
 </td>
@@ -229,7 +229,7 @@ If not set, uses the nodata value in the first input DataArray.</li>
 <dt id="rioxarray.merge.merge_datasets">
 <code class="descclassname">rioxarray.merge.</code><code class="descname">merge_datasets</code><span class="sig-paren">(</span><em>datasets: Iterable[xarray.core.dataset.Dataset], bounds: Optional[Tuple] = None, res: Optional[Tuple] = None, nodata: Optional[float] = None, precision: Optional[float] = None, method: Union[str, Callable, None] = None, crs: Optional[rasterio.crs.CRS] = None</em><span class="sig-paren">)</span> &#x2192; xarray.core.dataarray.DataArray<a class="reference internal" href="_modules/rioxarray/merge.html#merge_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.merge.merge_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge datasets geospatially.</p>
-<p>Uses <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.merge.merge()</span></code></a></p>
+<p>Uses <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.merge.merge()</span></code></a></p>
 <div class="versionadded">
 <p><span class="versionmodified">New in version 0.2: </span>crs</p>
 </div>
@@ -250,7 +250,7 @@ If a single value is passed, output pixels will be square.</li>
 If not set, uses the nodata value in the first input Dataset.</li>
 <li><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Number of decimal points of precision when computing inverse transform.</li>
 <li><strong>method</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – See rasterio docs.</li>
-<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><em>rasterio.crs.CRS</em></a><em>, </em><em>optional</em>) – Output CRS. If not set, the CRS of the first DataArray is used.</li>
+<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><em>rasterio.crs.CRS</em></a><em>, </em><em>optional</em>) – Output CRS. If not set, the CRS of the first DataArray is used.</li>
 </ul>
 </td>
 </tr>
@@ -374,7 +374,7 @@ transform attribute.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -399,7 +399,7 @@ transform attribute.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)">rasterio.crs.CRS</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)">rasterio.crs.CRS</a></td>
 </tr>
 </tbody>
 </table>
@@ -658,7 +658,7 @@ along these edges) and extracting the outermost bounds.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dst_crs</strong> (str, <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, or dict) – Target coordinate reference system.</li>
+<li><strong>dst_crs</strong> (str, <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, or dict) – Target coordinate reference system.</li>
 <li><strong>densify_pts</strong> (<em>uint</em><em>, </em><em>optional</em>) – Number of points to add to each edge to account for nonlinear
 edges produced by the transform process.  Large numbers will produce
 worse performance.  Default: 21 (gdal default).</li>
@@ -917,7 +917,7 @@ Default is the grid_mapping name of the dataset.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts or objects with __geom_interface__ with
 if you have rasterio 1.2+.</li>
-<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, optional) – The CRS of the input geometries. Default is to assume it is the same
+<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, optional) – The CRS of the input geometries. Default is to assume it is the same
 as the dataset.</li>
 <li><strong>all_touched</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
 false, only pixels whose center is within the polygon or that
@@ -1073,7 +1073,7 @@ set, and np.nan otherwise.</li>
 <dt id="rioxarray.raster_array.RasterArray.reproject">
 <code class="descname">reproject</code><span class="sig-paren">(</span><em>dst_crs</em>, <em>resolution=None</em>, <em>shape=None</em>, <em>transform=None</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em>, <em>nodata=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.19.1.dev6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> objects</p>
-<p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
+<p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
@@ -1101,12 +1101,12 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
 together with resolution.</li>
 <li><strong>transform</strong> (<em>Affine</em><em>, </em><em>optional</em>) – The destination transform.</li>
-<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.9)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
 <li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – The nodata value used to initialize the destination;
 it will remain in all areas not covered by the reprojected source.
 Defaults to the nodata value of the source image if none provided
 and exists or attempts to find an appropriate value by dtype.</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
+<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
 To override:
 - src_transform: <cite>rio.write_transform</cite>
 - src_crs: <cite>rio.write_crs</cite>
@@ -1129,7 +1129,7 @@ To override:
 <code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject a DataArray object to match the resolution, projection,
 and region of another DataArray.</p>
-<p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
+<p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Only 2D/3D arrays with dimensions ‘x’/’y’ are currently supported.
@@ -1143,7 +1143,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>match_data_array</strong> (<a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.19.1.dev6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> | <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – DataArray of the target resolution and projection.</li>
-<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.9)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
 </ul>
 </td>
 </tr>
@@ -1307,7 +1307,7 @@ with nodata. Default is False.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>geometries</strong> (<em>list</em>) – A list of geojson geometry dicts.</li>
-<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, optional) – The CRS of the input geometries. Default is to assume it is the same
+<li><strong>crs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, optional) – The CRS of the input geometries. Default is to assume it is the same
 as the dataset.</li>
 <li><strong>all_touched</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, all pixels touched by geometries will be burned in.  If
 false, only pixels whose center is within the polygon or that
@@ -1375,7 +1375,7 @@ an exception.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -1474,12 +1474,12 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <li><strong>shape</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – Shape of the destination in pixels (dst_height, dst_width). Cannot be used
 together with resolution.</li>
 <li><strong>transform</strong> (<em>optional</em>) – The destination transform.</li>
-<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.9)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
 <li><strong>nodata</strong> (<em>float</em><em>, </em><em>optional</em>) – The nodata value used to initialize the destination;
 it will remain in all areas not covered by the reprojected source.
 Defaults to the nodata value of the source image if none provided
 and exists or attempts to find an appropriate value by dtype.</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
+<li><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments to pass into <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a>.
 To override:
 - src_transform: <cite>rio.write_transform</cite>
 - src_crs: <cite>rio.write_crs</cite>
@@ -1516,7 +1516,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>match_data_array</strong> (<a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.19.1.dev6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> | <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.19.1.dev6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – Dataset with the target resolution and projection.</li>
-<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.9)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
 </ul>
 </td>
 </tr>
