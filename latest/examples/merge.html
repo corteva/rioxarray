@@ -404,14 +404,14 @@ from rioxarray.merge import merge_arrays
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>dem_test = &quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;
-with rioxarray.open_rasterio(dem_test) as rds:
-    arrays = [
-        rds.isel(x=slice(100), y=slice(100)),
-        rds.isel(x=slice(100, 200), y=slice(100, 200)),
-        rds.isel(x=slice(100), y=slice(100, 200)),
-        rds.isel(x=slice(100, 200), y=slice(100)),
-    ]
-    merged = merge_arrays(arrays)
+rds = rioxarray.open_rasterio(dem_test)
+arrays = [
+    rds.isel(x=slice(100), y=slice(100)),
+    rds.isel(x=slice(100, 200), y=slice(100, 200)),
+    rds.isel(x=slice(100), y=slice(100, 200)),
+    rds.isel(x=slice(100, 200), y=slice(100)),
+]
+merged = merge_arrays(arrays)
 </pre></div>
 </div>
 </div>
@@ -420,7 +420,7 @@ with rioxarray.open_rasterio(dem_test) as rds:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>rds.where(rds!=rds.nodata).plot();
+<span></span>rds.where(rds!=rds.rio.nodata).plot();
 </pre></div>
 </div>
 </div>
@@ -436,7 +436,7 @@ with rioxarray.open_rasterio(dem_test) as rds:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>merged.where(merged!=merged.nodata).plot()
+<span></span>merged.where(merged!=merged.rio.nodata).plot()
 </pre></div>
 </div>
 </div>
@@ -446,7 +446,7 @@ with rioxarray.open_rasterio(dem_test) as rds:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fb8d27c0908&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f84f86f13c8&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
