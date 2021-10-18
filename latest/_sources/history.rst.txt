@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.8.0
 ------
 - DEP: Make scipy an optional dependency (issue #413)
