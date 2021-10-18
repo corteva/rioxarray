@@ -663,7 +663,6 @@ class RasterArray(XRasterBase):
         # check that the window has data in it
         if window_error or cl_array.rio.width <= 1 or cl_array.rio.height <= 1:
             if auto_expand and auto_expand < auto_expand_limit:
-                resolution_x, resolution_y = self.resolution()
                 return self.clip_box(
                     minx=minx - abs(resolution_x) / 2.0,
                     miny=miny - abs(resolution_y) / 2.0,
