@@ -14,6 +14,7 @@ from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
+from pyproj import Transformer
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
@@ -393,6 +394,31 @@ def test_clip_box__one_dimension_error(modis_clip):
                 maxx=-7272272.226799311,  # xdi.x[7].values
                 maxy=5048834.500182299,  # xdi.y[5].values
             )
+
+
+def test_clip_box__nodata_in_bounds():
+    xds = rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "clip_bbox__out_of_bounds.tif")
+    )
+    with pytest.raises(NoDataInBounds):
+        xds.rio.clip_box(
+            *Transformer.from_crs(
+                xds.rio.crs, "EPSG:4326", always_xy=True
+            ).transform_bounds(
+                135.7821043660001123,
+                -17.1608065079999506,
+                135.7849362810001139,
+                -17.1580839999999739,
+            )
+        )
+
+    with pytest.raises(NoDataInBounds):
+        xds.rio.reproject("EPSG:4326").rio.clip_box(
+            135.7821043660001123,
+            -17.1608065079999506,
+            135.7849362810001139,
+            -17.1580839999999739,
+        )
 
 
 def test_slice_xy(modis_clip):

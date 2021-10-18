@@ -5,6 +5,7 @@ Latest
 ------
 - DEP: Make scipy an optional dependency (issue #413)
 - BUG: Return cached transform when axis data missing (pull #419)
+- BUG: Fix negative indexes in `rio.isel_window` (issue #421)
 
 0.7.1
 ------
