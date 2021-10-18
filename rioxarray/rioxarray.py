@@ -983,9 +983,9 @@ class XRasterBase:
         """
         (row_start, row_stop), (col_start, col_stop) = window.toranges()
         row_start = 0 if row_start < 0 else math.floor(row_start)
-        row_stop = math.floor(row_stop) if row_stop < 0 else math.ceil(row_stop)
+        row_stop = 0 if row_stop < 0 else math.ceil(row_stop)
         col_start = 0 if col_start < 0 else math.floor(col_start)
-        col_stop = math.floor(col_stop) if col_stop < 0 else math.ceil(col_stop)
+        col_stop = 0 if col_stop < 0 else math.ceil(col_stop)
         row_slice = slice(int(row_start), int(row_stop))
         col_slice = slice(int(col_start), int(col_stop))
         array_subset = (
