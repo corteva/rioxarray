@@ -1052,7 +1052,7 @@ def test_geotiff_attr_loading(open_rasterio):
         assert rds.shape == (1, 180, 360)
         # assert rds.attrs["scale_factor"] == 1.0
         # assert rds.attrs["add_offset"] == 0.0
-        assert isinstance(rds.attrs["colormap"], dict)
+        assert isinstance(rds.attrs["colormap"], str)
         assert rds.attrs["colorinterp"] == (rasterio.enums.ColorInterp.palette,)
 
 

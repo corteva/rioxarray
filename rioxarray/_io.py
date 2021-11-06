@@ -14,6 +14,7 @@ import warnings
 
 import numpy as np
 import rasterio
+import yaml
 from packaging import version
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
@@ -535,7 +536,7 @@ def _get_rasterio_attrs(riods):
     if hasattr(riods, "colormap"):
         # A dict containing the colormap for a band
         try:
-            attrs["colormap"] = riods.colormap(1)
+            attrs["colormap"] = yaml.safe_dump(riods.colormap(1))
         except ValueError:  # NULL color table
             pass
     if hasattr(riods, "colorinterp") and any(riods.colorinterp):

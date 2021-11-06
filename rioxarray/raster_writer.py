@@ -12,6 +12,7 @@ import warnings
 
 import numpy
 import rasterio
+import yaml
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
@@ -60,7 +61,7 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     # see https://rasterio.readthedocs.io/en/latest/topics/color.html
     try:
         raster_handle.colorinterp = tags["colorinterp"]
-        colormap = tags["colormap"]
+        colormap = yaml.safe_load(tags["colormap"])
         raster_handle.write_colormap(1, colormap)
     except KeyError:
         pass
