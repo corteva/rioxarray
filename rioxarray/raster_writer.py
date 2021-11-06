@@ -8,11 +8,11 @@ Source file:
 - https://github.com/dymaxionlabs/dask-rasterio/blob/8dd7fdece7ad094a41908c0ae6b4fe6ca49cf5e1/dask_rasterio/write.py  # noqa: E501
 
 """
+import json
 import warnings
 
 import numpy
 import rasterio
-import yaml
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
@@ -61,7 +61,8 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     # see https://rasterio.readthedocs.io/en/latest/topics/color.html
     try:
         raster_handle.colorinterp = tags["colorinterp"]
-        colormap = yaml.safe_load(tags["colormap"])
+        _colormap = json.loads(tags["colormap"])
+        colormap = {int(key): val for key, val in _colormap.items()}
         raster_handle.write_colormap(1, colormap)
     except KeyError:
         pass
