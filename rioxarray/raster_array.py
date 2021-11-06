@@ -21,7 +21,6 @@ from packaging import version
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
-from scipy.interpolate import griddata
 from xarray.core.dtypes import get_fill_value
 
 from rioxarray.crs import crs_from_user_input
@@ -664,7 +663,6 @@ class RasterArray(XRasterBase):
         # check that the window has data in it
         if window_error or cl_array.rio.width <= 1 or cl_array.rio.height <= 1:
             if auto_expand and auto_expand < auto_expand_limit:
-                resolution_x, resolution_y = self.resolution()
                 return self.clip_box(
                     minx=minx - abs(resolution_x) / 2.0,
                     miny=miny - abs(resolution_y) / 2.0,
@@ -809,6 +807,15 @@ class RasterArray(XRasterBase):
         :class:`numpy.ndarray`:
             An interpolated :class:`numpy.ndarray`.
         """
+        try:
+            from scipy.interpolate import (  # pylint: disable=import-outside-toplevel,import-error
+                griddata,
+            )
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(
+                "scipy is not found. Use rioxarray[interp] to install."
+            ) from err
+
         src_data_flat = src_data.flatten()
         try:
             data_isnan = np.isnan(self.nodata)
@@ -837,6 +844,8 @@ class RasterArray(XRasterBase):
     def interpolate_na(self, method="nearest"):
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
+
+        .. warning:: scipy is an optional dependency.
 
         Parameters
         ----------

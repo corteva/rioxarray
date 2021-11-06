@@ -16,6 +16,7 @@ PYPROJ_LT_3 = version.parse(pyproj.__version__) < version.parse("3")
 RASTERIO_LT_122 = version.parse(rasterio.__version__) < version.parse("1.2.2")
 RASTERIO_EQ_122 = version.parse(rasterio.__version__) == version.parse("1.2.2")
 RASTERIO_GE_125 = version.parse(rasterio.__version__) >= version.parse("1.2.5")
+RASTERIO_GE_13 = version.parse(rasterio.__version__) >= version.parse("1.3.0")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)

@@ -8,13 +8,13 @@ import dask.array as da
 import numpy
 import pytest
 import rasterio
-import scipy
 import xarray
 from affine import Affine
 from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
+from pyproj import Transformer
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
@@ -38,6 +38,15 @@ from test.conftest import (
     _assert_xarrays_equal,
     open_rasterio_engine,
 )
+
+try:
+    import scipy
+
+    SCIPY_VERSION = scipy.__version__
+    SCIPY_INSTALLED = True
+except ModuleNotFoundError:
+    SCIPY_VERSION = "0.0.0"
+    SCIPY_INSTALLED = False
 
 
 @pytest.fixture(
@@ -73,6 +82,7 @@ def modis_reproject_3d():
     ]
 )
 def interpolate_na(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_INTERPOLATE.nc"),
@@ -82,6 +92,7 @@ def interpolate_na(request):
 
 @pytest.fixture
 def interpolate_na_3d():
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "PLANET_SCOPE_3D_INTERPOLATE.nc"),
@@ -96,6 +107,7 @@ def interpolate_na_3d():
     ]
 )
 def interpolate_na_filled(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(
@@ -107,6 +119,7 @@ def interpolate_na_filled(request):
 
 @pytest.fixture
 def interpolate_na_veris():
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "veris.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "veris_interpolate.nc"),
@@ -122,6 +135,7 @@ def interpolate_na_veris():
     ]
 )
 def interpolate_na_nan(request):
+    pytest.importorskip("scipy")
     return dict(
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_INTERPOLATE_NAN.nc"),
@@ -380,6 +394,31 @@ def test_clip_box__one_dimension_error(modis_clip):
                 maxx=-7272272.226799311,  # xdi.x[7].values
                 maxy=5048834.500182299,  # xdi.y[5].values
             )
+
+
+def test_clip_box__nodata_in_bounds():
+    xds = rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "clip_bbox__out_of_bounds.tif")
+    )
+    with pytest.raises(NoDataInBounds):
+        xds.rio.clip_box(
+            *Transformer.from_crs(
+                xds.rio.crs, "EPSG:4326", always_xy=True
+            ).transform_bounds(
+                135.7821043660001123,
+                -17.1608065079999506,
+                135.7849362810001139,
+                -17.1580839999999739,
+            )
+        )
+
+    with pytest.raises(NoDataInBounds):
+        xds.rio.reproject("EPSG:4326").rio.clip_box(
+            135.7821043660001123,
+            -17.1608065079999506,
+            135.7849362810001139,
+            -17.1580839999999739,
+        )
 
 
 def test_slice_xy(modis_clip):
@@ -671,6 +710,7 @@ def test_reproject_match__non_geospatial(dummy_dataset_non_geospatial):
 
 
 def test_interpolate_na__non_geospatial(dummy_dataset_non_geospatial):
+    pytest.importorskip("scipy")
     ds = dummy_dataset_non_geospatial
     assert ds.stuff.shape == (6, 6, 6)
     with pytest.raises(MissingSpatialDimensionError):
@@ -1184,8 +1224,15 @@ def test_interpolate_na(interpolate_na):
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
+@pytest.mark.skipif(SCIPY_INSTALLED, reason="Only test if scipy is not installed.")
+def test_interpolate_na__missing_scipy():
+    xds = xarray.open_dataarray(os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"))
+    with pytest.raises(ModuleNotFoundError, match=r"rioxarray\[interp\]"):
+        xds.rio.interpolate_na()
+
+
 @pytest.mark.xfail(
-    version.parse(scipy.__version__) < version.parse("1.7.0")
+    version.parse(SCIPY_VERSION) < version.parse("1.7.0")
     or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
@@ -1296,6 +1343,7 @@ def test_geographic_reproject__missing_nodata():
 
 
 def test_geographic_resample_integer():
+    pytest.importorskip("scipy")
     sentinel_2_geographic = os.path.join(
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
@@ -1977,7 +2025,7 @@ def test_read_crs_cf():
     attrs = test_da.spatial_ref.attrs
     attrs.pop("spatial_ref")
     attrs.pop("crs_wkt")
-    assert test_da.rio.crs.to_epsg() == 4326
+    assert test_da.rio.crs.is_geographic
 
 
 def test_get_crs_dataset__nonstandard_grid_mapping():
@@ -2278,6 +2326,7 @@ def test_nonstandard_dims_reproject__array():
 
 
 def test_nonstandard_dims_interpolate_na__dataset():
+    pytest.importorskip("scipy")
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
@@ -2291,6 +2340,7 @@ def test_nonstandard_dims_interpolate_na__dataset():
 
 
 def test_nonstandard_dims_interpolate_na__array():
+    pytest.importorskip("scipy")
     with xarray.open_dataset(
         os.path.join(TEST_INPUT_DATA_DIR, "nonstandard_dim.nc")
     ) as xds:
@@ -2453,10 +2503,12 @@ def test_write_transform():
     ds.rio.write_transform(test_affine, inplace=True)
     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert ds.rio._cached_transform() == test_affine
+    assert ds.rio.transform() == test_affine
     assert ds.rio.grid_mapping == "spatial_ref"
     da = xarray.DataArray(1)
     da.rio.write_transform(test_affine, inplace=True)
     assert da.rio._cached_transform() == test_affine
+    assert da.rio.transform() == test_affine
     assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert da.rio.grid_mapping == "spatial_ref"
 
@@ -2666,6 +2718,7 @@ def test_estimate_utm_crs__out_of_bounds():
 
 
 def test_interpolate_na_missing_nodata():
+    pytest.importorskip("scipy")
     test_da = xarray.DataArray(
         name="missing",
         data=numpy.zeros((5, 5)),

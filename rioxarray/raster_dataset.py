@@ -360,6 +360,8 @@ class RasterDataset(XRasterBase):
         """
         This method uses `scipy.interpolate.griddata` to interpolate missing data.
 
+        .. warning:: scipy is an optional dependency.
+
         .. warning:: Interpolates variables that have dimensions 'x'/'y'. Others are appended as is.
 
         Parameters
