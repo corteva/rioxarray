@@ -26,18 +26,18 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.7, 3.8, 3.9]
         rasterio-version: ['*']
-        xarray-version: ['*']
+        xarray-version: [0.19]
         run-with-scipy: ['YES']
         include:
           - os: windows-latest
             python-version: 3.7
             rasterio-version: '*'
-            xarray-version: '*'
+            xarray-version: 0.19
             run-with-scipy: 'YES'
           - os: windows-latest
             python-version: 3.8
             rasterio-version: '*'
-            xarray-version: '*'
+            xarray-version: 0.19
             run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.7
@@ -47,17 +47,17 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.7
             rasterio-version: 1.1
-            xarray-version: '*'
+            xarray-version: 0.19
             run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.7
             rasterio-version: 1.2.1
-            xarray-version: '*'
+            xarray-version: 0.19
             run-with-scipy: 'YES'
           - os: ubuntu-latest
             python-version: 3.8
             rasterio-version: '*'
-            xarray-version: '*'
+            xarray-version: 0.19
             run-with-scipy: 'NO'
     steps:
       - uses: actions/checkout@v2
