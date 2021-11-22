@@ -178,6 +178,26 @@ def modis_reproject_match_coords(request):
     )
 
 
+@pytest.fixture(
+    params=[
+        xarray.open_dataset,
+        xarray.open_dataarray,
+        rioxarray.open_rasterio,
+        partial(rioxarray.open_rasterio, parse_coordinates=False),
+        open_rasterio_engine,
+    ]
+)
+def modis_reproject_match__passed_nodata(request):
+    return dict(
+        input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
+        compare=os.path.join(
+            TEST_COMPARE_DATA_DIR, "MODIS_ARRAY_MATCH_PASSED_NODATA.nc"
+        ),
+        match=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY_MATCH.nc"),
+        open=request.param,
+    )
+
+
 def _mod_attr(input_xr, attr, val=None, remove=False):
     if hasattr(input_xr, "variables"):
         for var in input_xr.rio.vars:
@@ -1080,6 +1100,25 @@ def test_reproject_match__no_transform_nodata(modis_reproject_match_coords):
         _del_attr(mda, "nodata")
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
+        # test
+        _assert_xarrays_equal(mds_repr, mdc)
+
+
+def test_reproject_match__pass_nodata(modis_reproject_match__passed_nodata):
+    mask_args = (
+        dict(masked=False, mask_and_scale=False)
+        if "rasterio" in str(modis_reproject_match__passed_nodata["open"])
+        else dict(mask_and_scale=False, decode_coords="all")
+    )
+    with modis_reproject_match__passed_nodata["open"](
+        modis_reproject_match__passed_nodata["input"], **mask_args
+    ) as mda, modis_reproject_match__passed_nodata["open"](
+        modis_reproject_match__passed_nodata["compare"], **mask_args
+    ) as mdc, xarray.open_dataarray(
+        modis_reproject_match__passed_nodata["match"]
+    ) as mdm:
+        # reproject
+        mds_repr = mda.rio.reproject_match(mdm, nodata=-9999)
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 

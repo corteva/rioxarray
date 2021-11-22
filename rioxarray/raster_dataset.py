@@ -129,7 +129,9 @@ class RasterDataset(XRasterBase):
                 resampled_dataset[var] = self._obj[var].copy()
         return resampled_dataset
 
-    def reproject_match(self, match_data_array, resampling=Resampling.nearest):
+    def reproject_match(
+        self, match_data_array, resampling=Resampling.nearest, **reproject_kwargs
+    ):
         """
         Reproject a Dataset object to match the resolution, projection,
         and region of another DataArray.
@@ -140,6 +142,7 @@ class RasterDataset(XRasterBase):
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
+        .. versionadded:: 0.9 reproject_kwargs
 
         Parameters
         ----------
@@ -147,7 +150,8 @@ class RasterDataset(XRasterBase):
             Dataset with the target resolution and projection.
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
-
+        **reproject_kwargs:
+            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`
 
         Returns
         --------
@@ -162,7 +166,9 @@ class RasterDataset(XRasterBase):
                 resampled_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
-                    .rio.reproject_match(match_data_array, resampling=resampling)
+                    .rio.reproject_match(
+                        match_data_array, resampling=resampling, **reproject_kwargs
+                    )
                 )
             except MissingSpatialDimensionError:
                 if len(self._obj[var].dims) >= 2 and not get_option(
