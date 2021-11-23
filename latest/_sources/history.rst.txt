@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- ENH: Allow additional kwargs to pass from reproject_match() -> reproject() (pull #436)
 
 0.8.0
 ------
