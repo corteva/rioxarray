@@ -207,7 +207,9 @@
                 <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">resampled_dataset</span></div>
 
-<div class="viewcode-block" id="RasterDataset.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterDataset.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject a Dataset object to match the resolution, projection,</span>
 <span class="sd">        and region of another DataArray.</span>
@@ -218,6 +220,7 @@
 <span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
 
+<span class="sd">        .. versionadded:: 0.9 reproject_kwargs</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -225,7 +228,8 @@
 <span class="sd">            Dataset with the target resolution and projection.</span>
 <span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
 <span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
-
+<span class="sd">        **reproject_kwargs:</span>
+<span class="sd">            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
@@ -240,7 +244,9 @@
                 <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
                     <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span>
+                        <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>

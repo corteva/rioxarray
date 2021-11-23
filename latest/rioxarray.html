@@ -287,7 +287,7 @@ grid mapping attributes for the CRS. This is useful if you are exporting
 your file to netCDF using <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html#xarray.Dataset.to_netcdf" title="(in xarray v0.20.2.dev0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf()</span></code></a>. When disabled,
 only the <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> attributes will be written and the
 program will be faster due to not needing to use
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.2.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>.</li>
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>.</li>
 <li><strong>skip_missing_spatial_dims</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, it will not perform spatial operations on variables
 within a <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> if the spatial dimensions
 are not found.</li>
@@ -1126,7 +1126,7 @@ To override:
 
 <dl class="method">
 <dt id="rioxarray.raster_array.RasterArray.reproject_match">
-<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em>, <em>**reproject_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_array.html#RasterArray.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_array.RasterArray.reproject_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject a DataArray object to match the resolution, projection,
 and region of another DataArray.</p>
 <p>Powered by <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a></p>
@@ -1137,6 +1137,9 @@ Requires either a grid mapping variable with ‘spatial_ref’ or
 a ‘crs’ attribute to be set containing a valid CRS.
 If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.9: </span>reproject_kwargs</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1144,6 +1147,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>match_data_array</strong> (<a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.20.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> | <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – DataArray of the target resolution and projection.</li>
 <li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>**reproject_kwargs</strong> – Other options to pass to <a class="reference internal" href="#rioxarray.raster_dataset.RasterDataset.reproject" title="rioxarray.raster_dataset.RasterDataset.reproject"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rioxarray.raster_dataset.RasterDataset.reproject()</span></code></a></li>
 </ul>
 </td>
 </tr>
@@ -1499,7 +1503,7 @@ To override:
 
 <dl class="method">
 <dt id="rioxarray.raster_dataset.RasterDataset.reproject_match">
-<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject_match" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reproject_match</code><span class="sig-paren">(</span><em>match_data_array</em>, <em>resampling=&lt;Resampling.nearest: 0&gt;</em>, <em>**reproject_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/raster_dataset.html#RasterDataset.reproject_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rioxarray.raster_dataset.RasterDataset.reproject_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproject a Dataset object to match the resolution, projection,
 and region of another DataArray.</p>
 <div class="admonition note">
@@ -1510,6 +1514,9 @@ Requires either a grid mapping variable with ‘spatial_ref’ or
 a ‘crs’ attribute to be set containing a valid CRS.
 If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 </div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.9: </span>reproject_kwargs</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1517,6 +1524,7 @@ If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>match_data_array</strong> (<a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.20.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> | <a class="reference external" href="http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.20.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – Dataset with the target resolution and projection.</li>
 <li><strong>resampling</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.enums.html#rasterio.enums.Resampling" title="(in rasterio v1.2.10)"><em>rasterio.enums.Resampling</em></a><em>, </em><em>optional</em>) – See <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio v1.2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.warp.reproject()</span></code></a> for more details.</li>
+<li><strong>**reproject_kwargs</strong> – Other options to pass to <a class="reference internal" href="#rioxarray.raster_dataset.RasterDataset.reproject" title="rioxarray.raster_dataset.RasterDataset.reproject"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rioxarray.raster_dataset.RasterDataset.reproject()</span></code></a></li>
 </ul>
 </td>
 </tr>

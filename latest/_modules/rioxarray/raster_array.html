@@ -534,7 +534,9 @@
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">xda</span></div>
 
-<div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject a DataArray object to match the resolution, projection,</span>
 <span class="sd">        and region of another DataArray.</span>
@@ -546,13 +548,16 @@
 <span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
 
+<span class="sd">        .. versionadded:: 0.9 reproject_kwargs</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
 <span class="sd">            DataArray of the target resolution and projection.</span>
 <span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
 <span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
-
+<span class="sd">        **reproject_kwargs:</span>
+<span class="sd">            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
@@ -565,6 +570,7 @@
             <span class="n">transform</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">reproject_kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
