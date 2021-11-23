@@ -479,7 +479,7 @@ class RasterArray(XRasterBase):
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
         **reproject_kwargs:
-            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`
+            Other options to pass to :meth:`rioxarray.raster_array.RasterArray.reproject`
 
         Returns
         --------
