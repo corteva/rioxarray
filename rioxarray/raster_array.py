@@ -456,7 +456,9 @@ class RasterArray(XRasterBase):
         xda.rio.write_coordinate_system(inplace=True)
         return xda
 
-    def reproject_match(self, match_data_array, resampling=Resampling.nearest):
+    def reproject_match(
+        self, match_data_array, resampling=Resampling.nearest, **reproject_kwargs
+    ):
         """
         Reproject a DataArray object to match the resolution, projection,
         and region of another DataArray.
@@ -468,13 +470,16 @@ class RasterArray(XRasterBase):
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
+        .. versionadded:: 0.9 reproject_kwargs
+
         Parameters
         ----------
         match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             DataArray of the target resolution and projection.
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
-
+        **reproject_kwargs:
+            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`
 
         Returns
         --------
@@ -487,6 +492,7 @@ class RasterArray(XRasterBase):
             transform=match_data_array.rio.transform(recalc=True),
             shape=match_data_array.rio.shape,
             resampling=resampling,
+            **reproject_kwargs,
         )
 
     def pad_xy(self, minx, miny, maxx, maxy, constant_values):
