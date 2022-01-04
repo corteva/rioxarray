@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- DEP: Drop Python 3.7 support (issue #451)
 
 0.9.1
 ------

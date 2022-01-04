@@ -53,9 +53,9 @@ setup(
         "Natural Language :: English",
         "Topic :: Scientific/Engineering :: GIS",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     description="rasterio xarray extension.",
     install_requires=requirements,
@@ -71,7 +71,7 @@ setup(
     url="https://github.com/corteva/rioxarray",
     version=get_version(),
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     entry_points={
         "xarray.backends": ["rasterio=rioxarray.xarray_plugin:RasterioBackend"]
     },

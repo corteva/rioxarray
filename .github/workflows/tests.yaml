@@ -24,38 +24,38 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ['3.8', '3.9', '3.10']
         rasterio-version: ['*']
         xarray-version: ['*']
         run-with-scipy: ['YES']
         include:
           - os: windows-latest
-            python-version: 3.7
+            python-version: '3.8'
             rasterio-version: '*'
             xarray-version: '*'
             run-with-scipy: 'YES'
           - os: windows-latest
-            python-version: 3.8
+            python-version: '3.9'
             rasterio-version: '*'
             xarray-version: '*'
             run-with-scipy: 'YES'
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: '3.8'
             rasterio-version: '*'
             xarray-version: 0.17
             run-with-scipy: 'YES'
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: '3.8'
             rasterio-version: 1.1
             xarray-version: '*'
             run-with-scipy: 'YES'
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: '3.8'
             rasterio-version: 1.2.1
             xarray-version: '*'
             run-with-scipy: 'YES'
           - os: ubuntu-latest
-            python-version: 3.8
+            python-version: '3.9'
             rasterio-version: '*'
             xarray-version: '*'
             run-with-scipy: 'NO'
