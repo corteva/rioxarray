@@ -315,7 +315,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -381,8 +381,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
 import xarray
 
 %matplotlib inline
@@ -395,8 +394,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
 </pre></div>
 </div>
 </div>
@@ -404,8 +402,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds
 </pre></div>
 </div>
 </div>
@@ -860,8 +857,7 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.plot()
 </pre></div>
 </div>
 </div>
@@ -893,8 +889,7 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xdsc = xds.rio.pad_box(
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc = xds.rio.pad_box(
     minx=-7.3e+06,
     miny=4.99e+06,
     maxx=-7.2e+06,
@@ -907,8 +902,7 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xdsc.values[0, 0]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc.values[0, 0]
 </pre></div>
 </div>
 </div>
@@ -925,8 +919,7 @@ nan
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xdsc.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc.plot()
 </pre></div>
 </div>
 </div>

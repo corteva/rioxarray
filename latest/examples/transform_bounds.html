@@ -311,7 +311,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -377,8 +377,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
 import xarray
 
 %matplotlib inline
@@ -389,8 +388,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;MODIS_ARRAY.nc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataarray(&quot;MODIS_ARRAY.nc&quot;)
 </pre></div>
 </div>
 </div>
@@ -398,8 +396,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.bounds()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.rio.bounds()
 </pre></div>
 </div>
 </div>
@@ -417,8 +414,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.transform_bounds(
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.rio.transform_bounds(
     &quot;+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84&quot;
     &quot; +datum=WGS84 +units=m +no_defs&quot;,
     densify_pts=100,
@@ -442,8 +438,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds.rio.transform_bounds(
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.rio.transform_bounds(
     &quot;+init=epsg:4326&quot;,
     densify_pts=1,
 )

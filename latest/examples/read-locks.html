@@ -317,7 +317,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -395,8 +395,7 @@ scheduler</a> and its <a class="reference external" href="https://distributed.da
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
 
 url = (
     &quot;https://naipeuwest.blob.core.windows.net/naip/v002/md/2013/md_100cm_2013/&quot;
@@ -409,8 +408,7 @@ url = (
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
 %time _ = ds.mean().compute()
 </pre></div>
 </div>
@@ -435,8 +433,7 @@ Wall time: 3.32 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(1, -1, &quot;auto&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(1, -1, &quot;auto&quot;))
 %time _ = ds.mean().compute()
 </pre></div>
 </div>
@@ -459,8 +456,7 @@ Wall time: 11.2 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
 %time _ = ds.mean().compute()
 </pre></div>
 </div>
@@ -478,8 +474,7 @@ Wall time: 3.25 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -497,8 +492,7 @@ Wall time: 2.97 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ds = rioxarray.open_rasterio(url, chunks=(4, &quot;auto&quot;, -1))  # use the default locking
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, chunks=(4, &quot;auto&quot;, -1))  # use the default locking
 %time _ = ds.mean().compute()
 </pre></div>
 </div>
@@ -517,8 +511,7 @@ Wall time: 5.03 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>

@@ -316,7 +316,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -382,8 +382,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import multiprocessing
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import multiprocessing
 # Linux/OSX:
 import multiprocessing.popen_spawn_posix
 # Windows:
@@ -412,8 +411,7 @@ import rioxarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = rioxarray.open_rasterio(
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = rioxarray.open_rasterio(
     &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
     chunks=True,
 )
@@ -428,8 +426,7 @@ xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = rioxarray.open_rasterio(
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = rioxarray.open_rasterio(
     &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
     chunks=True,
     lock=False,
@@ -447,8 +444,7 @@ xds.rio.to_raster(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>with LocalCluster() as cluster, Client(cluster) as client:
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with LocalCluster() as cluster, Client(cluster) as client:
     xds = rioxarray.open_rasterio(
         &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
         chunks=True,

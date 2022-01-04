@@ -316,7 +316,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -384,8 +384,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
 import xarray
 
 import matplotlib.pyplot as plt
@@ -398,8 +397,7 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>def print_raster(raster):
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def print_raster(raster):
     print(
         f&quot;shape: {raster.rio.shape}\n&quot;
         f&quot;resolution: {raster.rio.resolution()}\n&quot;
@@ -416,8 +414,7 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
 xds_match = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;)
 </pre></div>
 </div>
@@ -426,8 +423,7 @@ xds_match = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY_M
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>fig, axes = plt.subplots(ncols=2, figsize=(12,4))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(ncols=2, figsize=(12,4))
 xds.plot(ax=axes[0])
 xds_match.plot(ax=axes[1])
 plt.draw()
@@ -445,8 +441,7 @@ plt.draw()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>print(&quot;Original Raster:\n----------------\n&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Original Raster:\n----------------\n&quot;)
 print_raster(xds)
 print(&quot;Raster to Match:\n----------------\n&quot;)
 print_raster(xds_match)
@@ -490,8 +485,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match = xds.rio.reproject_match(xds_match)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds_repr_match = xds.rio.reproject_match(xds_match)
 </pre></div>
 </div>
 </div>
@@ -499,8 +493,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>print(&quot;Reprojected Raster:\n-------------------\n&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Reprojected Raster:\n-------------------\n&quot;)
 print_raster(xds_repr_match)
 print(&quot;Raster to Match:\n----------------\n&quot;)
 print_raster(xds_match)
@@ -541,8 +534,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>xds_repr_match = xds_repr_match.assign_coords({
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds_repr_match = xds_repr_match.assign_coords({
     &quot;x&quot;: xds_match.x,
     &quot;y&quot;: xds_match.y,
 })
@@ -554,8 +546,7 @@ xds_sum = xds_repr_match + xds_match
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>print(&quot;Sum Raster:\n-----------\n&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Sum Raster:\n-----------\n&quot;)
 print_raster(xds_sum)
 </pre></div>
 </div>
@@ -580,8 +571,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>fig, axes = plt.subplots(ncols=3, figsize=(16,4))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(ncols=3, figsize=(16,4))
 
 xds_repr_match.plot(ax=axes[0])
 xds_match.plot(ax=axes[1])

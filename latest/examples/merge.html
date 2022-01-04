@@ -314,7 +314,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -380,8 +380,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import rioxarray # for the extension to load
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
 import xarray
 from rioxarray.merge import merge_arrays
 # Note: You can merge datasets with the merge_datasets method
@@ -402,8 +401,7 @@ from rioxarray.merge import merge_arrays
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>dem_test = &quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dem_test = &quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;
 rds = rioxarray.open_rasterio(dem_test)
 arrays = [
     rds.isel(x=slice(100), y=slice(100)),
@@ -419,8 +417,7 @@ merged = merge_arrays(arrays)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>rds.where(rds!=rds.rio.nodata).plot();
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.where(rds!=rds.rio.nodata).plot();
 </pre></div>
 </div>
 </div>
@@ -435,8 +432,7 @@ merged = merge_arrays(arrays)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>merged.where(merged!=merged.rio.nodata).plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>merged.where(merged!=merged.rio.nodata).plot()
 </pre></div>
 </div>
 </div>
