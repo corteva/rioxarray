@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.9.1
 ------
 - BUG: Force coordinates to be exactly the same in `rio.reproject_match` (issue #298)
