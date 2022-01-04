@@ -487,13 +487,33 @@ class RasterArray(XRasterBase):
             Contains the data from the src_data_array, reprojected to match
             match_data_array.
         """
-        return self.reproject(
+        reprojected_data_array = self.reproject(
             match_data_array.rio.crs,
             transform=match_data_array.rio.transform(recalc=True),
             shape=match_data_array.rio.shape,
             resampling=resampling,
             **reproject_kwargs,
         )
+        # hack to resolve: https://github.com/corteva/rioxarray/issues/298
+        # may be resolved in the future by flexible indexes:
+        # https://github.com/pydata/xarray/pull/4489#issuecomment-831809607
+        x_attrs = reprojected_data_array[reprojected_data_array.rio.x_dim].attrs.copy()
+        y_attrs = reprojected_data_array[reprojected_data_array.rio.y_dim].attrs.copy()
+        # ensure coords the same
+        reprojected_data_array = reprojected_data_array.assign_coords(
+            {
+                reprojected_data_array.rio.x_dim: match_data_array[
+                    match_data_array.rio.x_dim
+                ].values.copy(),
+                reprojected_data_array.rio.y_dim: match_data_array[
+                    match_data_array.rio.y_dim
+                ].values.copy(),
+            }
+        )
+        # ensure attributes copied
+        reprojected_data_array[reprojected_data_array.rio.x_dim].attrs = x_attrs
+        reprojected_data_array[reprojected_data_array.rio.y_dim].attrs = y_attrs
+        return reprojected_data_array
 
     def pad_xy(self, minx, miny, maxx, maxy, constant_values):
         """Pad the array to x,y bounds.
