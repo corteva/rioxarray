@@ -26,7 +26,7 @@ with open("README.rst") as readme_file:
 requirements = ["packaging", "rasterio", "xarray>=0.17", "pyproj>=2.2"]
 
 test_requirements = ["pytest>=3.6", "pytest-cov", "pytest-timeout", "dask", "netcdf4"]
-doc_requirements = ["sphinx-click==1.1.0", "nbsphinx", "sphinx_rtd_theme"]
+doc_requirements = ["sphinx-click", "nbsphinx", "sphinx_rtd_theme"]
 
 extras_require = {
     "interp": ["scipy"],
