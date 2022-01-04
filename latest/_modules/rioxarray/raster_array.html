@@ -565,13 +565,33 @@
 <span class="sd">            Contains the data from the src_data_array, reprojected to match</span>
 <span class="sd">            match_data_array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+        <span class="n">reprojected_data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
             <span class="o">**</span><span class="n">reproject_kwargs</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="c1"># hack to resolve: https://github.com/corteva/rioxarray/issues/298</span>
+        <span class="c1"># may be resolved in the future by flexible indexes:</span>
+        <span class="c1"># https://github.com/pydata/xarray/pull/4489#issuecomment-831809607</span>
+        <span class="n">x_attrs</span> <span class="o">=</span> <span class="n">reprojected_data_array</span><span class="p">[</span><span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">y_attrs</span> <span class="o">=</span> <span class="n">reprojected_data_array</span><span class="p">[</span><span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># ensure coords the same</span>
+        <span class="n">reprojected_data_array</span> <span class="o">=</span> <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">match_data_array</span><span class="p">[</span>
+                    <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">match_data_array</span><span class="p">[</span>
+                    <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="c1"># ensure attributes copied</span>
+        <span class="n">reprojected_data_array</span><span class="p">[</span><span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">x_attrs</span>
+        <span class="n">reprojected_data_array</span><span class="p">[</span><span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">y_attrs</span>
+        <span class="k">return</span> <span class="n">reprojected_data_array</span></div>
 
 <div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Pad the array to x,y bounds.</span>
