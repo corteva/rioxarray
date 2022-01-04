@@ -21,7 +21,23 @@ Stable release
 
       conda config --prepend channels conda-forge
       conda config --set channel_priority strict
-      conda install rioxarray
+      conda create -n rioxarray_env rioxarray
+      conda activate rioxarray_env
+
+  .. note::
+      "... we recommend always installing your packages inside a
+      new environment instead of the base environment from
+      anaconda/miniconda. Using envs make it easier to
+      debug problems with packages and ensure the stability
+      of your root env."
+        -- https://conda-forge.org/docs/user/tipsandtricks.html
+
+  .. warning::
+      Avoid using `pip install` with a conda environment. If you encounter
+      a python package that isn't in conda-forge, consider submitting a
+      recipe: https://github.com/conda-forge/staged-recipes/
+
+  - `rioxarray` conda forge repository <http://github.com/conda-forge/rioxarray-feedstock>`__
 
 
 From source
