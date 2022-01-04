@@ -43,14 +43,20 @@ Stable release
 From source
 -----------
 
-The source for rioxarray can be downloaded from the `GitHub repo`_.
+The source for rioxarray can be installed from the `GitHub repo`_.
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ git clone git@github.com:corteva/rioxarray.git
+    python -m pip install git+git://github.com/corteva/rioxarray.git#egg=rioxarray
 
-    $ cd rioxarray
-    $ python setup.py install
+
+To install for local development:
+
+.. code-block:: bash
+
+    git clone git@github.com:corteva/rioxarray.git
+    cd rioxarray
+    python -m pip install -e .[dev]
 
 
 .. _GitHub repo: https://github.com/corteva/rioxarray
