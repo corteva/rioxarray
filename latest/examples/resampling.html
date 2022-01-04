@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example - Resampling &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Example - Resampling &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -375,8 +377,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Resampling">
-<h1>Example - Resampling<a class="headerlink" href="#Example---Resampling" title="Permalink to this headline">¶</a></h1>
+<section id="Example---Resampling">
+<h1>Example - Resampling<a class="headerlink" href="#Example---Resampling" title="Permalink to this headline"></a></h1>
 <p>This example demonstrates how to reproduce <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>’s resampling example <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/resampling.html">here</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -390,12 +392,12 @@ import rioxarray
 </pre></div>
 </div>
 </div>
-<div class="section" id="Load-in-xarray-dataset">
-<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
+<section id="Load-in-xarray-dataset">
+<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline"></a></h2>
 <p>See docs for <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
 <p>Notes:</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -408,13 +410,13 @@ import rioxarray
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Resampling">
-<h2>Resampling<a class="headerlink" href="#Resampling" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Resampling">
+<h2>Resampling<a class="headerlink" href="#Resampling" title="Permalink to this headline"></a></h2>
 <p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.reproject</span></code>:</p>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject"><span class="std std-ref">DataArray.reproject</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject"><span class="std std-ref">Dataset.reproject</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject"><span class="std std-ref">DataArray.reproject</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject"><span class="std std-ref">Dataset.reproject</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -500,8 +502,8 @@ xds_upsampled = xds.rio.reproject(
 (1.5, -1.5)
 </pre></div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

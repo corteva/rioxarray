@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nodata Management &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Nodata Management &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -361,23 +363,23 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Nodata-Management">
-<h1>Nodata Management<a class="headerlink" href="#Nodata-Management" title="Permalink to this headline">¶</a></h1>
+<section id="Nodata-Management">
+<h1>Nodata Management<a class="headerlink" href="#Nodata-Management" title="Permalink to this headline"></a></h1>
 <p>If you have opened a dataset and the nodata value can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> accessors.</p>
 <p>If your dataset’s nodata value cannot be determined, you can use the <code class="docutils literal notranslate"><span class="pre">rio.write_nodata</span></code> method.</p>
-<div class="section" id="Search-order-for-nodata-(DataArray-only):">
-<h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this headline">¶</a></h2>
+<section id="Search-order-for-nodata-(DataArray-only):">
+<h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this headline"></a></h2>
 <ol class="arabic simple">
-<li>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</li>
-<li>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</li>
+<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</p></li>
+<li><p>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
-</div>
-<div class="section" id="API-Documentation">
-<h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="API-Documentation">
+<h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -390,8 +392,8 @@ file_path = &quot;../../test/test_data/input/tmmx_20190121.nc&quot;
 </pre></div>
 </div>
 </div>
-<div class="section" id="Example-of-loading-unmaksed-data">
-<h3>Example of loading unmaksed data<a class="headerlink" href="#Example-of-loading-unmaksed-data" title="Permalink to this headline">¶</a></h3>
+<section id="Example-of-loading-unmaksed-data">
+<h3>Example of loading unmaksed data<a class="headerlink" href="#Example-of-loading-unmaksed-data" title="Permalink to this headline"></a></h3>
 <p>In this case, the nodata value is in the attributes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -453,9 +455,9 @@ attributes:
     {&#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;, &#39;_FillValue&#39;: 32767.0, &#39;_Unsigned&#39;: &#39;true&#39;}
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Example-of-data-loaded-in-with-mask_and_scale=True">
-<h3>Example of data loaded in with mask_and_scale=True<a class="headerlink" href="#Example-of-data-loaded-in-with-mask_and_scale=True" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Example-of-data-loaded-in-with-mask_and_scale=True">
+<h3>Example of data loaded in with mask_and_scale=True<a class="headerlink" href="#Example-of-data-loaded-in-with-mask_and_scale=True" title="Permalink to this headline"></a></h3>
 <p>When the dataset is opened with <code class="docutils literal notranslate"><span class="pre">mask_and_scale=True</span></code> with <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>, the nodata metadata is written to the encoding attribute. Then, when the dataset is written using <code class="docutils literal notranslate"><span class="pre">to_netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.to_raster</span></code> the data is decoded and it writes the original nodata value to the raster.</p>
 <p>When this happens, <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> returns <code class="docutils literal notranslate"><span class="pre">numpy.nan</span></code> and <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> contains the original value.</p>
 <div class="nbinput docutils container">
@@ -553,9 +555,9 @@ encoding:
     {&#39;_Unsigned&#39;: &#39;true&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_FillValue&#39;: 32767.0, &#39;missing_value&#39;: 32767}
 </pre></div></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

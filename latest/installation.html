@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Installation &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -41,7 +41,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">rioxarray README</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
@@ -105,12 +105,12 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="stable-release">
-<h2>Stable release<a class="headerlink" href="#stable-release" title="Permalink to this headline">¶</a></h2>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<section id="stable-release">
+<h2>Stable release<a class="headerlink" href="#stable-release" title="Permalink to this headline"></a></h2>
 <ol class="arabic simple">
-<li>Use pip to install package from <a class="reference external" href="https://pypi.org/project/rioxarray/">PyPI</a>:</li>
+<li><p>Use pip to install package from <a class="reference external" href="https://pypi.org/project/rioxarray/">PyPI</a>:</p></li>
 </ol>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install rioxarray
@@ -118,7 +118,7 @@
 </div>
 </div></blockquote>
 <ol class="arabic simple" start="2">
-<li>Use <a class="reference external" href="https://conda.io/en/latest/">conda</a> with the <a class="reference external" href="https://conda-forge.org/">conda-forge</a> channel:</li>
+<li><p>Use <a class="reference external" href="https://conda.io/en/latest/">conda</a> with the <a class="reference external" href="https://conda-forge.org/">conda-forge</a> channel:</p></li>
 </ol>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --prepend channels conda-forge
@@ -128,28 +128,29 @@ conda activate rioxarray_env
 </pre></div>
 </div>
 <ul class="simple">
-<li><cite>rioxarray</cite> <a class="reference external" href="http://github.com/conda-forge/rioxarray-feedstock">conda-forge repository</a></li>
+<li><p><cite>rioxarray</cite> <a class="reference external" href="http://github.com/conda-forge/rioxarray-feedstock">conda-forge repository</a></p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>“… we recommend always installing your packages inside a
 new environment instead of the base environment from
 anaconda/miniconda. Using envs make it easier to
 debug problems with packages and ensure the stability
 of your root env.”</p>
-<blockquote class="last">
-<div>– <a class="reference external" href="https://conda-forge.org/docs/user/tipsandtricks.html">https://conda-forge.org/docs/user/tipsandtricks.html</a></div></blockquote>
+<blockquote>
+<div><p>– <a class="reference external" href="https://conda-forge.org/docs/user/tipsandtricks.html">https://conda-forge.org/docs/user/tipsandtricks.html</a></p>
+</div></blockquote>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Avoid using <cite>pip install</cite> with a conda environment. If you encounter
+<p class="admonition-title">Warning</p>
+<p>Avoid using <cite>pip install</cite> with a conda environment. If you encounter
 a python package that isn’t in conda-forge, consider submitting a
 recipe: <a class="reference external" href="https://github.com/conda-forge/staged-recipes/">https://github.com/conda-forge/staged-recipes/</a></p>
 </div>
 </div></blockquote>
-</div>
-<div class="section" id="from-source">
-<h2>From source<a class="headerlink" href="#from-source" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="from-source">
+<h2>From source<a class="headerlink" href="#from-source" title="Permalink to this headline"></a></h2>
 <p>The source for rioxarray can be downloaded from the <a class="reference external" href="https://github.com/corteva/rioxarray">GitHub repo</a>.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone git@github.com:corteva/rioxarray.git
 
@@ -157,8 +158,8 @@ recipe: <a class="reference external" href="https://github.com/conda-forge/stage
 <span class="gp">$ </span>python setup.py install
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example - Convert dataset to raster (GeoTiff) &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Example - Convert dataset to raster (GeoTiff) &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -375,14 +377,14 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Convert-dataset-to-raster-(GeoTiff)">
-<h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this headline">¶</a></h1>
+<section id="Example---Convert-dataset-to-raster-(GeoTiff)">
+<h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this headline"></a></h1>
 <p>Often, it is desirable to take a variable (band) out of your dataset and export it to a raster. This is possible with the <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code>method. It does most of the work for you so you don’t have to.</p>
 <p>Note: The <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code> method only works on a 2-dimensional or 3-dimensional <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> or a 2-dimensional <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.</p>
 <p>API Reference:</p>
 <ul class="simple">
-<li>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
-<li>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
+<li><p>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p></li>
+<li><p>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -422,8 +424,8 @@ Data variables:
 Attributes:
     coordinates:  spatial_ref</pre></div>
 </div>
-<div class="section" id="Converting-Dataset-to-raster">
-<h2>Converting Dataset to raster<a class="headerlink" href="#Converting-Dataset-to-raster" title="Permalink to this headline">¶</a></h2>
+<section id="Converting-Dataset-to-raster">
+<h2>Converting Dataset to raster<a class="headerlink" href="#Converting-Dataset-to-raster" title="Permalink to this headline"></a></h2>
 <p>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -450,9 +452,9 @@ rds.isel(time=0).rio.to_raster(&quot;planet_scope.tif&quot;)
 {&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [&#34;blue&#34;, &#34;green&#34;], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Converting-DataArray-to-raster">
-<h2>Converting DataArray to raster<a class="headerlink" href="#Converting-DataArray-to-raster" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Converting-DataArray-to-raster">
+<h2>Converting DataArray to raster<a class="headerlink" href="#Converting-DataArray-to-raster" title="Permalink to this headline"></a></h2>
 <p>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -479,8 +481,8 @@ rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
 {&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [&#34;green&#34;, &#34;green&#34;], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

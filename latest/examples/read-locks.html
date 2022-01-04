@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example - Reading COGs in Parallel &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Example - Reading COGs in Parallel &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -377,19 +379,19 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Reading-COGs-in-Parallel">
-<h1>Example - Reading COGs in Parallel<a class="headerlink" href="#Example---Reading-COGs-in-Parallel" title="Permalink to this headline">¶</a></h1>
+<section id="Example---Reading-COGs-in-Parallel">
+<h1>Example - Reading COGs in Parallel<a class="headerlink" href="#Example---Reading-COGs-in-Parallel" title="Permalink to this headline"></a></h1>
 <p>Cloud Optimized Geotiffs (COGs) can be internally chunked, which makes it possible to read them in parallel from multiple threads. However, the libraries <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> builds on, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">GDAL</span></code>, require some care to be used safely from multiple threads within a single process. By default, <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a> will acquire a per-process lock when reading a chunk of a COG.</p>
 <p>If you’re using <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> with <a class="reference external" href="http://docs.dask.org/">Dask</a> through the <code class="docutils literal notranslate"><span class="pre">chunks</span></code> keyword, you can also specify the <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> keyword to ensure that reading <em>and</em> operating on your data happen in parallel.</p>
 <p>Note: Also see <a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p>
-<div class="section" id="Scheduler-Choice">
-<h2>Scheduler Choice<a class="headerlink" href="#Scheduler-Choice" title="Permalink to this headline">¶</a></h2>
+<section id="Scheduler-Choice">
+<h2>Scheduler Choice<a class="headerlink" href="#Scheduler-Choice" title="Permalink to this headline"></a></h2>
 <p>Dask has <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html">several schedulers</a> which run computations in parallel. Which scheduler is best depends on a variety of factors, including whether your computation holds Python’s Global Interpreter Lock, whether how much data needs to be moved around, and whether you need more than one machine’s computational power. This section about read-locks only applies if you have more than one thread in a process. This will happen with Dask’s <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html#local-threads">local threaded
 scheduler</a> and its <a class="reference external" href="https://distributed.dask.org/en/latest/">distributed scheduler</a> when configured to use more than one thread per worker.</p>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> objects will use the local <code class="docutils literal notranslate"><span class="pre">threaded</span></code> scheduler.</p>
-</div>
-<div class="section" id="Reading-without-Locks">
-<h2>Reading without Locks<a class="headerlink" href="#Reading-without-Locks" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Reading-without-Locks">
+<h2>Reading without Locks<a class="headerlink" href="#Reading-without-Locks" title="Permalink to this headline"></a></h2>
 <p>To read a COG without any locks, you’d specify <code class="docutils literal notranslate"><span class="pre">lock=False</span></code>. This tells <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> to open a new <code class="docutils literal notranslate"><span class="pre">rasterio.DatasetReader</span></code> in each thread, rather than trying to share one amongst multiple threads.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -423,9 +425,9 @@ Wall time: 3.32 s
 </pre></div></div>
 </div>
 <p>Note: these timings are from a VM in the same Azure data center that’s hosting the COG. Running this locally will give different times.</p>
-</div>
-<div class="section" id="Chunking">
-<h2>Chunking<a class="headerlink" href="#Chunking" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Chunking">
+<h2>Chunking<a class="headerlink" href="#Chunking" title="Permalink to this headline"></a></h2>
 <p>For maximum read performance, the chunking pattern you request should align with the internal chunking of the COG. Typically this means reading the data in a “row major” format: your chunks should be as wide as possible along the columns. We did that above with the chunks of <code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">&quot;auto&quot;,</span> <span class="pre">-1)</span></code>. The <code class="docutils literal notranslate"><span class="pre">-1</span></code> says “include all the columns”, and the <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> will make the chunking along the rows as large as possible while staying in a reasonable limit (specified in
 <code class="docutils literal notranslate"><span class="pre">dask.config.get(&quot;array.chunk-size&quot;)</span></code>).</p>
 <p>If we flipped that, and instead read as much of the rows as possible, we’ll see slower performance.</p>
@@ -448,9 +450,9 @@ Wall time: 11.2 s
 </pre></div></div>
 </div>
 <p>That said, reading is typically just the first step in a larger computation. You’d want to consider what chunking is best for your whole computation. See <a class="reference external" href="https://docs.dask.org/en/latest/array-chunks.html">https://docs.dask.org/en/latest/array-chunks.html</a> for more on choosing chunks.</p>
-</div>
-<div class="section" id="Caching-Considerations">
-<h2>Caching Considerations<a class="headerlink" href="#Caching-Considerations" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Caching-Considerations">
+<h2>Caching Considerations<a class="headerlink" href="#Caching-Considerations" title="Permalink to this headline"></a></h2>
 <p>Specifying <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> will disable some internal caching done by xarray or rasterio. For example, the first and second reads here are roughly the same, since nothing is cached.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -525,8 +527,8 @@ Wall time: 200 ms
 </pre></div></div>
 </div>
 <p>If you’re reapeatedly reading subsets of the data, using the default lock or <code class="docutils literal notranslate"><span class="pre">lock=some_lock_object</span></code> to benefit from the caching.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

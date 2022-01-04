@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coordinate Reference System Management &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Coordinate Reference System Management &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -361,49 +363,49 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Coordinate-Reference-System-Management">
-<h1>Coordinate Reference System Management<a class="headerlink" href="#Coordinate-Reference-System-Management" title="Permalink to this headline">¶</a></h1>
+<section id="Coordinate-Reference-System-Management">
+<h1>Coordinate Reference System Management<a class="headerlink" href="#Coordinate-Reference-System-Management" title="Permalink to this headline"></a></h1>
 <p>xarray “… is particularly tailored to working with netCDF files, which were the source of xarray’s data model…” (<a class="reference external" href="http://xarray.pydata.org">http://xarray.pydata.org</a>).</p>
 <p>For netCDF files, the GIS community uses CF conventions (<a class="reference external" href="http://cfconventions.org/">http://cfconventions.org/</a>).</p>
 <p>Additionally, GDAL also supports these attributes:</p>
 <ul class="simple">
-<li>spatial_ref (Well Known Text)</li>
-<li>GeoTransform (GeoTransform array)</li>
+<li><p>spatial_ref (Well Known Text)</p></li>
+<li><p>GeoTransform (GeoTransform array)</p></li>
 </ul>
 <p>References:</p>
 <ul class="simple">
-<li>Esri: <a class="reference external" href="https://pro.arcgis.com/en/pro-app/latest/help/data/multidimensional/spatial-reference-for-netcdf-data.htm">https://pro.arcgis.com/en/pro-app/latest/help/data/multidimensional/spatial-reference-for-netcdf-data.htm</a></li>
-<li>GDAL: <a class="reference external" href="https://gdal.org/drivers/raster/netcdf.html#georeference">https://gdal.org/drivers/raster/netcdf.html#georeference</a></li>
-<li>pyproj: <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/build_crs_cf.html">https://pyproj4.github.io/pyproj/stable/build_crs_cf.html</a></li>
+<li><p>Esri: <a class="reference external" href="https://pro.arcgis.com/en/pro-app/latest/help/data/multidimensional/spatial-reference-for-netcdf-data.htm">https://pro.arcgis.com/en/pro-app/latest/help/data/multidimensional/spatial-reference-for-netcdf-data.htm</a></p></li>
+<li><p>GDAL: <a class="reference external" href="https://gdal.org/drivers/raster/netcdf.html#georeference">https://gdal.org/drivers/raster/netcdf.html#georeference</a></p></li>
+<li><p>pyproj: <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/build_crs_cf.html">https://pyproj4.github.io/pyproj/stable/build_crs_cf.html</a></p></li>
 </ul>
 <p>Operations on xarray objects can cause data loss. Due to this, rioxarray writes and expects the spatial reference information to exist in the coordinates.</p>
-<div class="section" id="Accessing-the-CRS-object">
-<h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Permalink to this headline">¶</a></h2>
+<section id="Accessing-the-CRS-object">
+<h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Permalink to this headline"></a></h2>
 <p>If you have opened a dataset and the Coordinate Reference System (CRS) can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.crs</span></code> accessor.</p>
-<div class="section" id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
-<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this headline">¶</a></h3>
+<section id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
+<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this headline"></a></h3>
 <ol class="arabic simple">
-<li>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</li>
-<li>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</li>
+<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
+<li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
-</div>
-<div class="section" id="Search-order-for-the-CRS-for-Dataset:">
-<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Search-order-for-the-CRS-for-Dataset:">
+<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline"></a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
-</div>
-<div class="section" id="decode_coords=“all”">
-<h3>decode_coords=“all”<a class="headerlink" href="#decode_coords=“all”" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="decode_coords=“all”">
+<h3>decode_coords=“all”<a class="headerlink" href="#decode_coords=“all”" title="Permalink to this headline"></a></h3>
 <p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files with the default engine, it is recommended to use <code class="docutils literal notranslate"><span class="pre">decode_coords=&quot;all&quot;</span></code>. This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
-</div>
-<div class="section" id="API-Documentation">
-<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="API-Documentation">
+<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline"></a></h3>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs"><span class="std std-ref">rio.estimate_utm_crs()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs"><span class="std std-ref">rio.estimate_utm_crs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -828,14 +830,14 @@ Attributes:
 CRS.from_epsg(32722)
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Setting-the-CRS">
-<h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Setting-the-CRS">
+<h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Permalink to this headline"></a></h2>
 <p>Use the <code class="docutils literal notranslate"><span class="pre">rio.write_crs</span></code> method to set the CRS on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>. This modifies the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> and sets the CRS in a CF compliant manner.</p>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
 </ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -1236,13 +1238,13 @@ Attributes:
 CRS.from_epsg(4326)
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Setting-the-transform-of-the-dataset">
-<h2>Setting the transform of the dataset<a class="headerlink" href="#Setting-the-transform-of-the-dataset" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Setting-the-transform-of-the-dataset">
+<h2>Setting the transform of the dataset<a class="headerlink" href="#Setting-the-transform-of-the-dataset" title="Permalink to this headline"></a></h2>
 <p>The transform can be calculated from the coordinates of your data. This method is useful if your netCDF file does not have coordinates present. Use the <code class="docutils literal notranslate"><span class="pre">rio.write_transform</span></code> method to set the transform on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>.</p>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
 </ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -1281,8 +1283,8 @@ Affine(3.0, 0.0, 466266.0,
        0.0, -3.0, 8084700.0)
 </pre></div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

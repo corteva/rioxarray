@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Managing Information Loss with xarray operations &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Managing Information Loss with xarray operations &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -361,21 +363,21 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Managing-Information-Loss-with-xarray-operations">
-<h1>Managing Information Loss with xarray operations<a class="headerlink" href="#Managing-Information-Loss-with-xarray-operations" title="Permalink to this headline">¶</a></h1>
+<section id="Managing-Information-Loss-with-xarray-operations">
+<h1>Managing Information Loss with xarray operations<a class="headerlink" href="#Managing-Information-Loss-with-xarray-operations" title="Permalink to this headline"></a></h1>
 <p>Sometimes, you can lose important information from your dataset when performing operations. You will likely want to keep track of the attributes, <code class="docutils literal notranslate"><span class="pre">nodata</span></code>, and <code class="docutils literal notranslate"><span class="pre">CRS</span></code>.</p>
 <p>API Reference:</p>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs"><span class="std std-ref">rio.update_attrs()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding"><span class="std std-ref">rio.update_encoding()</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs"><span class="std std-ref">rio.update_attrs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding"><span class="std std-ref">rio.update_encoding()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
 </ul>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">write_transform</span></code> is only needed if you are not saving the x,y coordinates. It is for GDAL to be able to read in the transform without needing the original coordinates and is useful if you read in the file with <code class="docutils literal notranslate"><span class="pre">parse_coordinates=False</span></code>.</p>
 <div class="nbinput nblast docutils container">
@@ -519,7 +521,7 @@ new_ds.attrs, new_ds.encoding, new_ds.rio.crs, new_ds.rio.nodata
 {&#34;bounds&#34;: [466266.0, 8084670.0, 466296.0, 8084700.0], &#34;colorinterp&#34;: [&#34;gray&#34;, &#34;undefined&#34;], &#34;count&#34;: 2, &#34;crs&#34;: &#34;EPSG:32722&#34;, &#34;descriptions&#34;: [&#34;green&#34;, &#34;green&#34;], &#34;driver&#34;: &#34;GTiff&#34;, &#34;dtype&#34;: &#34;float64&#34;, &#34;height&#34;: 10, &#34;indexes&#34;: [1, 2], &#34;interleave&#34;: &#34;pixel&#34;, &#34;lnglat&#34;: [-51.31732641226951, -17.322997474192466], &#34;mask_flags&#34;: [[&#34;nodata&#34;], [&#34;nodata&#34;]], &#34;nodata&#34;: NaN, &#34;res&#34;: [3.0, 3.0], &#34;shape&#34;: [10, 10], &#34;tiled&#34;: false, &#34;transform&#34;: [3.0, 0.0, 466266.0, 0.0, -3.0, 8084700.0, 0.0, 0.0, 1.0], &#34;units&#34;: [null, null], &#34;width&#34;: 10}
 </pre></div></div>
 </div>
-</div>
+</section>
 
 
            </div>

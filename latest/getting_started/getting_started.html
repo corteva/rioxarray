@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting Started &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Getting Started &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +41,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -114,11 +114,11 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="getting-started">
-<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<section id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
 <p>Welcome! This page aims to help you gain a foundational understanding of rioxarray.</p>
-<div class="section" id="rio-accessor">
-<h2>rio accessor<a class="headerlink" href="#rio-accessor" title="Permalink to this headline">¶</a></h2>
+<section id="rio-accessor">
+<h2>rio accessor<a class="headerlink" href="#rio-accessor" title="Permalink to this headline"></a></h2>
 <p>rioxarray <a class="reference external" href="http://xarray.pydata.org/en/stable/internals.html#extending-xarray">extends xarray</a>
 with the <cite>rio</cite> accessor. The <cite>rio</cite> accessor is activated by importing rioxarray like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
@@ -127,11 +127,11 @@ with the <cite>rio</cite> accessor. The <cite>rio</cite> accessor is activated b
 <p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
 section of the documentation. Need to export to a raster (GeoTiff)? There is an example for
 that as well.</p>
-</div>
-<div class="section" id="reading-files">
-<h2>Reading Files<a class="headerlink" href="#reading-files" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="xarray">
-<h3>xarray<a class="headerlink" href="#xarray" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="reading-files">
+<h2>Reading Files<a class="headerlink" href="#reading-files" title="Permalink to this headline"></a></h2>
+<section id="xarray">
+<h3>xarray<a class="headerlink" href="#xarray" title="Permalink to this headline"></a></h3>
 <p>Since <cite>rioxarray</cite> is an extension of <cite>xarray</cite>, you can load in files using the standard
 <cite>xarray</cite> open methods. If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
 to load netCDF files with the default engine, it is recommended to use <cite>decode_coords=”all”</cite>.
@@ -141,9 +141,9 @@ This will load the grid mapping variable into coordinates for compatibility with
 <span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;file.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="rioxarray">
-<h3>rioxarray<a class="headerlink" href="#rioxarray" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="rioxarray">
+<h3>rioxarray<a class="headerlink" href="#rioxarray" title="Permalink to this headline"></a></h3>
 <p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
 and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+. This uses
 <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> as the backend and always returns an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.</p>
@@ -161,24 +161,24 @@ your input file type.</p>
 </div>
 <p>Why use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> instead of <cite>xarray.open_rasterio</cite>?</p>
 <ol class="arabic simple">
-<li>It supports multidimensional datasets such as netCDF.</li>
-<li>It stores the CRS as a WKT, which is the recommended format (<a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">PROJ FAQ</a>).</li>
-<li>It loads in the CRS, transform, and nodata metadata in standard CF &amp; GDAL locations.</li>
-<li>It supports masking and scaling data with the <cite>masked</cite> and <cite>mask_and_scale</cite> kwargs.</li>
-<li>It adds the coordinate axis CF metadata.</li>
-<li>It loads raster metadata into the attributes.</li>
+<li><p>It supports multidimensional datasets such as netCDF.</p></li>
+<li><p>It stores the CRS as a WKT, which is the recommended format (<a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">PROJ FAQ</a>).</p></li>
+<li><p>It loads in the CRS, transform, and nodata metadata in standard CF &amp; GDAL locations.</p></li>
+<li><p>It supports masking and scaling data with the <cite>masked</cite> and <cite>mask_and_scale</cite> kwargs.</p></li>
+<li><p>It adds the coordinate axis CF metadata.</p></li>
+<li><p>It loads raster metadata into the attributes.</p></li>
 </ol>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Data management:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Data management:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
 </ul>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

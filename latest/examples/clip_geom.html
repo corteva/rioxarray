@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example - Clip &mdash; rioxarray 0.9.2.dev0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Example - Clip &mdash; rioxarray 0.9.2.dev0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +43,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -377,12 +379,12 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Example---Clip">
-<h1>Example - Clip<a class="headerlink" href="#Example---Clip" title="Permalink to this headline">¶</a></h1>
+<section id="Example---Clip">
+<h1>Example - Clip<a class="headerlink" href="#Example---Clip" title="Permalink to this headline"></a></h1>
 <p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.clip</span></code>:</p>
 <ul class="simple">
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.clip"><span class="std std-ref">DataArray.clip</span></a></li>
-<li><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.clip"><span class="std std-ref">Dataset.clip</span></a></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.clip"><span class="std std-ref">DataArray.clip</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.clip"><span class="std std-ref">Dataset.clip</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -394,12 +396,12 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Load-in-xarray-dataset">
-<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline">¶</a></h2>
+<section id="Load-in-xarray-dataset">
+<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline"></a></h2>
 <p>See docs for <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
 <p>Notes:</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">masked=True</span></code> will convert from integer to <code class="docutils literal notranslate"><span class="pre">float64</span></code> and fill with <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If this behavior is not desired, you can skip this.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -436,9 +438,9 @@ div.rendered_html tbody tr:hover {
 <img alt="../_images/examples_clip_geom_4_1.png" src="../_images/examples_clip_geom_4_1.png" />
 </div>
 </div>
-</div>
-<div class="section" id="Clip-using-a-geometry">
-<h2>Clip using a geometry<a class="headerlink" href="#Clip-using-a-geometry" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Clip-using-a-geometry">
+<h2>Clip using a geometry<a class="headerlink" href="#Clip-using-a-geometry" title="Permalink to this headline"></a></h2>
 <p>By default, it assumes that the CRS of the geometry is the same as the CRS of the dataset. If it is different, make sure to pass in the CRS of the geometry.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -492,9 +494,9 @@ clipped = xds.rio.clip(geometries)
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Clip-using-a-GeoDataFrame">
-<h2>Clip using a GeoDataFrame<a class="headerlink" href="#Clip-using-a-GeoDataFrame" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Clip-using-a-GeoDataFrame">
+<h2>Clip using a GeoDataFrame<a class="headerlink" href="#Clip-using-a-GeoDataFrame" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -562,9 +564,9 @@ from shapely.geometry import box
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Clipping-larger-rasters">
-<h2>Clipping larger rasters<a class="headerlink" href="#Clipping-larger-rasters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Clipping-larger-rasters">
+<h2>Clipping larger rasters<a class="headerlink" href="#Clipping-larger-rasters" title="Permalink to this headline"></a></h2>
 <p>Note: Loading from disk will likely only work directly after opening a raster with <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
 <p>The clip operation needs the full raster loaded with the default method. This can be an issue if you don’t have enough memory (RAM) on you machine. If this is something you have run into, it is recommended to use the <code class="docutils literal notranslate"><span class="pre">from_disk=True</span></code> option. This option uses <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/masking-by-shapefile.html">rasterio.mask.mask</a> when loading the data if possible.</p>
 <p>But be careful, these two methods, as they use different core functions, can have <strong>different outputs</strong>: small discrepencies may appear on the borders (1 pixel added or removed on some borders, see issue <a class="reference external" href="https://github.com/corteva/rioxarray/issues/310">#310</a>)</p>
@@ -617,8 +619,8 @@ clipped = rioxarray.open_rasterio(
 <img alt="../_images/examples_clip_geom_17_1.png" src="../_images/examples_clip_geom_17_1.png" />
 </div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
