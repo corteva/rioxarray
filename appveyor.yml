@@ -4,7 +4,7 @@
 
 environment:
   matrix:
-    - PYTHON_VERSION: "3.7"
+    - PYTHON_VERSION: "3.8"
       MINICONDA: "C:\\Miniconda3-x64"
 
 install:
