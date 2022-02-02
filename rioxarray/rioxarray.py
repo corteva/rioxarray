@@ -65,8 +65,8 @@ def _resolution(affine):
     if not _affine_has_rotation(affine):
         return affine.a, affine.e
     return (
-        math.sqrt(affine.a ** 2 + affine.d ** 2),
-        math.sqrt(affine.b ** 2 + affine.e ** 2),
+        math.sqrt(affine.a**2 + affine.d**2),
+        math.sqrt(affine.b**2 + affine.e**2),
     )
 
 
