@@ -533,7 +533,35 @@ def _get_rasterio_attrs(riods):
         else:
             attrs["units"] = riods.units
 
+    if hasattr(riods, "gcps") and riods.gcps != ([], None):
+        gcps, gcp_crs = riods.gcps
+        attrs["gcps"] = _convert_gcps_to_geojson(gcps)
+        attrs["gcp_crs"] = gcp_crs
+
     return attrs
+
+
+def _convert_gcps_to_geojson(gcps):
+    """
+    Convert GCPs to geojson.
+
+    Parameters
+    ----------
+    gcps: The list of GroundControlPoint instances.
+
+    Returns
+    -------
+    A FeatureCollection dict.
+    """
+    features = [
+        dict(
+            type="Feature",
+            properties=dict(id=gcp.id, info=gcp.info, row=gcp.row, col=gcp.col),
+            geometry=dict(type="Point", coordinates=[gcp.x, gcp.y, gcp.z]),
+        )
+        for gcp in gcps
+    ]
+    return dict(type="FeatureCollection", features=features)
 
 
 def _decode_datetime_cf(data_array, decode_times, decode_timedelta):
