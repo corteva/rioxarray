@@ -2772,3 +2772,128 @@ def test_interpolate_na_missing_nodata():
         test_da.rio.interpolate_na()
     with pytest.raises(RioXarrayError, match=match):
         test_da.to_dataset().rio.interpolate_na()
+
+
+def test_rio_write_gcps():
+    """
+    Test setting gcps in dataarray.
+    """
+    gdal_gcps = _create_gdal_gcps()
+
+    darr = xarray.DataArray(1)
+    darr.rio.write_gcps(gdal_gcps, inplace=True)
+
+    _check_rio_gcps(darr, gdal_gcps)
+
+
+def _create_gdal_gcps():
+    src_gcps = [
+        GroundControlPoint(
+            row=0, col=0, x=0.0, y=0.0, z=12.0, id="1", info="the first gcp"
+        ),
+        GroundControlPoint(
+            row=0, col=800, x=10.0, y=0.0, z=1.0, id="2", info="the second gcp"
+        ),
+        GroundControlPoint(
+            row=800, col=800, x=10.0, y=10.0, z=3.5, id="3", info="the third gcp"
+        ),
+        GroundControlPoint(
+            row=800, col=0, x=0.0, y=10.0, z=5.5, id="4", info="the fourth gcp"
+        ),
+    ]
+    crs = CRS.from_epsg(4326)
+    gdal_gcps = (src_gcps, crs)
+    return gdal_gcps
+
+
+def _check_rio_gcps(darr, gdal_gcps):
+    src_gcps, crs = gdal_gcps
+    assert "x" not in darr.coords
+    assert "y" not in darr.coords
+    assert darr.rio.crs == crs
+    assert "gcps" in darr.spatial_ref.attrs
+    gcps = darr.spatial_ref.attrs["gcps"]
+    assert gcps["type"] == "FeatureCollection"
+    assert len(gcps["features"]) == len(src_gcps)
+    for feature, gcp in zip(gcps["features"], src_gcps):
+        assert feature["type"] == "Feature"
+        assert feature["properties"]["id"] == gcp.id
+        # info seems to be lost when rasterio writes?
+        # assert feature["properties"]["info"] == gcp.info
+        assert feature["properties"]["row"] == gcp.row
+        assert feature["properties"]["col"] == gcp.col
+        assert feature["geometry"]["type"] == "Point"
+        assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+
+
+# def test_rio_read_gcps(tmp_path):
+#     """
+#     Test reading gcps from a tiff file.
+#     """
+#     tiffname = tmp_path / "test.tif"
+#     src_gcps = [
+#         GroundControlPoint(
+#             row=0, col=0, x=0.0, y=0.0, z=12.0, id="1", info="the first gcp"
+#         ),
+#         GroundControlPoint(
+#             row=0, col=800, x=10.0, y=0.0, z=1.0, id="2", info="the second gcp"
+#         ),
+#         GroundControlPoint(
+#             row=800, col=800, x=10.0, y=10.0, z=3.5, id="3", info="the third gcp"
+#         ),
+#         GroundControlPoint(
+#             row=800, col=0, x=0.0, y=10.0, z=5.5, id="4", info="the fourth gcp"
+#         ),
+#     ]
+#     crs = CRS.from_epsg(4326)
+#     with rasterio.open(
+#         tiffname,
+#         mode="w",
+#         height=800,
+#         width=800,
+#         count=3,
+#         dtype=numpy.uint8,
+#         driver="GTiff",
+#     ) as source:
+#         source.gcps = (src_gcps, crs)
+#
+#     with rioxarray.open_rasterio(tiffname) as darr:
+#         assert darr.rio.get_gcps != ([], None)
+#
+#
+# def test_write_gcps():
+#     test_da = xarray.DataArray(1)
+#     test_da = test_da.rio.write_crs(4326)
+#     assert test_da.encoding["grid_mapping"] == "spatial_ref"
+#     assert test_da.rio.crs.to_epsg() == 4326
+#     assert "spatial_ref" in test_da.spatial_ref.attrs
+#     assert "crs_wkt" in test_da.spatial_ref.attrs
+#     assert test_da.spatial_ref.attrs["grid_mapping_name"] == "latitude_longitude"
+#
+#
+# def test_write_transform__from_read(tmp_path):
+#     xds = rioxarray.open_rasterio(
+#         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
+#         parse_coordinates=False,
+#     )
+#     out_file = tmp_path / "test_geotransform.nc"
+#     xds.to_netcdf(out_file)
+#     xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
+#     assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
+#     assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform
+#
+#
+# def test_write_transform():
+#     test_affine = Affine.from_gdal(425047, 3.0, 0.0, 4615780, 0.0, -3.0)
+#     ds = xarray.Dataset()
+#     ds.rio.write_transform(test_affine, inplace=True)
+#     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
+#     assert ds.rio._cached_transform() == test_affine
+#     assert ds.rio.transform() == test_affine
+#     assert ds.rio.grid_mapping == "spatial_ref"
+#     da = xarray.DataArray(1)
+#     da.rio.write_transform(test_affine, inplace=True)
+#     assert da.rio._cached_transform() == test_affine
+#     assert da.rio.transform() == test_affine
+#     assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
+#     assert da.rio.grid_mapping == "spatial_ref"

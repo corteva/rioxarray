@@ -1078,3 +1078,52 @@ class XRasterBase:
         return rasterio.warp.transform_bounds(
             self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
         )
+
+    def write_gcps(self, gcps, inplace=False):
+        """
+        Write the GroundControlPoints to the dataset.
+
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points
+
+        Parameters
+        ----------
+        gcp: (list of rasterio.GroundControlPoints, corresponding crs)
+            The Ground Control Points to integrate to the dataset.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with Ground Control Points written.
+        """
+        data_obj = self._get_obj(inplace=True)
+
+        gcps, gcp_crs = gcps
+        data_obj = data_obj.rio.write_crs(gcp_crs, inplace=inplace)
+        geojson_gcps = _convert_gcps_to_geojson(gcps)
+        data_obj.spatial_ref.attrs["gcps"] = geojson_gcps
+        return data_obj
+
+
+def _convert_gcps_to_geojson(gcps):
+    """
+    Convert GCPs to geojson.
+
+    Parameters
+    ----------
+    gcps: The list of GroundControlPoint instances.
+
+    Returns
+    -------
+    A FeatureCollection dict.
+    """
+    features = [
+        dict(
+            type="Feature",
+            properties=dict(id=gcp.id, info=gcp.info, row=gcp.row, col=gcp.col),
+            geometry=dict(type="Point", coordinates=[gcp.x, gcp.y, gcp.z]),
+        )
+        for gcp in gcps
+    ]
+    return dict(type="FeatureCollection", features=features)

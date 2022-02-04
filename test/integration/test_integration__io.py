@@ -33,6 +33,10 @@ from test.conftest import (
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
 )
+from test.integration.test_integration_rioxarray import (
+    _check_rio_gcps,
+    _create_gdal_gcps,
+)
 
 
 @pytest.mark.parametrize(
@@ -1243,21 +1247,9 @@ def test_reading_gcps(tmp_path):
     Test reading gcps from a tiff file.
     """
     tiffname = tmp_path / "test.tif"
-    src_gcps = [
-        GroundControlPoint(
-            row=0, col=0, x=0.0, y=0.0, z=12.0, id="1", info="the first gcp"
-        ),
-        GroundControlPoint(
-            row=0, col=800, x=10.0, y=0.0, z=1.0, id="2", info="the second gcp"
-        ),
-        GroundControlPoint(
-            row=800, col=800, x=10.0, y=10.0, z=3.5, id="3", info="the third gcp"
-        ),
-        GroundControlPoint(
-            row=800, col=0, x=0.0, y=10.0, z=5.5, id="4", info="the fourth gcp"
-        ),
-    ]
-    crs = CRS.from_epsg(4326)
+
+    gdal_gcps = _create_gdal_gcps()
+
     with rasterio.open(
         tiffname,
         mode="w",
@@ -1267,21 +1259,7 @@ def test_reading_gcps(tmp_path):
         dtype=np.uint8,
         driver="GTiff",
     ) as source:
-        source.gcps = (src_gcps, crs)
+        source.gcps = gdal_gcps
 
     with rioxarray.open_rasterio(tiffname) as darr:
-        assert "gcps" in darr.attrs
-        assert "gcp_crs" in darr.attrs
-        assert darr.attrs["gcp_crs"] == crs
-        gcps = darr.attrs["gcps"]
-        assert gcps["type"] == "FeatureCollection"
-        assert len(gcps["features"]) == len(src_gcps)
-        for feature, gcp in zip(gcps["features"], src_gcps):
-            assert feature["type"] == "Feature"
-            assert feature["properties"]["id"] == gcp.id
-            # info seems to be lost when rasterio writes?
-            # assert feature["properties"]["info"] == gcp.info
-            assert feature["properties"]["row"] == gcp.row
-            assert feature["properties"]["col"] == gcp.col
-            assert feature["geometry"]["type"] == "Point"
-            assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+        _check_rio_gcps(darr, gdal_gcps)
