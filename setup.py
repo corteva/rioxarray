@@ -34,10 +34,7 @@ extras_require = {
     "dev": test_requirements
     + doc_requirements
     + [
-        "black",
-        "flake8",
         "pylint",
-        "isort",
         "pre-commit",
     ],
 }
