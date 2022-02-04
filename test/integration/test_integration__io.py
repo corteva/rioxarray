@@ -1150,7 +1150,7 @@ def test_rotation_affine():
             assert rioda.rio.resolution() == (10, 10)
 
 
-cint_skip = pytest.mark.skip(
+cint_skip = pytest.mark.skipif(
     rasterio.__version__ < "1.2.4",
     reason="https://github.com/mapbox/rasterio/issues/2182",
 )
@@ -1174,7 +1174,7 @@ def test_cint16_dtype(dtype, tmp_path):
         assert data.dtype == "complex64"
 
 
-@pytest.mark.skip(
+@pytest.mark.skipif(
     rasterio.__version__ < "1.2.5",
     reason="https://github.com/mapbox/rasterio/issues/2206",
 )
