@@ -2844,3 +2844,42 @@ def test_rio_get_gcps():
         assert gcp.z == gdal_gcp.z
         assert gcp.id == gdal_gcp.id
         assert gcp.info == gdal_gcp.info
+
+
+def test_reproject__gcps_file(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
+        GroundControlPoint(row=0, col=800, x=338353, y=2785790, z=0),
+        GroundControlPoint(row=800, col=800, x=297939, y=2618518, z=0),
+        GroundControlPoint(row=800, col=0, x=115698, y=2651448, z=0),
+    ]
+    crs = CRS.from_epsg(32618)
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=numpy.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    rds = rioxarray.open_rasterio(tiffname)
+    rds = rds.rio.reproject(
+        crs,
+    )
+    assert rds.rio.height == 923
+    assert rds.rio.width == 1027
+    assert rds.rio.crs == crs
+    assert rds.rio.transform().almost_equals(
+        Affine(
+            216.8587081056465,
+            0.0,
+            115698.25,
+            0.0,
+            -216.8587081056465,
+            2818720.0,
+        )
+    )

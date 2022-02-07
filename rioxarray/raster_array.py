@@ -392,6 +392,9 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
+        gcps = self.get_gcps()
+        if gcps:
+            kwargs.setdefault("gcps", gcps)
         src_affine = None if "gcps" in kwargs else self.transform(recalc=True)
         if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
