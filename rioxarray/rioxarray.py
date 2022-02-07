@@ -12,6 +12,7 @@ import rasterio.warp
 import rasterio.windows
 import xarray
 from affine import Affine
+from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 
 from rioxarray._options import EXPORT_GRID_MAPPING, get_option
@@ -1104,6 +1105,26 @@ class XRasterBase:
         geojson_gcps = _convert_gcps_to_geojson(gcps)
         data_obj.spatial_ref.attrs["gcps"] = geojson_gcps
         return data_obj
+
+    def get_gcps(self):
+        try:
+            geojson_gcps = self._obj.spatial_ref.attrs["gcps"]
+        except (KeyError, AttributeError):
+            return None
+
+        gcps = [
+            GroundControlPoint(
+                x=gcp["geometry"]["coordinates"][0],
+                y=gcp["geometry"]["coordinates"][1],
+                z=gcp["geometry"]["coordinates"][2],
+                row=gcp["properties"]["row"],
+                col=gcp["properties"]["col"],
+                id=gcp["properties"]["id"],
+                info=gcp["properties"]["info"],
+            )
+            for gcp in geojson_gcps["features"]
+        ]
+        return gcps
 
 
 def _convert_gcps_to_geojson(gcps):

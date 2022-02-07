@@ -1263,3 +1263,31 @@ def test_reading_gcps(tmp_path):
 
     with rioxarray.open_rasterio(tiffname) as darr:
         _check_rio_gcps(darr, gdal_gcps)
+
+
+def test_writing_gcps(tmp_path):
+    """
+    Test reading gcps from a tiff file.
+    """
+    tiffname = tmp_path / "test.tif"
+    tiffname2 = tmp_path / "test_written.tif"
+
+    gdal_gcps = _create_gdal_gcps()
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=np.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = gdal_gcps
+
+    with rioxarray.open_rasterio(tiffname) as darr:
+        darr.rio.to_raster(tiffname2, driver="GTIFF")
+
+    with rioxarray.open_rasterio(tiffname2) as darr:
+        assert "gcps" in darr.coords["spatial_ref"].attrs
+        _check_rio_gcps(darr, gdal_gcps)

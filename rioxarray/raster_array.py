@@ -1011,6 +1011,7 @@ class RasterArray(XRasterBase):
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
+            gcps=self.get_gcps(),
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,

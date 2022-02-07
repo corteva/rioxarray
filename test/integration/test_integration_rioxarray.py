@@ -2824,3 +2824,23 @@ def _check_rio_gcps(darr, gdal_gcps):
         assert feature["properties"]["col"] == gcp.col
         assert feature["geometry"]["type"] == "Point"
         assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+
+
+def test_rio_get_gcps():
+    """
+    Test setting gcps in dataarray.
+    """
+    gdal_gcps, gdal_crs = _create_gdal_gcps()
+
+    darr = xarray.DataArray(1)
+    darr.rio.write_gcps((gdal_gcps, gdal_crs), inplace=True)
+
+    gcps = darr.rio.get_gcps()
+    for gcp, gdal_gcp in zip(gcps, gdal_gcps):
+        assert gcp.row == gdal_gcp.row
+        assert gcp.col == gdal_gcp.col
+        assert gcp.x == gdal_gcp.x
+        assert gcp.y == gdal_gcp.y
+        assert gcp.z == gdal_gcp.z
+        assert gcp.id == gdal_gcp.id
+        assert gcp.info == gdal_gcp.info
