@@ -1080,7 +1080,7 @@ class XRasterBase:
             self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
         )
 
-    def write_gcps(self, gcps, inplace=False):
+    def write_gcps(self, gcps, grid_mapping_name=None, inplace=False):
         """
         Write the GroundControlPoints to the dataset.
 
@@ -1090,6 +1090,9 @@ class XRasterBase:
         ----------
         gcp: (list of rasterio.GroundControlPoints, corresponding crs)
             The Ground Control Points to integrate to the dataset.
+        grid_mapping_name: str, optional
+            Name of the grid_mapping coordinate to store the GCPs information in.
+            Default is the grid_mapping name of the dataset.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
@@ -1098,17 +1101,20 @@ class XRasterBase:
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Modified dataset with Ground Control Points written.
         """
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
         data_obj = self._get_obj(inplace=True)
 
         gcps, gcp_crs = gcps
         data_obj = data_obj.rio.write_crs(gcp_crs, inplace=inplace)
         geojson_gcps = _convert_gcps_to_geojson(gcps)
-        data_obj.spatial_ref.attrs["gcps"] = geojson_gcps
+        data_obj.coords[grid_mapping_name].attrs["gcps"] = geojson_gcps
         return data_obj
 
     def get_gcps(self):
         try:
-            geojson_gcps = self._obj.spatial_ref.attrs["gcps"]
+            geojson_gcps = self._obj.coords[self.grid_mapping].attrs["gcps"]
         except (KeyError, AttributeError):
             return None
 
