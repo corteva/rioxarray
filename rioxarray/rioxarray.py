@@ -1107,7 +1107,9 @@ class XRasterBase:
         data_obj = self._get_obj(inplace=True)
 
         gcps, gcp_crs = gcps
-        data_obj = data_obj.rio.write_crs(gcp_crs, inplace=inplace)
+        data_obj = data_obj.rio.write_crs(
+            gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
+        )
         geojson_gcps = _convert_gcps_to_geojson(gcps)
         data_obj.coords[grid_mapping_name].attrs["gcps"] = geojson_gcps
         return data_obj
