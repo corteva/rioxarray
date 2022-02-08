@@ -1115,6 +1115,16 @@ class XRasterBase:
         return data_obj
 
     def get_gcps(self):
+        """
+        Get the GroundControlPoints from the dataset.
+
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points
+
+        Returns
+        ----------
+        (list of rasterio.GroundControlPoints, corresponding crs)
+            The Ground Control Points from the dataset.
+        """
         try:
             geojson_gcps = self._obj.coords[self.grid_mapping].attrs["gcps"]
         except (KeyError, AttributeError):
