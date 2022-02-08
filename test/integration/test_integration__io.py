@@ -1267,7 +1267,7 @@ def test_reading_gcps(tmp_path):
 
 def test_writing_gcps(tmp_path):
     """
-    Test reading gcps from a tiff file.
+    Test writing gcps to a tiff file.
     """
     tiffname = tmp_path / "test.tif"
     tiffname2 = tmp_path / "test_written.tif"
