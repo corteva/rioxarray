@@ -1121,9 +1121,9 @@ class XRasterBase:
         https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points
 
         Returns
-        ----------
-        (list of rasterio.GroundControlPoints, corresponding crs)
-            The Ground Control Points from the dataset.
+        -------
+        list of rasterio.GroundControlPoints or None
+            The Ground Control Points from the dataset or None if not applicable
         """
         try:
             geojson_gcps = self._obj.coords[self.grid_mapping].attrs["gcps"]
