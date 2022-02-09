@@ -89,6 +89,7 @@
 <span class="kn">import</span> <span class="nn">rasterio.windows</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
 <span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">rasterio.control</span> <span class="kn">import</span> <span class="n">GroundControlPoint</span>
 <span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray._options</span> <span class="kn">import</span> <span class="n">EXPORT_GRID_MAPPING</span><span class="p">,</span> <span class="n">get_option</span>
@@ -1154,7 +1155,95 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span> <span class="n">densify_pts</span><span class="o">=</span><span class="n">densify_pts</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.write_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">write_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gcps</span><span class="p">,</span> <span class="n">gcp_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the GroundControlPoints to the dataset.</span>
+
+<span class="sd">        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gcp: list of :obj:`rasterio.control.GroundControlPoints`</span>
+<span class="sd">            The Ground Control Points to integrate to the dataset.</span>
+<span class="sd">        gcp_crs: str, :obj:`rasterio.crs.CRS`, or dict</span>
+<span class="sd">            Coordinate reference system for the GCPs.</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the grid_mapping coordinate to store the GCPs information in.</span>
+<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with Ground Control Points written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
+        <span class="p">)</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span>
+            <span class="n">gcp_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span>
+        <span class="p">)</span>
+        <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="n">_convert_gcps_to_geojson</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geojson_gcps</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.get_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">get_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the GroundControlPoints from the dataset.</span>
+
+<span class="sd">        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :obj:`rasterio.control.GroundControlPoints` or None</span>
+<span class="sd">            The Ground Control Points from the dataset or None if not applicable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">gcps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">GroundControlPoint</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">row</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;row&quot;</span><span class="p">],</span>
+                <span class="n">col</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;col&quot;</span><span class="p">],</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                <span class="n">info</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;info&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">geojson_gcps</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">gcps</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_convert_gcps_to_geojson</span><span class="p">(</span><span class="n">gcps</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert GCPs to geojson.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gcps: The list of GroundControlPoint instances.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A FeatureCollection dict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">col</span><span class="p">),</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="n">gcp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">z</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">gcps</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
 </pre></div>
 
            </div>

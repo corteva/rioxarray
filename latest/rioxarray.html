@@ -374,6 +374,21 @@ Retrieve projection from <a class="reference external" href="https://xarray.pyda
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.get_gcps">
+<span class="sig-name descname"><span class="pre">get_gcps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.get_gcps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.get_gcps" title="Permalink to this definition"></a></dt>
+<dd><p>Get the GroundControlPoints from the dataset.</p>
+<p><a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points">https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The Ground Control Points from the dataset or None if not applicable</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of <code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.control.GroundControlPoints</span></code> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.grid_mapping">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grid_mapping</span></span><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Permalink to this definition"></a></dt>
@@ -712,6 +727,30 @@ Default is the grid_mapping name of the dataset.</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">raster</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;epsg:4326&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.write_gcps">
+<span class="sig-name descname"><span class="pre">write_gcps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gcps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gcp_crs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_mapping_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_gcps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_gcps" title="Permalink to this definition"></a></dt>
+<dd><p>Write the GroundControlPoints to the dataset.</p>
+<p><a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points">https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gcp</strong> (list of <code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.control.GroundControlPoints</span></code>) – The Ground Control Points to integrate to the dataset.</p></li>
+<li><p><strong>gcp_crs</strong> (str, <a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html#rasterio.crs.CRS" title="(in rasterio v1.2.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.crs.CRS</span></code></a>, or dict) – Coordinate reference system for the GCPs.</p></li>
+<li><p><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the GCPs information in.
+Default is the grid_mapping name of the dataset.</p></li>
+<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Modified dataset with Ground Control Points written.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v0.21.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> | <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v0.21.2.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
