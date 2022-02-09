@@ -880,7 +880,7 @@ def open_rasterio(
         coord_name = "band"
         coords[coord_name] = np.asarray(riods.indexes)
 
-    has_gcps = hasattr(riods, "gcps") and riods.gcps != ([], None)
+    has_gcps = hasattr(riods, "gcps") and riods.gcps[0] != []
     if has_gcps:
         parse_coordinates = False
 
