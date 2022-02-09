@@ -880,6 +880,10 @@ def open_rasterio(
         coord_name = "band"
         coords[coord_name] = np.asarray(riods.indexes)
 
+    has_gcps = hasattr(riods, "gcps") and riods.gcps != ([], None)
+    if has_gcps:
+        parse_coordinates = False
+
     # Get geospatial coordinates
     if parse_coordinates:
         coords.update(
@@ -937,6 +941,8 @@ def open_rasterio(
     result.rio.write_transform(_rio_transform(riods), inplace=True)
     if hasattr(riods, "crs") and riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
+    if has_gcps:
+        result.rio.write_gcps(*riods.gcps, inplace=True)
 
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)

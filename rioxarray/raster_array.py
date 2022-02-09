@@ -392,6 +392,10 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
+        gcps = self.get_gcps()
+        if gcps:
+            kwargs.setdefault("gcps", gcps)
+
         src_affine = None if "gcps" in kwargs else self.transform(recalc=True)
         if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
@@ -404,21 +408,9 @@ class RasterArray(XRasterBase):
             else:
                 dst_height, dst_width = self.shape
 
-        extra_dim = self._check_dimensions()
-        if extra_dim:
-            dst_data = np.zeros(
-                (self._obj[extra_dim].size, dst_height, dst_width),
-                dtype=self._obj.dtype.type,
-            )
-        else:
-            dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
+        dst_data = self._create_dst_data(dst_height, dst_width)
 
-        default_nodata = (
-            _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
-            if self.nodata is None
-            else self.nodata
-        )
-        dst_nodata = default_nodata if nodata is None else nodata
+        dst_nodata = self._get_dst_nodata(nodata)
 
         rasterio.warp.reproject(
             source=self._obj.values,
@@ -455,6 +447,26 @@ class RasterArray(XRasterBase):
         xda.rio.write_crs(dst_crs, inplace=True)
         xda.rio.write_coordinate_system(inplace=True)
         return xda
+
+    def _get_dst_nodata(self, nodata):
+        default_nodata = (
+            _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
+            if self.nodata is None
+            else self.nodata
+        )
+        dst_nodata = default_nodata if nodata is None else nodata
+        return dst_nodata
+
+    def _create_dst_data(self, dst_height, dst_width):
+        extra_dim = self._check_dimensions()
+        if extra_dim:
+            dst_data = np.zeros(
+                (self._obj[extra_dim].size, dst_height, dst_width),
+                dtype=self._obj.dtype.type,
+            )
+        else:
+            dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
+        return dst_data
 
     def reproject_match(
         self, match_data_array, resampling=Resampling.nearest, **reproject_kwargs
@@ -1011,6 +1023,7 @@ class RasterArray(XRasterBase):
             dtype=dtype,
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
+            gcps=self.get_gcps(),
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,

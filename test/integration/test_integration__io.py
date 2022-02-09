@@ -33,6 +33,10 @@ from test.conftest import (
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
 )
+from test.integration.test_integration_rioxarray import (
+    _check_rio_gcps,
+    _create_gdal_gcps,
+)
 
 
 @pytest.mark.parametrize(
@@ -760,7 +764,7 @@ def test_ENVI_tags():
 
 
 def test_no_mftime():
-    # rasterio can accept "filename" urguments that are actually urls,
+    # rasterio can accept "filename" arguments that are actually urls,
     # including paths to remote files.
     # In issue #1816, we found that these caused dask to break, because
     # the modification time was used to determine the dask token. This
@@ -1236,3 +1240,54 @@ def test_cint16_promote_dtype(tmp_path):
         assert "complex128" in riofh.dtypes
         assert riofh.nodata == 0
         assert data.dtype == "complex128"
+
+
+def test_reading_gcps(tmp_path):
+    """
+    Test reading gcps from a tiff file.
+    """
+    tiffname = tmp_path / "test.tif"
+
+    gdal_gcps = _create_gdal_gcps()
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=np.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = gdal_gcps
+
+    with rioxarray.open_rasterio(tiffname) as darr:
+        _check_rio_gcps(darr, *gdal_gcps)
+
+
+def test_writing_gcps(tmp_path):
+    """
+    Test writing gcps to a tiff file.
+    """
+    tiffname = tmp_path / "test.tif"
+    tiffname2 = tmp_path / "test_written.tif"
+
+    gdal_gcps = _create_gdal_gcps()
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=np.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = gdal_gcps
+
+    with rioxarray.open_rasterio(tiffname) as darr:
+        darr.rio.to_raster(tiffname2, driver="GTIFF")
+
+    with rioxarray.open_rasterio(tiffname2) as darr:
+        assert "gcps" in darr.coords["spatial_ref"].attrs
+        _check_rio_gcps(darr, *gdal_gcps)

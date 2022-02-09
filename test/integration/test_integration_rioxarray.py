@@ -2772,3 +2772,113 @@ def test_interpolate_na_missing_nodata():
         test_da.rio.interpolate_na()
     with pytest.raises(RioXarrayError, match=match):
         test_da.to_dataset().rio.interpolate_na()
+
+
+def test_rio_write_gcps():
+    """
+    Test setting gcps in dataarray.
+    """
+    gdal_gcps, gcp_crs = _create_gdal_gcps()
+
+    darr = xarray.DataArray(1)
+    darr.rio.write_gcps(gdal_gcps, gcp_crs, inplace=True)
+
+    _check_rio_gcps(darr, gdal_gcps, gcp_crs)
+
+
+def _create_gdal_gcps():
+    src_gcps = [
+        GroundControlPoint(
+            row=0, col=0, x=0.0, y=0.0, z=12.0, id="1", info="the first gcp"
+        ),
+        GroundControlPoint(
+            row=0, col=800, x=10.0, y=0.0, z=1.0, id="2", info="the second gcp"
+        ),
+        GroundControlPoint(
+            row=800, col=800, x=10.0, y=10.0, z=3.5, id="3", info="the third gcp"
+        ),
+        GroundControlPoint(
+            row=800, col=0, x=0.0, y=10.0, z=5.5, id="4", info="the fourth gcp"
+        ),
+    ]
+    crs = CRS.from_epsg(4326)
+    gdal_gcps = (src_gcps, crs)
+    return gdal_gcps
+
+
+def _check_rio_gcps(darr, src_gcps, crs):
+    assert "x" not in darr.coords
+    assert "y" not in darr.coords
+    assert darr.rio.crs == crs
+    assert "gcps" in darr.spatial_ref.attrs
+    gcps = darr.spatial_ref.attrs["gcps"]
+    assert gcps["type"] == "FeatureCollection"
+    assert len(gcps["features"]) == len(src_gcps)
+    for feature, gcp in zip(gcps["features"], src_gcps):
+        assert feature["type"] == "Feature"
+        assert feature["properties"]["id"] == gcp.id
+        # info seems to be lost when rasterio writes?
+        # assert feature["properties"]["info"] == gcp.info
+        assert feature["properties"]["row"] == gcp.row
+        assert feature["properties"]["col"] == gcp.col
+        assert feature["geometry"]["type"] == "Point"
+        assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+
+
+def test_rio_get_gcps():
+    """
+    Test setting gcps in dataarray.
+    """
+    gdal_gcps, gdal_crs = _create_gdal_gcps()
+
+    darr = xarray.DataArray(1)
+    darr.rio.write_gcps(gdal_gcps, gdal_crs, inplace=True)
+
+    gcps = darr.rio.get_gcps()
+    for gcp, gdal_gcp in zip(gcps, gdal_gcps):
+        assert gcp.row == gdal_gcp.row
+        assert gcp.col == gdal_gcp.col
+        assert gcp.x == gdal_gcp.x
+        assert gcp.y == gdal_gcp.y
+        assert gcp.z == gdal_gcp.z
+        assert gcp.id == gdal_gcp.id
+        assert gcp.info == gdal_gcp.info
+
+
+def test_reproject__gcps_file(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
+        GroundControlPoint(row=0, col=800, x=338353, y=2785790, z=0),
+        GroundControlPoint(row=800, col=800, x=297939, y=2618518, z=0),
+        GroundControlPoint(row=800, col=0, x=115698, y=2651448, z=0),
+    ]
+    crs = CRS.from_epsg(32618)
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=numpy.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    rds = rioxarray.open_rasterio(tiffname)
+    rds = rds.rio.reproject(
+        crs,
+    )
+    assert rds.rio.height == 923
+    assert rds.rio.width == 1027
+    assert rds.rio.crs == crs
+    assert rds.rio.transform().almost_equals(
+        Affine(
+            216.8587081056465,
+            0.0,
+            115698.25,
+            0.0,
+            -216.8587081056465,
+            2818720.0,
+        )
+    )
