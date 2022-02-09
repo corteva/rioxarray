@@ -1080,7 +1080,7 @@ class XRasterBase:
             self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
         )
 
-    def write_gcps(self, gcps, grid_mapping_name=None, inplace=False):
+    def write_gcps(self, gcps, gcp_crs, grid_mapping_name=None, inplace=False):
         """
         Write the GroundControlPoints to the dataset.
 
@@ -1088,8 +1088,10 @@ class XRasterBase:
 
         Parameters
         ----------
-        gcp: (list of rasterio.GroundControlPoints, corresponding crs)
+        gcp: list of :obj:`rasterio.control.GroundControlPoints`
             The Ground Control Points to integrate to the dataset.
+        gcp_crs: str, :obj:`rasterio.crs.CRS`, or dict
+            Coordinate reference system for the GCPs.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the GCPs information in.
             Default is the grid_mapping name of the dataset.
@@ -1106,7 +1108,6 @@ class XRasterBase:
         )
         data_obj = self._get_obj(inplace=True)
 
-        gcps, gcp_crs = gcps
         data_obj = data_obj.rio.write_crs(
             gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
         )

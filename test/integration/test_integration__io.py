@@ -1262,7 +1262,7 @@ def test_reading_gcps(tmp_path):
         source.gcps = gdal_gcps
 
     with rioxarray.open_rasterio(tiffname) as darr:
-        _check_rio_gcps(darr, gdal_gcps)
+        _check_rio_gcps(darr, *gdal_gcps)
 
 
 def test_writing_gcps(tmp_path):
@@ -1290,4 +1290,4 @@ def test_writing_gcps(tmp_path):
 
     with rioxarray.open_rasterio(tiffname2) as darr:
         assert "gcps" in darr.coords["spatial_ref"].attrs
-        _check_rio_gcps(darr, gdal_gcps)
+        _check_rio_gcps(darr, *gdal_gcps)

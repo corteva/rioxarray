@@ -2778,12 +2778,12 @@ def test_rio_write_gcps():
     """
     Test setting gcps in dataarray.
     """
-    gdal_gcps = _create_gdal_gcps()
+    gdal_gcps, gcp_crs = _create_gdal_gcps()
 
     darr = xarray.DataArray(1)
-    darr.rio.write_gcps(gdal_gcps, inplace=True)
+    darr.rio.write_gcps(gdal_gcps, gcp_crs, inplace=True)
 
-    _check_rio_gcps(darr, gdal_gcps)
+    _check_rio_gcps(darr, gdal_gcps, gcp_crs)
 
 
 def _create_gdal_gcps():
@@ -2806,8 +2806,7 @@ def _create_gdal_gcps():
     return gdal_gcps
 
 
-def _check_rio_gcps(darr, gdal_gcps):
-    src_gcps, crs = gdal_gcps
+def _check_rio_gcps(darr, src_gcps, crs):
     assert "x" not in darr.coords
     assert "y" not in darr.coords
     assert darr.rio.crs == crs
@@ -2833,7 +2832,7 @@ def test_rio_get_gcps():
     gdal_gcps, gdal_crs = _create_gdal_gcps()
 
     darr = xarray.DataArray(1)
-    darr.rio.write_gcps((gdal_gcps, gdal_crs), inplace=True)
+    darr.rio.write_gcps(gdal_gcps, gdal_crs, inplace=True)
 
     gcps = darr.rio.get_gcps()
     for gcp, gdal_gcp in zip(gcps, gdal_gcps):

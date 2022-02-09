@@ -942,7 +942,7 @@ def open_rasterio(
     if hasattr(riods, "crs") and riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
     if has_gcps:
-        result.rio.write_gcps(riods.gcps, inplace=True)
+        result.rio.write_gcps(*riods.gcps, inplace=True)
 
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)
