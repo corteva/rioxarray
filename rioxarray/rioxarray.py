@@ -1123,7 +1123,7 @@ class XRasterBase:
 
         Returns
         -------
-        list of rasterio.GroundControlPoints or None
+        list of :obj:`rasterio.control.GroundControlPoints` or None
             The Ground Control Points from the dataset or None if not applicable
         """
         try:
