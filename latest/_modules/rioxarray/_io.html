@@ -574,36 +574,34 @@
     <span class="c1"># pylint: disable=too-many-branches</span>
     <span class="c1"># Add rasterio attributes</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># The nodata values for the raster bands</span>
         <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;scales&quot;</span><span class="p">):</span>
-        <span class="c1"># The scale values for the raster bands</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">scales</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Offsets differ across bands. The &#39;scale_factor&#39; attribute will &quot;</span>
-                <span class="s2">&quot;not be added. See the &#39;scales&#39; attribute.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">):</span>
-        <span class="c1"># The offset values for the raster bands</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">offsets</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Offsets differ across bands. The &#39;add_offset&#39; attribute will &quot;</span>
-                <span class="s2">&quot;not be added. See the &#39;offsets&#39; attribute.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;add_offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;descriptions&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">):</span>
+    <span class="c1"># The scale values for the raster bands</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">scales</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Offsets differ across bands. The &#39;scale_factor&#39; attribute will &quot;</span>
+            <span class="s2">&quot;not be added. See the &#39;scales&#39; attribute.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># The offset values for the raster bands</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">offsets</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Offsets differ across bands. The &#39;add_offset&#39; attribute will &quot;</span>
+            <span class="s2">&quot;not be added. See the &#39;offsets&#39; attribute.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;add_offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Descriptions for each dataset band</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">descriptions</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">):</span>
         <span class="c1"># A list of units string for each dataset band</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -957,7 +955,7 @@
         <span class="n">coord_name</span> <span class="o">=</span> <span class="s2">&quot;band&quot;</span>
         <span class="n">coords</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">indexes</span><span class="p">)</span>
 
-    <span class="n">has_gcps</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">has_gcps</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">has_gcps</span><span class="p">:</span>
         <span class="n">parse_coordinates</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1016,7 +1014,7 @@
     <span class="c1"># always (0, 0, 1) per definition (see</span>
     <span class="c1"># https://github.com/sgillies/affine)</span>
     <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">has_gcps</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_gcps</span><span class="p">(</span><span class="o">*</span><span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
