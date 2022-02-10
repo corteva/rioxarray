@@ -23,7 +23,7 @@ def get_version():
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = ["packaging", "rasterio", "xarray>=0.17", "pyproj>=2.2"]
+requirements = ["packaging", "rasterio>=1.1.1", "xarray>=0.17", "pyproj>=2.2"]
 
 test_requirements = ["pytest>=3.6", "pytest-cov", "pytest-timeout", "dask", "netcdf4"]
 doc_requirements = ["sphinx-click", "nbsphinx", "sphinx_rtd_theme"]

@@ -497,36 +497,34 @@ def _get_rasterio_attrs(riods):
     # pylint: disable=too-many-branches
     # Add rasterio attributes
     attrs = _parse_tags(riods.tags(1))
-    if hasattr(riods, "nodata") and riods.nodata is not None:
+    if riods.nodata is not None:
         # The nodata values for the raster bands
         attrs["_FillValue"] = riods.nodata
-    if hasattr(riods, "scales"):
-        # The scale values for the raster bands
-        if len(set(riods.scales)) > 1:
-            attrs["scales"] = riods.scales
-            warnings.warn(
-                "Offsets differ across bands. The 'scale_factor' attribute will "
-                "not be added. See the 'scales' attribute."
-            )
-        else:
-            attrs["scale_factor"] = riods.scales[0]
-    if hasattr(riods, "offsets"):
-        # The offset values for the raster bands
-        if len(set(riods.offsets)) > 1:
-            attrs["offsets"] = riods.offsets
-            warnings.warn(
-                "Offsets differ across bands. The 'add_offset' attribute will "
-                "not be added. See the 'offsets' attribute."
-            )
-        else:
-            attrs["add_offset"] = riods.offsets[0]
-    if hasattr(riods, "descriptions") and any(riods.descriptions):
+    # The scale values for the raster bands
+    if len(set(riods.scales)) > 1:
+        attrs["scales"] = riods.scales
+        warnings.warn(
+            "Offsets differ across bands. The 'scale_factor' attribute will "
+            "not be added. See the 'scales' attribute."
+        )
+    else:
+        attrs["scale_factor"] = riods.scales[0]
+    # The offset values for the raster bands
+    if len(set(riods.offsets)) > 1:
+        attrs["offsets"] = riods.offsets
+        warnings.warn(
+            "Offsets differ across bands. The 'add_offset' attribute will "
+            "not be added. See the 'offsets' attribute."
+        )
+    else:
+        attrs["add_offset"] = riods.offsets[0]
+    if any(riods.descriptions):
         if len(set(riods.descriptions)) == 1:
             attrs["long_name"] = riods.descriptions[0]
         else:
             # Descriptions for each dataset band
             attrs["long_name"] = riods.descriptions
-    if hasattr(riods, "units") and any(riods.units):
+    if any(riods.units):
         # A list of units string for each dataset band
         if len(riods.units) == 1:
             attrs["units"] = riods.units[0]
@@ -880,7 +878,7 @@ def open_rasterio(
         coord_name = "band"
         coords[coord_name] = np.asarray(riods.indexes)
 
-    has_gcps = hasattr(riods, "gcps") and riods.gcps[0]
+    has_gcps = riods.gcps[0]
     if has_gcps:
         parse_coordinates = False
 
@@ -939,7 +937,7 @@ def open_rasterio(
     # always (0, 0, 1) per definition (see
     # https://github.com/sgillies/affine)
     result.rio.write_transform(_rio_transform(riods), inplace=True)
-    if hasattr(riods, "crs") and riods.crs:
+    if riods.crs:
         result.rio.write_crs(riods.crs, inplace=True)
     if has_gcps:
         result.rio.write_gcps(*riods.gcps, inplace=True)
