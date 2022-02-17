@@ -239,6 +239,16 @@
         "ideas",
         "bug"
       ]
+    },
+    {
+      "login": "cordmaur",
+      "name": "Mauricio Cordeiro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19617404?v=4",
+      "profile": "https://cordmaur.medium.com/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
