@@ -2537,19 +2537,25 @@ def test_write_transform__from_read(tmp_path):
 
 
 def test_write_transform():
-    test_affine = Affine.from_gdal(425047, 3.0, 0.0, 4615780, 0.0, -3.0)
+    test_affine = Affine.from_gdal(
+        *numpy.fromstring("425047 3.0 0.0 4615780 0.0 -3.0", sep=" ")
+    )
     ds = xarray.Dataset()
     ds.rio.write_transform(test_affine, inplace=True)
     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert ds.rio._cached_transform() == test_affine
     assert ds.rio.transform() == test_affine
     assert ds.rio.grid_mapping == "spatial_ref"
+    ds_transform = ds.rio.transform()
+    assert all([isinstance(getattr(ds_transform, arg), float) for arg in "abcdef"])
     da = xarray.DataArray(1)
     da.rio.write_transform(test_affine, inplace=True)
     assert da.rio._cached_transform() == test_affine
     assert da.rio.transform() == test_affine
     assert da.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
     assert da.rio.grid_mapping == "spatial_ref"
+    da_transform = da.rio.transform()
+    assert all([isinstance(getattr(da_transform, arg), float) for arg in "abcdef"])
 
 
 def test_write_read_transform__non_rectilinear():

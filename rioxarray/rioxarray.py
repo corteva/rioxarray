@@ -508,11 +508,12 @@ class XRasterBase:
         """
         try:
             # look in grid_mapping
-            return Affine.from_gdal(
-                *np.fromstring(
-                    self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
-                )
+            transform = np.fromstring(
+                self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
             )
+            # Calling .tolist() to assure the arguments are Python float and JSON serializable
+            return Affine.from_gdal(*transform.tolist())
+
         except KeyError:
             try:
                 return Affine(*self._obj.attrs["transform"][:6])
