@@ -1,8 +1,10 @@
 History
 =======
 
-Latest
+0.10.1
 -------
+- DEP: pin rasterio>=1.1.1 (pull #471)
+- BUG: Corrected bounds and transform args to float (pull #475)
 
 0.10.0
 -------
