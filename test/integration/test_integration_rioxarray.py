@@ -2537,7 +2537,9 @@ def test_write_transform__from_read(tmp_path):
 
 
 def test_write_transform():
-    test_affine = Affine.from_gdal(*numpy.fromstring("425047 3.0 0.0 4615780 0.0 -3.0", sep=" "))
+    test_affine = Affine.from_gdal(
+        *numpy.fromstring("425047 3.0 0.0 4615780 0.0 -3.0", sep=" ")
+    )
     ds = xarray.Dataset()
     ds.rio.write_transform(test_affine, inplace=True)
     assert ds.spatial_ref.GeoTransform == "425047.0 3.0 0.0 4615780.0 0.0 -3.0"
