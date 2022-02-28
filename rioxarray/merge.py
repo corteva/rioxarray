@@ -35,19 +35,26 @@ class RasterioDatasetDuck:
         try:
             rio_file = xds.rio._manager.acquire()
             self.profile = rio_file.profile
-            self.colormap = rio_file.colormap
         except AttributeError:
             self.profile = {}
-
-            def colormap(_):
-                return None
-
-            self.colormap = colormap
         self.profile.update(
             dtype=xds.dtype,
             crs=xds.rio.crs,
             nodata=xds.rio.nodata,
         )
+
+    def colormap(self, *args, **kwargs):
+        """
+        Lazy load colormap through _manager.acquire()
+        for the scenario many file handles are opened
+
+        See: https://github.com/corteva/rioxarray/issues/479
+        """
+        try:
+            rio_file = self.xds.rio._manager.acquire()
+            return rio_file.colormap(*args, **kwargs)
+        except AttributeError:
+            return None
 
     def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.array:
         # pylint: disable=unused-argument
