@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+-------
+
 0.10.2
 -------
 - BUG: Lazy load colormap through _manager.acquire() in merge (issue #479)
