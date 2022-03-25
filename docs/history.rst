@@ -4,6 +4,10 @@ History
 Latest
 -------
 
+0.10.3
+------
+- BUG: Remove underlying xarray `crs` once rioxarray's one is ready (issue #488)
+
 0.10.2
 -------
 - BUG: Lazy load colormap through _manager.acquire() in merge (issue #479)
