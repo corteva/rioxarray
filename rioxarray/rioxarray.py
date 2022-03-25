@@ -313,6 +313,11 @@ class XRasterBase:
         crs = crs_from_user_input(input_crs)
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
+
+        # Remove the crs from the underlying xarray to avoid confusion and force
+        # the user to manipulate the rioxarray controlled one.
+        if "crs" in self._obj.attrs:
+            del self._obj.attrs["crs"]
         return obj
 
     @property
