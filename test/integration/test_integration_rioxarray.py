@@ -2026,7 +2026,7 @@ def test_get_crs_dataset():
 
 def test_crs_is_removed():
     test_ds = xarray.Dataset(attrs=dict(crs="+init=epsg:4326"))
-    test_ds = test_ds.write_crs(4326)
+    test_ds = test_ds.rio.write_crs(4326)
 
     assert "crs" not in test_ds.attrs
 
