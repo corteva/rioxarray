@@ -2028,9 +2028,7 @@ def test_crs_is_removed():
     test_ds = xarray.Dataset(attrs=dict(crs="+init=epsg:4326"))
     test_ds = test_ds.write_crs(4326)
 
-    expected_exception = AttributeError
-    with pytest.raises(expected_exception):
-        test_ds.crs
+    assert "crs" not in test_ds.attrs
 
 def test_write_crs_cf():
     test_da = xarray.DataArray(1)
