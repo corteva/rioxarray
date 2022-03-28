@@ -314,10 +314,6 @@ class XRasterBase:
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
 
-        # Remove the crs from the underlying xarray to avoid confusion and force
-        # the user to manipulate the rioxarray controlled one.
-        if "crs" in self._obj.attrs:
-            del self._obj.attrs["crs"]
         return obj
 
     @property
@@ -451,6 +447,12 @@ class XRasterBase:
                 [str(item) for item in transform.to_gdal()]
             )
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
+
+        # remove old crs if exists
+        try:
+            del data_obj.attrs["crs"]
+        except KeyError:
+            pass
 
         return data_obj.rio.write_grid_mapping(
             grid_mapping_name=grid_mapping_name, inplace=True
