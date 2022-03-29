@@ -2024,11 +2024,13 @@ def test_get_crs_dataset():
     assert test_ds.encoding["grid_mapping"] == "spatial_ref"
     assert test_ds.rio.crs.to_epsg() == 4326
 
+
 def test_crs_is_removed():
     test_ds = xarray.Dataset(attrs=dict(crs="+init=epsg:4326"))
     test_ds = test_ds.rio.write_crs(4326)
 
     assert "crs" not in test_ds.attrs
+
 
 def test_write_crs_cf():
     test_da = xarray.DataArray(1)
