@@ -31,7 +31,8 @@ except ImportError:
 
 
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodatavals", "crs", "is_tiled", "res")
+UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
+# Note: transform & crs are removed in write_transform/write_crs
 
 
 def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
@@ -61,6 +62,7 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
         UNWANTED_RIO_ATTRS
         + FILL_VALUE_NAMES
         + (
+            "crs",
             "transform",
             "scales",
             "scale_factor",
