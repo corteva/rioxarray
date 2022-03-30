@@ -892,14 +892,20 @@ def test_reproject__grid_mapping(modis_reproject):
     ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
 
         # remove 'crs' attribute and add grid mapping
+        # keep a copy of the crs before setting the spatial_ref to 0 as that will
+        # set `rio.crs` to None.
+        mda_rio_crs = mda.rio.crs
         mda.coords["spatial_ref"] = 0
         mda.coords["spatial_ref"].attrs["spatial_ref"] = CRS.from_user_input(
-            mda.rio.crs
+            mda_rio_crs
         ).wkt
         _mod_attr(mda, "grid_mapping", val="spatial_ref")
+        # keep a copy of the crs before setting the spatial_ref to 0 as that will
+        # set `rio.crs` to None.
+        mdc_rio_crs = mdc.rio.crs
         mdc.coords["spatial_ref"] = 0
         mdc.coords["spatial_ref"].attrs["spatial_ref"] = CRS.from_user_input(
-            mdc.rio.crs
+            mdc_rio_crs
         ).wkt
         _mod_attr(mdc, "grid_mapping", val="spatial_ref")
 
