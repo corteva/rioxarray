@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rioxarray.raster_dataset &mdash; rioxarray 0.10.3 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> rioxarray
+          </a>
+              <div class="version">
+                0.10.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>rioxarray.raster_dataset</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rioxarray.raster_dataset</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is an extension for xarray to provide rasterio capabilities</span>
+<span class="sd">to xarray datasets.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
+
+<span class="kn">from</span> <span class="nn">rioxarray._options</span> <span class="kn">import</span> <span class="n">SKIP_MISSING_SPATIAL_DIMS</span><span class="p">,</span> <span class="n">get_option</span>
+<span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">MissingSpatialDimensionError</span><span class="p">,</span> <span class="n">RioXarrayError</span>
+<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">XRasterBase</span><span class="p">,</span> <span class="n">_get_spatial_dims</span>
+
+
+<div class="viewcode-block" id="RasterDataset"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset">[docs]</a><span class="nd">@xarray</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">RasterDataset</span><span class="p">(</span><span class="n">XRasterBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the GIS extension for :class:`xarray.Dataset`&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;list: Returns non-coordinate varibles&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
+<span class="sd">        Retrieve projection from `xarray.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="c1"># ensure all the CRS of the variables are the same</span>
+        <span class="n">crs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">crs_i</span> <span class="o">==</span> <span class="n">crs</span> <span class="k">for</span> <span class="n">crs_i</span> <span class="ow">in</span> <span class="n">crs_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CRS in DataArrays differ in the Dataset: </span><span class="si">{</span><span class="n">crs_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+<div class="viewcode-block" id="RasterDataset.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reproject :class:`xarray.Dataset` objects</span>
+
+<span class="sd">        .. note:: Only 2D/3D arrays with dimensions &#39;x&#39;/&#39;y&#39; are currently supported.</span>
+<span class="sd">            Others are appended as is.</span>
+<span class="sd">            Requires either a grid mapping variable with &#39;spatial_ref&#39; or</span>
+<span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
+<span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
+
+<span class="sd">        .. versionadded:: 0.0.27 shape</span>
+<span class="sd">        .. versionadded:: 0.0.28 transform</span>
+<span class="sd">        .. versionadded:: 0.5.0 nodata, kwargs</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dst_crs: str</span>
+<span class="sd">            OGC WKT string or Proj.4 string.</span>
+<span class="sd">        resolution: float or tuple(float, float), optional</span>
+<span class="sd">            Size of a destination pixel in destination projection units</span>
+<span class="sd">            (e.g. degrees or metres).</span>
+<span class="sd">        shape: tuple(int, int), optional</span>
+<span class="sd">            Shape of the destination in pixels (dst_height, dst_width). Cannot be used</span>
+<span class="sd">            together with resolution.</span>
+<span class="sd">        transform: optional</span>
+<span class="sd">            The destination transform.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
+<span class="sd">        nodata: float, optional</span>
+<span class="sd">            The nodata value used to initialize the destination;</span>
+<span class="sd">            it will remain in all areas not covered by the reprojected source.</span>
+<span class="sd">            Defaults to the nodata value of the source image if none provided</span>
+<span class="sd">            and exists or attempts to find an appropriate value by dtype.</span>
+<span class="sd">        **kwargs: dict</span>
+<span class="sd">            Additional keyword arguments to pass into :func:`rasterio.warp.reproject`.</span>
+<span class="sd">            To override:</span>
+<span class="sd">            - src_transform: `rio.write_transform`</span>
+<span class="sd">            - src_crs: `rio.write_crs`</span>
+<span class="sd">            - src_nodata: `rio.write_nodata`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        :class:`xarray.Dataset`:</span>
+<span class="sd">            The reprojected Dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resampled_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+                        <span class="n">dst_crs</span><span class="p">,</span>
+                        <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+                        <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
+                        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">resampled_dataset</span></div>
+
+<div class="viewcode-block" id="RasterDataset.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reproject a Dataset object to match the resolution, projection,</span>
+<span class="sd">        and region of another DataArray.</span>
+
+<span class="sd">        .. note:: Only 2D/3D arrays with dimensions &#39;x&#39;/&#39;y&#39; are currently supported.</span>
+<span class="sd">            Others are appended as is.</span>
+<span class="sd">            Requires either a grid mapping variable with &#39;spatial_ref&#39; or</span>
+<span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
+<span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
+
+<span class="sd">        .. versionadded:: 0.9 reproject_kwargs</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
+<span class="sd">            Dataset with the target resolution and projection.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
+<span class="sd">        **reproject_kwargs:</span>
+<span class="sd">            Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        :obj:`xarray.Dataset`:</span>
+<span class="sd">            Contains the data from the src_data_array,</span>
+<span class="sd">            reprojected to match match_data_array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resampled_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span>
+                        <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">resampled_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">resampled_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pad the :class:`xarray.Dataset` to a bounding box.</span>
+
+<span class="sd">        .. warning:: Only works if all variables in the dataset have the</span>
+<span class="sd">                     same coordinates.</span>
+
+<span class="sd">        .. warning:: Pads variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset`:</span>
+<span class="sd">            The padded object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">padded_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">padded_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">padded_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.Dataset` by a bounding box in dimensions &#39;x&#39;/&#39;y&#39;.</span>
+
+<span class="sd">        .. warning:: Clips variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+<span class="sd">        auto_expand: bool</span>
+<span class="sd">            If True, it will expand clip search if only 1D raster found with clip.</span>
+<span class="sd">        auto_expand_limit: int</span>
+<span class="sd">            maximum number of times the clip will be retried before raising</span>
+<span class="sd">            an exception.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`Dataset`:</span>
+<span class="sd">            The clipped object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip_box</span><span class="p">(</span>
+                        <span class="n">minx</span><span class="p">,</span>
+                        <span class="n">miny</span><span class="p">,</span>
+                        <span class="n">maxx</span><span class="p">,</span>
+                        <span class="n">maxy</span><span class="p">,</span>
+                        <span class="n">auto_expand</span><span class="o">=</span><span class="n">auto_expand</span><span class="p">,</span>
+                        <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">geometries</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">from_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crops a :class:`xarray.Dataset` by geojson like geometry dicts in dimensions &#39;x&#39;/&#39;y&#39;.</span>
+
+<span class="sd">        .. warning:: Clips variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
+
+<span class="sd">        Powered by `rasterio.features.geometry_mask`.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; geometry = &#39;&#39;&#39; {&quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="sd">            ...                 &quot;coordinates&quot;: [</span>
+<span class="sd">            ...                 [[-94.07955380199459, 41.69085871273774],</span>
+<span class="sd">            ...                 [-94.06082436942204, 41.69103313774798],</span>
+<span class="sd">            ...                 [-94.06063203899649, 41.67932439500822],</span>
+<span class="sd">            ...                 [-94.07935807746362, 41.679150041277325],</span>
+<span class="sd">            ...                 [-94.07955380199459, 41.69085871273774]]]}&#39;&#39;&#39;</span>
+<span class="sd">            &gt;&gt;&gt; cropping_geometries = [geojson.loads(geometry)]</span>
+<span class="sd">            &gt;&gt;&gt; xds = xarray.open_rasterio(&#39;cool_raster.tif&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; cropped = xds.rio.clip(geometries=cropping_geometries, crs=4326)</span>
+
+
+<span class="sd">        .. versionadded:: 0.2 from_disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        geometries: list</span>
+<span class="sd">            A list of geojson geometry dicts.</span>
+<span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
+<span class="sd">            The CRS of the input geometries. Default is to assume it is the same</span>
+<span class="sd">            as the dataset.</span>
+<span class="sd">        all_touched : boolean, optional</span>
+<span class="sd">            If True, all pixels touched by geometries will be burned in.  If</span>
+<span class="sd">            false, only pixels whose center is within the polygon or that</span>
+<span class="sd">            are selected by Bresenham&#39;s line algorithm will be burned in.</span>
+<span class="sd">        drop: bool, optional</span>
+<span class="sd">            If True, drop the data outside of the extent of the mask geometries</span>
+<span class="sd">            Otherwise, it will return the same raster with the data masked.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        invert: boolean, optional</span>
+<span class="sd">            If False, pixels that do not overlap shapes will be set as nodata.</span>
+<span class="sd">            Otherwise, pixels that overlap the shapes will be set as nodata.</span>
+<span class="sd">            False by default.</span>
+<span class="sd">        from_disk: boolean, optional</span>
+<span class="sd">            If True, it will clip from disk using rasterio.mask.mask if possible.</span>
+<span class="sd">            This is beneficial when the size of the data is larger than memory.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset`:</span>
+<span class="sd">            The clipped object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">clipped_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                        <span class="n">geometries</span><span class="p">,</span>
+                        <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+                        <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span>
+                        <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
+                        <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+                        <span class="n">from_disk</span><span class="o">=</span><span class="n">from_disk</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">clipped_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">clipped_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.interpolate_na"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.interpolate_na">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method uses `scipy.interpolate.griddata` to interpolate missing data.</span>
+
+<span class="sd">        .. warning:: scipy is an optional dependency.</span>
+
+<span class="sd">        .. warning:: Interpolates variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method: {‘linear’, ‘nearest’, ‘cubic’}, optional</span>
+<span class="sd">            The method to use for interpolation in `scipy.interpolate.griddata`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">             The interpolated object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">interpolated_dataset</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">get_option</span><span class="p">(</span>
+                    <span class="n">SKIP_MISSING_SPATIAL_DIMS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">interpolated_dataset</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">interpolated_dataset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RasterDataset.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">raster_path</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">recalc_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the Dataset to a raster file. Only works with 2D data.</span>
+
+<span class="sd">        ..versionadded:: 0.2 lock</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        raster_path: str</span>
+<span class="sd">            The path to output the raster to.</span>
+<span class="sd">        driver: str, optional</span>
+<span class="sd">            The name of the GDAL/rasterio driver to use to export the raster.</span>
+<span class="sd">            Default is &quot;GTiff&quot; if rasterio &lt; 1.2 otherwise it will autodetect.</span>
+<span class="sd">        dtype: str, optional</span>
+<span class="sd">            The data type to write the raster to. Default is the datasets dtype.</span>
+<span class="sd">        tags: dict, optional</span>
+<span class="sd">            A dictionary of tags to write to the raster.</span>
+<span class="sd">        windowed: bool, optional</span>
+<span class="sd">            If True, it will write using the windows of the output raster.</span>
+<span class="sd">            This is useful for loading data in chunks when writing. Does not</span>
+<span class="sd">            do anything when writing with dask.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        lock: boolean or Lock, optional</span>
+<span class="sd">            Lock to use to write data using dask.</span>
+<span class="sd">            If not supplied, it will use a single process for writing.</span>
+<span class="sd">        compute: bool, optional</span>
+<span class="sd">            If True and data is a dask array, then compute and save</span>
+<span class="sd">            the data immediately. If False, return a dask Delayed object.</span>
+<span class="sd">            Call &quot;.compute()&quot; on the Delayed object to compute the result</span>
+<span class="sd">            later. Call ``dask.compute(delayed1, delayed2)`` to save</span>
+<span class="sd">            multiple delayed files at once. Default is True.</span>
+<span class="sd">        **profile_kwargs</span>
+<span class="sd">            Additional keyword arguments to pass into writing the raster. The</span>
+<span class="sd">            nodata, transform, crs, count, width, and height attributes</span>
+<span class="sd">            are ignored.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`dask.Delayed`:</span>
+<span class="sd">            If the data array is a dask array and compute</span>
+<span class="sd">            is True. Otherwise None is returned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">variable_dim</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">variable_dim</span><span class="p">)</span>
+        <span class="c1"># write data array names to raster</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_array</span><span class="p">[</span><span class="n">variable_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># ensure raster metadata preserved</span>
+        <span class="n">scales</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodatavals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data_var</span> <span class="ow">in</span> <span class="n">data_array</span><span class="p">[</span><span class="n">variable_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+            <span class="n">nodatavals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scales&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scales</span>
+        <span class="n">data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offsets</span>
+        <span class="n">nodata</span> <span class="o">=</span> <span class="n">nodatavals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">all</span><span class="p">(</span><span class="n">nodataval</span> <span class="o">==</span> <span class="n">nodata</span> <span class="k">for</span> <span class="n">nodataval</span> <span class="ow">in</span> <span class="n">nodatavals</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodatavals</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+                <span class="s2">&quot;All nodata values must be the same when exporting to raster. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Current values: </span><span class="si">{</span><span class="n">nodatavals</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># write it to a raster</span>
+        <span class="k">return</span> <span class="n">data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span>
+            <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+            <span class="n">raster_path</span><span class="o">=</span><span class="n">raster_path</span><span class="p">,</span>
+            <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
+            <span class="n">windowed</span><span class="o">=</span><span class="n">windowed</span><span class="p">,</span>
+            <span class="n">recalc_transform</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">,</span>
+            <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
+            <span class="n">compute</span><span class="o">=</span><span class="n">compute</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, rioxarray Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
