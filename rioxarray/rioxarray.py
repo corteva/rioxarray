@@ -447,6 +447,9 @@ class XRasterBase:
             )
         data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
 
+        # remove old crs if exists
+        data_obj.attrs.pop("crs", None)
+
         return data_obj.rio.write_grid_mapping(
             grid_mapping_name=grid_mapping_name, inplace=True
         )

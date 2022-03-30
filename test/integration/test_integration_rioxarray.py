@@ -892,18 +892,22 @@ def test_reproject__grid_mapping(modis_reproject):
     ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
 
         # remove 'crs' attribute and add grid mapping
+        # keep a copy of the crs before setting the spatial_ref to 0 as that will
+        # set `rio.crs` to None.
+        mda_rio_crs = mda.rio.crs
         mda.coords["spatial_ref"] = 0
         mda.coords["spatial_ref"].attrs["spatial_ref"] = CRS.from_user_input(
-            _get_attr(mda, "crs")
+            mda_rio_crs
         ).wkt
         _mod_attr(mda, "grid_mapping", val="spatial_ref")
-        _del_attr(mda, "crs")
+        # keep a copy of the crs before setting the spatial_ref to 0 as that will
+        # set `rio.crs` to None.
+        mdc_rio_crs = mdc.rio.crs
         mdc.coords["spatial_ref"] = 0
         mdc.coords["spatial_ref"].attrs["spatial_ref"] = CRS.from_user_input(
-            _get_attr(mdc, "crs")
+            mdc_rio_crs
         ).wkt
         _mod_attr(mdc, "grid_mapping", val="spatial_ref")
-        _del_attr(mdc, "crs")
 
         # reproject
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
@@ -2023,6 +2027,13 @@ def test_get_crs_dataset():
     test_ds = test_ds.rio.write_crs(4326)
     assert test_ds.encoding["grid_mapping"] == "spatial_ref"
     assert test_ds.rio.crs.to_epsg() == 4326
+
+
+def test_crs_is_removed():
+    test_ds = xarray.Dataset(attrs=dict(crs="+init=epsg:4326"))
+    test_ds = test_ds.rio.write_crs(4326)
+
+    assert "crs" not in test_ds.attrs
 
 
 def test_write_crs_cf():

@@ -937,8 +937,9 @@ def open_rasterio(
     # always (0, 0, 1) per definition (see
     # https://github.com/sgillies/affine)
     result.rio.write_transform(_rio_transform(riods), inplace=True)
-    if riods.crs:
-        result.rio.write_crs(riods.crs, inplace=True)
+    rio_crs = riods.crs or result.rio.crs
+    if rio_crs:
+        result.rio.write_crs(rio_crs, inplace=True)
     if has_gcps:
         result.rio.write_gcps(*riods.gcps, inplace=True)
 

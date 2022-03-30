@@ -15,7 +15,6 @@ def test_merge_arrays(squeeze):
     with open_rasterio(dem_test) as rds:
         rds.attrs = {
             "_FillValue": rds.rio.nodata,
-            "crs": rds.attrs["crs"],
         }
         arrays = [
             rds.isel(x=slice(100), y=slice(100)),
@@ -140,7 +139,6 @@ def test_merge_arrays__res():
     with open_rasterio(dem_test, masked=True) as rds:
         rds.attrs = {
             "_FillValue": rds.rio.nodata,
-            "crs": rds.attrs["crs"],
         }
         arrays = [
             rds.isel(x=slice(100), y=slice(100)),
@@ -173,7 +171,6 @@ def test_merge_arrays__res():
     assert merged.rio.crs == rds.rio.crs
     assert_almost_equal(merged.attrs.pop("_FillValue"), rds.attrs.pop("_FillValue"))
     compare_attrs = dict(rds.attrs)
-    compare_attrs.pop("crs")
     assert merged.attrs == compare_attrs
     assert merged.encoding["grid_mapping"] == "spatial_ref"
     assert_almost_equal(nansum(merged), 13760565)
