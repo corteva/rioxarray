@@ -40,12 +40,13 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
       </tr>
       <tr>
         <td align="center"><a href="https://cordmaur.medium.com/"><img src="https://avatars.githubusercontent.com/u/19617404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mauricio Cordeiro</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3Acordmaur" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=cordmaur" title="Code">💻</a></td>
+        <td align="center"><a href="https://github.com/GCBallesteros"><img src="https://avatars.githubusercontent.com/u/6859287?v=4?s=100" width="100px;" alt=""/><br /><sub><b>GBallesteros</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3AGCBallesteros" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=GCBallesteros" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=GCBallesteros" title="Tests">⚠️</a></td>
       </tr>
     </table>
 
-    <!-- markdownlint-restore -->
-    <!-- prettier-ignore-end -->
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
-    <!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the `all-contributors <https://github.com/all-contributors/all-contributors>`_ specification. Contributions of any kind welcome!
