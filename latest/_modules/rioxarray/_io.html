@@ -1014,8 +1014,9 @@
     <span class="c1"># always (0, 0, 1) per definition (see</span>
     <span class="c1"># https://github.com/sgillies/affine)</span>
     <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rio_crs</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">if</span> <span class="n">rio_crs</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rio_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">has_gcps</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_gcps</span><span class="p">(</span><span class="o">*</span><span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
