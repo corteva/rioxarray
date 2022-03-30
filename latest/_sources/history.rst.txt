@@ -1,9 +1,6 @@
 History
 =======
 
-Latest
--------
-
 0.10.3
 ------
 - BUG: Remove xarray crs attribute in rio.write_crs (issue #488)
