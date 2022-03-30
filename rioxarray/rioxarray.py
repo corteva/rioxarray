@@ -313,7 +313,6 @@ class XRasterBase:
         crs = crs_from_user_input(input_crs)
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
-
         return obj
 
     @property
