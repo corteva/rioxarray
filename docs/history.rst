@@ -6,7 +6,7 @@ Latest
 
 0.10.3
 ------
-- BUG: Remove underlying xarray `crs` once rioxarray's one is ready (issue #488)
+- BUG: Remove xarray crs attribute in rio.write_crs (issue #488)
 
 0.10.2
 -------
