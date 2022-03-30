@@ -31,10 +31,14 @@ def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
             )
         elif (
             attr != "_FillValue"
-            and attr not in UNWANTED_RIO_ATTRS
-            and attr != "creation_date"
-            and attr != "grid_mapping"
-            and attr != "coordinates"
+            and attr
+            not in UNWANTED_RIO_ATTRS
+            + (
+                "creation_date",
+                "grid_mapping",
+                "coordinates",
+                "crs",
+            )
             and "#" not in attr
         ):
             try:
@@ -94,7 +98,7 @@ def _assert_xarrays_equal(
         )
         assert_array_equal([input_fill_value], [compare_fill_value])
         assert input_xarray.rio.grid_mapping == compare_xarray.rio.grid_mapping
-        for unwanted_attr in UNWANTED_RIO_ATTRS:
+        for unwanted_attr in UNWANTED_RIO_ATTRS + ("crs", "transform"):
             assert unwanted_attr not in input_xarray.attrs
 
 
