@@ -8,6 +8,9 @@ on:
   schedule:
     - cron:  '0 0 * * 0'
 
+env:
+  PIP_NO_BINARY: rasterio
+
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -16,49 +19,91 @@ jobs:
       - uses: actions/setup-python@v2
       - uses: pre-commit/action@v2.0.0
 
-  test:
+  docker_tests:
+    needs: linting
+    runs-on: ubuntu-latest
+    name: Docker | python=${{ matrix.python-version }} | rasterio${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
+    container: osgeo/gdal:ubuntu-full-3.4.1
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9']
+        rasterio-version: ['']
+        xarray-version: ['']
+        run-with-scipy: ['YES']
+        include:
+          - python-version: '3.8'
+            rasterio-version: ''
+            xarray-version: '==0.17'
+            run-with-scipy: 'YES'
+          - python-version: '3.8'
+            rasterio-version: '==1.1'
+            xarray-version: ''
+            run-with-scipy: 'YES'
+          - python-version: '3.8'
+            rasterio-version: '==1.2.1'
+            xarray-version: ''
+            run-with-scipy: 'YES'
+          - python-version: '3.10'
+            rasterio-version: '==1.3a3'
+            xarray-version: ''
+            run-with-scipy: 'NO'
+          - python-version: '3.9'
+            rasterio-version: ''
+            xarray-version: ''
+            run-with-scipy: 'NO'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update
+        run: |
+          apt-get update
+          apt-get -y install software-properties-common
+          add-apt-repository -y ppa:deadsnakes/ppa
+          apt-get update
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: |
+          apt-get install -y --no-install-recommends \
+            python${{ matrix.python-version }} \
+            python${{ matrix.python-version }}-dev \
+            python${{ matrix.python-version }}-venv \
+            python3-pip \
+            g++
+          chown -R $(whoami) /github/home/
+
+      - name: Install dependencies
+        run: |
+          python${{ matrix.python-version }} -m venv testenv
+          . testenv/bin/activate
+          python -m pip install --upgrade pip
+          python setup.py clean
+          export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
+          [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
+          python -m pip install $INSTALL_DEPS
+          python -m pip install -e .[dev,docs]
+
+      - name: run tests
+        run: |
+          . testenv/bin/activate
+          python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
+
+      - uses: codecov/codecov-action@v1
+
+
+  conda_test:
     needs: linting
     name: ${{ matrix.os }} | ${{ matrix.python-version }} | rasterio-${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.8', '3.9', '3.10']
         rasterio-version: ['*']
         xarray-version: ['*']
         run-with-scipy: ['YES']
-        include:
-          - os: windows-latest
-            python-version: '3.8'
-            rasterio-version: '*'
-            xarray-version: '*'
-            run-with-scipy: 'YES'
-          - os: windows-latest
-            python-version: '3.9'
-            rasterio-version: '*'
-            xarray-version: '*'
-            run-with-scipy: 'YES'
-          - os: ubuntu-latest
-            python-version: '3.8'
-            rasterio-version: '*'
-            xarray-version: 0.17
-            run-with-scipy: 'YES'
-          - os: ubuntu-latest
-            python-version: '3.8'
-            rasterio-version: 1.1
-            xarray-version: '*'
-            run-with-scipy: 'YES'
-          - os: ubuntu-latest
-            python-version: '3.8'
-            rasterio-version: 1.2.1
-            xarray-version: '*'
-            run-with-scipy: 'YES'
-          - os: ubuntu-latest
-            python-version: '3.9'
-            rasterio-version: '*'
-            xarray-version: '*'
-            run-with-scipy: 'NO'
+
     steps:
       - uses: actions/checkout@v2
 
