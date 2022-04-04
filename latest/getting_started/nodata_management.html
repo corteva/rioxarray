@@ -370,6 +370,7 @@ div.rendered_html tbody tr:hover {
 <section id="Search-order-for-nodata-(DataArray-only):">
 <h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this headline"></a></h2>
 <ol class="arabic simple">
+<li><p>Check if DataArray values are masked. If they are masked, return <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If the DataArray is masked, the original nodata value can be retreived from <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code>.</p></li>
 <li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</p></li>
 <li><p>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
@@ -424,7 +425,7 @@ print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.encoded_nodata}
 <div class="highlight"><pre>
 nodata:
 - xarray.open_dataset: 32767
-- rioxarray.open_rasterio: 32767.0
+- rioxarray.open_rasterio: 32767
 
 encoded_nodata:
 - xarray.open_dataset: None
@@ -452,7 +453,7 @@ attributes:
     {&#39;_FillValue&#39;: 32767, &#39;units&#39;: &#39;K&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_Unsigned&#39;: &#39;true&#39;}
 
 - rioxarray.open_rasterio:
-    {&#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;, &#39;_FillValue&#39;: 32767.0, &#39;_Unsigned&#39;: &#39;true&#39;}
+    {&#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;, &#39;_FillValue&#39;: 32767.0, &#39;_Unsigned&#39;: &#39;true&#39;}
 </pre></div></div>
 </div>
 </section>
@@ -474,9 +475,7 @@ rds = rioxarray.open_rasterio(file_path, mask_and_scale=True)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-~/miniconda/envs/rioxarray/lib/python3.8/site-packages/xarray/conventions.py:487: SerializationWarning: variable &#39;air_temperature&#39; has _Unsigned attribute but is not of integer type. Ignoring attribute.
-  new_vars[k] = decode_cf_variable(
-~/scripts/rioxarray/rioxarray/_io.py:501: SerializationWarning: variable &#39;air_temperature&#39; has _Unsigned attribute but is not of integer type. Ignoring attribute.
+/home/snowal/miniconda/envs/midas/lib/python3.10/site-packages/rioxarray/_io.py:618: SerializationWarning: variable &#39;air_temperature&#39; has _Unsigned attribute but is not of integer type. Ignoring attribute.
   rioda = open_rasterio(
 </pre></div></div>
 </div>
@@ -503,7 +502,7 @@ nodata:
 - rioxarray.open_rasterio: nan
 
 encoded_nodata:
-- xarray.open_dataset: 32767
+- xarray.open_dataset: 32767.0
 - rioxarray.open_rasterio: 32767.0
 </pre></div></div>
 </div>
@@ -528,7 +527,7 @@ attributes:
     {&#39;units&#39;: &#39;K&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;}
 
 - rioxarray.open_rasterio:
-    {&#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;}
+    {&#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -549,10 +548,56 @@ print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.encoding}&qu
 encoding:
 
 - xarray.open_dataset:
-    {&#39;zlib&#39;: True, &#39;shuffle&#39;: True, &#39;complevel&#39;: 5, &#39;fletcher32&#39;: False, &#39;contiguous&#39;: False, &#39;chunksizes&#39;: (585, 1386), &#39;source&#39;: &#39;~/scripts/rioxarray/test/test_data/input/tmmx_20190121.nc&#39;, &#39;original_shape&#39;: (585, 1386), &#39;dtype&#39;: dtype(&#39;uint16&#39;), &#39;_Unsigned&#39;: &#39;true&#39;, &#39;missing_value&#39;: 32767, &#39;_FillValue&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;}
+    {&#39;zlib&#39;: True, &#39;shuffle&#39;: True, &#39;complevel&#39;: 5, &#39;fletcher32&#39;: False, &#39;contiguous&#39;: False, &#39;chunksizes&#39;: (585, 1386), &#39;source&#39;: &#39;/home/snowal/scripts/rioxarray/test/test_data/input/tmmx_20190121.nc&#39;, &#39;original_shape&#39;: (585, 1386), &#39;dtype&#39;: dtype(&#39;uint16&#39;), &#39;_Unsigned&#39;: &#39;true&#39;, &#39;missing_value&#39;: 32767, &#39;_FillValue&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;}
 
 - rioxarray.open_rasterio:
-    {&#39;_Unsigned&#39;: &#39;true&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_FillValue&#39;: 32767.0, &#39;missing_value&#39;: 32767}
+    {&#39;_Unsigned&#39;: &#39;true&#39;, &#39;dtype&#39;: &#39;uint16&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_FillValue&#39;: 32767.0, &#39;missing_value&#39;: 32767, &#39;source&#39;: &#39;netcdf:../../test/test_data/input/tmmx_20190121.nc:air_temperature&#39;, &#39;rasterio_dtype&#39;: &#39;uint16&#39;}
+</pre></div></div>
+</div>
+</section>
+<section id="Manually-masking-data">
+<h3>Manually masking data<a class="headerlink" href="#Manually-masking-data" title="Permalink to this headline"></a></h3>
+<p>If you use <code class="docutils literal notranslate"><span class="pre">xarray.where</span></code> to mask you data, then you need to ensure that the attributes stored on the DataArray reflect the correct values. <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a> can help ensure that the nodata attributes are written correctly.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path, mask_and_scale=False) # performs mask_and_scale by default
+raster = xds.air_temperature
+raster = raster.where(raster != raster.rio.nodata)
+# nodata does not reflect the data has been masked
+print(f&quot;nodata: {raster.rio.nodata}&quot;)
+print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata: 32767.0
+encoded_nodata: None
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># update nodata value to show the data has been masked
+raster.rio.write_nodata(raster.rio.nodata, encoded=True, inplace=True)
+print(f&quot;nodata: {raster.rio.nodata}&quot;)
+print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata: nan
+encoded_nodata: 32767.0
 </pre></div></div>
 </div>
 </section>
