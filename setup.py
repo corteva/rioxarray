@@ -16,7 +16,7 @@ def get_version():
             if line.find("__version__") >= 0:
                 # parse __version__ and remove surrounding " or '
                 return line.split("=")[1].strip()[1:-1]
-    sys.exit("ERROR: rioxarray version not fount.")
+    sys.exit("ERROR: rioxarray version not found.")
 
 
 setup(version=get_version())
