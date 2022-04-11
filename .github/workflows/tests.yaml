@@ -138,6 +138,12 @@ jobs:
           source activate test
           pylint rioxarray/
 
+      - name: mypy
+        shell: bash
+        run: |
+          source activate test
+          mypy rioxarray/
+
       - name: Test
         shell: bash
         run: |

@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- TYPE: Add more type hints (issue #373)
 
 0.10.3
 ------

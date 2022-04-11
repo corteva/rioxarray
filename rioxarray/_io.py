@@ -11,6 +11,7 @@ import os
 import re
 import threading
 import warnings
+from typing import Any, Dict, Hashable, List, Optional, Tuple, Union
 
 import numpy as np
 import rasterio
@@ -34,6 +35,8 @@ from rioxarray.rioxarray import _generate_spatial_coords
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
+
+RasterioReader = Union[rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT]
 
 
 class FileHandleLocal(threading.local):
@@ -344,7 +347,7 @@ def _rasterio_to_numpy_dtype(dtypes):
     return dtype
 
 
-def _to_numeric(value):
+def _to_numeric(value: Any) -> float:
     """
     Convert the value to a number
     """
@@ -358,7 +361,7 @@ def _to_numeric(value):
     return value
 
 
-def _parse_tag(key, value):
+def _parse_tag(key: str, value: Any) -> Tuple[str, Any]:
     # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
     key = key.split("NC_GLOBAL#")[-1]
     if value.startswith("{") and value.endswith("}"):
@@ -373,7 +376,7 @@ def _parse_tag(key, value):
     return key, value
 
 
-def _parse_tags(tags):
+def _parse_tags(tags: Dict) -> Dict:
     parsed_tags = {}
     for key, value in tags.items():
         key, value = _parse_tag(key, value)
@@ -398,7 +401,7 @@ NETCDF_DTYPE_MAP = {
 }
 
 
-def _load_netcdf_attrs(tags, data_array):
+def _load_netcdf_attrs(tags: Dict, data_array: DataArray) -> None:
     """
     Loads the netCDF attributes into the data array
 
@@ -415,7 +418,7 @@ def _load_netcdf_attrs(tags, data_array):
             data_array.coords[variable_name].attrs.update({attr_name: value})
 
 
-def _load_netcdf_1d_coords(tags):
+def _load_netcdf_1d_coords(tags: Dict) -> Dict:
     """
     Dimension information:
         - NETCDF_DIM_EXTRA: '{time}' (comma separated list of dim names)
@@ -441,7 +444,10 @@ def _load_netcdf_1d_coords(tags):
     return coords
 
 
-def build_subdataset_filter(group_names, variable_names):
+def build_subdataset_filter(
+    group_names: Optional[Union[str, List[str], Tuple[str, ...]]],
+    variable_names: Optional[Union[str, List[str], Tuple[str, ...]]],
+):
     """
     Example::
         'HDF4_EOS:EOS_GRID:"./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf":
@@ -479,7 +485,7 @@ def build_subdataset_filter(group_names, variable_names):
     )
 
 
-def _get_rasterio_attrs(riods):
+def _get_rasterio_attrs(riods: RasterioReader):
     """
     Get rasterio specific attributes
     """
@@ -523,7 +529,11 @@ def _get_rasterio_attrs(riods):
     return attrs
 
 
-def _decode_datetime_cf(data_array, decode_times, decode_timedelta):
+def _decode_datetime_cf(
+    data_array: DataArray,
+    decode_times: bool,
+    decode_timedelta: Optional[bool],
+) -> DataArray:
     """
     Decide the datetime based on CF conventions
     """
@@ -560,7 +570,11 @@ def _decode_datetime_cf(data_array, decode_times, decode_timedelta):
     return data_array
 
 
-def _parse_driver_tags(riods, attrs, coords):
+def _parse_driver_tags(
+    riods: RasterioReader,
+    attrs: Dict,
+    coords: Dict,
+) -> None:
     # Parse extra metadata from tags, if supported
     parsers = {"ENVI": _parse_envi}
 
@@ -578,19 +592,19 @@ def _parse_driver_tags(riods, attrs, coords):
 
 
 def _load_subdatasets(
-    riods,
-    group,
-    variable,
-    parse_coordinates,
-    chunks,
-    cache,
-    lock,
-    masked,
-    mask_and_scale,
-    decode_times,
-    decode_timedelta,
+    riods: RasterioReader,
+    group: Optional[Union[str, List[str], Tuple[str, ...]]],
+    variable: Optional[Union[str, List[str], Tuple[str, ...]]],
+    parse_coordinates: bool,
+    chunks: Optional[Union[int, Tuple, Dict]],
+    cache: Optional[bool],
+    lock: Any,
+    masked: bool,
+    mask_and_scale: bool,
+    decode_times: bool,
+    decode_timedelta: Optional[bool],
     **open_kwargs,
-):
+) -> Union[Dataset, List[Dataset]]:
     """
     Load in rasterio subdatasets
     """
@@ -604,7 +618,7 @@ def _load_subdatasets(
             continue
         with rasterio.open(subdataset) as rds:
             shape = rds.shape
-        rioda = open_rasterio(
+        rioda: DataArray = open_rasterio(  # type: ignore
             subdataset,
             parse_coordinates=shape not in dim_groups and parse_coordinates,
             chunks=chunks,
@@ -623,7 +637,7 @@ def _load_subdatasets(
             dim_groups[shape][rioda.name] = rioda
 
     if len(dim_groups) > 1:
-        dataset = [
+        dataset: Union[Dataset, List[Dataset]] = [
             Dataset(dim_group, attrs=base_tags) for dim_group in dim_groups.values()
         ]
     elif not dim_groups:
@@ -633,7 +647,12 @@ def _load_subdatasets(
     return dataset
 
 
-def _prepare_dask(result, riods, filename, chunks):
+def _prepare_dask(
+    result: DataArray,
+    riods: RasterioReader,
+    filename: Union[str, os.PathLike],
+    chunks: Union[int, Tuple, Dict],
+) -> DataArray:
     """
     Prepare the data for dask computations
     """
@@ -669,7 +688,9 @@ def _prepare_dask(result, riods, filename, chunks):
     return result.chunk(chunks, name_prefix=name_prefix, token=token)
 
 
-def _handle_encoding(result, mask_and_scale, masked, da_name):
+def _handle_encoding(
+    result: DataArray, mask_and_scale: bool, masked: bool, da_name: Optional[Hashable]
+) -> None:
     """
     Make sure encoding handled properly
     """
@@ -692,20 +713,22 @@ def _handle_encoding(result, mask_and_scale, masked, da_name):
 
 
 def open_rasterio(
-    filename,
-    parse_coordinates=None,
-    chunks=None,
-    cache=None,
-    lock=None,
-    masked=False,
-    mask_and_scale=False,
-    variable=None,
-    group=None,
-    default_name=None,
-    decode_times=True,
-    decode_timedelta=None,
+    filename: Union[
+        str, os.PathLike, rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT
+    ],
+    parse_coordinates: Optional[bool] = None,
+    chunks: Optional[Union[int, Tuple, Dict]] = None,
+    cache: Optional[bool] = None,
+    lock: Any = None,
+    masked: bool = False,
+    mask_and_scale: bool = False,
+    variable: Optional[Union[str, List[str], Tuple[str, ...]]] = None,
+    group: Optional[Union[str, List[str], Tuple[str, ...]]] = None,
+    default_name: Optional[str] = None,
+    decode_times: bool = True,
+    decode_timedelta: Optional[bool] = None,
     **open_kwargs,
-):
+) -> Union[Dataset, DataArray, List[Dataset]]:
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     """Open a file with rasterio (experimental).
 
@@ -753,7 +776,7 @@ def open_rasterio(
 
     masked: bool, optional
         If True, read the mask and set values to NaN. Defaults to False.
-    mask_and_scale: bool, optional
+    mask_and_scale: bool, default=False
         Lazily scale (using the `scales` and `offsets` from rasterio) and mask.
         If the _Unsigned attribute is present treat integer arrays as unsigned.
     variable: str or list or tuple, optional
@@ -762,7 +785,7 @@ def open_rasterio(
         Group name or names to use to filter loading.
     default_name: str, optional
         The name of the data array if none exists. Default is None.
-    decode_times: bool, optional
+    decode_times: bool, default=True
         If True, decode times encoded in the standard NetCDF datetime format
         into datetime objects. Otherwise, leave them encoded as numbers.
     decode_timedelta: bool, optional
@@ -771,7 +794,7 @@ def open_rasterio(
         into timedelta objects. If False, leave them encoded as numbers.
         If None (default), assume the same value of decode_time.
     **open_kwargs: kwargs, optional
-        Optional keyword arguments to pass into rasterio.open().
+        Optional keyword arguments to pass into :func:`rasterio.open`.
 
     Returns
     -------
@@ -812,7 +835,7 @@ def open_rasterio(
 
     with warnings.catch_warnings(record=True) as rio_warnings:
         if lock is not NO_LOCK:
-            manager = CachingFileManager(
+            manager: FileManager = CachingFileManager(
                 rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
             )
         else:
@@ -825,7 +848,7 @@ def open_rasterio(
         if not riods.subdatasets or not isinstance(
             rio_warning.message, NotGeoreferencedWarning
         ):
-            warnings.warn(str(rio_warning.message), type(rio_warning.message))
+            warnings.warn(str(rio_warning.message), type(rio_warning.message))  # type: ignore
 
     # open the subdatasets if they exist
     if riods.subdatasets:
@@ -878,7 +901,7 @@ def open_rasterio(
         )
 
     unsigned = False
-    encoding = {}
+    encoding: Dict[Hashable, Any] = {}
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 
@@ -886,7 +909,7 @@ def open_rasterio(
         encoding["dtype"] = str(_rasterio_to_numpy_dtype(riods.dtypes))
 
     da_name = attrs.pop("NETCDF_VARNAME", default_name)
-    data = indexing.LazilyOuterIndexedArray(
+    data: Any = indexing.LazilyOuterIndexedArray(
         RasterioArrayWrapper(
             manager,
             lock,

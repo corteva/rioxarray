@@ -2,10 +2,14 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets.
 """
+import os
+from typing import Any, Dict, Iterable, List, Literal, Mapping, Optional, Tuple, Union
 from uuid import uuid4
 
 import numpy as np
+import rasterio.crs
 import xarray
+from affine import Affine
 from rasterio.enums import Resampling
 
 from rioxarray._options import SKIP_MISSING_SPATIAL_DIMS, get_option
@@ -18,12 +22,12 @@ class RasterDataset(XRasterBase):
     """This is the GIS extension for :class:`xarray.Dataset`"""
 
     @property
-    def vars(self):
+    def vars(self) -> List:
         """list: Returns non-coordinate varibles"""
         return list(self._obj.data_vars)
 
     @property
-    def crs(self):
+    def crs(self) -> Optional[rasterio.crs.CRS]:
         """:obj:`rasterio.crs.CRS`:
         Retrieve projection from `xarray.Dataset`
         """
@@ -52,14 +56,14 @@ class RasterDataset(XRasterBase):
 
     def reproject(
         self,
-        dst_crs,
-        resolution=None,
-        shape=None,
-        transform=None,
-        resampling=Resampling.nearest,
-        nodata=None,
+        dst_crs: Any,
+        resolution: Optional[Union[float, Tuple[float, float]]] = None,
+        shape: Optional[Tuple[int, int]] = None,
+        transform: Optional[Affine] = None,
+        resampling: Resampling = Resampling.nearest,
+        nodata: Optional[float] = None,
         **kwargs,
-    ):
+    ) -> xarray.Dataset:
         """
         Reproject :class:`xarray.Dataset` objects
 
@@ -83,7 +87,7 @@ class RasterDataset(XRasterBase):
         shape: tuple(int, int), optional
             Shape of the destination in pixels (dst_height, dst_width). Cannot be used
             together with resolution.
-        transform: optional
+        transform: Affine, optional
             The destination transform.
         resampling: rasterio.enums.Resampling, optional
             See :func:`rasterio.warp.reproject` for more details.
@@ -130,8 +134,11 @@ class RasterDataset(XRasterBase):
         return resampled_dataset
 
     def reproject_match(
-        self, match_data_array, resampling=Resampling.nearest, **reproject_kwargs
-    ):
+        self,
+        match_data_array: Union[xarray.DataArray, xarray.Dataset],
+        resampling: Resampling = Resampling.nearest,
+        **reproject_kwargs,
+    ) -> xarray.Dataset:
         """
         Reproject a Dataset object to match the resolution, projection,
         and region of another DataArray.
@@ -180,7 +187,16 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def pad_box(self, minx, miny, maxx, maxy):
+    def pad_box(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+        constant_values: Union[
+            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+        ] = None,
+    ) -> xarray.Dataset:
         """Pad the :class:`xarray.Dataset` to a bounding box.
 
         .. warning:: Only works if all variables in the dataset have the
@@ -198,6 +214,9 @@ class RasterDataset(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
+        constant_values: scalar, tuple or mapping of hashable to tuple
+            The value used for padding. If None, nodata will be used if it is
+            set, and np.nan otherwise.
 
         Returns
         -------
@@ -211,7 +230,9 @@ class RasterDataset(XRasterBase):
                 padded_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
-                    .rio.pad_box(minx, miny, maxx, maxy)
+                    .rio.pad_box(
+                        minx, miny, maxx, maxy, constant_values=constant_values
+                    )
                 )
             except MissingSpatialDimensionError:
                 if len(self._obj[var].dims) >= 2 and not get_option(
@@ -223,7 +244,15 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
+    def clip_box(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+        auto_expand: Union[bool, int] = False,
+        auto_expand_limit: int = 3,
+    ) -> xarray.Dataset:
         """Clip the :class:`xarray.Dataset` by a bounding box in dimensions 'x'/'y'.
 
         .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
@@ -277,13 +306,13 @@ class RasterDataset(XRasterBase):
 
     def clip(
         self,
-        geometries,
-        crs=None,
-        all_touched=False,
-        drop=True,
-        invert=False,
-        from_disk=False,
-    ):
+        geometries: Iterable,
+        crs: Any = None,
+        all_touched: bool = False,
+        drop: bool = True,
+        invert: bool = False,
+        from_disk: bool = False,
+    ) -> xarray.Dataset:
         """
         Crops a :class:`xarray.Dataset` by geojson like geometry dicts in dimensions 'x'/'y'.
 
@@ -362,7 +391,9 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
-    def interpolate_na(self, method="nearest"):
+    def interpolate_na(
+        self, method: Literal["linear", "nearest", "cubic"] = "nearest"
+    ) -> xarray.Dataset:
         """
         This method uses `scipy.interpolate.griddata` to interpolate missing data.
 
@@ -372,7 +403,7 @@ class RasterDataset(XRasterBase):
 
         Parameters
         ----------
-        method: {‘linear’, ‘nearest’, ‘cubic’}, optional
+        method: {'linear', 'nearest', 'cubic'}, optional
             The method to use for interpolation in `scipy.interpolate.griddata`.
 
         Returns
@@ -401,16 +432,16 @@ class RasterDataset(XRasterBase):
 
     def to_raster(
         self,
-        raster_path,
-        driver=None,
-        dtype=None,
-        tags=None,
-        windowed=False,
-        recalc_transform=True,
-        lock=None,
-        compute=True,
+        raster_path: Union[str, os.PathLike],
+        driver: str = None,
+        dtype: Union[str, np.dtype] = None,
+        tags: Dict[str, str] = None,
+        windowed: bool = False,
+        recalc_transform: bool = True,
+        lock: Optional[bool] = None,
+        compute: bool = True,
         **profile_kwargs,
-    ):
+    ) -> None:
         """
         Export the Dataset to a raster file. Only works with 2D data.
 
