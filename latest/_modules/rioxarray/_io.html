@@ -556,17 +556,6 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the transform from a rasterio dataset</span>
-<span class="sd">    reguardless of rasterio version.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">riods</span><span class="o">.</span><span class="n">transform</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">riods</span><span class="o">.</span><span class="n">affine</span>  <span class="c1"># rasterio &lt; 1.0</span>
-
-
 <span class="k">def</span> <span class="nf">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get rasterio specific attributes</span>
@@ -962,7 +951,7 @@
     <span class="c1"># Get geospatial coordinates</span>
     <span class="k">if</span> <span class="n">parse_coordinates</span><span class="p">:</span>
         <span class="n">coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="n">_generate_spatial_coords</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+            <span class="n">_generate_spatial_coords</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="n">unsigned</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1013,7 +1002,7 @@
     <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
     <span class="c1"># always (0, 0, 1) per definition (see</span>
     <span class="c1"># https://github.com/sgillies/affine)</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">_rio_transform</span><span class="p">(</span><span class="n">riods</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">rio_crs</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
     <span class="k">if</span> <span class="n">rio_crs</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rio_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
