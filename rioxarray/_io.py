@@ -479,17 +479,6 @@ def build_subdataset_filter(group_names, variable_names):
     )
 
 
-def _rio_transform(riods):
-    """
-    Get the transform from a rasterio dataset
-    reguardless of rasterio version.
-    """
-    try:
-        return riods.transform
-    except AttributeError:
-        return riods.affine  # rasterio < 1.0
-
-
 def _get_rasterio_attrs(riods):
     """
     Get rasterio specific attributes
@@ -885,7 +874,7 @@ def open_rasterio(
     # Get geospatial coordinates
     if parse_coordinates:
         coords.update(
-            _generate_spatial_coords(_rio_transform(riods), riods.width, riods.height)
+            _generate_spatial_coords(riods.transform, riods.width, riods.height)
         )
 
     unsigned = False
@@ -936,7 +925,7 @@ def open_rasterio(
     # For serialization store as tuple of 6 floats, the last row being
     # always (0, 0, 1) per definition (see
     # https://github.com/sgillies/affine)
-    result.rio.write_transform(_rio_transform(riods), inplace=True)
+    result.rio.write_transform(riods.transform, inplace=True)
     rio_crs = riods.crs or result.rio.crs
     if rio_crs:
         result.rio.write_crs(rio_crs, inplace=True)
