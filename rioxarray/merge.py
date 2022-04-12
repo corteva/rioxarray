@@ -132,7 +132,7 @@ def merge_arrays(
     precision: float, optional
         Number of decimal points of precision when computing inverse transform.
     method: str or callable, optional
-        See rasterio docs.
+        See rasterio docs (https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html).
     crs: rasterio.crs.CRS, optional
         Output CRS. If not set, the CRS of the first DataArray is used.
     parse_coordinates: bool, optional
