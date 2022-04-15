@@ -10,17 +10,31 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
-from typing import Iterable
+import os
+from typing import (
+    Any,
+    Dict,
+    Hashable,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import rasterio
 import rasterio.mask
 import rasterio.warp
 import xarray
+from affine import Affine
 from packaging import version
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
+from xarray.backends.file_manager import FileManager
 from xarray.core.dtypes import get_fill_value
 
 from rioxarray.crs import crs_from_user_input
@@ -57,7 +71,9 @@ _NODATA_DTYPE_MAP = {
 }
 
 
-def _generate_attrs(src_data_array, dst_nodata):
+def _generate_attrs(
+    src_data_array: xarray.DataArray, dst_nodata: Optional[float]
+) -> Dict[str, Any]:
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
     # remove all nodata information
@@ -76,7 +92,9 @@ def _generate_attrs(src_data_array, dst_nodata):
     return new_attrs
 
 
-def _add_attrs_proj(new_data_array, src_data_array):
+def _add_attrs_proj(
+    new_data_array: xarray.DataArray, src_data_array: xarray.DataArray
+) -> xarray.DataArray:
     """Make sure attributes and projection correct"""
     # make sure dimension information is preserved
     if new_data_array.rio._x_dim is None:
@@ -105,7 +123,12 @@ def _add_attrs_proj(new_data_array, src_data_array):
 
 
 def _make_dst_affine(
-    src_data_array, src_crs, dst_crs, dst_resolution=None, dst_shape=None, **kwargs
+    src_data_array: xarray.DataArray,
+    src_crs: rasterio.crs.CRS,
+    dst_crs: rasterio.crs.CRS,
+    dst_resolution: Optional[Union[float, Tuple[float, float]]] = None,
+    dst_shape: Optional[Tuple[float, float]] = None,
+    **kwargs,
 ):
     """Determine the affine of the new projected `xarray.DataArray`"""
     src_bounds = () if "gcps" in kwargs else src_data_array.rio.bounds()
@@ -113,9 +136,9 @@ def _make_dst_affine(
     dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
     # pylint: disable=isinstance-second-argument-not-valid-type
     if isinstance(dst_resolution, Iterable):
-        dst_resolution = tuple(abs(res_val) for res_val in dst_resolution)
+        dst_resolution = tuple(abs(res_val) for res_val in dst_resolution)  # type: ignore
     elif dst_resolution is not None:
-        dst_resolution = abs(dst_resolution)
+        dst_resolution = abs(dst_resolution)  # type: ignore
 
     for key, value in (
         ("resolution", dst_resolution),
@@ -135,7 +158,13 @@ def _make_dst_affine(
     return dst_affine, dst_width, dst_height
 
 
-def _clip_from_disk(xds, geometries, all_touched, drop, invert):
+def _clip_from_disk(
+    xds: xarray.DataArray,
+    geometries: Iterable,
+    all_touched: bool,
+    drop: bool,
+    invert: bool,
+) -> Optional[xarray.DataArray]:
     """
     clip from disk if the file object is available
     """
@@ -165,7 +194,13 @@ def _clip_from_disk(xds, geometries, all_touched, drop, invert):
         return None
 
 
-def _clip_xarray(xds, geometries, all_touched, drop, invert):
+def _clip_xarray(
+    xds: xarray.DataArray,
+    geometries: Iterable,
+    all_touched: bool,
+    drop: bool,
+    invert: bool,
+) -> xarray.DataArray:
     """
     clip the xarray DataArray
     """
@@ -200,20 +235,25 @@ def _clip_xarray(xds, geometries, all_touched, drop, invert):
 class RasterArray(XRasterBase):
     """This is the GIS extension for :obj:`xarray.DataArray`"""
 
-    def __init__(self, xarray_obj):
+    def __init__(self, xarray_obj: xarray.DataArray):
         super().__init__(xarray_obj)
+        self._obj: xarray.DataArray
         # properties
-        self._nodata = None
-        self._manager = None  # https://github.com/corteva/rioxarray/issues/254
+        self._nodata: Optional[float] = None
+        self._manager: Optional[
+            FileManager
+        ] = None  # https://github.com/corteva/rioxarray/issues/254
 
-    def set_nodata(self, input_nodata, inplace=True):
+    def set_nodata(
+        self, input_nodata: Optional[float], inplace: bool = True
+    ) -> xarray.DataArray:
         """
         Set the nodata value for the DataArray without modifying
         the data array.
 
         Parameters
         ----------
-        input_nodata: object
+        input_nodata: Optional[float]
             Valid nodata for dtype.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
@@ -223,17 +263,19 @@ class RasterArray(XRasterBase):
         :obj:`xarray.DataArray`:
             Dataset with nodata attribute set.
         """
-        obj = self._get_obj(inplace=inplace)
+        obj: xarray.DataArray = self._get_obj(inplace=inplace)  # type: ignore
         obj.rio._nodata = input_nodata
         return obj
 
-    def write_nodata(self, input_nodata, encoded=False, inplace=False):
+    def write_nodata(
+        self, input_nodata: Optional[float], encoded: bool = False, inplace=False
+    ) -> xarray.DataArray:
         """
         Write the nodata to the DataArray in a CF compliant manner.
 
         Parameters
         ----------
-        input_nodata: object
+        input_nodata: Optional[float]
             Nodata value for the DataArray.
             If input_nodata is None, it will remove the _FillValue attribute.
         encoded: bool, optional
@@ -265,7 +307,7 @@ class RasterArray(XRasterBase):
         >>> raster.rio.write_nodata(nodata, encoded=True, inplace=True)
 
         """
-        data_obj = self._get_obj(inplace=inplace)
+        data_obj: xarray.DataArray = self._get_obj(inplace=inplace)  # type: ignore
         input_nodata = False if input_nodata is None else input_nodata
         if input_nodata is not False:
             input_nodata = _ensure_nodata_dtype(input_nodata, self._obj.dtype)
@@ -288,7 +330,7 @@ class RasterArray(XRasterBase):
         return data_obj
 
     @property
-    def encoded_nodata(self):
+    def encoded_nodata(self) -> Optional[float]:
         """Return the encoded nodata value for the dataset if encoded."""
         encoded_nodata = self._obj.encoding.get("_FillValue")
         if encoded_nodata is None:
@@ -296,7 +338,7 @@ class RasterArray(XRasterBase):
         return _ensure_nodata_dtype(encoded_nodata, self._obj.dtype)
 
     @property
-    def nodata(self):
+    def nodata(self) -> Optional[float]:
         """Get the nodata value for the dataset."""
         if self._nodata is not None:
             return None if self._nodata is False else self._nodata
@@ -315,7 +357,7 @@ class RasterArray(XRasterBase):
         # look in places used by `xarray.open_rasterio`
         if self._nodata is None:
             try:
-                self._nodata = self._manager.acquire().nodata
+                self._nodata = self._manager.acquire().nodata  # type: ignore
             except AttributeError:
                 try:
                     self._nodata = self._obj.attrs["nodatavals"][0]
@@ -331,14 +373,14 @@ class RasterArray(XRasterBase):
 
     def reproject(
         self,
-        dst_crs,
-        resolution=None,
-        shape=None,
-        transform=None,
-        resampling=Resampling.nearest,
-        nodata=None,
+        dst_crs: Any,
+        resolution: Optional[Union[float, Tuple[float, float]]] = None,
+        shape: Optional[Tuple[int, int]] = None,
+        transform: Optional[Affine] = None,
+        resampling: Resampling = Resampling.nearest,
+        nodata: Optional[float] = None,
         **kwargs,
-    ):
+    ) -> xarray.DataArray:
         """
         Reproject :obj:`xarray.DataArray` objects
 
@@ -427,7 +469,7 @@ class RasterArray(XRasterBase):
         # add necessary attributes
         new_attrs = _generate_attrs(self._obj, dst_nodata)
         # make sure dimensions with coordinates renamed to x,y
-        dst_dims = []
+        dst_dims: List[Hashable] = []
         for dim in self._obj.dims:
             if dim == self.x_dim:
                 dst_dims.append("x")
@@ -448,7 +490,7 @@ class RasterArray(XRasterBase):
         xda.rio.write_coordinate_system(inplace=True)
         return xda
 
-    def _get_dst_nodata(self, nodata):
+    def _get_dst_nodata(self, nodata: Optional[float]) -> Optional[float]:
         default_nodata = (
             _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
             if self.nodata is None
@@ -457,7 +499,7 @@ class RasterArray(XRasterBase):
         dst_nodata = default_nodata if nodata is None else nodata
         return dst_nodata
 
-    def _create_dst_data(self, dst_height, dst_width):
+    def _create_dst_data(self, dst_height: int, dst_width: int) -> np.ndarray:
         extra_dim = self._check_dimensions()
         if extra_dim:
             dst_data = np.zeros(
@@ -469,8 +511,11 @@ class RasterArray(XRasterBase):
         return dst_data
 
     def reproject_match(
-        self, match_data_array, resampling=Resampling.nearest, **reproject_kwargs
-    ):
+        self,
+        match_data_array: Union[xarray.DataArray, xarray.Dataset],
+        resampling: Resampling = Resampling.nearest,
+        **reproject_kwargs,
+    ) -> xarray.DataArray:
         """
         Reproject a DataArray object to match the resolution, projection,
         and region of another DataArray.
@@ -527,7 +572,16 @@ class RasterArray(XRasterBase):
         reprojected_data_array[reprojected_data_array.rio.y_dim].attrs = y_attrs
         return reprojected_data_array
 
-    def pad_xy(self, minx, miny, maxx, maxy, constant_values):
+    def pad_xy(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+        constant_values: Union[
+            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+        ] = None,
+    ) -> xarray.DataArray:
         """Pad the array to x,y bounds.
 
         .. versionadded:: 0.0.29
@@ -542,7 +596,7 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
-        constant_values: scalar
+        constant_values: scalar, tuple or mapping of hashable to tuple
             The value used for padding. If None, nodata will be used if it is
             set, and np.nan otherwise.
 
@@ -557,11 +611,11 @@ class RasterArray(XRasterBase):
         resolution_x, resolution_y = self.resolution()
         y_before = y_after = 0
         x_before = x_after = 0
-        y_coord = self._obj[self.y_dim]
-        x_coord = self._obj[self.x_dim]
+        y_coord: Union[xarray.DataArray, np.ndarray] = self._obj[self.y_dim]
+        x_coord: Union[xarray.DataArray, np.ndarray] = self._obj[self.x_dim]
 
         if top - resolution_y < maxy:
-            new_y_coord = np.arange(bottom, maxy, -resolution_y)[::-1]
+            new_y_coord: np.ndarray = np.arange(bottom, maxy, -resolution_y)[::-1]
             y_before = len(new_y_coord) - len(y_coord)
             y_coord = new_y_coord
             top = y_coord[0]
@@ -572,7 +626,7 @@ class RasterArray(XRasterBase):
             bottom = y_coord[-1]
 
         if left - resolution_x > minx:
-            new_x_coord = np.arange(right, minx, -resolution_x)[::-1]
+            new_x_coord: np.ndarray = np.arange(right, minx, -resolution_x)[::-1]
             x_before = len(new_x_coord) - len(x_coord)
             x_coord = new_x_coord
             left = x_coord[0]
@@ -590,14 +644,23 @@ class RasterArray(XRasterBase):
                 self.x_dim: (x_before, x_after),
                 self.y_dim: (y_before, y_after),
             },
-            constant_values=constant_values,
+            constant_values=constant_values,  # type: ignore
         ).rio.set_spatial_dims(x_dim=self.x_dim, y_dim=self.y_dim, inplace=True)
         superset[self.x_dim] = x_coord
         superset[self.y_dim] = y_coord
         superset.rio.write_transform(inplace=True)
         return superset
 
-    def pad_box(self, minx, miny, maxx, maxy, constant_values=None):
+    def pad_box(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+        constant_values: Union[
+            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+        ] = None,
+    ) -> xarray.DataArray:
         """Pad the :obj:`xarray.DataArray` to a bounding box
 
         .. versionadded:: 0.0.29
@@ -612,7 +675,7 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
-        constant_values: scalar
+        constant_values: scalar, tuple or mapping of hashable to tuple
             The value used for padding. If None, nodata will be used if it is
             set, and np.nan otherwise.
 
@@ -636,7 +699,15 @@ class RasterArray(XRasterBase):
 
         return pd_array
 
-    def clip_box(self, minx, miny, maxx, maxy, auto_expand=False, auto_expand_limit=3):
+    def clip_box(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+        auto_expand: Union[bool, int] = False,
+        auto_expand_limit: int = 3,
+    ) -> xarray.DataArray:
         """Clip the :obj:`xarray.DataArray` by a bounding box.
 
         Parameters
@@ -649,7 +720,7 @@ class RasterArray(XRasterBase):
             Maximum bound for x coordinate.
         maxy: float
             Maximum bound for y coordinate.
-        auto_expand: bool
+        auto_expand: Union[bool, int]
             If True, it will expand clip search if only 1D raster found with clip.
         auto_expand_limit: int
             maximum number of times the clip will be retried before raising
@@ -694,7 +765,7 @@ class RasterArray(XRasterBase):
                 width=self.width,
                 height=self.height,
             )
-            cl_array = self.isel_window(window)
+            cl_array: xarray.DataArray = self.isel_window(window)  # type: ignore
         except rasterio.errors.WindowError as err:
             window_error = err
 
@@ -728,13 +799,13 @@ class RasterArray(XRasterBase):
 
     def clip(
         self,
-        geometries,
-        crs=None,
-        all_touched=False,
-        drop=True,
-        invert=False,
-        from_disk=False,
-    ):
+        geometries: Iterable,
+        crs: Any = None,
+        all_touched: bool = False,
+        drop: bool = True,
+        invert: bool = False,
+        from_disk: bool = False,
+    ) -> xarray.DataArray:
         """
         Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.
 
@@ -758,7 +829,7 @@ class RasterArray(XRasterBase):
 
         Parameters
         ----------
-        geometries: list
+        geometries: Iterable
             A list of geojson geometry dicts or objects with __geom_interface__ with
             if you have rasterio 1.2+.
         crs: :obj:`rasterio.crs.CRS`, optional
@@ -831,13 +902,17 @@ class RasterArray(XRasterBase):
 
         return cropped_ds
 
-    def _interpolate_na(self, src_data, method="nearest"):
+    def _interpolate_na(
+        self, src_data: Any, method: Literal["linear", "nearest", "cubic"] = "nearest"
+    ) -> np.ndarray:
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
 
         Parameters
         ----------
-        method: {‘linear’, ‘nearest’, ‘cubic’}, optional
+        src_data: Any
+            Input data array.
+        method: {'linear', 'nearest', 'cubic'}, optional
             The method to use for interpolation in `scipy.interpolate.griddata`.
 
         Returns
@@ -856,7 +931,7 @@ class RasterArray(XRasterBase):
 
         src_data_flat = src_data.flatten()
         try:
-            data_isnan = np.isnan(self.nodata)
+            data_isnan = np.isnan(self.nodata)  # type: ignore
         except TypeError:
             data_isnan = False
         if not data_isnan:
@@ -879,7 +954,9 @@ class RasterArray(XRasterBase):
             fill_value=self.nodata,
         )
 
-    def interpolate_na(self, method="nearest"):
+    def interpolate_na(
+        self, method: Literal["linear", "nearest", "cubic"] = "nearest"
+    ) -> xarray.DataArray:
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
 
@@ -887,7 +964,7 @@ class RasterArray(XRasterBase):
 
         Parameters
         ----------
-        method: {‘linear’, ‘nearest’, ‘cubic’}, optional
+        method: {'linear', 'nearest', 'cubic'}, optional
             The method to use for interpolation in `scipy.interpolate.griddata`.
 
         Returns
@@ -908,9 +985,9 @@ class RasterArray(XRasterBase):
                 interp_data.append(
                     self._interpolate_na(sub_xds.load().data, method=method)
                 )
-            interp_data = np.array(interp_data)
+            interp_data = np.array(interp_data)  # type: ignore
         else:
-            interp_data = self._interpolate_na(self._obj.load().data, method=method)
+            interp_data = self._interpolate_na(self._obj.load().data, method=method)  # type: ignore
 
         interp_array = xarray.DataArray(
             name=self._obj.name,
@@ -928,16 +1005,16 @@ class RasterArray(XRasterBase):
 
     def to_raster(
         self,
-        raster_path,
-        driver=None,
-        dtype=None,
-        tags=None,
-        windowed=False,
-        recalc_transform=True,
-        lock=None,
-        compute=True,
+        raster_path: Union[str, os.PathLike],
+        driver: str = None,
+        dtype: Union[str, np.dtype] = None,
+        tags: Dict[str, str] = None,
+        windowed: bool = False,
+        recalc_transform: bool = True,
+        lock: Optional[bool] = None,
+        compute: bool = True,
         **profile_kwargs,
-    ):
+    ) -> None:
         """
         Export the DataArray to a raster file.
 
@@ -945,7 +1022,7 @@ class RasterArray(XRasterBase):
 
         Parameters
         ----------
-        raster_path: str
+        raster_path: Union[str, os.PathLike]
             The path to output the raster to.
         driver: str, optional
             The name of the GDAL/rasterio driver to use to export the raster.
@@ -988,7 +1065,7 @@ class RasterArray(XRasterBase):
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()
         try:
-            out_profile = self._manager.acquire().profile
+            out_profile = self._manager.acquire().profile  # type: ignore
         except AttributeError:
             out_profile = {}
         out_profile.update(profile_kwargs)

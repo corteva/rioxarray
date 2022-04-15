@@ -2,6 +2,8 @@
 """
 This module contains helper methods for rasterio.crs.CRS.
 """
+from typing import Any
+
 import rasterio
 import rasterio.crs
 from packaging import version
@@ -9,7 +11,7 @@ from pyproj import CRS
 from rasterio.errors import CRSError
 
 
-def crs_from_user_input(crs_input):
+def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
     """
     Return a rasterio.crs.CRS from user input.
 

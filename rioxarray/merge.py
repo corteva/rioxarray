@@ -3,7 +3,7 @@ This module allows you to merge xarray Datasets/DataArrays
 geospatially with the `rasterio.merge` module.
 """
 
-from typing import Callable, Iterable, Optional, Tuple, Union
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 import numpy
 from rasterio.crs import CRS
@@ -56,7 +56,7 @@ class RasterioDatasetDuck:
         except AttributeError:
             return None
 
-    def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.array:
+    def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.MaskedArray:
         # pylint: disable=unused-argument
         """
         This method is meant to be used by the rasterio.merge.merge function.
@@ -97,7 +97,7 @@ class RasterioDatasetDuck:
 
 
 def merge_arrays(
-    dataarrays: Iterable[DataArray],
+    dataarrays: Sequence[DataArray],
     bounds: Optional[Tuple] = None,
     res: Optional[Tuple] = None,
     nodata: Optional[float] = None,
@@ -204,14 +204,14 @@ def merge_arrays(
 
 
 def merge_datasets(
-    datasets: Iterable[Dataset],
+    datasets: Sequence[Dataset],
     bounds: Optional[Tuple] = None,
     res: Optional[Tuple] = None,
     nodata: Optional[float] = None,
     precision: Optional[float] = None,
     method: Union[str, Callable, None] = None,
     crs: Optional[CRS] = None,
-) -> DataArray:
+) -> Dataset:
     """
     Merge datasets geospatially.
 

@@ -5,6 +5,7 @@ to xarray datasets/dataarrays.
 # pylint: disable=too-many-lines
 import math
 import warnings
+from typing import Any, Dict, Hashable, Iterable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
@@ -32,7 +33,7 @@ from rioxarray.exceptions import (
 DEFAULT_GRID_MAP = "spatial_ref"
 
 
-def _affine_has_rotation(affine) -> bool:
+def _affine_has_rotation(affine: Affine) -> bool:
     """
     Determine if the affine has rotation.
 
@@ -48,7 +49,7 @@ def _affine_has_rotation(affine) -> bool:
     return affine.b == affine.d != 0
 
 
-def _resolution(affine):
+def _resolution(affine: Affine) -> Tuple[float, float]:
     """
     Determine if the resolution of the affine.
     If it has rotation, the sign of the resolution is lost.
@@ -60,8 +61,13 @@ def _resolution(affine):
     affine: :obj:`affine.Affine`
         The affine of the grid.
 
-    x_resolution, y_resolution: float
-        The resolution of the affine.
+
+    Returns
+    --------
+    x_resolution: float
+        The X resolution of the affine.
+    y_resolution: float
+        The Y resolution of the affine.
     """
     if not _affine_has_rotation(affine):
         return affine.a, affine.e
@@ -71,7 +77,9 @@ def _resolution(affine):
     )
 
 
-def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
+def affine_to_coords(
+    affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y"
+) -> Dict[str, np.ndarray]:
     """Generate 1d pixel centered coordinates from affine.
 
     Based on code from the xarray rasterio backend.
@@ -106,7 +114,7 @@ def affine_to_coords(affine, width, height, x_dim="x", y_dim="y"):
     return {y_dim: y_coords, x_dim: x_coords}
 
 
-def _generate_spatial_coords(affine, width, height):
+def _generate_spatial_coords(affine: Affine, width: int, height: int) -> Dict[str, Any]:
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
     if new_spatial_coords["x"].ndim == 1:
@@ -120,8 +128,10 @@ def _generate_spatial_coords(affine, width, height):
     }
 
 
-def _get_nonspatial_coords(src_data_array):
-    coords = {}
+def _get_nonspatial_coords(
+    src_data_array: Union[xarray.DataArray, xarray.Dataset]
+) -> Dict[str, Union[xarray.Variable, xarray.IndexVariable]]:
+    coords: Dict[str, Union[xarray.Variable, xarray.IndexVariable]] = {}
     for coord in set(src_data_array.coords) - {
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
@@ -143,7 +153,11 @@ def _get_nonspatial_coords(src_data_array):
 
 
 def _make_coords(
-    src_data_array, dst_affine, dst_width, dst_height, force_generate=False
+    src_data_array: Union[xarray.DataArray, xarray.Dataset],
+    dst_affine: Affine,
+    dst_width: int,
+    dst_height: int,
+    force_generate: bool = False,
 ):
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
@@ -157,7 +171,7 @@ def _make_coords(
     return coords
 
 
-def _get_data_var_message(obj):
+def _get_data_var_message(obj: Union[xarray.DataArray, xarray.Dataset]) -> str:
     """
     Get message for named data variables.
     """
@@ -167,7 +181,9 @@ def _get_data_var_message(obj):
         return ""
 
 
-def _get_spatial_dims(obj: xarray.Dataset, var: str):
+def _get_spatial_dims(
+    obj: Union[xarray.Dataset, xarray.DataArray], var: Union[Any, Hashable]
+) -> Tuple[str, str]:
     """
     Retrieve the spatial dimensions of the dataset
     """
@@ -183,7 +199,9 @@ def _get_spatial_dims(obj: xarray.Dataset, var: str):
             raise err from None
 
 
-def _has_spatial_dims(obj: xarray.Dataset, var: str):
+def _has_spatial_dims(
+    obj: Union[xarray.Dataset, xarray.DataArray], var: Union[Any, Hashable]
+) -> bool:
     """
     Check to see if the variable in the Dataset has spatial dimensions
     """
@@ -198,11 +216,11 @@ def _has_spatial_dims(obj: xarray.Dataset, var: str):
 class XRasterBase:
     """This is the base class for the GIS extensions for xarray"""
 
-    def __init__(self, xarray_obj):
-        self._obj = xarray_obj
+    def __init__(self, xarray_obj: Union[xarray.DataArray, xarray.Dataset]):
+        self._obj: Union[xarray.DataArray, xarray.Dataset] = xarray_obj
 
-        self._x_dim = None
-        self._y_dim = None
+        self._x_dim: Optional[Hashable] = None
+        self._y_dim: Optional[Hashable] = None
         # Determine the spatial dimensions of the `xarray.DataArray`
         if "x" in self._obj.dims and "y" in self._obj.dims:
             self._x_dim = "x"
@@ -229,13 +247,13 @@ class XRasterBase:
                     self._y_dim = coord
 
         # properties
-        self._count = None
-        self._height = None
-        self._width = None
-        self._crs = None
+        self._count: Optional[int] = None
+        self._height: Optional[int] = None
+        self._width: Optional[int] = None
+        self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
 
     @property
-    def crs(self):
+    def crs(self) -> Optional[rasterio.crs.CRS]:
         """:obj:`rasterio.crs.CRS`:
         Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
@@ -269,7 +287,7 @@ class XRasterBase:
                 return None
         return self._crs
 
-    def _get_obj(self, inplace):
+    def _get_obj(self, inplace: bool) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Get the object to modify.
 
@@ -293,7 +311,9 @@ class XRasterBase:
         obj_copy.rio._crs = self._crs
         return obj_copy
 
-    def set_crs(self, input_crs, inplace=True):
+    def set_crs(
+        self, input_crs: Any, inplace: bool = True
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Set the CRS value for the Dataset/DataArray without modifying
         the dataset/data array.
@@ -316,7 +336,7 @@ class XRasterBase:
         return obj
 
     @property
-    def grid_mapping(self):
+    def grid_mapping(self) -> str:
         """
         str: The CF grid_mapping attribute. 'spatial_ref' is the default.
         """
@@ -342,7 +362,9 @@ class XRasterBase:
                 raise RioXarrayError("Multiple grid mappings exist.")
         return grid_mapping
 
-    def write_grid_mapping(self, grid_mapping_name=DEFAULT_GRID_MAP, inplace=False):
+    def write_grid_mapping(
+        self, grid_mapping_name: str = DEFAULT_GRID_MAP, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write the CF grid_mapping attribute.
 
@@ -382,13 +404,18 @@ class XRasterBase:
             dict(grid_mapping=grid_mapping_name), inplace=True
         ).rio.update_attrs(new_attrs, inplace=True)
 
-    def write_crs(self, input_crs=None, grid_mapping_name=None, inplace=False):
+    def write_crs(
+        self,
+        input_crs: Any = None,
+        grid_mapping_name: str = None,
+        inplace: bool = False,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write the CRS to the dataset in a CF compliant manner.
 
         Parameters
         ----------
-        input_crs: object
+        input_crs: Any
             Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the CRS information in.
@@ -454,7 +481,7 @@ class XRasterBase:
             grid_mapping_name=grid_mapping_name, inplace=True
         )
 
-    def estimate_utm_crs(self, datum_name="WGS 84"):
+    def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
 
         .. versionadded:: 0.2
@@ -473,7 +500,7 @@ class XRasterBase:
         # pylint: disable=import-outside-toplevel
         try:
             from pyproj.aoi import AreaOfInterest
-            from pyproj.database import query_utm_crs_info
+            from pyproj.database import query_utm_crs_info  # type: ignore
         except ImportError:
             raise RuntimeError("pyproj 3+ required for estimate_utm_crs.") from None
 
@@ -503,7 +530,7 @@ class XRasterBase:
         except IndexError:
             raise RuntimeError("Unable to determine UTM CRS") from None
 
-    def _cached_transform(self):
+    def _cached_transform(self) -> Optional[Affine]:
         """
         Get the transform from:
         1. The GeoTransform metatada property in the grid mapping
@@ -524,7 +551,12 @@ class XRasterBase:
                 pass
         return None
 
-    def write_transform(self, transform=None, grid_mapping_name=None, inplace=False):
+    def write_transform(
+        self,
+        transform: Optional[Affine] = None,
+        grid_mapping_name: Optional[str] = None,
+        inplace: bool = False,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         .. versionadded:: 0.0.30
 
@@ -567,7 +599,7 @@ class XRasterBase:
             grid_mapping_name=grid_mapping_name, inplace=True
         )
 
-    def transform(self, recalc=False):
+    def transform(self, recalc: bool = False) -> Affine:
         """
         Parameters
         ----------
@@ -600,7 +632,9 @@ class XRasterBase:
             src_resolution_x, src_resolution_y
         )
 
-    def write_coordinate_system(self, inplace=False):
+    def write_coordinate_system(
+        self, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write the coordinate system CF metadata.
 
@@ -655,7 +689,9 @@ class XRasterBase:
         data_obj.coords[self.x_dim].attrs = x_coord_attrs
         return data_obj
 
-    def set_attrs(self, new_attrs, inplace=False):
+    def set_attrs(
+        self, new_attrs: Dict, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Set the attributes of the dataset/dataarray and reset
         rioxarray properties to re-search for them.
@@ -681,7 +717,9 @@ class XRasterBase:
         data_obj.rio._crs = None
         return data_obj
 
-    def update_attrs(self, new_attrs, inplace=False):
+    def update_attrs(
+        self, new_attrs: Dict, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Update the attributes of the dataset/dataarray and reset
         rioxarray properties to re-search for them.
@@ -702,7 +740,9 @@ class XRasterBase:
         data_attrs.update(**new_attrs)
         return self.set_attrs(data_attrs, inplace=inplace)
 
-    def set_encoding(self, new_encoding, inplace=False):
+    def set_encoding(
+        self, new_encoding: Dict, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Set the encoding of the dataset/dataarray and reset
         rioxarray properties to re-search for them.
@@ -730,7 +770,9 @@ class XRasterBase:
         data_obj.rio._crs = None
         return data_obj
 
-    def update_encoding(self, new_encoding, inplace=False):
+    def update_encoding(
+        self, new_encoding: Dict, inplace: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Update the encoding of the dataset/dataarray and reset
         rioxarray properties to re-search for them.
@@ -753,7 +795,9 @@ class XRasterBase:
         data_encoding.update(**new_encoding)
         return self.set_encoding(data_encoding, inplace=inplace)
 
-    def set_spatial_dims(self, x_dim, y_dim, inplace=True):
+    def set_spatial_dims(
+        self, x_dim: str, y_dim: str, inplace: bool = True
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         This sets the spatial dimensions of the dataset.
 
@@ -789,8 +833,8 @@ class XRasterBase:
         return data_obj
 
     @property
-    def x_dim(self):
-        """str: The dimension for the X-axis."""
+    def x_dim(self) -> Hashable:
+        """Hashable: The dimension for the X-axis."""
         if self._x_dim is not None:
             return self._x_dim
         raise MissingSpatialDimensionError(
@@ -800,8 +844,8 @@ class XRasterBase:
         )
 
     @property
-    def y_dim(self):
-        """str: The dimension for the Y-axis."""
+    def y_dim(self) -> Hashable:
+        """Hashable: The dimension for the Y-axis."""
         if self._y_dim is not None:
             return self._y_dim
         raise MissingSpatialDimensionError(
@@ -811,7 +855,7 @@ class XRasterBase:
         )
 
     @property
-    def width(self):
+    def width(self) -> int:
         """int: Returns the width of the dataset (x dimension size)"""
         if self._width is not None:
             return self._width
@@ -819,7 +863,7 @@ class XRasterBase:
         return self._width
 
     @property
-    def height(self):
+    def height(self) -> int:
         """int: Returns the height of the dataset (y dimension size)"""
         if self._height is not None:
             return self._height
@@ -827,11 +871,11 @@ class XRasterBase:
         return self._height
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, int]:
         """tuple(int, int): Returns the shape (height, width)"""
         return (self.height, self.width)
 
-    def _check_dimensions(self):
+    def _check_dimensions(self) -> Optional[str]:
         """
         This function validates that the dimensions 2D/3D and
         they are are in the proper order.
@@ -840,14 +884,14 @@ class XRasterBase:
         -------
         str or None: Name extra dimension.
         """
-        extra_dims = list(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
+        extra_dims = tuple(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
         if len(extra_dims) > 1:
             raise TooManyDimensions(
                 "Only 2D and 3D data arrays supported."
                 f"{_get_data_var_message(self._obj)}"
             )
         if extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
-            dim_info = (extra_dims[0], self.y_dim, self.x_dim)
+            dim_info: Tuple = (extra_dims[0], self.y_dim, self.x_dim)
             raise InvalidDimensionOrder(
                 f"Invalid dimension order. Expected order: {dim_info}. "
                 f"You can use `DataArray.transpose{dim_info}`"
@@ -862,10 +906,10 @@ class XRasterBase:
                 " to reorder your dimensions."
                 f"{_get_data_var_message(self._obj)}"
             )
-        return extra_dims[0] if extra_dims else None
+        return str(extra_dims[0]) if extra_dims else None
 
     @property
-    def count(self):
+    def count(self) -> int:
         """int: Returns the band count (z dimension size)"""
         if self._count is not None:
             return self._count
@@ -875,7 +919,7 @@ class XRasterBase:
             self._count = self._obj[extra_dim].size
         return self._count
 
-    def _internal_bounds(self):
+    def _internal_bounds(self) -> Tuple[float, float, float, float]:
         """Determine the internal bounds of the `xarray.DataArray`"""
         if self.x_dim not in self._obj.coords:
             raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
@@ -893,7 +937,7 @@ class XRasterBase:
             ) from None
         return left, bottom, right, top
 
-    def resolution(self, recalc=False):
+    def resolution(self, recalc: bool = False) -> Tuple[float, float]:
         """
         Determine if the resolution of the grid.
         If the transformation has rotation, the sign of the resolution is lost.
@@ -935,7 +979,7 @@ class XRasterBase:
         resolution_y = (bottom - top) / (self.height - 1)
         return resolution_x, resolution_y
 
-    def bounds(self, recalc=False):
+    def bounds(self, recalc: bool = False) -> Tuple[float, float, float, float]:
         """
         Parameters
         ----------
@@ -957,8 +1001,10 @@ class XRasterBase:
             right += resolution_x / 2.0
             top -= resolution_y / 2.0
             bottom += resolution_y / 2.0
-        except DimensionMissingCoordinateError:
+        except DimensionMissingCoordinateError as error:
             transform = self._cached_transform()
+            if not transform:
+                raise RioXarrayError("Transform not able to be determined.") from error
             left = transform.c
             top = transform.f
             right = left + resolution_x * self.width
@@ -966,9 +1012,11 @@ class XRasterBase:
 
         return left, bottom, right, top
 
-    def isel_window(self, window, pad=False):
+    def isel_window(
+        self, window: rasterio.windows.Window, pad: bool = False
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Use a rasterio.window.Window to select a subset of the data.
+        Use a rasterio.windows.Window to select a subset of the data.
 
         .. versionadded:: 0.6.0 pad
 
@@ -976,7 +1024,7 @@ class XRasterBase:
 
         Parameters
         ----------
-        window: :class:`rasterio.window.Window`
+        window: :class:`rasterio.windows.Window`
             The window of the dataset to read.
         pad: bool, default=False
             Set to True to expand returned DataArray to dimensions of the window
@@ -1016,7 +1064,13 @@ class XRasterBase:
             )
         return array_subset
 
-    def slice_xy(self, minx, miny, maxx, maxy):
+    def slice_xy(
+        self,
+        minx: float,
+        miny: float,
+        maxx: float,
+        maxy: float,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Slice the array by x,y bounds.
 
         Parameters
@@ -1055,7 +1109,9 @@ class XRasterBase:
         )
         return subset
 
-    def transform_bounds(self, dst_crs, densify_pts=21, recalc=False):
+    def transform_bounds(
+        self, dst_crs: Any, densify_pts: int = 21, recalc: bool = False
+    ) -> Tuple[float, float, float, float]:
         """Transform bounds from src_crs to dst_crs.
 
         Optionally densifying the edges (to account for nonlinear transformations
@@ -1084,7 +1140,13 @@ class XRasterBase:
             self.crs, dst_crs, *self.bounds(recalc=recalc), densify_pts=densify_pts
         )
 
-    def write_gcps(self, gcps, gcp_crs, grid_mapping_name=None, inplace=False):
+    def write_gcps(
+        self,
+        gcps: Iterable[GroundControlPoint],
+        gcp_crs: Any,
+        grid_mapping_name: str = None,
+        inplace: bool = False,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write the GroundControlPoints to the dataset.
 
@@ -1092,7 +1154,7 @@ class XRasterBase:
 
         Parameters
         ----------
-        gcp: list of :obj:`rasterio.control.GroundControlPoints`
+        gcp: list of :obj:`rasterio.control.GroundControlPoint`
             The Ground Control Points to integrate to the dataset.
         gcp_crs: str, :obj:`rasterio.crs.CRS`, or dict
             Coordinate reference system for the GCPs.
@@ -1119,7 +1181,7 @@ class XRasterBase:
         data_obj.coords[grid_mapping_name].attrs["gcps"] = geojson_gcps
         return data_obj
 
-    def get_gcps(self):
+    def get_gcps(self) -> Optional[List[GroundControlPoint]]:
         """
         Get the GroundControlPoints from the dataset.
 
@@ -1127,7 +1189,7 @@ class XRasterBase:
 
         Returns
         -------
-        list of :obj:`rasterio.control.GroundControlPoints` or None
+        list of :obj:`rasterio.control.GroundControlPoint` or None
             The Ground Control Points from the dataset or None if not applicable
         """
         try:
@@ -1150,7 +1212,9 @@ class XRasterBase:
         return gcps
 
 
-def _convert_gcps_to_geojson(gcps):
+def _convert_gcps_to_geojson(
+    gcps: Iterable[GroundControlPoint],
+) -> Dict:
     """
     Convert GCPs to geojson.
 

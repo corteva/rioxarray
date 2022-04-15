@@ -8,9 +8,10 @@ which was adapted from :func:`pandas.show_versions`
 import importlib
 import platform
 import sys
+from typing import Dict
 
 
-def _get_sys_info():
+def _get_sys_info() -> Dict[str, str]:
     """System information
     Return
     ------
@@ -26,7 +27,7 @@ def _get_sys_info():
     return dict(blob)
 
 
-def _get_main_info():
+def _get_main_info() -> Dict[str, str]:
     """Get the main dependency information to hightlight.
 
     Returns
@@ -46,7 +47,7 @@ def _get_main_info():
     return dict(blob)
 
 
-def _get_deps_info():
+def _get_deps_info() -> Dict[str, str]:
     """Overview of the installed version of dependencies
     Returns
     -------
@@ -77,13 +78,13 @@ def _get_deps_info():
     return deps_info
 
 
-def _print_info_dict(info_dict):
+def _print_info_dict(info_dict: Dict[str, str]) -> None:
     """Print the information dictionary"""
     for key, stat in info_dict.items():
         print(f"{key:>10}: {stat}")
 
 
-def show_versions():
+def show_versions() -> None:
     """
     .. versionadded:: 0.0.26
 
