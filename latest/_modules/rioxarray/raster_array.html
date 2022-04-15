@@ -87,17 +87,31 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Hashable</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">Mapping</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
 <span class="kn">import</span> <span class="nn">rasterio.mask</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 <span class="kn">from</span> <span class="nn">rasterio.dtypes</span> <span class="kn">import</span> <span class="n">dtype_rev</span>
 <span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
 <span class="kn">from</span> <span class="nn">rasterio.features</span> <span class="kn">import</span> <span class="n">geometry_mask</span>
+<span class="kn">from</span> <span class="nn">xarray.backends.file_manager</span> <span class="kn">import</span> <span class="n">FileManager</span>
 <span class="kn">from</span> <span class="nn">xarray.core.dtypes</span> <span class="kn">import</span> <span class="n">get_fill_value</span>
 
 <span class="kn">from</span> <span class="nn">rioxarray.crs</span> <span class="kn">import</span> <span class="n">crs_from_user_input</span>
@@ -134,7 +148,9 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_generate_attrs</span><span class="p">(</span>
+    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="c1"># add original attributes</span>
     <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
     <span class="c1"># remove all nodata information</span>
@@ -153,7 +169,9 @@
     <span class="k">return</span> <span class="n">new_attrs</span>
 
 
-<span class="k">def</span> <span class="nf">_add_attrs_proj</span><span class="p">(</span><span class="n">new_data_array</span><span class="p">,</span> <span class="n">src_data_array</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_add_attrs_proj</span><span class="p">(</span>
+    <span class="n">new_data_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">src_data_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Make sure attributes and projection correct&quot;&quot;&quot;</span>
     <span class="c1"># make sure dimension information is preserved</span>
     <span class="k">if</span> <span class="n">new_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_x_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -182,7 +200,12 @@
 
 
 <span class="k">def</span> <span class="nf">_make_dst_affine</span><span class="p">(</span>
-    <span class="n">src_data_array</span><span class="p">,</span> <span class="n">src_crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dst_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">src_crs</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span>
+    <span class="n">dst_crs</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span>
+    <span class="n">dst_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dst_shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Determine the affine of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
     <span class="n">src_bounds</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
@@ -190,9 +213,9 @@
     <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">dst_shape</span> <span class="k">if</span> <span class="n">dst_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="c1"># pylint: disable=isinstance-second-argument-not-valid-type</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_resolution</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-        <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">res_val</span> <span class="ow">in</span> <span class="n">dst_resolution</span><span class="p">)</span>
+        <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">res_val</span> <span class="ow">in</span> <span class="n">dst_resolution</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">dst_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dst_resolution</span><span class="p">)</span>
+        <span class="n">dst_resolution</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dst_resolution</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;resolution&quot;</span><span class="p">,</span> <span class="n">dst_resolution</span><span class="p">),</span>
@@ -212,7 +235,13 @@
     <span class="k">return</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span>
 
 
-<span class="k">def</span> <span class="nf">_clip_from_disk</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_clip_from_disk</span><span class="p">(</span>
+    <span class="n">xds</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">geometries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">drop</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    clip from disk if the file object is available</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -242,7 +271,13 @@
         <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">_clip_xarray</span><span class="p">(</span><span class="n">xds</span><span class="p">,</span> <span class="n">geometries</span><span class="p">,</span> <span class="n">all_touched</span><span class="p">,</span> <span class="n">drop</span><span class="p">,</span> <span class="n">invert</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_clip_xarray</span><span class="p">(</span>
+    <span class="n">xds</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">geometries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">drop</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    clip the xarray DataArray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -277,20 +312,25 @@
 <span class="k">class</span> <span class="nc">RasterArray</span><span class="p">(</span><span class="n">XRasterBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is the GIS extension for :obj:`xarray.DataArray`&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span>
         <span class="c1"># properties</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># https://github.com/corteva/rioxarray/issues/254</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">FileManager</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># https://github.com/corteva/rioxarray/issues/254</span>
 
-<div class="viewcode-block" id="RasterArray.set_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.set_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.set_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.set_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the nodata value for the DataArray without modifying</span>
 <span class="sd">        the data array.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_nodata: object</span>
+<span class="sd">        input_nodata: Optional[float]</span>
 <span class="sd">            Valid nodata for dtype.</span>
 <span class="sd">        inplace: bool, optional</span>
 <span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
@@ -300,17 +340,19 @@
 <span class="sd">        :obj:`xarray.DataArray`:</span>
 <span class="sd">            Dataset with nodata attribute set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="n">obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="n">input_nodata</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
-<div class="viewcode-block" id="RasterArray.write_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">write_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">,</span> <span class="n">encoded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.write_nodata"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata">[docs]</a>    <span class="k">def</span> <span class="nf">write_nodata</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">encoded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the nodata to the DataArray in a CF compliant manner.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_nodata: object</span>
+<span class="sd">        input_nodata: Optional[float]</span>
 <span class="sd">            Nodata value for the DataArray.</span>
 <span class="sd">            If input_nodata is None, it will remove the _FillValue attribute.</span>
 <span class="sd">        encoded: bool, optional</span>
@@ -342,7 +384,7 @@
 <span class="sd">        &gt;&gt;&gt; raster.rio.write_nodata(nodata, encoded=True, inplace=True)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="n">data_obj</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="n">input_nodata</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">input_nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_nodata</span>
         <span class="k">if</span> <span class="n">input_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">input_nodata</span> <span class="o">=</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">input_nodata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
@@ -365,7 +407,7 @@
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">encoded_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">encoded_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return the encoded nodata value for the dataset if encoded.&quot;&quot;&quot;</span>
         <span class="n">encoded_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -373,7 +415,7 @@
         <span class="k">return</span> <span class="n">_ensure_nodata_dtype</span><span class="p">(</span><span class="n">encoded_nodata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the nodata value for the dataset.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span>
@@ -392,7 +434,7 @@
         <span class="c1"># look in places used by `xarray.open_rasterio`</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">nodata</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">nodata</span>  <span class="c1"># type: ignore</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;nodatavals&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -408,14 +450,14 @@
 
 <div class="viewcode-block" id="RasterArray.reproject"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dst_crs</span><span class="p">,</span>
-        <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
-        <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">resampling</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject :obj:`xarray.DataArray` objects</span>
 
@@ -504,7 +546,7 @@
         <span class="c1"># add necessary attributes</span>
         <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="p">)</span>
         <span class="c1"># make sure dimensions with coordinates renamed to x,y</span>
-        <span class="n">dst_dims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dst_dims</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span>
                 <span class="n">dst_dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
@@ -525,7 +567,7 @@
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">xda</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_dst_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodata</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_dst_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="n">default_nodata</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">_NODATA_DTYPE_MAP</span><span class="p">[</span><span class="n">dtype_rev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">]]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -534,7 +576,7 @@
         <span class="n">dst_nodata</span> <span class="o">=</span> <span class="n">default_nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
         <span class="k">return</span> <span class="n">dst_nodata</span>
 
-    <span class="k">def</span> <span class="nf">_create_dst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_dst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">extra_dim</span><span class="p">:</span>
             <span class="n">dst_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -546,8 +588,11 @@
         <span class="k">return</span> <span class="n">dst_data</span>
 
 <div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">match_data_array</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">reproject_kwargs</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">match_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
+        <span class="n">resampling</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">reproject_kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reproject a DataArray object to match the resolution, projection,</span>
 <span class="sd">        and region of another DataArray.</span>
@@ -604,7 +649,16 @@
         <span class="n">reprojected_data_array</span><span class="p">[</span><span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">y_attrs</span>
         <span class="k">return</span> <span class="n">reprojected_data_array</span></div>
 
-<div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.pad_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_xy">[docs]</a>    <span class="k">def</span> <span class="nf">pad_xy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">constant_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+            <span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Pad the array to x,y bounds.</span>
 
 <span class="sd">        .. versionadded:: 0.0.29</span>
@@ -619,7 +673,7 @@
 <span class="sd">            Maximum bound for x coordinate.</span>
 <span class="sd">        maxy: float</span>
 <span class="sd">            Maximum bound for y coordinate.</span>
-<span class="sd">        constant_values: scalar</span>
+<span class="sd">        constant_values: scalar, tuple or mapping of hashable to tuple</span>
 <span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
 <span class="sd">            set, and np.nan otherwise.</span>
 
@@ -634,11 +688,11 @@
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
         <span class="n">y_before</span> <span class="o">=</span> <span class="n">y_after</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">x_before</span> <span class="o">=</span> <span class="n">x_after</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">y_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
-        <span class="n">x_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
+        <span class="n">y_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
+        <span class="n">x_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">top</span> <span class="o">-</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="n">maxy</span><span class="p">:</span>
-            <span class="n">new_y_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_y</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_y_coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_y</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">y_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_y_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
             <span class="n">y_coord</span> <span class="o">=</span> <span class="n">new_y_coord</span>
             <span class="n">top</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -649,7 +703,7 @@
             <span class="n">bottom</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">left</span> <span class="o">-</span> <span class="n">resolution_x</span> <span class="o">&gt;</span> <span class="n">minx</span><span class="p">:</span>
-            <span class="n">new_x_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_x</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_x_coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_x</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">x_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
             <span class="n">x_coord</span> <span class="o">=</span> <span class="n">new_x_coord</span>
             <span class="n">left</span> <span class="o">=</span> <span class="n">x_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -667,14 +721,23 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">x_before</span><span class="p">,</span> <span class="n">x_after</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">y_before</span><span class="p">,</span> <span class="n">y_after</span><span class="p">),</span>
             <span class="p">},</span>
-            <span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">,</span>
+            <span class="n">constant_values</span><span class="o">=</span><span class="n">constant_values</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_coord</span>
         <span class="n">superset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_coord</span>
         <span class="n">superset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">superset</span></div>
 
-<div class="viewcode-block" id="RasterArray.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.pad_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.pad_box">[docs]</a>    <span class="k">def</span> <span class="nf">pad_box</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">constant_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+            <span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Pad the :obj:`xarray.DataArray` to a bounding box</span>
 
 <span class="sd">        .. versionadded:: 0.0.29</span>
@@ -689,7 +752,7 @@
 <span class="sd">            Maximum bound for x coordinate.</span>
 <span class="sd">        maxy: float</span>
 <span class="sd">            Maximum bound for y coordinate.</span>
-<span class="sd">        constant_values: scalar</span>
+<span class="sd">        constant_values: scalar, tuple or mapping of hashable to tuple</span>
 <span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
 <span class="sd">            set, and np.nan otherwise.</span>
 
@@ -713,7 +776,15 @@
 
         <span class="k">return</span> <span class="n">pd_array</span></div>
 
-<div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">auto_expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_expand_limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.clip_box"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.clip_box">[docs]</a>    <span class="k">def</span> <span class="nf">clip_box</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">auto_expand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_expand_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Clip the :obj:`xarray.DataArray` by a bounding box.</span>
 
 <span class="sd">        Parameters</span>
@@ -726,7 +797,7 @@
 <span class="sd">            Maximum bound for x coordinate.</span>
 <span class="sd">        maxy: float</span>
 <span class="sd">            Maximum bound for y coordinate.</span>
-<span class="sd">        auto_expand: bool</span>
+<span class="sd">        auto_expand: Union[bool, int]</span>
 <span class="sd">            If True, it will expand clip search if only 1D raster found with clip.</span>
 <span class="sd">        auto_expand_limit: int</span>
 <span class="sd">            maximum number of times the clip will be retried before raising</span>
@@ -771,7 +842,7 @@
                 <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
                 <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">cl_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+            <span class="n">cl_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">WindowError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">window_error</span> <span class="o">=</span> <span class="n">err</span>
 
@@ -805,13 +876,13 @@
 
 <div class="viewcode-block" id="RasterArray.clip"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">geometries</span><span class="p">,</span>
-        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">from_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">geometries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span>
+        <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">drop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">from_disk</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crops a :obj:`xarray.DataArray` by geojson like geometry dicts.</span>
 
@@ -835,7 +906,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        geometries: list</span>
+<span class="sd">        geometries: Iterable</span>
 <span class="sd">            A list of geojson geometry dicts or objects with __geom_interface__ with</span>
 <span class="sd">            if you have rasterio 1.2+.</span>
 <span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
@@ -908,13 +979,17 @@
 
         <span class="k">return</span> <span class="n">cropped_ds</span></div>
 
-    <span class="k">def</span> <span class="nf">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_interpolate_na</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">src_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;cubic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method uses scipy.interpolate.griddata to interpolate missing data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        method: {‘linear’, ‘nearest’, ‘cubic’}, optional</span>
+<span class="sd">        src_data: Any</span>
+<span class="sd">            Input data array.</span>
+<span class="sd">        method: {&#39;linear&#39;, &#39;nearest&#39;, &#39;cubic&#39;}, optional</span>
 <span class="sd">            The method to use for interpolation in `scipy.interpolate.griddata`.</span>
 
 <span class="sd">        Returns</span>
@@ -933,7 +1008,7 @@
 
         <span class="n">src_data_flat</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">data_isnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+            <span class="n">data_isnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">data_isnan</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data_isnan</span><span class="p">:</span>
@@ -956,7 +1031,9 @@
             <span class="n">fill_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="RasterArray.interpolate_na"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.interpolate_na">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterArray.interpolate_na"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.interpolate_na">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_na</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;cubic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method uses scipy.interpolate.griddata to interpolate missing data.</span>
 
@@ -964,7 +1041,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        method: {‘linear’, ‘nearest’, ‘cubic’}, optional</span>
+<span class="sd">        method: {&#39;linear&#39;, &#39;nearest&#39;, &#39;cubic&#39;}, optional</span>
 <span class="sd">            The method to use for interpolation in `scipy.interpolate.griddata`.</span>
 
 <span class="sd">        Returns</span>
@@ -985,9 +1062,9 @@
                 <span class="n">interp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_na</span><span class="p">(</span><span class="n">sub_xds</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
                 <span class="p">)</span>
-            <span class="n">interp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interp_data</span><span class="p">)</span>
+            <span class="n">interp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interp_data</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">interp_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">interp_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
         <span class="n">interp_array</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -1005,16 +1082,16 @@
 
 <div class="viewcode-block" id="RasterArray.to_raster"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster">[docs]</a>    <span class="k">def</span> <span class="nf">to_raster</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">raster_path</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">windowed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">recalc_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">raster_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="n">driver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">windowed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">recalc_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">lock</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">compute</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">profile_kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export the DataArray to a raster file.</span>
 
@@ -1022,7 +1099,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        raster_path: str</span>
+<span class="sd">        raster_path: Union[str, os.PathLike]</span>
 <span class="sd">            The path to output the raster to.</span>
 <span class="sd">        driver: str, optional</span>
 <span class="sd">            The name of the GDAL/rasterio driver to use to export the raster.</span>
@@ -1065,7 +1142,7 @@
         <span class="c1"># get the output profile from the rasterio object</span>
         <span class="c1"># if opened with xarray.open_rasterio()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">out_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">profile</span>
+            <span class="n">out_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span><span class="o">.</span><span class="n">profile</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">out_profile</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">out_profile</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">profile_kwargs</span><span class="p">)</span>

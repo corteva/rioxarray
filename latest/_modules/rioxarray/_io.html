@@ -88,6 +88,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
@@ -111,6 +112,8 @@
 <span class="c1"># TODO: should this be GDAL_LOCK instead?</span>
 <span class="n">RASTERIO_LOCK</span> <span class="o">=</span> <span class="n">SerializableLock</span><span class="p">()</span>
 <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
+
+<span class="n">RasterioReader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">]</span>
 
 
 <span class="k">class</span> <span class="nc">FileHandleLocal</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">):</span>
@@ -421,7 +424,7 @@
     <span class="k">return</span> <span class="n">dtype</span>
 
 
-<span class="k">def</span> <span class="nf">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the value to a number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -435,7 +438,7 @@
     <span class="k">return</span> <span class="n">value</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_tag</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_tag</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="c1"># NC_GLOBAL is appended to tags with netcdf driver and is not really needed</span>
     <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;NC_GLOBAL#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">):</span>
@@ -450,7 +453,7 @@
     <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="n">parsed_tags</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">_parse_tag</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -475,7 +478,7 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_load_netcdf_attrs</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">data_array</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_load_netcdf_attrs</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data_array</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads the netCDF attributes into the data array</span>
 
@@ -492,7 +495,7 @@
             <span class="n">data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">attr_name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
 
 
-<span class="k">def</span> <span class="nf">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dimension information:</span>
 <span class="sd">        - NETCDF_DIM_EXTRA: &#39;{time}&#39; (comma separated list of dim names)</span>
@@ -518,7 +521,10 @@
     <span class="k">return</span> <span class="n">coords</span>
 
 
-<span class="k">def</span> <span class="nf">build_subdataset_filter</span><span class="p">(</span><span class="n">group_names</span><span class="p">,</span> <span class="n">variable_names</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">build_subdataset_filter</span><span class="p">(</span>
+    <span class="n">group_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+    <span class="n">variable_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Example::</span>
 <span class="sd">        &#39;HDF4_EOS:EOS_GRID:&quot;./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf&quot;:</span>
@@ -556,7 +562,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get rasterio specific attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -600,7 +606,11 @@
     <span class="k">return</span> <span class="n">attrs</span>
 
 
-<span class="k">def</span> <span class="nf">_decode_datetime_cf</span><span class="p">(</span><span class="n">data_array</span><span class="p">,</span> <span class="n">decode_times</span><span class="p">,</span> <span class="n">decode_timedelta</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_decode_datetime_cf</span><span class="p">(</span>
+    <span class="n">data_array</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">decode_times</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decide the datetime based on CF conventions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -637,7 +647,11 @@
     <span class="k">return</span> <span class="n">data_array</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_driver_tags</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_driver_tags</span><span class="p">(</span>
+    <span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># Parse extra metadata from tags, if supported</span>
     <span class="n">parsers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ENVI&quot;</span><span class="p">:</span> <span class="n">_parse_envi</span><span class="p">}</span>
 
@@ -655,19 +669,19 @@
 
 
 <span class="k">def</span> <span class="nf">_load_subdatasets</span><span class="p">(</span>
-    <span class="n">riods</span><span class="p">,</span>
-    <span class="n">group</span><span class="p">,</span>
-    <span class="n">variable</span><span class="p">,</span>
-    <span class="n">parse_coordinates</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="p">,</span>
-    <span class="n">cache</span><span class="p">,</span>
-    <span class="n">lock</span><span class="p">,</span>
-    <span class="n">masked</span><span class="p">,</span>
-    <span class="n">mask_and_scale</span><span class="p">,</span>
-    <span class="n">decode_times</span><span class="p">,</span>
-    <span class="n">decode_timedelta</span><span class="p">,</span>
+    <span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">,</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+    <span class="n">variable</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+    <span class="n">parse_coordinates</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+    <span class="n">lock</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">decode_times</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load in rasterio subdatasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -681,7 +695,7 @@
             <span class="k">continue</span>
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">subdataset</span><span class="p">)</span> <span class="k">as</span> <span class="n">rds</span><span class="p">:</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="n">rds</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">rioda</span> <span class="o">=</span> <span class="n">open_rasterio</span><span class="p">(</span>
+        <span class="n">rioda</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">=</span> <span class="n">open_rasterio</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
             <span class="n">subdataset</span><span class="p">,</span>
             <span class="n">parse_coordinates</span><span class="o">=</span><span class="n">shape</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dim_groups</span> <span class="ow">and</span> <span class="n">parse_coordinates</span><span class="p">,</span>
             <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
@@ -700,7 +714,7 @@
             <span class="n">dim_groups</span><span class="p">[</span><span class="n">shape</span><span class="p">][</span><span class="n">rioda</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rioda</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dim_groups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">Dataset</span><span class="p">(</span><span class="n">dim_group</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim_group</span> <span class="ow">in</span> <span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="p">]</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">dim_groups</span><span class="p">:</span>
@@ -710,7 +724,12 @@
     <span class="k">return</span> <span class="n">dataset</span>
 
 
-<span class="k">def</span> <span class="nf">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_prepare_dask</span><span class="p">(</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare the data for dask computations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -746,7 +765,9 @@
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">name_prefix</span><span class="o">=</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_handle_encoding</span><span class="p">(</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">da_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make sure encoding handled properly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -769,20 +790,22 @@
 
 
 <div class="viewcode-block" id="open_rasterio"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.open_rasterio">[docs]</a><span class="k">def</span> <span class="nf">open_rasterio</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">,</span>
-    <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">lock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">masked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">default_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">decode_times</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">decode_timedelta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span>
+    <span class="p">],</span>
+    <span class="n">parse_coordinates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lock</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">variable</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">decode_times</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]:</span>
     <span class="c1"># pylint: disable=too-many-statements,too-many-locals,too-many-branches</span>
     <span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
 
@@ -830,7 +853,7 @@
 
 <span class="sd">    masked: bool, optional</span>
 <span class="sd">        If True, read the mask and set values to NaN. Defaults to False.</span>
-<span class="sd">    mask_and_scale: bool, optional</span>
+<span class="sd">    mask_and_scale: bool, default=False</span>
 <span class="sd">        Lazily scale (using the `scales` and `offsets` from rasterio) and mask.</span>
 <span class="sd">        If the _Unsigned attribute is present treat integer arrays as unsigned.</span>
 <span class="sd">    variable: str or list or tuple, optional</span>
@@ -839,7 +862,7 @@
 <span class="sd">        Group name or names to use to filter loading.</span>
 <span class="sd">    default_name: str, optional</span>
 <span class="sd">        The name of the data array if none exists. Default is None.</span>
-<span class="sd">    decode_times: bool, optional</span>
+<span class="sd">    decode_times: bool, default=True</span>
 <span class="sd">        If True, decode times encoded in the standard NetCDF datetime format</span>
 <span class="sd">        into datetime objects. Otherwise, leave them encoded as numbers.</span>
 <span class="sd">    decode_timedelta: bool, optional</span>
@@ -848,7 +871,7 @@
 <span class="sd">        into timedelta objects. If False, leave them encoded as numbers.</span>
 <span class="sd">        If None (default), assume the same value of decode_time.</span>
 <span class="sd">    **open_kwargs: kwargs, optional</span>
-<span class="sd">        Optional keyword arguments to pass into rasterio.open().</span>
+<span class="sd">        Optional keyword arguments to pass into :func:`rasterio.open`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -889,7 +912,7 @@
 
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">rio_warnings</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_LOCK</span><span class="p">:</span>
-            <span class="n">manager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span>
+            <span class="n">manager</span><span class="p">:</span> <span class="n">FileManager</span> <span class="o">=</span> <span class="n">CachingFileManager</span><span class="p">(</span>
                 <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">open_kwargs</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -902,7 +925,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">NotGeoreferencedWarning</span>
         <span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># open the subdatasets if they exist</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">:</span>
@@ -955,7 +978,7 @@
         <span class="p">)</span>
 
     <span class="n">unsigned</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">encoding</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">encoding</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="s2">&quot;_Unsigned&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
         <span class="n">unsigned</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;_Unsigned&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
 
@@ -963,7 +986,7 @@
         <span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">))</span>
 
     <span class="n">da_name</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_VARNAME&quot;</span><span class="p">,</span> <span class="n">default_name</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">LazilyOuterIndexedArray</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">indexing</span><span class="o">.</span><span class="n">LazilyOuterIndexedArray</span><span class="p">(</span>
         <span class="n">RasterioArrayWrapper</span><span class="p">(</span>
             <span class="n">manager</span><span class="p">,</span>
             <span class="n">lock</span><span class="p">,</span>
