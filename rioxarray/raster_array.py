@@ -256,7 +256,7 @@ class RasterArray(XRasterBase):
         input_nodata: Optional[float]
             Valid nodata for dtype.
         inplace: bool, optional
-            If True, it will write to the existing dataset. Default is False.
+            If True, it will write to the existing dataset. Default is True.
 
         Returns
         -------
