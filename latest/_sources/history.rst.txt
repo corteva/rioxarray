@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.11.0
 ------
 - TYPE: Add more type hints (issue #373)
