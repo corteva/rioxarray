@@ -11,6 +11,10 @@ def test_get_main_info():
     assert "rasterio" in pyproj_info
     assert "xarray" in pyproj_info
     assert "GDAL" in pyproj_info
+    assert "PROJ" in pyproj_info
+    assert "GEOS" in pyproj_info
+    assert "PROJ DATA" in pyproj_info
+    assert "GDAL DATA" in pyproj_info
 
 
 def test_get_sys_info():

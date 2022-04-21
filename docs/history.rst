@@ -4,6 +4,7 @@ History
 Latest
 ------
 - TYPE: Add more type hints (issue #373)
+- ENH: Add additional GDAL information to :func:`rioxarray.show_versions` (pull #513)
 
 0.10.3
 ------
