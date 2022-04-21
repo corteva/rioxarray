@@ -6,6 +6,7 @@ which was adapted from :func:`pandas.show_versions`
 """
 # pylint: disable=import-outside-toplevel
 import importlib
+import os
 import platform
 import sys
 from typing import Dict
@@ -38,10 +39,23 @@ def _get_main_info() -> Dict[str, str]:
     import rasterio
     import xarray
 
+    try:
+        proj_data = os.pathsep.join(rasterio._env.get_proj_data_search_paths())
+    except AttributeError:
+        proj_data = None
+    try:
+        gdal_data = rasterio._env.get_gdal_data()
+    except AttributeError:
+        gdal_data = None
+
     blob = [
         ("rasterio", rasterio.__version__),
         ("xarray", xarray.__version__),
         ("GDAL", rasterio.__gdal_version__),
+        ("GEOS", getattr(rasterio, "__geos_version__", None)),
+        ("PROJ", getattr(rasterio, "__proj_version__", None)),
+        ("PROJ DATA", proj_data),
+        ("GDAL DATA", gdal_data),
     ]
 
     return dict(blob)
