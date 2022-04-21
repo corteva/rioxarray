@@ -1,2 +1,2 @@
 """rioxarray version"""
-__version__ = "0.10.4.dev0"
+__version__ = "0.11.0"
