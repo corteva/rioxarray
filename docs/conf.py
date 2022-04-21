@@ -171,3 +171,7 @@ texinfo_documents = [
         "Miscellaneous",
     )
 ]
+
+
+# --- nbsphinx ---
+nbsphinx_execute = "never"
