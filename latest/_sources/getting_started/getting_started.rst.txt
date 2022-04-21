@@ -72,9 +72,11 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 6. It loads raster metadata into the attributes.
 
 
+Introductory Information
+--------------------------
+
 .. toctree::
    :maxdepth: 1
-   :caption: Data management:
 
    crs_management.ipynb
    nodata_management.ipynb

@@ -49,14 +49,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting Started</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#rio-accessor">rio accessor</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="getting_started.html#reading-files">Reading Files</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#xarray">xarray</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="getting_started.html#rioxarray">rioxarray</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Coordinate Reference System Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#reading-files">Reading Files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="getting_started.html#introductory-information">Introductory Information</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Coordinate Reference System Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Accessing-the-CRS-object">Accessing the CRS object</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Setting-the-CRS">Setting the CRS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Spatial-dimensions">Spatial dimensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Setting-the-transform-of-the-dataset">Setting the transform of the dataset</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
 </ul>
 </li>
 </ul>
@@ -404,6 +407,8 @@ div.rendered_html tbody tr:hover {
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs"><span class="std std-ref">rio.estimate_utm_crs()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims"><span class="std std-ref">rio.set_spatial_dims()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system"><span class="std std-ref">rio.write_coordinate_system()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
 </ul>
@@ -844,7 +849,7 @@ CRS.from_epsg(32722)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xda = xarray.DataArray(1)
-xda = xda.rio.write_crs(4326)
+xda.rio.write_crs(4326, inplace=True)
 xda.spatial_ref
 </pre></div>
 </div>
@@ -1237,6 +1242,52 @@ Attributes:
 <div class="highlight"><pre>
 CRS.from_epsg(4326)
 </pre></div></div>
+</div>
+</section>
+<section id="Spatial-dimensions">
+<h2>Spatial dimensions<a class="headerlink" href="#Spatial-dimensions" title="Permalink to this headline"></a></h2>
+<p>Only 1-dimensional X and Y dimensions are supported.</p>
+<p>The expected X/Y dimension names searched for in the <code class="docutils literal notranslate"><span class="pre">coords</span></code> are:</p>
+<ul class="simple">
+<li><p>x | y</p></li>
+<li><p>longitude | latitude</p></li>
+<li><p>Coordinates (<code class="docutils literal notranslate"><span class="pre">coords</span></code>) with the CF attributes in <code class="docutils literal notranslate"><span class="pre">attrs</span></code>:</p>
+<ul>
+<li><p>axis: X | Y</p></li>
+<li><p>standard_name: longitude | latitude or projection_x_coordinate | projection_y_coordinate</p></li>
+</ul>
+</li>
+</ul>
+<p>Option 1: Write the CF attributes for non-standard dimension names</p>
+<p>If you don’t want to rename your dimensions/coordinates, you can write the CF attributes so the coordinates can be found.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims"><span class="std std-ref">rio.set_spatial_dims()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system"><span class="std std-ref">rio.write_coordinate_system()</span></a></p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.rio.write_crs(
+    4326
+    inplace=True,
+).rio.set_spatial_dims(
+    x_dim=&quot;lon&quot;,
+    y_dim=&quot;lat&quot;
+    inplace=True,
+).rio.write_coordinate_system(inplace=True)
+</pre></div>
+</div>
+</div>
+<p>Option 2: Rename your coordinates</p>
+<p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.rename.html">xarray.Dataset.rename</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds = rds.rename(lon=longitute, lat=latitude)
+</pre></div>
+</div>
 </div>
 </section>
 <section id="Setting-the-transform-of-the-dataset">
