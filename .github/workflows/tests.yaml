@@ -23,7 +23,7 @@ jobs:
     needs: linting
     runs-on: ubuntu-latest
     name: Docker | python=${{ matrix.python-version }} | rasterio${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
-    container: osgeo/gdal:ubuntu-full-3.4.1
+    container: osgeo/gdal:ubuntu-full-3.4.2
     strategy:
       fail-fast: false
       matrix:
