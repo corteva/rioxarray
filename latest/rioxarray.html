@@ -273,7 +273,7 @@ grid mapping attributes for the CRS. This is useful if you are exporting
 your file to netCDF using <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html#xarray.Dataset.to_netcdf" title="(in xarray v2022.3.1.dev0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf()</span></code></a>. When disabled,
 only the <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> attributes will be written and the
 program will be faster due to not needing to use
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>.</p></li>
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.to_cf" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS.to_cf()</span></code></a>.</p></li>
 <li><p><strong>skip_missing_spatial_dims</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, it will not perform spatial operations on variables
 within a <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> if the spatial dimensions
 are not found.</p></li>
