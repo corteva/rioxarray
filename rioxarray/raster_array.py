@@ -438,7 +438,8 @@ class RasterArray(XRasterBase):
         if gcps:
             kwargs.setdefault("gcps", gcps)
 
-        src_affine = None if "gcps" in kwargs else self.transform(recalc=True)
+        gcps_or_rpcs = "gcps" in kwargs or "rpcs" in kwargs
+        src_affine = None if gcps_or_rpcs else self.transform(recalc=True)
         if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
                 self._obj, self.crs, dst_crs, resolution, shape, **kwargs
@@ -480,7 +481,13 @@ class RasterArray(XRasterBase):
         xda = xarray.DataArray(
             name=self._obj.name,
             data=dst_data,
-            coords=_make_coords(self._obj, dst_affine, dst_width, dst_height),
+            coords=_make_coords(
+                src_data_array=self._obj,
+                dst_affine=dst_affine,
+                dst_width=dst_width,
+                dst_height=dst_height,
+                force_generate=gcps_or_rpcs,
+            ),
             dims=tuple(dst_dims),
             attrs=new_attrs,
         )

@@ -1034,6 +1034,8 @@ def test_reproject__gcps_kwargs(tmp_path):
             2818720.0,
         )
     )
+    assert (rds.coords["x"].values > 11000).all()
+    assert (rds.coords["y"].values > 281700).all()
 
 
 def test_reproject_match(modis_reproject_match):
