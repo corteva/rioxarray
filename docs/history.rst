@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: Fix WarpedVRT param cache in :func:`rioxarray.open_rasterio` (issue #515)
 
 0.11.0
 ------

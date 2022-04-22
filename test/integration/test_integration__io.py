@@ -38,6 +38,11 @@ from test.integration.test_integration_rioxarray import (
     _create_gdal_gcps,
 )
 
+cint_skip = pytest.mark.skipif(
+    rasterio.__version__ < "1.2.4",
+    reason="https://github.com/mapbox/rasterio/issues/2182",
+)
+
 
 @pytest.mark.parametrize(
     "subdataset, variable, group, match",
@@ -932,6 +937,19 @@ def test_rasterio_vrt_gcps(tmp_path):
                 )
 
 
+@cint_skip
+def test_rasterio_vrt_gcps__data_exists():
+    # https://github.com/corteva/rioxarray/issues/515
+    vrt_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    with rasterio.open(vrt_file) as src:
+        crs = src.gcps[1]
+        # NOTE: Eventually src_crs will not need to be provided
+        # https://github.com/mapbox/rasterio/pull/2193
+        with rasterio.vrt.WarpedVRT(src, src_crs=crs) as vrt:
+            rds = rioxarray.open_rasterio(vrt)
+            assert rds.values.any()
+
+
 @pytest.mark.parametrize("lock", [True, False])
 def test_open_cog(lock):
     cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
@@ -1148,12 +1166,6 @@ def test_rotation_affine():
             ):
                 assert rioda.rio.transform(recalc=True) == rds.transform
             assert rioda.rio.resolution() == (10, 10)
-
-
-cint_skip = pytest.mark.skipif(
-    rasterio.__version__ < "1.2.4",
-    reason="https://github.com/mapbox/rasterio/issues/2182",
-)
 
 
 @cint_skip
