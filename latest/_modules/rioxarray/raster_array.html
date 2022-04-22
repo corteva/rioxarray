@@ -515,7 +515,8 @@
         <span class="k">if</span> <span class="n">gcps</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;gcps&quot;</span><span class="p">,</span> <span class="n">gcps</span><span class="p">)</span>
 
-        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gcps_or_rpcs</span> <span class="o">=</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">gcps_or_rpcs</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
@@ -557,7 +558,13 @@
         <span class="n">xda</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
-            <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">),</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span>
+                <span class="n">src_data_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="n">dst_affine</span><span class="o">=</span><span class="n">dst_affine</span><span class="p">,</span>
+                <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">,</span>
+                <span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span>
+                <span class="n">force_generate</span><span class="o">=</span><span class="n">gcps_or_rpcs</span><span class="p">,</span>
+            <span class="p">),</span>
             <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dst_dims</span><span class="p">),</span>
             <span class="n">attrs</span><span class="o">=</span><span class="n">new_attrs</span><span class="p">,</span>
         <span class="p">)</span>
