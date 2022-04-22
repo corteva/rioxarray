@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.11.1
 ------
 - BUG: Fix WarpedVRT param cache in :func:`rioxarray.open_rasterio` (issue #515)
 - BUG: Always generate coordinates in `rio.reproject` when GCPS|RPCS present (issue #517)
