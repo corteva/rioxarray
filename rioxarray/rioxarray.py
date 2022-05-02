@@ -500,7 +500,7 @@ class XRasterBase:
         # pylint: disable=import-outside-toplevel
         try:
             from pyproj.aoi import AreaOfInterest
-            from pyproj.database import query_utm_crs_info  # type: ignore
+            from pyproj.database import query_utm_crs_info
         except ImportError:
             raise RuntimeError("pyproj 3+ required for estimate_utm_crs.") from None
 

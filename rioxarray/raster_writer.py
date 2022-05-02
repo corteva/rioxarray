@@ -22,7 +22,7 @@ try:
     from dask import is_dask_collection
 except ImportError:
 
-    def is_dask_collection(_):
+    def is_dask_collection(_) -> bool:  # type: ignore
         """
         Replacement method to check if it is a dask collection
         """
