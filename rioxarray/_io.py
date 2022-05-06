@@ -850,8 +850,20 @@ def open_rasterio(
         ):
             warnings.warn(str(rio_warning.message), type(rio_warning.message))  # type: ignore
 
+    # skip subdatasets for Zarr driver basic scenario
+    # https://github.com/corteva/rioxarray/issues/521
+    skip_subdatasets = (
+        riods.driver.lower() == "zarr"
+        and riods.crs is not None
+        and len(riods.subdatasets) == 2
+        and all(
+            subdataset.lower().endswith((":/x", ":/y"))
+            for subdataset in riods.subdatasets
+        )
+    )
+
     # open the subdatasets if they exist
-    if riods.subdatasets:
+    if riods.subdatasets and not skip_subdatasets:
         return _load_subdatasets(
             riods=riods,
             group=group,
