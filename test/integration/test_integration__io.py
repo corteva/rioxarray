@@ -1303,3 +1303,36 @@ def test_writing_gcps(tmp_path):
     with rioxarray.open_rasterio(tiffname2) as darr:
         assert "gcps" in darr.coords["spatial_ref"].attrs
         _check_rio_gcps(darr, *gdal_gcps)
+
+
+def test_zarr_driver_simple_dataset(tmp_path):
+    # https://github.com/corteva/rioxarray/issues/521
+    w_settings = {
+        "driver": "Zarr",
+        "dtype": "float32",
+        "nodata": -9999,
+        "width": 3039,
+        "height": 4501,
+        "count": 1,
+        "crs": 3857,
+        "transform": Affine(25.0, 0.0, 16556975.0, 0.0, -25.0, -4179000.0),
+        "blockxsize": 5760,
+        "blockysize": 5760,
+        "tiled": True,
+    }
+
+    zarr_settings = dict(
+        COMPRESS="BLOSC",
+        BLOCKSIZE="5760,5760",
+        BLOSC_CNAME="lz4",
+        BLOSC_CLEVEL=5,
+        BLOSC_SHUFFLE="BYTE",
+        BLOSC_NUM_THREADS="ALL_CPUS",
+        ARRAY_NAME="data",
+    )
+
+    output = tmp_path / "test.zarr"
+    with rasterio.open(output, "w", **w_settings, **zarr_settings) as dst:
+        dst.write(np.ones((4501, 3039), np.float32), 1)
+
+    assert isinstance(rioxarray.open_rasterio(output), xr.DataArray)
