@@ -45,7 +45,7 @@ jobs:
             xarray-version: ''
             run-with-scipy: 'YES'
           - python-version: '3.10'
-            rasterio-version: '==1.3a4'
+            rasterio-version: '==1.3b1'
             xarray-version: ''
             run-with-scipy: 'NO'
           - python-version: '3.9'
