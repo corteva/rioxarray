@@ -927,20 +927,8 @@
         <span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">rio_warning</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
-    <span class="c1"># skip subdatasets for Zarr driver basic scenario</span>
-    <span class="c1"># https://github.com/corteva/rioxarray/issues/521</span>
-    <span class="n">skip_subdatasets</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">riods</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;zarr&quot;</span>
-        <span class="ow">and</span> <span class="n">riods</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
-        <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="n">subdataset</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;:/x&quot;</span><span class="p">,</span> <span class="s2">&quot;:/y&quot;</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">subdataset</span> <span class="ow">in</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-
     <span class="c1"># open the subdatasets if they exist</span>
-    <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">skip_subdatasets</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">subdatasets</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_load_subdatasets</span><span class="p">(</span>
             <span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span>
             <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>

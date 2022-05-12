@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-- BUG: Fix subdatasets for specific Zarr driver scenario (issue #521)
+
 
 0.11.1
 ------
