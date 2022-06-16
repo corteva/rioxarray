@@ -148,7 +148,7 @@ jobs:
         shell: bash
         run: |
           source activate test
-          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
+          pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
       - name: Test Build docs
         shell: bash
@@ -207,4 +207,4 @@ jobs:
         shell: bash
         run: |
           source activate test
-          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
+          pytest --cov-report term-missing --cov=rioxarray --cov-report xml

@@ -94,7 +94,7 @@ Using python::
 
 7. When you're done making changes, check that the tests pass::
 
-    $ py.test
+    $ pytest
 
 8. Commit your changes and push your branch to GitHub (this should trigger pre-commit checks)::
 
@@ -121,4 +121,4 @@ Tips
 
 To run a subset of tests::
 
-$ py.test test.test_rioxarray
+$ pytest test/unit/test_show_versions.py::test_get_main_info
