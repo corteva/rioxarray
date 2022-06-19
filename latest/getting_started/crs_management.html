@@ -14,6 +14,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -311,6 +312,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -319,10 +321,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -334,12 +340,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -367,7 +376,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Coordinate-Reference-System-Management">
-<h1>Coordinate Reference System Management<a class="headerlink" href="#Coordinate-Reference-System-Management" title="Permalink to this headline"></a></h1>
+<h1>Coordinate Reference System Management<a class="headerlink" href="#Coordinate-Reference-System-Management" title="Permalink to this heading"></a></h1>
 <p>xarray “… is particularly tailored to working with netCDF files, which were the source of xarray’s data model…” (<a class="reference external" href="http://xarray.pydata.org">http://xarray.pydata.org</a>).</p>
 <p>For netCDF files, the GIS community uses CF conventions (<a class="reference external" href="http://cfconventions.org/">http://cfconventions.org/</a>).</p>
 <p>Additionally, GDAL also supports these attributes:</p>
@@ -383,10 +392,10 @@ div.rendered_html tbody tr:hover {
 </ul>
 <p>Operations on xarray objects can cause data loss. Due to this, rioxarray writes and expects the spatial reference information to exist in the coordinates.</p>
 <section id="Accessing-the-CRS-object">
-<h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Permalink to this headline"></a></h2>
+<h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Permalink to this heading"></a></h2>
 <p>If you have opened a dataset and the Coordinate Reference System (CRS) can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.crs</span></code> accessor.</p>
 <section id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
-<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this headline"></a></h3>
+<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Permalink to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
 <li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
@@ -394,15 +403,15 @@ div.rendered_html tbody tr:hover {
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
 </section>
 <section id="Search-order-for-the-CRS-for-Dataset:">
-<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this headline"></a></h3>
+<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Permalink to this heading"></a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
 </section>
 <section id="decode_coords=“all”">
-<h3>decode_coords=“all”<a class="headerlink" href="#decode_coords=“all”" title="Permalink to this headline"></a></h3>
+<h3>decode_coords=“all”<a class="headerlink" href="#decode_coords=“all”" title="Permalink to this heading"></a></h3>
 <p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files with the default engine, it is recommended to use <code class="docutils literal notranslate"><span class="pre">decode_coords=&quot;all&quot;</span></code>. This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
 </section>
 <section id="API-Documentation">
-<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline"></a></h3>
+<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
@@ -838,7 +847,7 @@ CRS.from_epsg(32722)
 </section>
 </section>
 <section id="Setting-the-CRS">
-<h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Permalink to this headline"></a></h2>
+<h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Permalink to this heading"></a></h2>
 <p>Use the <code class="docutils literal notranslate"><span class="pre">rio.write_crs</span></code> method to set the CRS on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>. This modifies the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> and sets the CRS in a CF compliant manner.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
@@ -1245,7 +1254,7 @@ CRS.from_epsg(4326)
 </div>
 </section>
 <section id="Spatial-dimensions">
-<h2>Spatial dimensions<a class="headerlink" href="#Spatial-dimensions" title="Permalink to this headline"></a></h2>
+<h2>Spatial dimensions<a class="headerlink" href="#Spatial-dimensions" title="Permalink to this heading"></a></h2>
 <p>Only 1-dimensional X and Y dimensions are supported.</p>
 <p>The expected X/Y dimension names searched for in the <code class="docutils literal notranslate"><span class="pre">coords</span></code> are:</p>
 <ul class="simple">
@@ -1291,7 +1300,7 @@ CRS.from_epsg(4326)
 </div>
 </section>
 <section id="Setting-the-transform-of-the-dataset">
-<h2>Setting the transform of the dataset<a class="headerlink" href="#Setting-the-transform-of-the-dataset" title="Permalink to this headline"></a></h2>
+<h2>Setting the transform of the dataset<a class="headerlink" href="#Setting-the-transform-of-the-dataset" title="Permalink to this heading"></a></h2>
 <p>The transform can be calculated from the coordinates of your data. This method is useful if your netCDF file does not have coordinates present. Use the <code class="docutils literal notranslate"><span class="pre">rio.write_transform</span></code> method to set the transform on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform"><span class="std std-ref">rio.write_transform()</span></a></p></li>

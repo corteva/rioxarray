@@ -14,6 +14,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -323,6 +324,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -331,10 +333,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -346,12 +352,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -379,7 +388,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Example---Convert-dataset-to-raster-(GeoTiff)">
-<h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this headline"></a></h1>
+<h1>Example - Convert dataset to raster (GeoTiff)<a class="headerlink" href="#Example---Convert-dataset-to-raster-(GeoTiff)" title="Permalink to this heading"></a></h1>
 <p>Often, it is desirable to take a variable (band) out of your dataset and export it to a raster. This is possible with the <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code>method. It does most of the work for you so you don’t have to.</p>
 <p>Note: The <code class="docutils literal notranslate"><span class="pre">rio.to_raster()</span></code> method only works on a 2-dimensional or 3-dimensional <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> or a 2-dimensional <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.</p>
 <p>API Reference:</p>
@@ -861,7 +870,7 @@ Attributes:
          12.958856, 21.760335, 27.292202, 18.409063]]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-61726b62-e734-4c3d-ac2e-d1b638c55612' class='xr-section-summary-in' type='checkbox'  checked><label for='section-61726b62-e734-4c3d-ac2e-d1b638c55612' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>coordinates :</span></dt><dd>spatial_ref</dd></dl></div></li></ul></div></div></div>
 </div>
 <section id="Converting-Dataset-to-raster">
-<h2>Converting Dataset to raster<a class="headerlink" href="#Converting-Dataset-to-raster" title="Permalink to this headline"></a></h2>
+<h2>Converting Dataset to raster<a class="headerlink" href="#Converting-Dataset-to-raster" title="Permalink to this heading"></a></h2>
 <p>Dataset: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -890,7 +899,7 @@ rds.isel(time=0).rio.to_raster(&quot;planet_scope.tif&quot;)
 </div>
 </section>
 <section id="Converting-DataArray-to-raster">
-<h2>Converting DataArray to raster<a class="headerlink" href="#Converting-DataArray-to-raster" title="Permalink to this headline"></a></h2>
+<h2>Converting DataArray to raster<a class="headerlink" href="#Converting-DataArray-to-raster" title="Permalink to this heading"></a></h2>
 <p>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster"><span class="std std-ref">rio.to_raster()</span></a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -919,7 +928,7 @@ rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
 </div>
 </section>
 <section id="Memory-efficient-raster-writing">
-<h2>Memory efficient raster writing<a class="headerlink" href="#Memory-efficient-raster-writing" title="Permalink to this headline"></a></h2>
+<h2>Memory efficient raster writing<a class="headerlink" href="#Memory-efficient-raster-writing" title="Permalink to this heading"></a></h2>
 <p>Useful for reading and writing larger rasters to disk.</p>
 <p>Note: This will increase the time it takes to generate the raster.</p>
 <p>Also see: <a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p>

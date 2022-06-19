@@ -14,6 +14,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -322,6 +323,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -330,10 +332,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -345,12 +351,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -378,7 +387,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Example---Resampling">
-<h1>Example - Resampling<a class="headerlink" href="#Example---Resampling" title="Permalink to this headline"></a></h1>
+<h1>Example - Resampling<a class="headerlink" href="#Example---Resampling" title="Permalink to this heading"></a></h1>
 <p>This example demonstrates how to reproduce <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>’s resampling example <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/resampling.html">here</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -393,7 +402,7 @@ import rioxarray
 </div>
 </div>
 <section id="Load-in-xarray-dataset">
-<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this headline"></a></h2>
+<h2>Load in xarray dataset<a class="headerlink" href="#Load-in-xarray-dataset" title="Permalink to this heading"></a></h2>
 <p>See docs for <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
 <p>Notes:</p>
 <ul class="simple">
@@ -412,7 +421,7 @@ import rioxarray
 </div>
 </section>
 <section id="Resampling">
-<h2>Resampling<a class="headerlink" href="#Resampling" title="Permalink to this headline"></a></h2>
+<h2>Resampling<a class="headerlink" href="#Resampling" title="Permalink to this heading"></a></h2>
 <p>API Reference for <code class="docutils literal notranslate"><span class="pre">rio.reproject</span></code>:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject"><span class="std std-ref">DataArray.reproject</span></a></p></li>

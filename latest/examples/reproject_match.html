@@ -14,6 +14,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -323,6 +324,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -331,10 +333,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -346,12 +352,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -379,7 +388,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Example---Reproject-Match-(For-Raster-Calculations/Stacking)">
-<h1>Example - Reproject Match (For Raster Calculations/Stacking)<a class="headerlink" href="#Example---Reproject-Match-(For-Raster-Calculations/Stacking)" title="Permalink to this headline"></a></h1>
+<h1>Example - Reproject Match (For Raster Calculations/Stacking)<a class="headerlink" href="#Example---Reproject-Match-(For-Raster-Calculations/Stacking)" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">rio.reproject_match</span></code> will reproject to match the resolution, projection, and region of another raster.</p>
 <p>This is useful for raster caclulations and stacking rasters.</p>
 <div class="nbinput nblast docutils container">
@@ -411,7 +420,7 @@ import matplotlib.pyplot as plt
 </div>
 </div>
 <section id="Load-in-xarray-datasets">
-<h2>Load in xarray datasets<a class="headerlink" href="#Load-in-xarray-datasets" title="Permalink to this headline"></a></h2>
+<h2>Load in xarray datasets<a class="headerlink" href="#Load-in-xarray-datasets" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -477,7 +486,7 @@ CRS: EPSG:32615
 </div>
 </section>
 <section id="Reproject-Match">
-<h2>Reproject Match<a class="headerlink" href="#Reproject-Match" title="Permalink to this headline"></a></h2>
+<h2>Reproject Match<a class="headerlink" href="#Reproject-Match" title="Permalink to this heading"></a></h2>
 <p>API Reference:</p>
 <ul class="simple">
 <li><p>DataArray: <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match"><span class="std std-ref">rio.reproject_match()</span></a></p></li>
@@ -529,7 +538,7 @@ CRS: EPSG:32615
 </div>
 </section>
 <section id="Raster-Calculations">
-<h2>Raster Calculations<a class="headerlink" href="#Raster-Calculations" title="Permalink to this headline"></a></h2>
+<h2>Raster Calculations<a class="headerlink" href="#Raster-Calculations" title="Permalink to this heading"></a></h2>
 <p>Now that the rasters have the same projection, resolution, and extents, you can do raster calculations.</p>
 <p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">assign_coords</span></code> to make the coordinates the exact same due to tiny differences in the coordinate values due to floating precision (<a class="reference external" href="https://github.com/corteva/rioxarray/issues/298">issue 298</a>).</p>
 <div class="nbinput nblast docutils container">

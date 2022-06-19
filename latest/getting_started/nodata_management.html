@@ -14,6 +14,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -309,6 +310,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -317,10 +319,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -332,12 +338,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -365,11 +374,11 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Nodata-Management">
-<h1>Nodata Management<a class="headerlink" href="#Nodata-Management" title="Permalink to this headline"></a></h1>
+<h1>Nodata Management<a class="headerlink" href="#Nodata-Management" title="Permalink to this heading"></a></h1>
 <p>If you have opened a dataset and the nodata value can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> accessors.</p>
 <p>If your dataset’s nodata value cannot be determined, you can use the <code class="docutils literal notranslate"><span class="pre">rio.write_nodata</span></code> method.</p>
 <section id="Search-order-for-nodata-(DataArray-only):">
-<h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this headline"></a></h2>
+<h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Check if DataArray values are masked. If they are masked, return <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If the DataArray is masked, the original nodata value can be retreived from <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code>.</p></li>
 <li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</p></li>
@@ -377,7 +386,7 @@ div.rendered_html tbody tr:hover {
 </ol>
 </section>
 <section id="API-Documentation">
-<h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this headline"></a></h2>
+<h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
@@ -395,7 +404,7 @@ file_path = &quot;../../test/test_data/input/tmmx_20190121.nc&quot;
 </div>
 </div>
 <section id="Example-of-loading-unmaksed-data">
-<h3>Example of loading unmaksed data<a class="headerlink" href="#Example-of-loading-unmaksed-data" title="Permalink to this headline"></a></h3>
+<h3>Example of loading unmaksed data<a class="headerlink" href="#Example-of-loading-unmaksed-data" title="Permalink to this heading"></a></h3>
 <p>In this case, the nodata value is in the attributes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -459,7 +468,7 @@ attributes:
 </div>
 </section>
 <section id="Example-of-data-loaded-in-with-mask_and_scale=True">
-<h3>Example of data loaded in with mask_and_scale=True<a class="headerlink" href="#Example-of-data-loaded-in-with-mask_and_scale=True" title="Permalink to this headline"></a></h3>
+<h3>Example of data loaded in with mask_and_scale=True<a class="headerlink" href="#Example-of-data-loaded-in-with-mask_and_scale=True" title="Permalink to this heading"></a></h3>
 <p>When the dataset is opened with <code class="docutils literal notranslate"><span class="pre">mask_and_scale=True</span></code> with <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>, the nodata metadata is written to the encoding attribute. Then, when the dataset is written using <code class="docutils literal notranslate"><span class="pre">to_netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.to_raster</span></code> the data is decoded and it writes the original nodata value to the raster.</p>
 <p>When this happens, <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> returns <code class="docutils literal notranslate"><span class="pre">numpy.nan</span></code> and <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> contains the original value.</p>
 <div class="nbinput docutils container">
@@ -557,7 +566,7 @@ encoding:
 </div>
 </section>
 <section id="Manually-masking-data">
-<h3>Manually masking data<a class="headerlink" href="#Manually-masking-data" title="Permalink to this headline"></a></h3>
+<h3>Manually masking data<a class="headerlink" href="#Manually-masking-data" title="Permalink to this heading"></a></h3>
 <p>If you use <code class="docutils literal notranslate"><span class="pre">xarray.where</span></code> to mask you data, then you need to ensure that the attributes stored on the DataArray reflect the correct values. <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a> can help ensure that the nodata attributes are written correctly.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
