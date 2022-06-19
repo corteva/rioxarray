@@ -67,7 +67,7 @@ pylint:
 	pylint --load-plugins tests.linter --disable=I,E,W,R,C,F --enable C9999,C9998 tests/
 
 test: ## run tests quickly with the default Python
-	py.test
+	pytest
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	# rm -f docs/rioxarray*.rst
@@ -80,12 +80,16 @@ docs-browser: docs ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) docs/_build/html/index.html
 
 release: dist ## package and upload a release
+	twine check --strict dist/*
 	twine upload dist/*
+
+dist: clean  ## builds source and wheel package
+	python -m build
 
 report: install-dev coverage ## clean, install development version, run all tests, produce coverage report
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	pip install .
 
 install-dev: clean ## install development version to active Python's site-packages
 	pip install -e .[all]

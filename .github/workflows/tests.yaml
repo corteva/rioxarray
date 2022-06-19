@@ -77,11 +77,10 @@ jobs:
           python${{ matrix.python-version }} -m venv testenv
           . testenv/bin/activate
           python -m pip install --upgrade pip
-          python setup.py clean
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           python -m pip install $INSTALL_DEPS
-          python -m pip install -e .[dev,docs]
+          python -m pip install -e .[dev,doc]
 
       - name: run tests
         run: |
@@ -148,7 +147,7 @@ jobs:
         shell: bash
         run: |
           source activate test
-          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
+          pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
       - name: Test Build docs
         shell: bash
@@ -207,7 +206,7 @@ jobs:
         shell: bash
         run: |
           source activate test
-          py.test --cov-report term-missing --cov=rioxarray --cov-report xml
+          pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
 
   test_build:
@@ -233,4 +232,4 @@ jobs:
       - name: Check packages
         shell: bash
         run: |
-          twine check dist/*
+          twine check --strict dist/*

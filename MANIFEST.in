@@ -8,4 +8,4 @@ recursive-exclude test *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recusive-prune docs/
+prune docs/
