@@ -232,4 +232,4 @@ jobs:
       - name: Check packages
         shell: bash
         run: |
-          twine check dist/*
+          twine check --strict dist/*
