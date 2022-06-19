@@ -202,7 +202,7 @@ $ . venv/bin/activate
 <p>Now you can make your changes locally.</p>
 </li>
 <li><p>When you’re done making changes, check that the tests pass:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ py.test
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pytest
 </pre></div>
 </div>
 </li>
@@ -230,7 +230,7 @@ feature to the list in README.rst.</p></li>
 <section id="tips">
 <h2>Tips<a class="headerlink" href="#tips" title="Permalink to this heading"></a></h2>
 <p>To run a subset of tests:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ py.test test.test_rioxarray
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pytest test/unit/test_show_versions.py::test_get_main_info
 </pre></div>
 </div>
 </section>
