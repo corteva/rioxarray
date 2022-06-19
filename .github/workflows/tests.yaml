@@ -207,3 +207,29 @@ jobs:
         run: |
           source activate test
           pytest --cov-report term-missing --cov=rioxarray --cov-report xml
+
+
+  test_build:
+    needs: linting
+    name: Test building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
+
+      - name: Build sdist and wheel packages
+        shell: bash
+        run: |
+          python -m build
+
+      - name: Check packages
+        shell: bash
+        run: |
+          twine check dist/*
