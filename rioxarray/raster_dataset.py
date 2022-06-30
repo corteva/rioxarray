@@ -463,6 +463,10 @@ class RasterDataset(XRasterBase):
             This is useful for loading data in chunks when writing. Does not
             do anything when writing with dask.
             Default is False.
+        recalc_transform: bool, optional
+            If False, it will write the raster with the cached transform from
+            the dataset rather than recalculating it.
+            Default is True.
         lock: boolean or Lock, optional
             Lock to use to write data using dask.
             If not supplied, it will use a single process for writing.
