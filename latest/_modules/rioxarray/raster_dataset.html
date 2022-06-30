@@ -541,6 +541,10 @@
 <span class="sd">            This is useful for loading data in chunks when writing. Does not</span>
 <span class="sd">            do anything when writing with dask.</span>
 <span class="sd">            Default is False.</span>
+<span class="sd">        recalc_transform: bool, optional</span>
+<span class="sd">            If False, it will write the raster with the cached transform from</span>
+<span class="sd">            the dataset rather than recalculating it.</span>
+<span class="sd">            Default is True.</span>
 <span class="sd">        lock: boolean or Lock, optional</span>
 <span class="sd">            Lock to use to write data using dask.</span>
 <span class="sd">            If not supplied, it will use a single process for writing.</span>

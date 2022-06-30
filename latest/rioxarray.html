@@ -1115,6 +1115,9 @@ Default is “GTiff” if rasterio &lt; 1.2 otherwise it will autodetect.</p></l
 This is useful for loading data in chunks when writing. Does not
 do anything when writing with dask.
 Default is False.</p></li>
+<li><p><strong>recalc_transform</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, it will write the raster with the cached transform from
+the dataarray rather than recalculating it.
+Default is True.</p></li>
 <li><p><strong>lock</strong> (<em>boolean</em><em> or </em><em>Lock</em><em>, </em><em>optional</em>) – Lock to use to write data using dask.
 If not supplied, it will use a single process for writing.</p></li>
 <li><p><strong>compute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True and data is a dask array, then compute and save
@@ -1433,6 +1436,9 @@ Default is “GTiff” if rasterio &lt; 1.2 otherwise it will autodetect.</p></l
 This is useful for loading data in chunks when writing. Does not
 do anything when writing with dask.
 Default is False.</p></li>
+<li><p><strong>recalc_transform</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, it will write the raster with the cached transform from
+the dataset rather than recalculating it.
+Default is True.</p></li>
 <li><p><strong>lock</strong> (<em>boolean</em><em> or </em><em>Lock</em><em>, </em><em>optional</em>) – Lock to use to write data using dask.
 If not supplied, it will use a single process for writing.</p></li>
 <li><p><strong>compute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True and data is a dask array, then compute and save
