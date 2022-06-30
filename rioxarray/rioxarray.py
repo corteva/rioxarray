@@ -513,8 +513,8 @@ class XRasterBase:
         else:
             minx, miny, maxx, maxy = self.transform_bounds("EPSG:4326", recalc=True)
 
-        x_center = np.mean([minx, maxx])
-        y_center = np.mean([miny, maxy])
+        x_center = np.mean([minx, maxx]).item()
+        y_center = np.mean([miny, maxy]).item()
 
         utm_crs_list = query_utm_crs_info(
             datum_name=datum_name,
