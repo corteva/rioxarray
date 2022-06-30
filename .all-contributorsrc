@@ -278,6 +278,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "Zionett",
+      "name": "Sangzi Liang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9539198?v=4",
+      "profile": "https://github.com/Zionett",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

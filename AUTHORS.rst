@@ -43,6 +43,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://github.com/GCBallesteros"><img src="https://avatars.githubusercontent.com/u/6859287?v=4?s=100" width="100px;" alt=""/><br /><sub><b>GBallesteros</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3AGCBallesteros" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=GCBallesteros" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=GCBallesteros" title="Tests">⚠️</a></td>
         <td align="center"><a href="https://github.com/apiwat-chantawibul"><img src="https://avatars.githubusercontent.com/u/8740786?v=4?s=100" width="100px;" alt=""/><br /><sub><b>apiwat-chantawibul</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=apiwat-chantawibul" title="Documentation">📖</a></td>
         <td align="center"><a href="https://mwtoews.github.io/"><img src="https://avatars.githubusercontent.com/u/895458?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mike Taves</b></sub></a><br /><a href="#maintenance-mwtoews" title="Maintenance">🚧</a></td>
+        <td align="center"><a href="https://github.com/Zionett"><img src="https://avatars.githubusercontent.com/u/9539198?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sangzi Liang</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=Zionett" title="Documentation">📖</a></td>
       </tr>
     </table>
 
