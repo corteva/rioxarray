@@ -189,7 +189,7 @@ jobs:
           python -m pip install --upgrade \
             git+https://github.com/dask/dask.git@main \
             git+https://github.com/dask/distributed.git@main \
-            git+https://github.com/mapbox/rasterio.git@master \
+            git+https://github.com/mapbox/rasterio.git@main \
             git+https://github.com/pyproj4/pyproj.git@main \
             git+https://github.com/pydata/xarray.git@main;
           python -m pip install -e .[all]
