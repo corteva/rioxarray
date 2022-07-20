@@ -287,6 +287,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "jonasViehweger",
+      "name": "jonasViehweger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53001455?v=4",
+      "profile": "https://github.com/jonasViehweger",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
