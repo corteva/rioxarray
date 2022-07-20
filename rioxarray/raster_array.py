@@ -769,8 +769,6 @@ class RasterArray(XRasterBase):
                 right=np.array(right).item(),
                 top=np.array(top).item(),
                 transform=self.transform(recalc=True),
-                width=self.width,
-                height=self.height,
             )
             cl_array: xarray.DataArray = self.isel_window(window)  # type: ignore
         except rasterio.errors.WindowError as err:
