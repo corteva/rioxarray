@@ -45,6 +45,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://mwtoews.github.io/"><img src="https://avatars.githubusercontent.com/u/895458?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mike Taves</b></sub></a><br /><a href="#maintenance-mwtoews" title="Maintenance">🚧</a></td>
         <td align="center"><a href="https://github.com/Zionett"><img src="https://avatars.githubusercontent.com/u/9539198?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sangzi Liang</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=Zionett" title="Documentation">📖</a></td>
         <td align="center"><a href="https://github.com/jonasViehweger"><img src="https://avatars.githubusercontent.com/u/53001455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jonasViehweger</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=jonasViehweger" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/issues?q=author%3AjonasViehweger" title="Bug reports">🐛</a></td>
+        <td align="center"><a href="https://github.com/chbrandt"><img src="https://avatars.githubusercontent.com/u/482051?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Carlos H Brandt</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=chbrandt" title="Documentation">📖</a></td>
       </tr>
     </table>
 
