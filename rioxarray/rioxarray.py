@@ -114,7 +114,9 @@ def affine_to_coords(
     return {y_dim: y_coords, x_dim: x_coords}
 
 
-def _generate_spatial_coords(affine: Affine, width: int, height: int) -> Dict[str, Any]:
+def _generate_spatial_coords(
+    affine: Affine, width: int, height: int
+) -> Dict[Hashable, Any]:
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
     if new_spatial_coords["x"].ndim == 1:
@@ -130,8 +132,8 @@ def _generate_spatial_coords(affine: Affine, width: int, height: int) -> Dict[st
 
 def _get_nonspatial_coords(
     src_data_array: Union[xarray.DataArray, xarray.Dataset]
-) -> Dict[str, Union[xarray.Variable, xarray.IndexVariable]]:
-    coords: Dict[str, Union[xarray.Variable, xarray.IndexVariable]] = {}
+) -> Dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
+    coords: Dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
     for coord in set(src_data_array.coords) - {
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
@@ -158,7 +160,7 @@ def _make_coords(
     dst_width: int,
     dst_height: int,
     force_generate: bool = False,
-):
+) -> Dict[Hashable, Any]:
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
     if force_generate or (
