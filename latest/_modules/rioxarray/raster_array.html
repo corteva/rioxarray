@@ -644,12 +644,12 @@
         <span class="c1"># ensure coords the same</span>
         <span class="n">reprojected_data_array</span> <span class="o">=</span> <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">match_data_array</span><span class="p">[</span>
-                    <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">match_data_array</span><span class="p">[</span>
-                    <span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="n">match_data_array</span><span class="p">[</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="p">),</span>
+                <span class="n">reprojected_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="n">match_data_array</span><span class="p">[</span><span class="n">match_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="p">),</span>
             <span class="p">}</span>
         <span class="p">)</span>
         <span class="c1"># ensure attributes copied</span>
