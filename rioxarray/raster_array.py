@@ -566,12 +566,12 @@ class RasterArray(XRasterBase):
         # ensure coords the same
         reprojected_data_array = reprojected_data_array.assign_coords(
             {
-                reprojected_data_array.rio.x_dim: match_data_array[
-                    match_data_array.rio.x_dim
-                ].values.copy(),
-                reprojected_data_array.rio.y_dim: match_data_array[
-                    match_data_array.rio.y_dim
-                ].values.copy(),
+                reprojected_data_array.rio.x_dim: copy.copy(
+                    match_data_array[match_data_array.rio.x_dim].values
+                ),
+                reprojected_data_array.rio.y_dim: copy.copy(
+                    match_data_array[match_data_array.rio.y_dim].values
+                ),
             }
         )
         # ensure attributes copied
