@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: Fix reading file handle with dask (issue #550)
 
 0.11.1
 ------
