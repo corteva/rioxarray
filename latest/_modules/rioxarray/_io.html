@@ -740,7 +740,7 @@
     <span class="c1"># augment the token with the file modification time</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
         <span class="c1"># the filename is probably an s3 bucket rather than a regular file</span>
         <span class="n">mtime</span> <span class="o">=</span> <span class="kc">None</span>
 
