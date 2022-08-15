@@ -1303,3 +1303,14 @@ def test_writing_gcps(tmp_path):
     with rioxarray.open_rasterio(tiffname2) as darr:
         assert "gcps" in darr.coords["spatial_ref"].attrs
         _check_rio_gcps(darr, *gdal_gcps)
+
+
+@pytest.mark.skipif(
+    rasterio.__version__ < "1.3.0",
+    reason="Support added in 1.3.0",
+)
+def test_read_file_handle_with_dask():
+    with open(
+        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"
+    ) as src:
+        rioxarray.open_rasterio(src, chunks=2048)

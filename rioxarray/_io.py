@@ -662,7 +662,7 @@ def _prepare_dask(
     # augment the token with the file modification time
     try:
         mtime = os.path.getmtime(filename)
-    except OSError:
+    except (TypeError, OSError):
         # the filename is probably an s3 bucket rather than a regular file
         mtime = None
 
