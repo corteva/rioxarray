@@ -1314,3 +1314,9 @@ def test_read_file_handle_with_dask():
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"
     ) as src:
         rioxarray.open_rasterio(src, chunks=2048)
+
+
+@cint_skip
+def test_read_cint16_with_dask():
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
+    rioxarray.open_rasterio(test_file, chunks=True)
