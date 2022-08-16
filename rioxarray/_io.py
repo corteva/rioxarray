@@ -834,7 +834,7 @@ def open_rasterio(
     open_kwargs["sharing"] = open_kwargs.get("sharing", False)
 
     with warnings.catch_warnings(record=True) as rio_warnings:
-        if lock is not NO_LOCK:
+        if lock is not NO_LOCK and isinstance(filename, (str, os.PathLike)):
             manager: FileManager = CachingFileManager(
                 rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
             )
