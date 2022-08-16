@@ -680,7 +680,7 @@ def _prepare_dask(
         chunks = normalize_chunks(
             chunks=(1, "auto", "auto"),
             shape=(riods.count, riods.height, riods.width),
-            dtype=riods.dtypes[0],
+            dtype=_rasterio_to_numpy_dtype(riods.dtypes),
             previous_chunks=tuple((c,) for c in block_shape),
         )
     token = tokenize(filename, mtime, chunks)
