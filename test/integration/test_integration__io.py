@@ -1,4 +1,5 @@
 import contextlib
+import io
 import itertools
 import os
 import pickle
@@ -41,6 +42,11 @@ from test.integration.test_integration_rioxarray import (
 cint_skip = pytest.mark.skipif(
     rasterio.__version__ < "1.2.4",
     reason="https://github.com/mapbox/rasterio/issues/2182",
+)
+
+python_vsi_skip = pytest.mark.skipif(
+    rasterio.__version__ < "1.3.0",
+    reason="Python VSI Support added in 1.3.0",
 )
 
 
@@ -1305,10 +1311,7 @@ def test_writing_gcps(tmp_path):
         _check_rio_gcps(darr, *gdal_gcps)
 
 
-@pytest.mark.skipif(
-    rasterio.__version__ < "1.3.0",
-    reason="Support added in 1.3.0",
-)
+@python_vsi_skip
 def test_read_file_handle_with_dask():
     with open(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"
@@ -1320,3 +1323,22 @@ def test_read_file_handle_with_dask():
 def test_read_cint16_with_dask():
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     rioxarray.open_rasterio(test_file, chunks=True)
+
+
+@python_vsi_skip
+def test_read_ascii__from_bytesio():
+    ascii_raster_string = """ncols        5
+    nrows        5
+    xllcorner    440720.000000000000
+    yllcorner    3750120.000000000000
+    cellsize     60.000000000000
+    nodata_value -99999
+        107    123    132    115    132
+        115    132    107    123    148
+        115    132    140    132    123
+        148    132    123    123    115
+        132    156    132    140    132
+    """
+    ascii_raster_io = io.BytesIO(ascii_raster_string.encode("utf-8"))
+    with rioxarray.open_rasterio(ascii_raster_io) as rds:
+        assert rds.rio.bounds() == (440720.0, 3750120.0, 441020.0, 3750420.0)
