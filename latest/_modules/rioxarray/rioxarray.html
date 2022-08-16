@@ -293,6 +293,33 @@
     <span class="k">return</span> <span class="kc">True</span>
 
 
+<span class="k">def</span> <span class="nf">_order_bounds</span><span class="p">(</span>
+    <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">resolution_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">resolution_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure that the bounds are in the correct order</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">maxy</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">miny</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">miny</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">maxy</span>
+    <span class="k">if</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">maxx</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">minx</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">minx</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">maxx</span>
+
+    <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+
 <div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
 
@@ -704,7 +731,7 @@
             <span class="k">return</span> <span class="n">transform</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unordered_bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
             <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">DimensionMissingCoordinateError</span><span class="p">,</span> <span class="n">DimensionError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span> <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">transform</span>
@@ -1059,8 +1086,12 @@
         <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
 
-<div class="viewcode-block" id="XRasterBase.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_unordered_bounds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unordered bounds.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        recalc: bool, optional</span>
@@ -1090,7 +1121,25 @@
             <span class="n">right</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
             <span class="n">bottom</span> <span class="o">=</span> <span class="n">top</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
 
-        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span></div>
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+<div class="viewcode-block" id="XRasterBase.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_order_bounds</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_unordered_bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="XRasterBase.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">Window</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
