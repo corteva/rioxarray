@@ -50,7 +50,12 @@ from rioxarray.raster_writer import (
     RasterioWriter,
     _ensure_nodata_dtype,
 )
-from rioxarray.rioxarray import XRasterBase, _get_data_var_message, _make_coords
+from rioxarray.rioxarray import (
+    XRasterBase,
+    _get_data_var_message,
+    _make_coords,
+    _order_bounds,
+)
 
 # DTYPE TO NODATA MAP
 # Based on: https://github.com/OSGeo/gdal/blob/
@@ -744,21 +749,17 @@ class RasterArray(XRasterBase):
                 f"{_get_data_var_message(self._obj)}"
             )
 
+        resolution_x, resolution_y = self.resolution()
         # make sure that if the coordinates are
         # in reverse order that it still works
-        resolution_x, resolution_y = self.resolution()
-        if resolution_y < 0:
-            top = maxy
-            bottom = miny
-        else:
-            top = miny
-            bottom = maxy
-        if resolution_x < 0:
-            left = maxx
-            right = minx
-        else:
-            left = minx
-            right = maxx
+        left, bottom, right, top = _order_bounds(
+            minx=minx,
+            miny=miny,
+            maxx=maxx,
+            maxy=maxy,
+            resolution_x=resolution_x,
+            resolution_y=resolution_y,
+        )
 
         # pull the data out
         window_error = None
