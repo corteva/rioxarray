@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.11.2
 ------
 - BUG: Fix reading file handle with dask (issue #550)
 - BUG: Fix reading cint16 files with dask (issue #542)
