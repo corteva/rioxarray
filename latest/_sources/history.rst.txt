@@ -6,6 +6,7 @@ Latest
 - BUG: Fix reading file handle with dask (issue #550)
 - BUG: Fix reading cint16 files with dask (issue #542)
 - BUG: Ensure `rio.bounds` ordered correctly (issue #545)
+- BUG: Allow reading from `io.BytesIO` (issue #549)
 
 0.11.1
 ------
