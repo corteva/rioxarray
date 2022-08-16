@@ -2901,3 +2901,15 @@ def test_reproject__gcps_file(tmp_path):
             2818720.0,
         )
     )
+
+
+def test_bounds__ordered__dataarray():
+    xds = xarray.DataArray(
+        numpy.zeros((5, 5)), dims=("y", "x"), coords={"x": range(5), "y": range(5)}
+    )
+    assert xds.rio.bounds() == (-0.5, -0.5, 4.5, 4.5)
+
+
+def test_bounds__ordered__dataset():
+    xds = xarray.Dataset(None, coords={"x": range(5), "y": range(5)})
+    assert xds.rio.bounds() == (-0.5, -0.5, 4.5, 4.5)

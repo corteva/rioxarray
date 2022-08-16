@@ -215,6 +215,33 @@ def _has_spatial_dims(
     return True
 
 
+def _order_bounds(
+    minx: float,
+    miny: float,
+    maxx: float,
+    maxy: float,
+    resolution_x: float,
+    resolution_y: float,
+) -> Tuple[float, float, float, float]:
+    """
+    Make sure that the bounds are in the correct order
+    """
+    if resolution_y < 0:
+        top = maxy
+        bottom = miny
+    else:
+        top = miny
+        bottom = maxy
+    if resolution_x < 0:
+        left = maxx
+        right = minx
+    else:
+        left = minx
+        right = maxx
+
+    return left, bottom, right, top
+
+
 class XRasterBase:
     """This is the base class for the GIS extensions for xarray"""
 
@@ -626,7 +653,7 @@ class XRasterBase:
             return transform
 
         try:
-            src_left, _, _, src_top = self.bounds(recalc=recalc)
+            src_left, _, _, src_top = self._unordered_bounds(recalc=recalc)
             src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
         except (DimensionMissingCoordinateError, DimensionError):
             return Affine.identity() if transform is None else transform
@@ -981,8 +1008,12 @@ class XRasterBase:
         resolution_y = (bottom - top) / (self.height - 1)
         return resolution_x, resolution_y
 
-    def bounds(self, recalc: bool = False) -> Tuple[float, float, float, float]:
+    def _unordered_bounds(
+        self, recalc: bool = False
+    ) -> Tuple[float, float, float, float]:
         """
+        Unordered bounds.
+
         Parameters
         ----------
         recalc: bool, optional
@@ -1013,6 +1044,24 @@ class XRasterBase:
             bottom = top + resolution_y * self.height
 
         return left, bottom, right, top
+
+    def bounds(self, recalc: bool = False) -> Tuple[float, float, float, float]:
+        """
+        Parameters
+        ----------
+        recalc: bool, optional
+            Will force the bounds to be recalculated instead of using the
+            transform attribute.
+
+        Returns
+        -------
+        left, bottom, right, top: float
+            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.
+        """
+        return _order_bounds(
+            *self._unordered_bounds(recalc=recalc),
+            *self.resolution(recalc=recalc),
+        )
 
     def isel_window(
         self, window: rasterio.windows.Window, pad: bool = False
