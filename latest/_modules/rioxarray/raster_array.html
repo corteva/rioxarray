@@ -797,8 +797,11 @@
         <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">auto_expand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">auto_expand_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Clip the :obj:`xarray.DataArray` by a bounding box.</span>
+
+<span class="sd">        .. versionadded:: 0.12 crs</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -815,10 +818,13 @@
 <span class="sd">        auto_expand_limit: int</span>
 <span class="sd">            maximum number of times the clip will be retried before raising</span>
 <span class="sd">            an exception.</span>
+<span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
+<span class="sd">            The CRS of the bounding box. Default is to assume it is the same</span>
+<span class="sd">            as the dataset.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        :obj:`xarray.DataArray`:</span>
+<span class="sd">        xarray.DataArray:</span>
 <span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -826,6 +832,34 @@
                 <span class="s2">&quot;At least one of the raster x,y coordinates has only one point.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
+                <span class="s2">&quot;CRS not found. Please set the CRS with &#39;rio.write_crs()&#39;.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
+            <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
+                <span class="n">src_crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">dst_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">left</span><span class="o">=</span><span class="n">minx</span><span class="p">,</span>
+                <span class="n">bottom</span><span class="o">=</span><span class="n">miny</span><span class="p">,</span>
+                <span class="n">right</span><span class="o">=</span><span class="n">maxx</span><span class="p">,</span>
+                <span class="n">top</span><span class="o">=</span><span class="n">maxy</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span>  <span class="c1"># pylint: disable=no-member</span>
+                <span class="ow">and</span> <span class="n">minx</span> <span class="o">&gt;</span> <span class="n">maxx</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span>
+                    <span class="s2">&quot;Transformed bounds crossed the antimeridian. &quot;</span>
+                    <span class="s2">&quot;Please transform your bounds manually using &quot;</span>
+                    <span class="s2">&quot;rasterio.warp.transform_bounds and clip using &quot;</span>
+                    <span class="s2">&quot;the bounding box(es) desired.&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
         <span class="c1"># make sure that if the coordinates are</span>
