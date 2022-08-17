@@ -14,7 +14,6 @@ from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
-from pyproj import Transformer
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
@@ -422,14 +421,11 @@ def test_clip_box__nodata_in_bounds():
     )
     with pytest.raises(NoDataInBounds):
         xds.rio.clip_box(
-            *Transformer.from_crs(
-                xds.rio.crs, "EPSG:4326", always_xy=True
-            ).transform_bounds(
-                135.7821043660001123,
-                -17.1608065079999506,
-                135.7849362810001139,
-                -17.1580839999999739,
-            )
+            135.7821043660001123,
+            -17.1608065079999506,
+            135.7849362810001139,
+            -17.1580839999999739,
+            crs="EPSG:4326",
         )
 
     with pytest.raises(NoDataInBounds):
@@ -438,6 +434,63 @@ def test_clip_box__nodata_in_bounds():
             -17.1608065079999506,
             135.7849362810001139,
             -17.1580839999999739,
+        )
+
+
+def test_clip_box__reproject_bounds(modis_clip):
+    with modis_clip["open"](modis_clip["input"]) as xdi:
+        clipped = xdi.rio.clip_box(
+            minx=-93.1558,
+            miny=45.403,
+            maxx=-93.1557,
+            maxy=45.4065,
+            crs="EPSG:4326",
+        )
+        assert_almost_equal(
+            clipped.rio.bounds(),
+            (
+                -7272851.367694971,
+                5048487.015644904,
+                -7272156.398620179,
+                5049181.9847196955,
+            ),
+        )
+
+
+@pytest.mark.skipif(
+    rasterio.__version__ < "1.3.0",
+    reason="Antimeridian Support added in 1.3.0",
+)
+def test_clip_box__antimeridian():
+    xds = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"x": range(-180, 180, 72), "y": range(-90, 90, 36)},
+    )
+    xds.rio.write_crs("EPSG:4326", inplace=True)
+    with pytest.raises(RioXarrayError, match="antimeridian"):
+        xds.rio.clip_box(
+            minx=1722483.900174921,
+            miny=5228058.6143420935,
+            maxx=4624385.494808555,
+            maxy=8692574.544944234,
+            crs="EPSG:3851",
+        )
+
+
+def test_clip_box__mising_crs():
+    xds = xarray.DataArray(
+        numpy.zeros((5, 5)),
+        dims=("y", "x"),
+        coords={"x": range(-180, 180, 72), "y": range(-90, 90, 36)},
+    )
+    with pytest.raises(MissingCRS):
+        xds.rio.clip_box(
+            minx=1722483.900174921,
+            miny=5228058.6143420935,
+            maxx=4624385.494808555,
+            maxy=8692574.544944234,
+            crs="EPSG:3851",
         )
 
 

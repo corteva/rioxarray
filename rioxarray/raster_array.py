@@ -719,8 +719,11 @@ class RasterArray(XRasterBase):
         maxy: float,
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
+        crs: Any = None,
     ) -> xarray.DataArray:
         """Clip the :obj:`xarray.DataArray` by a bounding box.
+
+        .. versionadded:: 0.12 crs
 
         Parameters
         ----------
@@ -737,10 +740,13 @@ class RasterArray(XRasterBase):
         auto_expand_limit: int
             maximum number of times the clip will be retried before raising
             an exception.
+        crs: :obj:`rasterio.crs.CRS`, optional
+            The CRS of the bounding box. Default is to assume it is the same
+            as the dataset.
 
         Returns
         -------
-        :obj:`xarray.DataArray`:
+        xarray.DataArray:
             The clipped object.
         """
         if self.width == 1 or self.height == 1:
@@ -748,6 +754,34 @@ class RasterArray(XRasterBase):
                 "At least one of the raster x,y coordinates has only one point."
                 f"{_get_data_var_message(self._obj)}"
             )
+
+        if crs is not None and self.crs is None:
+            raise MissingCRS(
+                "CRS not found. Please set the CRS with 'rio.write_crs()'."
+                f"{_get_data_var_message(self._obj)}"
+            )
+
+        crs = crs_from_user_input(crs) if crs is not None else self.crs
+        if self.crs != crs:
+            minx, miny, maxx, maxy = rasterio.warp.transform_bounds(
+                src_crs=crs,
+                dst_crs=self.crs,
+                left=minx,
+                bottom=miny,
+                right=maxx,
+                top=maxy,
+            )
+            if (
+                self.crs is not None
+                and self.crs.is_geographic  # pylint: disable=no-member
+                and minx > maxx
+            ):
+                raise RioXarrayError(
+                    "Transformed bounds crossed the antimeridian. "
+                    "Please transform your bounds manually using "
+                    "rasterio.warp.transform_bounds and clip using "
+                    "the bounding box(es) desired."
+                )
 
         resolution_x, resolution_y = self.resolution()
         # make sure that if the coordinates are
