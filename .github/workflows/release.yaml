@@ -31,6 +31,8 @@ jobs:
         shell: bash
         run: |
           python -m build
+          twine check --strict dist/*
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
