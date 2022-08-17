@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.12.0
 -------
 - ENH: Allow passing in bounds of different CRS in `rio.clip_box` (pull #563)
