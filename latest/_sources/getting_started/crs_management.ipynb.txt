@@ -46,7 +46,7 @@
     "1. Look in attributes (`attrs`) of your data array for the `grid_mapping` coordinate name.\n",
     "   Inside the `grid_mapping` coordinate first look for `spatial_ref` then `crs_wkt` and lastly the CF grid mapping attributes.\n",
     "   This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.\n",
-    "2. Look in the `crs` attribute and load in the CRS from there. This is for backwards compatibility with `xarray.open_rasterio`.      We recommend using `rioxarray.open_rasterio` instead.\n",
+    "2. Look in the `crs` attribute and load in the CRS from there. This is for backwards compatibility with `xarray.open_rasterio`, which is deprecated since version 0.20.0. We recommend using `rioxarray.open_rasterio` instead.\n",
     "\n",
     "The value for the `crs` is anything accepted by `rasterio.crs.CRS.from_user_input()`\n",
     "\n",
