@@ -70,6 +70,7 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 4. It supports masking and scaling data with the `masked` and `mask_and_scale` kwargs.
 5. It adds the coordinate axis CF metadata.
 6. It loads raster metadata into the attributes.
+7. `xarray.open_rasterio` is deprecated (since v0.20.0)
 
 
 Introductory Information
