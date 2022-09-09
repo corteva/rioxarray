@@ -23,7 +23,6 @@ from rasterio.errors import NotGeoreferencedWarning
 from rasterio.transform import from_origin
 from rasterio.warp import calculate_default_transform
 from xarray import DataArray
-from xarray.coding.variables import SerializationWarning
 from xarray.testing import assert_allclose, assert_equal, assert_identical
 
 import rioxarray
@@ -258,11 +257,16 @@ def test_open_group_load_attrs(open_rasterio):
     ) as rds:
         attrs = rds["sur_refl_b05_1"].attrs
         assert sorted(attrs) == [
+            "Nadir Data Resolution",
             "_FillValue",
             "add_offset",
+            "add_offset_err",
+            "calibrated_nt",
             "long_name",
             "scale_factor",
+            "scale_factor_err",
             "units",
+            "valid_range",
         ]
         assert attrs["long_name"] == "500m Surface Reflectance Band 5 - first layer"
         assert attrs["units"] == "reflectance"
@@ -299,6 +303,7 @@ def test_open_rasterio_mask_chunk_clip():
             (3.0, 0.0, 425047.68381405267, 0.0, -3.0, 4615780.040546387),
         )
         assert attrs == {
+            "AREA_OR_POINT": "Area",
             "add_offset": 0.0,
             "scale_factor": 1.0,
         }
@@ -967,35 +972,33 @@ def test_open_cog(lock):
 
 def test_mask_and_scale(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
-    with pytest.warns(SerializationWarning):
-        with open_rasterio(test_file, mask_and_scale=True) as rds:
-            assert np.nanmin(rds.air_temperature.values) == np.float32(248.7)
-            assert np.nanmax(rds.air_temperature.values) == np.float32(302.1)
-            test_encoding = dict(rds.air_temperature.encoding)
-            source = test_encoding.pop("source")
-            assert source.startswith("netcdf:") and source.endswith(
-                "tmmx_20190121.nc:air_temperature"
-            )
-            assert test_encoding == {
-                "_Unsigned": "true",
-                "add_offset": 220.0,
-                "scale_factor": 0.1,
-                "_FillValue": 32767.0,
-                "missing_value": 32767,
-                "grid_mapping": "crs",
-                "dtype": "uint16",
-                "rasterio_dtype": "uint16",
-            }
-            attrs = rds.air_temperature.attrs
-            assert attrs == {
-                "coordinates": "day",
-                "coordinate_system": "WGS84,EPSG:4326",
-                "description": "Daily Maximum Temperature",
-                "dimensions": "lon lat time",
-                "long_name": "tmmx",
-                "standard_name": "tmmx",
-                "units": "K",
-            }
+    with open_rasterio(test_file, mask_and_scale=True) as rds:
+        assert np.nanmin(rds.air_temperature.values) == np.float32(248.7)
+        assert np.nanmax(rds.air_temperature.values) == np.float32(302.1)
+        test_encoding = dict(rds.air_temperature.encoding)
+        source = test_encoding.pop("source")
+        assert source.startswith("netcdf:") and source.endswith(
+            "tmmx_20190121.nc:air_temperature"
+        )
+        assert test_encoding == {
+            "_Unsigned": "true",
+            "add_offset": 220.0,
+            "scale_factor": 0.1,
+            "_FillValue": 32767.0,
+            "missing_value": 32767,
+            "grid_mapping": "crs",
+            "dtype": "uint16",
+            "rasterio_dtype": "uint16",
+        }
+        attrs = rds.air_temperature.attrs
+        assert attrs == {
+            "coordinates": "day",
+            "description": "Daily Maximum Temperature",
+            "dimensions": "lon lat time",
+            "long_name": "tmmx",
+            "standard_name": "tmmx",
+            "units": "K",
+        }
 
 
 def test_no_mask_and_scale(open_rasterio):
@@ -1023,7 +1026,6 @@ def test_no_mask_and_scale(open_rasterio):
             "_Unsigned": "true",
             "add_offset": 220.0,
             "coordinates": "day",
-            "coordinate_system": "WGS84,EPSG:4326",
             "description": "Daily Maximum Temperature",
             "dimensions": "lon lat time",
             "long_name": "tmmx",
@@ -1036,16 +1038,44 @@ def test_no_mask_and_scale(open_rasterio):
 def test_mask_and_scale__to_raster(open_rasterio, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     tmp_output = tmp_path / "tmmx_20190121.tif"
-    with pytest.warns(SerializationWarning):
-        with open_rasterio(test_file, mask_and_scale=True) as rds:
-            rds.air_temperature.rio.to_raster(str(tmp_output))
-            with rasterio.open(str(tmp_output)) as riofh:
-                assert riofh.scales == (0.1,)
-                assert riofh.offsets == (220.0,)
-                assert riofh.nodata == 32767.0
-                data = riofh.read(1, masked=True)
-                assert data.min() == 287
-                assert data.max() == 821
+    with open_rasterio(test_file, mask_and_scale=True) as rds:
+        rds.air_temperature.rio.to_raster(str(tmp_output))
+        with rasterio.open(str(tmp_output)) as riofh:
+            assert riofh.scales == (0.1,)
+            assert riofh.offsets == (220.0,)
+            assert riofh.nodata == 32767.0
+            data = riofh.read(1, masked=True)
+            assert data.min() == 287
+            assert data.max() == 821
+
+
+def test_mask_and_scale__unicode(open_rasterio):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "unicode.nc")
+    with open_rasterio(test_file, mask_and_scale=True) as rds:
+        assert np.nanmin(rds.LST.values) == np.float32(270.4925)
+        assert np.nanmax(rds.LST.values) == np.float32(276.6025)
+        test_encoding = dict(rds.LST.encoding)
+        assert test_encoding["_Unsigned"] == "true"
+        assert test_encoding["add_offset"] == 190
+        assert test_encoding["scale_factor"] == pytest.approx(0.0025)
+        assert test_encoding["_FillValue"] == 65535
+        assert test_encoding["dtype"] == "int16"
+        assert test_encoding["rasterio_dtype"] == "int16"
+
+
+def test_mask_and_scale__unicode__to_raster(open_rasterio, tmp_path):
+    tmp_output = tmp_path / "unicode.tif"
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "unicode.nc")
+    with open_rasterio(test_file, mask_and_scale=True) as rds:
+        rds.LST.rio.to_raster(str(tmp_output))
+        with rasterio.open(str(tmp_output)) as riofh:
+            assert riofh.scales == (pytest.approx(0.0025),)
+            assert riofh.offsets == (190,)
+            assert riofh.nodata == 65535
+            data = riofh.read(1, masked=True)
+            assert data.min() == 32197
+            assert data.max() == 34641
+            assert riofh.dtypes == ("uint16",)
 
 
 def test_notgeoreferenced_warning(open_rasterio):

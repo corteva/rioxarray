@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Handle `_Unsigned` and load in all attributes (pull #575)
 
 0.12.0
 -------
