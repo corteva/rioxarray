@@ -89,10 +89,11 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 <span class="kn">from</span> <span class="nn">rasterio.errors</span> <span class="kn">import</span> <span class="n">NotGeoreferencedWarning</span>
 <span class="kn">from</span> <span class="nn">rasterio.vrt</span> <span class="kn">import</span> <span class="n">WarpedVRT</span>
@@ -115,6 +116,18 @@
 <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
 
 <span class="n">RasterioReader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_unsigned_dtype</span><span class="p">(</span><span class="n">unsigned</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Based on: https://github.com/pydata/xarray/blob/abe1e613a96b000ae603c53d135828df532b952e/xarray/coding/variables.py#L306-L334</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unsigned</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;u</span><span class="si">{</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unsigned</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;u&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;i</span><span class="si">{</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">class</span> <span class="nc">FileHandleLocal</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">):</span>
@@ -251,28 +264,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
         <span class="n">dtypes</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">==</span> <span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All bands should have the same dtype&quot;</span><span class="p">)</span>
 
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
-
-        <span class="c1"># handle unsigned case</span>
-        <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="n">unsigned</span> <span class="ow">and</span> <span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;u</span><span class="si">{</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="n">unsigned</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;variable </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has _Unsigned attribute but is not &quot;</span>
-                <span class="s2">&quot;of integer type. Ignoring attribute.&quot;</span><span class="p">,</span>
-                <span class="n">variables</span><span class="o">.</span><span class="n">SerializationWarning</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="n">unsigned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="o">=</span> <span class="n">_get_unsigned_dtype</span><span class="p">(</span>
+                <span class="n">unsigned</span><span class="o">=</span><span class="n">unsigned</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="n">maybe_promote</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;variable </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has _Unsigned attribute but is not &quot;</span>
+                    <span class="s2">&quot;of integer type. Ignoring attribute.&quot;</span><span class="p">,</span>
+                    <span class="n">variables</span><span class="o">.</span><span class="n">SerializationWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="n">maybe_promote</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">dtype</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -366,6 +382,8 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vrt_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">riods</span> <span class="o">=</span> <span class="n">WarpedVRT</span><span class="p">(</span><span class="n">riods</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">vrt_params</span><span class="p">)</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">band_key</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">masked</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked</span><span class="p">:</span>
                     <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_value</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_and_scale</span><span class="p">:</span>
@@ -496,29 +514,44 @@
             <span class="n">data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">attr_name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
 
 
+<span class="k">def</span> <span class="nf">_parse_netcdf_attr_array</span><span class="p">(</span><span class="n">attr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Expected format: &#39;{2,6}&#39; or &#39;[2. 6.]&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;[]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">attr</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+
 <span class="k">def</span> <span class="nf">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dimension information:</span>
 <span class="sd">        - NETCDF_DIM_EXTRA: &#39;{time}&#39; (comma separated list of dim names)</span>
-<span class="sd">        - NETCDF_DIM_time_DEF: &#39;{2,6}&#39; (dim size, dim dtype)</span>
-<span class="sd">        - NETCDF_DIM_time_VALUES: &#39;{0,872712.659688}&#39; (comma separated list of data)</span>
+<span class="sd">        - NETCDF_DIM_time_DEF: &#39;{2,6}&#39; or &#39;[2. 6.]&#39; (dim size, dim dtype)</span>
+<span class="sd">        - NETCDF_DIM_time_VALUES: &#39;{0,872712.659688}&#39; (comma separated list of data) or [     0.       872712.659688]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dim_names</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NETCDF_DIM_EXTRA&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dim_names</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span>
-    <span class="n">dim_names</span> <span class="o">=</span> <span class="n">dim_names</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">dim_names</span> <span class="o">=</span> <span class="n">_parse_netcdf_attr_array</span><span class="p">(</span><span class="n">dim_names</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">dim_name</span> <span class="ow">in</span> <span class="n">dim_names</span><span class="p">:</span>
         <span class="n">dim_def</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">dim_name</span><span class="si">}</span><span class="s2">_DEF&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dim_def</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dim_def</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="c1"># pylint: disable=unused-variable</span>
-        <span class="n">dim_size</span><span class="p">,</span> <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">dim_def</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-        <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">NETCDF_DTYPE_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dim_dtype</span><span class="p">),</span> <span class="nb">object</span><span class="p">)</span>
-        <span class="n">dim_values</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">dim_name</span><span class="si">}</span><span class="s2">_VALUES&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">coords</span><span class="p">[</span><span class="n">dim_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">IndexVariable</span><span class="p">(</span>
-            <span class="n">dim_name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">dim_values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dim_dtype</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">dim_size</span><span class="p">,</span> <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">_parse_netcdf_attr_array</span><span class="p">(</span><span class="n">dim_def</span><span class="p">)</span>
+        <span class="n">dim_dtype</span> <span class="o">=</span> <span class="n">NETCDF_DTYPE_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">dim_dtype</span><span class="p">)),</span> <span class="nb">object</span><span class="p">)</span>
+        <span class="n">dim_values</span> <span class="o">=</span> <span class="n">_parse_netcdf_attr_array</span><span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">dim_name</span><span class="si">}</span><span class="s2">_VALUES&quot;</span><span class="p">])</span>
+        <span class="n">coords</span><span class="p">[</span><span class="n">dim_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">IndexVariable</span><span class="p">(</span><span class="n">dim_name</span><span class="p">,</span> <span class="n">dim_values</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">coords</span>
 
 
@@ -569,7 +602,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># pylint: disable=too-many-branches</span>
     <span class="c1"># Add rasterio attributes</span>
-    <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">({</span><span class="o">**</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(),</span> <span class="o">**</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">)})</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># The nodata values for the raster bands</span>
         <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
@@ -669,6 +702,19 @@
                 <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
 
+<span class="k">def</span> <span class="nf">_pop_global_netcdf_attrs_from_vars</span><span class="p">(</span><span class="n">dataset_to_clean</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="c1"># remove GLOBAL netCDF attributes from dataset variables</span>
+    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">dataset_to_clean</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">dataset_to_clean</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+            <span class="n">dataset_to_clean</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">attr</span><span class="p">:</span> <span class="n">value</span>
+                <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataset_to_clean</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset_to_clean</span><span class="o">.</span><span class="n">attrs</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">#&quot;</span><span class="p">)</span>
+            <span class="p">}</span>
+    <span class="k">return</span> <span class="n">dataset_to_clean</span>
+
+
 <span class="k">def</span> <span class="nf">_load_subdatasets</span><span class="p">(</span>
     <span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
@@ -686,7 +732,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load in rasterio subdatasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">base_tags</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">())</span>
+    <span class="n">global_tags</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">())</span>
     <span class="n">dim_groups</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">subdataset_filter</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">group</span><span class="p">,</span> <span class="n">variable</span><span class="p">)):</span>
@@ -716,12 +762,15 @@
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dim_groups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Dataset</span><span class="p">(</span><span class="n">dim_group</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim_group</span> <span class="ow">in</span> <span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="n">_pop_global_netcdf_attrs_from_vars</span><span class="p">(</span><span class="n">Dataset</span><span class="p">(</span><span class="n">dim_group</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">global_tags</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">dim_group</span> <span class="ow">in</span> <span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="p">]</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">dim_groups</span><span class="p">:</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">global_tags</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attrs</span><span class="o">=</span><span class="n">base_tags</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">_pop_global_netcdf_attrs_from_vars</span><span class="p">(</span>
+            <span class="n">Dataset</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dim_groups</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attrs</span><span class="o">=</span><span class="n">global_tags</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">dataset</span>
 
 
@@ -767,7 +816,11 @@
 
 
 <span class="k">def</span> <span class="nf">_handle_encoding</span><span class="p">(</span>
-    <span class="n">result</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">da_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">da_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">],</span>
+    <span class="n">unsigned</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make sure encoding handled properly</span>
@@ -787,6 +840,16 @@
         <span class="k">if</span> <span class="s2">&quot;missing_value&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
             <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">da_name</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="n">unsigned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">:</span>
+        <span class="n">unsigned_dtype</span> <span class="o">=</span> <span class="n">_get_unsigned_dtype</span><span class="p">(</span>
+            <span class="n">unsigned</span><span class="o">=</span><span class="n">unsigned</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">unsigned_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unsigned_dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span>
             <span class="p">)</span>
 
 
@@ -957,12 +1020,18 @@
 
     <span class="c1"># parse tags &amp; load alternate coords</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">)</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">())</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
     <span class="n">_parse_driver_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
         <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
             <span class="n">coord_name</span> <span class="o">=</span> <span class="n">coord</span>
             <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">_VALUES&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">coord_name</span> <span class="o">=</span> <span class="n">coord</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">_VALUES&quot;</span><span class="p">)</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NETCDF_DIM_</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">_DEF&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;NETCDF_DIM_EXTRA&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coord_name</span> <span class="o">=</span> <span class="s2">&quot;band&quot;</span>
@@ -978,7 +1047,7 @@
             <span class="n">_generate_spatial_coords</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="n">unsigned</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">unsigned</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">encoding</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">mask_and_scale</span> <span class="ow">and</span> <span class="s2">&quot;_Unsigned&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
         <span class="n">unsigned</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">pop_to</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="s2">&quot;_Unsigned&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
@@ -1016,11 +1085,11 @@
     <span class="p">)</span>
 
     <span class="c1"># make sure the _FillValue is correct dtype</span>
-    <span class="k">if</span> <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">])</span>
 
     <span class="c1"># handle encoding</span>
-    <span class="n">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">)</span>
+    <span class="n">_handle_encoding</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="p">,</span> <span class="n">masked</span><span class="p">,</span> <span class="n">da_name</span><span class="p">,</span> <span class="n">unsigned</span><span class="o">=</span><span class="n">unsigned</span><span class="p">)</span>
     <span class="c1"># Affine transformation matrix (always available)</span>
     <span class="c1"># This describes coefficients mapping pixel coordinates to CRS</span>
     <span class="c1"># For serialization store as tuple of 6 floats, the last row being</span>
@@ -1042,6 +1111,20 @@
     <span class="c1"># add file path to encoding</span>
     <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">name</span>
     <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;rasterio_dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># remove duplicate coordinate information</span>
+    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">attr</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">#&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="c1"># remove duplicate tags</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">attr</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">#&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
     <span class="k">return</span> <span class="n">result</span></div>
 </pre></div>
 
