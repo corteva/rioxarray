@@ -1558,6 +1558,7 @@ def test_to_raster(
 def test_to_raster_3d(open_method, windowed, write_lock, compute, tmpdir):
     tmp_raster = tmpdir.join("planet_3d_raster.tif")
     with open_method(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as mda:
+        assert sorted(mda.coords) == ["spatial_ref", "time", "x", "y"]
         xds = mda.green.fillna(mda.green.rio.encoded_nodata)
         xds.rio._nodata = mda.green.rio.encoded_nodata
         delayed = xds.rio.to_raster(

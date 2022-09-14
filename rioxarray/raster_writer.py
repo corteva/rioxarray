@@ -15,6 +15,7 @@ import rasterio
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
+from rioxarray._io import _get_unsigned_dtype
 from rioxarray.exceptions import RioXarrayError
 
 try:
@@ -39,7 +40,11 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     """
     Write the metadata stored in the xarray object to raster metadata
     """
-    tags = xarray_dataset.attrs if tags is None else {**xarray_dataset.attrs, **tags}
+    tags = (
+        xarray_dataset.attrs.copy()
+        if tags is None
+        else {**xarray_dataset.attrs, **tags}
+    )
 
     # write scales and offsets
     try:
@@ -224,11 +229,25 @@ class RasterioWriter:
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
+        xarray_dataarray = xarray_dataarray.copy()
         kwargs["dtype"], numpy_dtype = _get_dtypes(
             kwargs["dtype"],
             xarray_dataarray.encoding.get("rasterio_dtype"),
             xarray_dataarray.encoding.get("dtype", str(xarray_dataarray.dtype)),
         )
+        # there is no equivalent for netCDF _Unsigned
+        # across output GDAL formats. It is safest to convert beforehand.
+        # https://github.com/OSGeo/gdal/issues/6352#issuecomment-1245981837
+        if "_Unsigned" in xarray_dataarray.encoding:
+            unsigned_dtype = _get_unsigned_dtype(
+                unsigned=xarray_dataarray.encoding["_Unsigned"] == "true",
+                dtype=numpy_dtype,
+            )
+            if unsigned_dtype is not None:
+                numpy_dtype = unsigned_dtype
+                kwargs["dtype"] = unsigned_dtype
+                xarray_dataarray.encoding["rasterio_dtype"] = str(unsigned_dtype)
+                xarray_dataarray.encoding["dtype"] = str(unsigned_dtype)
 
         if kwargs["nodata"] is not None:
             # Ensure dtype of output data matches the expected dtype.

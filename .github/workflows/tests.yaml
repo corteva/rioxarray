@@ -136,6 +136,7 @@ jobs:
           conda info
 
       - name: pylint
+        if: matrix.python-version == '3.8'
         shell: bash
         run: |
           source activate test
@@ -143,6 +144,7 @@ jobs:
 
       - name: mypy
         shell: bash
+        if: matrix.python-version == '3.8'
         run: |
           source activate test
           mypy rioxarray/
