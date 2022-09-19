@@ -29,6 +29,9 @@ import rioxarray
 from rioxarray._io import build_subdataset_filter
 from rioxarray.rioxarray import DEFAULT_GRID_MAP
 from test.conftest import (
+    RASTERIO_GE_13,
+    RASTERIO_GE_125,
+    RASTERIO_VERSION,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -39,12 +42,12 @@ from test.integration.test_integration_rioxarray import (
 )
 
 cint_skip = pytest.mark.skipif(
-    rasterio.__version__ < "1.2.4",
+    RASTERIO_VERSION < version.parse("1.2.4"),
     reason="https://github.com/mapbox/rasterio/issues/2182",
 )
 
 python_vsi_skip = pytest.mark.skipif(
-    rasterio.__version__ < "1.3.0",
+    not RASTERIO_GE_13,
     reason="Python VSI Support added in 1.3.0",
 )
 
@@ -823,7 +826,7 @@ def test_rasterio_environment():
 
 
 @pytest.mark.xfail(
-    rasterio.__version__ == "1.1.1",
+    RASTERIO_VERSION == version.parse("1.1.1"),
     reason="https://github.com/mapbox/rasterio/issues/1833",
 )
 def test_rasterio_vrt():
@@ -1223,7 +1226,7 @@ def test_cint16_dtype(dtype, tmp_path):
 
 
 @pytest.mark.skipif(
-    rasterio.__version__ < "1.2.5",
+    not RASTERIO_GE_125,
     reason="https://github.com/mapbox/rasterio/issues/2206",
 )
 def test_cint16_dtype_nodata(tmp_path):

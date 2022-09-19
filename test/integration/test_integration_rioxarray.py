@@ -1,3 +1,4 @@
+import importlib.metadata
 import json
 import os
 import platform
@@ -31,6 +32,7 @@ from rioxarray.rioxarray import _make_coords
 from test.conftest import (
     PYPROJ_LT_3,
     RASTERIO_EQ_122,
+    RASTERIO_GE_13,
     RASTERIO_LT_122,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -39,12 +41,12 @@ from test.conftest import (
 )
 
 try:
-    import scipy
-
-    SCIPY_VERSION = scipy.__version__
+    SCIPY_LT_17 = version.parse(importlib.metadata.version("scipy")) < version.parse(
+        "1.7.0"
+    )
     SCIPY_INSTALLED = True
-except ModuleNotFoundError:
-    SCIPY_VERSION = "0.0.0"
+except importlib.metadata.PackageNotFoundError:
+    SCIPY_LT_17 = True
     SCIPY_INSTALLED = False
 
 
@@ -458,7 +460,7 @@ def test_clip_box__reproject_bounds(modis_clip):
 
 
 @pytest.mark.skipif(
-    rasterio.__version__ < "1.3.0",
+    not RASTERIO_GE_13,
     reason="Antimeridian Support added in 1.3.0",
 )
 def test_clip_box__antimeridian():
@@ -1330,11 +1332,11 @@ def test_interpolate_na__missing_scipy():
 
 
 @pytest.mark.xfail(
-    version.parse(SCIPY_VERSION) < version.parse("1.7.0")
-    or platform.system() != "Linux",
+    SCIPY_LT_17 or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
 def test_interpolate_na_veris(interpolate_na_veris):
+    pytest.importorskip("scipy")
     with xarray.open_dataset(interpolate_na_veris["input"]) as mda, xarray.open_dataset(
         interpolate_na_veris["compare"]
     ) as mdc:
