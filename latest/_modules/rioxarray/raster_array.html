@@ -88,6 +88,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">importlib.metadata</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
@@ -134,6 +135,10 @@
     <span class="n">_make_coords</span><span class="p">,</span>
     <span class="n">_order_bounds</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="n">_RASTERIO_GTE_12</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+    <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;1.2&quot;</span><span class="p">)</span>
 
 <span class="c1"># DTYPE TO NODATA MAP</span>
 <span class="c1"># Based on: https://github.com/OSGeo/gdal/blob/</span>
@@ -982,7 +987,7 @@
             <span class="p">)</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;1.2&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">_RASTERIO_GTE_12</span><span class="p">:</span>
                 <span class="n">geometries</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_geom</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">geometries</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
@@ -1179,9 +1184,7 @@
 <span class="sd">            is True. Otherwise None is returned.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
-            <span class="s2">&quot;1.2&quot;</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_RASTERIO_GTE_12</span><span class="p">:</span>
             <span class="n">driver</span> <span class="o">=</span> <span class="s2">&quot;GTiff&quot;</span>
 
         <span class="c1"># get the output profile from the rasterio object</span>

@@ -85,6 +85,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">importlib.metadata</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">threading</span>
@@ -116,6 +117,14 @@
 <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
 
 <span class="n">RasterioReader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">]</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_DASK_GTE_018</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;dask&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+        <span class="s2">&quot;0.18.0&quot;</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
+    <span class="n">_DASK_GTE_018</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_get_unsigned_dtype</span><span class="p">(</span><span class="n">unsigned</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
@@ -794,15 +803,10 @@
         <span class="n">mtime</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">dask</span>
         <span class="kn">from</span> <span class="nn">dask.array.core</span> <span class="kn">import</span> <span class="n">normalize_chunks</span>
 
-        <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">dask</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;0.18.0&quot;</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;Automatic chunking requires dask.__version__ &gt;= 0.18.0 . &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;You currently have version </span><span class="si">{</span><span class="n">dask</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_DASK_GTE_018</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Automatic chunking requires dask &gt;= 0.18.0&quot;</span><span class="p">)</span>
         <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="n">normalize_chunks</span><span class="p">(</span>
             <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
