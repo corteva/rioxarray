@@ -7,6 +7,7 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 """
 
 import contextlib
+import importlib.metadata
 import os
 import re
 import threading
@@ -38,6 +39,14 @@ RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
 
 RasterioReader = Union[rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT]
+
+
+try:
+    _DASK_GTE_018 = version.parse(importlib.metadata.version("dask")) >= version.parse(
+        "0.18.0"
+    )
+except importlib.metadata.PackageNotFoundError:
+    _DASK_GTE_018 = False
 
 
 def _get_unsigned_dtype(unsigned, dtype):
@@ -716,15 +725,10 @@ def _prepare_dask(
         mtime = None
 
     if chunks in (True, "auto"):
-        import dask
         from dask.array.core import normalize_chunks
 
-        if version.parse(dask.__version__) < version.parse("0.18.0"):
-            msg = (
-                "Automatic chunking requires dask.__version__ >= 0.18.0 . "
-                f"You currently have version {dask.__version__}"
-            )
-            raise NotImplementedError(msg)
+        if not _DASK_GTE_018:
+            raise NotImplementedError("Automatic chunking requires dask >= 0.18.0")
         block_shape = (1,) + riods.block_shapes[0]
         chunks = normalize_chunks(
             chunks=(1, "auto", "auto"),

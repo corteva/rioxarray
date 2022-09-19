@@ -1,8 +1,7 @@
+import importlib.metadata
 import os
 
-import pyproj
 import pytest
-import rasterio
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 
@@ -12,13 +11,13 @@ from rioxarray.raster_array import UNWANTED_RIO_ATTRS
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "test_data")
 TEST_INPUT_DATA_DIR = os.path.join(TEST_DATA_DIR, "input")
 TEST_COMPARE_DATA_DIR = os.path.join(TEST_DATA_DIR, "compare")
-PYPROJ_LT_3 = version.parse(pyproj.__version__) < version.parse("3")
-RASTERIO_LT_122 = version.parse(rasterio.__version__) < version.parse("1.2.2")
-RASTERIO_EQ_122 = version.parse(rasterio.__version__) == version.parse("1.2.2")
-RASTERIO_GE_125 = version.parse(rasterio.__version__) >= version.parse("1.2.5")
-RASTERIO_GE_13 = version.parse(
-    version.parse(rasterio.__version__).base_version
-) >= version.parse("1.3.0")
+PYPROJ_VERSION = version.parse(importlib.metadata.version("pyproj"))
+PYPROJ_LT_3 = PYPROJ_VERSION < version.parse("3")
+RASTERIO_VERSION = version.parse(importlib.metadata.version("rasterio"))
+RASTERIO_LT_122 = RASTERIO_VERSION < version.parse("1.2.2")
+RASTERIO_EQ_122 = RASTERIO_VERSION == version.parse("1.2.2")
+RASTERIO_GE_125 = RASTERIO_VERSION >= version.parse("1.2.5")
+RASTERIO_GE_13 = version.parse(RASTERIO_VERSION.base_version) >= version.parse("1.3.0")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)

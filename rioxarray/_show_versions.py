@@ -5,7 +5,7 @@ adapted from :func:`sklearn.utils._show_versions`
 which was adapted from :func:`pandas.show_versions`
 """
 # pylint: disable=import-outside-toplevel
-import importlib
+import importlib.metadata
 import os
 import platform
 import sys
@@ -37,7 +37,6 @@ def _get_main_info() -> Dict[str, str]:
         system GDAL information
     """
     import rasterio
-    import xarray
 
     try:
         proj_data = os.pathsep.join(rasterio._env.get_proj_data_search_paths())
@@ -49,8 +48,8 @@ def _get_main_info() -> Dict[str, str]:
         gdal_data = None
 
     blob = [
-        ("rasterio", rasterio.__version__),
-        ("xarray", xarray.__version__),
+        ("rasterio", importlib.metadata.version("rasterio")),
+        ("xarray", importlib.metadata.version("xarray")),
         ("GDAL", rasterio.__gdal_version__),
         ("GEOS", getattr(rasterio, "__geos_version__", None)),
         ("PROJ", getattr(rasterio, "__proj_version__", None)),
@@ -72,24 +71,11 @@ def _get_deps_info() -> Dict[str, str]:
 
     def get_version(module):
         try:
-            return module.__version__
-        except AttributeError:
-            return module.version
+            return importlib.metadata.version(module)
+        except importlib.metadata.PackageNotFoundError:
+            return None
 
-    deps_info = {}
-
-    for modname in deps:
-        try:
-            if modname in sys.modules:
-                mod = sys.modules[modname]
-            else:
-                mod = importlib.import_module(modname)
-            ver = get_version(mod)
-            deps_info[modname] = ver
-        except ImportError:
-            deps_info[modname] = None
-
-    return deps_info
+    return {dep: get_version(dep) for dep in deps}
 
 
 def _print_info_dict(info_dict: Dict[str, str]) -> None:
@@ -109,9 +95,7 @@ def show_versions() -> None:
     > python -c "import rioxarray; rioxarray.show_versions()"
 
     """
-    import rioxarray  # pylint: disable=cyclic-import
-
-    print(f"rioxarray ({rioxarray.__version__}) deps:")
+    print(f"rioxarray ({importlib.metadata.version('rioxarray')}) deps:")
     _print_info_dict(_get_main_info())
     print("\nOther python deps:")
     _print_info_dict(_get_deps_info())
