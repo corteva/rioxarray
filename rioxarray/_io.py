@@ -302,7 +302,6 @@ class RasterioArrayWrapper(BackendArray):
 
     def _getitem(self, key):
         band_key, window, squeeze_axis, np_inds = self._get_indexer(key)
-
         if not band_key or any(start == stop for (start, stop) in window):
             # no need to do IO
             shape = (len(band_key),) + tuple(stop - start for (start, stop) in window)
@@ -318,10 +317,17 @@ class RasterioArrayWrapper(BackendArray):
                 if self.masked:
                     out = np.ma.filled(out.astype(self.dtype), self.fill_value)
                 if self.mask_and_scale:
-                    for iii, band_iii in enumerate(np.atleast_1d(band_key) - 1):
-                        out[iii] = (
-                            out[iii] * riods.scales[band_iii] + riods.offsets[band_iii]
+                    if not isinstance(band_key, Iterable):
+                        out = (
+                            out * riods.scales[band_key - 1]
+                            + riods.offsets[band_key - 1]
                         )
+                    else:
+                        for iii, band_iii in enumerate(np.atleast_1d(band_key) - 1):
+                            out[iii] = (
+                                out[iii] * riods.scales[band_iii]
+                                + riods.offsets[band_iii]
+                            )
 
         if squeeze_axis:
             out = np.squeeze(out, axis=squeeze_axis)
