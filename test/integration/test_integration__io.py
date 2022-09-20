@@ -1038,6 +1038,26 @@ def test_no_mask_and_scale(open_rasterio):
         }
 
 
+def test_mask_and_scale__select_band_values(open_rasterio, tmp_path):
+    # https://github.com/corteva/rioxarray/issues/580
+    output_nc = tmp_path / "test.nc"
+    data = np.hypot(
+        *np.meshgrid(np.linspace(-100, 500, 50), np.linspace(-150, 700, 60))
+    )
+    xds = xr.Dataset(
+        {"var": (["y", "x"], data)},
+        coords={"x": np.linspace(40, 51, 50), "y": np.linspace(55, 62, 60)},
+    )
+    xds.rio.write_crs(4326, inplace=True)
+    xds.rio.write_coordinate_system(inplace=True)
+    encoding = {"var": {"scale_factor": 0.01, "_FillValue": -9999, "dtype": "int32"}}
+    xds.to_netcdf(output_nc, encoding=encoding)
+    with open_rasterio(output_nc) as rds:
+        if isinstance(rds, xr.Dataset):
+            rds = rds["var"]
+        assert_array_equal(rds.values[0], rds.isel(band=0).values)
+
+
 def test_mask_and_scale__to_raster(open_rasterio, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     tmp_output = tmp_path / "tmmx_20190121.tif"
