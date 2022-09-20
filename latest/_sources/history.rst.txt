@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Fix `mask_and_scale` data load after `.sel` (issue #580)
 
 0.12.1
 ------
