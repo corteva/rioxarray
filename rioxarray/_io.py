@@ -690,7 +690,7 @@ def _load_subdatasets(
             default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
             decode_times=decode_times,
             decode_timedelta=decode_timedelta,
-            band_as_variable=False
+            band_as_variable=False,
             **open_kwargs,
         )
         if shape not in dim_groups:
