@@ -690,6 +690,7 @@ def _load_subdatasets(
             default_name=subdataset.split(":")[-1].lstrip("/").replace("/", "_"),
             decode_times=decode_times,
             decode_timedelta=decode_timedelta,
+            band_as_variable=False
             **open_kwargs,
         )
         if shape not in dim_groups:
@@ -800,6 +801,7 @@ def open_rasterio(
     default_name: Optional[str] = None,
     decode_times: bool = True,
     decode_timedelta: Optional[bool] = None,
+    band_as_variable: bool = False,
     **open_kwargs,
 ) -> Union[Dataset, DataArray, List[Dataset]]:
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
@@ -866,6 +868,9 @@ def open_rasterio(
         {“days”, “hours”, “minutes”, “seconds”, “milliseconds”, “microseconds”}
         into timedelta objects. If False, leave them encoded as numbers.
         If None (default), assume the same value of decode_time.
+    band_as_variable: bool, default=False
+        If True, try to decode the bands description metadata as band name
+        If False (default), decode the bands as integers.
     **open_kwargs: kwargs, optional
         Optional keyword arguments to pass into :func:`rasterio.open`.
 
@@ -967,7 +972,12 @@ def open_rasterio(
             break
     else:
         coord_name = "band"
-        coords[coord_name] = np.asarray(riods.indexes)
+        band_descriptions = riods.descriptions
+        # Assign the band names only if the description is available for all of them
+        if band_as_variable and not any(map(lambda ele: ele is None, band_descriptions)):   
+                coords[coord_name] = np.asarray(band_descriptions)
+        else:
+            coords[coord_name] = np.asarray(riods.indexes)
 
     has_gcps = riods.gcps[0]
     if has_gcps:
