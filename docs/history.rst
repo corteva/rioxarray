@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.12.3
 ------
 - BUG: Handle CF CRS export errors in `rio.write_crs` (discussion #591)
