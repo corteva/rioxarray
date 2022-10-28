@@ -30,6 +30,7 @@ from xarray.core.dataarray import DataArray
 from xarray.core.dtypes import maybe_promote
 from xarray.core.utils import is_scalar
 from xarray.core.variable import as_variable
+import pyproj
 
 from rioxarray.exceptions import RioXarrayError
 from rioxarray.rioxarray import _generate_spatial_coords
