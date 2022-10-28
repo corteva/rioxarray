@@ -991,7 +991,7 @@ def open_rasterio(
             spatial_ref_attrs = pyproj.CRS.from_user_input(riods.crs).to_cf()
             data_vars["spatial_ref"] = ((), 0, spatial_ref_attrs)
             
-            coords = xr.Dataset(data_vars=data_vars)
+            coords = Dataset(data_vars=data_vars)
         else:
             coords[coord_name] = np.asarray(riods.indexes)
 
