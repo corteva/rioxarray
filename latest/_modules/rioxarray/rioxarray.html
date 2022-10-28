@@ -568,10 +568,12 @@
             <span class="p">)</span>
         <span class="c1"># add grid mapping coordinate</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">get_option</span><span class="p">(</span><span class="n">EXPORT_GRID_MAPPING</span><span class="p">):</span>
-            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_cf</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_cf</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
         <span class="c1"># spatial_ref is for compatibility with GDAL</span>
         <span class="n">crs_wkt</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
         <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
