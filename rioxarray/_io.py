@@ -882,6 +882,7 @@ def open_rasterio(
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
     masked = masked or mask_and_scale
     vrt_params = None
+    output_is_dataset = False
     if isinstance(filename, rasterio.io.DatasetReader):
         filename = filename.name
     elif isinstance(filename, rasterio.vrt.WarpedVRT):
@@ -974,8 +975,22 @@ def open_rasterio(
         coord_name = "band"
         band_descriptions = riods.descriptions
         # Assign the band names only if the description is available for all of them
-        if band_as_variable and not any(map(lambda ele: ele is None, band_descriptions)):   
-                coords[coord_name] = np.asarray(band_descriptions)
+        if band_as_variable and not any(map(lambda ele: ele is None, band_descriptions)):
+            output_is_dataset = True
+            data_vars = {}
+            for i in riods.indexes:
+                data_var_attrs = {
+                    "grid_mapping": "spatial_ref",
+                    "scale_factor": riods.scales[i - 1],
+                    "add_offset": riods.offsets[i - 1],
+                    "_FillValue": riods.nodatavals[i - 1],
+                    "description": riods.descriptions[i - 1]
+                }
+                data_vars[band_descriptions[i - 1]] = (("y", "x"), riods.read(i), data_var_attrs)
+            spatial_ref_attrs = pyproj.CRS.from_user_input(riods.crs).to_cf()
+            data_vars["spatial_ref"] = ((), 0, spatial_ref_attrs)
+            
+            coords = xr.Dataset(data_vars=data_vars)
         else:
             coords[coord_name] = np.asarray(riods.indexes)
 
@@ -988,7 +1003,6 @@ def open_rasterio(
         coords.update(
             _generate_spatial_coords(riods.transform, riods.width, riods.height)
         )
-
     unsigned = None
     encoding: Dict[Hashable, Any] = {}
     if mask_and_scale and "_Unsigned" in attrs:
@@ -1014,22 +1028,25 @@ def open_rasterio(
     data = indexing.CopyOnWriteArray(data)
     if cache and chunks is None:
         data = indexing.MemoryCachedArray(data)
-
-    result = DataArray(
-        data=data, dims=(coord_name, "y", "x"), coords=coords, attrs=attrs, name=da_name
-    )
+    if output_is_dataset:
+        # Remove band specific attrs from Dataset attrs
+        band_attrs = riods.tags(1)
+        for k in band_attrs.keys():
+            attrs.pop(k)
+        result = coords.assign_attrs(attrs)
+    else:
+        result = DataArray(
+            data=data, dims=(coord_name, "y", "x"), coords=coords, attrs=attrs, name=da_name
+        )
     result.encoding = encoding
-
     # update attributes from NetCDF attributess
     _load_netcdf_attrs(riods.tags(), result)
     result = _decode_datetime_cf(
         result, decode_times=decode_times, decode_timedelta=decode_timedelta
     )
-
     # make sure the _FillValue is correct dtype
-    if "_FillValue" in result.attrs:
+    if "_FillValue" in result.attrs and not output_is_dataset:
         result.attrs["_FillValue"] = result.dtype.type(result.attrs["_FillValue"])
-
     # handle encoding
     _handle_encoding(result, mask_and_scale, masked, da_name, unsigned=unsigned)
     # Affine transformation matrix (always available)
@@ -1037,13 +1054,17 @@ def open_rasterio(
     # For serialization store as tuple of 6 floats, the last row being
     # always (0, 0, 1) per definition (see
     # https://github.com/sgillies/affine)
-    result.rio.write_transform(riods.transform, inplace=True)
-    rio_crs = riods.crs or result.rio.crs
-    if rio_crs:
-        result.rio.write_crs(rio_crs, inplace=True)
+    # If we have a Dataset with variables and each variable has already 'grid_mapping: spatial_ref'
+    # in the variable attrs, doing the next steps would add another 'spatial_ref' as a
+    # coordinate and will break the functionality of xarray.to_nectdf()
+    # TODO: Probably we would need to check if the transform is already available in each band?
+    if not output_is_dataset:
+        result.rio.write_transform(riods.transform, inplace=True)
+        rio_crs = riods.crs or result.rio.crs
+        if rio_crs:
+            result.rio.write_crs(rio_crs, inplace=True)
     if has_gcps:
         result.rio.write_gcps(*riods.gcps, inplace=True)
-
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)
 
@@ -1060,11 +1081,22 @@ def open_rasterio(
             for attr, value in result.attrs.items()
             if not attr.startswith(f"{coord}#")
         }
-    # remove duplicate tags
-    if result.name:
-        result.attrs = {
-            attr: value
-            for attr, value in result.attrs.items()
-            if not attr.startswith(f"{result.name}#")
-        }
+    # remove duplicate tags for DataArray
+    if not output_is_dataset: # result.name is not available in a Dataset
+        if result.name:
+            result.attrs = {
+                attr: value
+                for attr, value in result.attrs.items()
+                if not attr.startswith(f"{result.name}#")
+            }
+    # remove duplicate tags for Dataset, otherwise there are issues opening the netCDF file in QGIS
+    if output_is_dataset:
+        main_attrs = list(result.attrs.keys())
+        vars_attrs = [list(result[d].attrs.keys()) for d in result.data_vars]
+        out_list = []
+        for attr in vars_attrs:
+            out_list =list(set(attr) | set(out_list))
+        for k in out_list:
+            if k in main_attrs:
+                result.attrs.pop(k)
     return result
