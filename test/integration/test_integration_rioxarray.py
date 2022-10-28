@@ -2115,6 +2115,42 @@ def test_write_crs_cf__disable_grid_mapping():
     assert "grid_mapping_name" not in test_da.spatial_ref.attrs
 
 
+def test_write_crs_cf__grib_wkt():
+    # https://github.com/corteva/rioxarray/discussions/591
+    grib_rotated_wkt = """GEOGCRS["Coordinate System imported from GRIB file",
+        BASEGEOGCRS["Coordinate System imported from GRIB file",
+            DATUM["unnamed",
+                ELLIPSOID["Sphere",6371229,0,
+                    LENGTHUNIT["metre",1,
+                        ID["EPSG",9001]]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]]],
+        DERIVINGCONVERSION["Pole rotation (GRIB convention)",
+            METHOD["Pole rotation (GRIB convention)"],
+            PARAMETER["Latitude of the southern pole (GRIB convention)",-33.443381,
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]],
+            PARAMETER["Longitude of the southern pole (GRIB convention)",-93.536426,
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]],
+            PARAMETER["Axis rotation (GRIB convention)",0,
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]]],
+        CS[ellipsoidal,2],
+            AXIS["latitude",north,
+                ORDER[1],
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]],
+            AXIS["longitude",east,
+                ORDER[2],
+                ANGLEUNIT["degree",0.0174532925199433,
+                    ID["EPSG",9122]]]]"""
+
+    test_da = xarray.DataArray(1)
+    test_da.rio.write_crs(grib_rotated_wkt, inplace=True)
+
+
 def test_write_crs__missing_geospatial_dims():
     test_da = xarray.DataArray(
         [1],
