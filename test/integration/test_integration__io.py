@@ -951,6 +951,123 @@ def test_rasterio_vrt_gcps(tmp_path):
                 )
 
 
+def test_rasterio_vrt_warp_extras(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(
+            row=2015.0,
+            col=0.0,
+            x=100.61835695597287,
+            y=-0.19173548698662005,
+            z=685.0004720482975,
+            id="22",
+            info="",
+        ),
+        GroundControlPoint(
+            row=2015.0,
+            col=2532.0,
+            x=100.39527906016217,
+            y=-0.14376286530261378,
+            z=750.0005434434861,
+            id="24",
+            info="",
+        ),
+        GroundControlPoint(
+            row=8060.0,
+            col=18990.0,
+            x=98.84559009470779,
+            y=-0.3783665839371584,
+            z=-0.00012378208339214325,
+            id="100",
+            info="",
+        ),
+        GroundControlPoint(
+            row=12090.0,
+            col=15192.0,
+            x=99.10314926392824,
+            y=-0.8127938652342409,
+            z=-0.0003862651064991951,
+            id="139",
+            info="",
+        ),
+        GroundControlPoint(
+            row=20150.0,
+            col=7596.0,
+            x=99.61705472917613,
+            y=-1.6823719472066612,
+            z=-7.35744833946228e-08,
+            id="217",
+            info="",
+        ),
+        GroundControlPoint(
+            row=22165.0,
+            col=22788.0,
+            x=98.2441590762303,
+            y=-1.5732331941915954,
+            z=-4.936009645462036e-08,
+            id="250",
+            info="",
+        ),
+        GroundControlPoint(
+            row=18135.0,
+            col=1266.0,
+            x=100.21153447659657,
+            y=-1.6215674668309863,
+            z=-7.82310962677002e-08,
+            id="191",
+            info="",
+        ),
+        GroundControlPoint(
+            row=4030.0,
+            col=2532.0,
+            x=100.35260704728941,
+            y=-0.3242082619976011,
+            z=1085.0010350951925,
+            id="45",
+            info="",
+        ),
+        GroundControlPoint(
+            row=23062.0,
+            col=17724.0,
+            x=98.67178669518916,
+            y=-1.7507543424460825,
+            z=-7.078051567077637e-08,
+            id="267",
+            info="",
+        ),
+        GroundControlPoint(
+            row=12090.0,
+            col=17724.0,
+            x=98.88075494473509,
+            y=-0.7646707270388453,
+            z=-0.0003558387979865074,
+            id="141",
+            info="",
+        ),
+    ]
+
+    crs = CRS.from_epsg(4326)
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=23063,
+        width=25313,
+        count=1,
+        dtype=np.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    with rasterio.open(tiffname) as src:
+        with rasterio.vrt.WarpedVRT(
+            src,
+            **{"SRC_METHOD": "GCP_TPS"},
+        ) as vrt:
+            assert vrt.crs == "EPSG:4326"
+            assert vrt.shape == (28275, 29351)
+
+
 @cint_skip
 def test_rasterio_vrt_gcps__data_exists():
     # https://github.com/corteva/rioxarray/issues/515
