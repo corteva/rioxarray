@@ -894,7 +894,7 @@ def open_rasterio(
             src_transform=vrt.src_transform,
             transform=vrt.dst_transform,
             dtype=vrt.working_dtype,
-            warp_extras=vrt.warp_extras,
+            **vrt.warp_extras,
         )
 
     if lock in (True, None):

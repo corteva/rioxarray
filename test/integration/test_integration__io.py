@@ -951,6 +951,83 @@ def test_rasterio_vrt_gcps(tmp_path):
                 )
 
 
+@pytest.mark.skipif(
+    not RASTERIO_GE_13,
+    reason="warp options support added in 1.3.0",
+)
+def test_rasterio_vrt_warp_extras(tmp_path):
+    tiffname = tmp_path / "test.tif"
+    src_gcps = [
+        GroundControlPoint(
+            row=2015.0,
+            col=0.0,
+            x=100.61835695597287,
+            y=-0.19173548698662005,
+            z=685.0004720482975,
+            id="22",
+            info="",
+        ),
+        GroundControlPoint(
+            row=8060.0,
+            col=18990.0,
+            x=98.84559009470779,
+            y=-0.3783665839371584,
+            z=-0.00012378208339214325,
+            id="100",
+            info="",
+        ),
+        GroundControlPoint(
+            row=20150.0,
+            col=7596.0,
+            x=99.61705472917613,
+            y=-1.6823719472066612,
+            z=-7.35744833946228e-08,
+            id="217",
+            info="",
+        ),
+        GroundControlPoint(
+            row=22165.0,
+            col=22788.0,
+            x=98.2441590762303,
+            y=-1.5732331941915954,
+            z=-4.936009645462036e-08,
+            id="250",
+            info="",
+        ),
+        GroundControlPoint(
+            row=12090.0,
+            col=17724.0,
+            x=98.88075494473509,
+            y=-0.7646707270388453,
+            z=-0.0003558387979865074,
+            id="141",
+            info="",
+        ),
+    ]
+
+    crs = CRS.from_epsg(4326)
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=23063,
+        width=25313,
+        count=1,
+        dtype=np.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    with rasterio.open(tiffname) as src:
+        warp_extras = {"SRC_METHOD": "GCP_TPS"}
+        with rasterio.vrt.WarpedVRT(
+            src,
+            **warp_extras,
+        ) as vrt:
+            assert vrt.crs == "EPSG:4326"
+            assert vrt.shape == (28286, 29338)
+
+
 @cint_skip
 def test_rasterio_vrt_gcps__data_exists():
     # https://github.com/corteva/rioxarray/issues/515
