@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- BUG: Pass warp_extras dictionary to raster.vrt.WarpedVRT (issue #598)
 
 0.12.3
 ------
