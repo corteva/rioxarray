@@ -1,6 +1,5 @@
 """Top-level package for rioxarray."""
 __author__ = """rioxarray Contributors"""
-__email__ = "alansnow21@gmail.com"
 import importlib.metadata
 
 import rioxarray.raster_array  # noqa
