@@ -7,6 +7,7 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 """
 
 import contextlib
+import functools
 import importlib.metadata
 import os
 import re
@@ -38,7 +39,91 @@ from rioxarray.rioxarray import _generate_spatial_coords
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
 
-RasterioReader = Union[rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT]
+
+class SingleBandDatasetReader:
+    """
+    Hack to have a DatasetReader behave like it only has one band
+    """
+
+    def __init__(self, riods, bidx) -> None:
+        self._riods = riods
+        self._bidx = bidx
+
+    def __getattr__(self, __name: str) -> Any:
+        return getattr(self._riods, __name)
+
+    @property
+    def count(self):
+        """
+        int: band count
+        """
+        return 1
+
+    @property
+    def nodata(self):
+        """
+        Nodata value for the band
+        """
+        return self._riods.nodatavals[self._bidx]
+
+    @property
+    def offsets(self):
+        """
+        Offset value for the band
+        """
+        return [self._riods.offsets[self._bidx]]
+
+    @property
+    def scales(self):
+        """
+        Scale value for the band
+        """
+        return [self._riods.scales[self._bidx]]
+
+    @property
+    def units(self):
+        """
+        Unit for the band
+        """
+        return [self._riods.units[self._bidx]]
+
+    @property
+    def descriptions(self):
+        """
+        Description for the band
+        """
+        return [self._riods.descriptions[self._bidx]]
+
+    @property
+    def dtypes(self):
+        """
+        dtype for the band
+        """
+        return [self._riods.dtypes[self._bidx]]
+
+    @property
+    def indexes(self):
+        """
+        indexes for the band
+        """
+        return [self._riods.indexes[self._bidx]]
+
+    def read(self, indexes=None, **kwargs):  # pylint: disable=unused-argument
+        """
+        read data for the band
+        """
+        return self._riods.read(indexes=self._bidx + 1, **kwargs)
+
+    def tags(self, bidx=None, **kwargs):  # pylint: disable=unused-argument
+        """
+        read tags for the band
+        """
+        return self._riods.tags(bidx=self._bidx + 1, **kwargs)
+
+
+RasterioReader = Union[
+    rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT, SingleBandDatasetReader
+]
 
 
 try:
@@ -711,6 +796,49 @@ def _load_subdatasets(
     return dataset
 
 
+def _load_bands_as_variables(
+    riods: RasterioReader,
+    parse_coordinates: bool,
+    chunks: Optional[Union[int, Tuple, Dict]],
+    cache: Optional[bool],
+    lock: Any,
+    masked: bool,
+    mask_and_scale: bool,
+    decode_times: bool,
+    decode_timedelta: Optional[bool],
+    **open_kwargs,
+) -> Union[Dataset, List[Dataset]]:
+    """
+    Load in rasterio bands as variables
+    """
+    global_tags = _parse_tags(riods.tags())
+    data_vars = {}
+    for band in riods.indexes:
+        band_riods = SingleBandDatasetReader(
+            riods=riods,
+            bidx=band - 1,
+        )
+        band_name = f"band_{band}"
+        data_vars[band_name] = (
+            open_rasterio(  # type: ignore
+                band_riods,
+                parse_coordinates=band == 1 and parse_coordinates,
+                chunks=chunks,
+                cache=cache,
+                lock=lock,
+                masked=masked,
+                mask_and_scale=mask_and_scale,
+                default_name=band_name,
+                decode_times=decode_times,
+                decode_timedelta=decode_timedelta,
+                **open_kwargs,
+            )
+            .squeeze()  # type: ignore
+            .drop("band")  # type: ignore
+        )
+    return Dataset(data_vars, attrs=global_tags)
+
+
 def _prepare_dask(
     result: DataArray,
     riods: RasterioReader,
@@ -785,9 +913,23 @@ def _handle_encoding(
             )
 
 
+def _single_band_open(*args, bidx=0, **kwargs):
+    """
+    Open file as if it only has a single band
+    """
+    return SingleBandDatasetReader(
+        riods=rasterio.open(*args, **kwargs),
+        bidx=bidx,
+    )
+
+
 def open_rasterio(
     filename: Union[
-        str, os.PathLike, rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT
+        str,
+        os.PathLike,
+        rasterio.io.DatasetReader,
+        rasterio.vrt.WarpedVRT,
+        SingleBandDatasetReader,
     ],
     parse_coordinates: Optional[bool] = None,
     chunks: Optional[Union[int, Tuple, Dict]] = None,
@@ -800,6 +942,7 @@ def open_rasterio(
     default_name: Optional[str] = None,
     decode_times: bool = True,
     decode_timedelta: Optional[bool] = None,
+    band_as_variable: bool = False,
     **open_kwargs,
 ) -> Union[Dataset, DataArray, List[Dataset]]:
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
@@ -811,6 +954,8 @@ def open_rasterio(
     `"PixelIsArea" Raster Space
     <http://web.archive.org/web/20160326194152/http://remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2>`_
     for more information).
+
+    .. versionadded:: 0.13 band_as_variable
 
     Parameters
     ----------
@@ -866,6 +1011,8 @@ def open_rasterio(
         {“days”, “hours”, “minutes”, “seconds”, “milliseconds”, “microseconds”}
         into timedelta objects. If False, leave them encoded as numbers.
         If None (default), assume the same value of decode_time.
+    band_as_variable: bool, default=False
+        If True, will load bands in a raster to separate variables.
     **open_kwargs: kwargs, optional
         Optional keyword arguments to pass into :func:`rasterio.open`.
 
@@ -877,7 +1024,13 @@ def open_rasterio(
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
     masked = masked or mask_and_scale
     vrt_params = None
-    if isinstance(filename, rasterio.io.DatasetReader):
+    file_opener = rasterio.open
+    if isinstance(filename, SingleBandDatasetReader):
+        file_opener = functools.partial(
+            _single_band_open,
+            bidx=filename._bidx,
+        )
+    if isinstance(filename, (rasterio.io.DatasetReader, SingleBandDatasetReader)):
         filename = filename.name
     elif isinstance(filename, rasterio.vrt.WarpedVRT):
         vrt = filename
@@ -909,12 +1062,26 @@ def open_rasterio(
     with warnings.catch_warnings(record=True) as rio_warnings:
         if lock is not NO_LOCK and isinstance(filename, (str, os.PathLike)):
             manager: FileManager = CachingFileManager(
-                rasterio.open, filename, lock=lock, mode="r", kwargs=open_kwargs
+                file_opener, filename, lock=lock, mode="r", kwargs=open_kwargs
             )
         else:
-            manager = URIManager(rasterio.open, filename, mode="r", kwargs=open_kwargs)
+            manager = URIManager(file_opener, filename, mode="r", kwargs=open_kwargs)
         riods = manager.acquire()
         captured_warnings = rio_warnings.copy()
+
+    if band_as_variable:
+        return _load_bands_as_variables(
+            riods=riods,
+            parse_coordinates=parse_coordinates,
+            chunks=chunks,
+            cache=cache,
+            lock=lock,
+            masked=masked,
+            mask_and_scale=mask_and_scale,
+            decode_times=decode_times,
+            decode_timedelta=decode_timedelta,
+            **open_kwargs,
+        )
 
     # raise the NotGeoreferencedWarning if applicable
     for rio_warning in captured_warnings:

@@ -15,7 +15,7 @@ enable=c-extension-no-member
 
 
 [FORMAT]
-max-module-lines=1200
+max-module-lines=1250
 
 [DESIGN]
 max-locals=20

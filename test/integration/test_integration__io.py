@@ -426,6 +426,8 @@ def create_tmp_geotiff(
         ) as s:
             for attr, val in additional_attrs.items():
                 setattr(s, attr, val)
+            for band in range(1, nz + 1):
+                s.update_tags(band, BAND=band)
             s.write(data, **write_kwargs)
             dx, dy = s.res[0], -s.res[1]
             tt = s.transform
@@ -478,6 +480,25 @@ def test_utm():
         with rioxarray.open_rasterio(tmp_file, parse_coordinates=False) as rioda:
             assert "x" not in rioda.coords
             assert "y" not in rioda.coords
+
+
+def test_band_as_variable():
+    with create_tmp_geotiff() as (tmp_file, expected):
+        with rioxarray.open_rasterio(tmp_file, band_as_variable=True) as riods:
+            for band in (1, 2, 3):
+                band_name = f"band_{band}"
+                assert_allclose(riods[band_name], expected.sel(band=band).drop("band"))
+                assert riods[band_name].attrs["BAND"] == band
+                assert riods[band_name].attrs["scale_factor"] == 1.0
+                assert riods[band_name].attrs["add_offset"] == 0.0
+                assert riods[band_name].attrs["long_name"] == f"d{band}"
+                assert riods[band_name].attrs["units"] == f"u{band}"
+                assert riods[band_name].rio.crs == expected.rio.crs
+                assert_array_equal(
+                    riods[band_name].rio.resolution(), expected.rio.resolution()
+                )
+                assert isinstance(riods[band_name].rio._cached_transform(), Affine)
+                assert riods[band_name].rio.nodata is None
 
 
 def test_platecarree():
