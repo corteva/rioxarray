@@ -91,7 +91,7 @@ jobs:
           . testenv/bin/activate
           python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
 
 
   conda_test:
