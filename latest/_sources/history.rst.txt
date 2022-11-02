@@ -6,6 +6,7 @@ Latest
 
 0.12.4
 ------
+- ENH: Added band_as_variable option to open_rasterio (issue #296)
 - BUG: Pass warp_extras dictionary to raster.vrt.WarpedVRT (issue #598)
 
 0.12.3
