@@ -482,9 +482,11 @@ def test_utm():
             assert "y" not in rioda.coords
 
 
-def test_band_as_variable():
+def test_band_as_variable(open_rasterio):
     with create_tmp_geotiff() as (tmp_file, expected):
-        with rioxarray.open_rasterio(tmp_file, band_as_variable=True) as riods:
+        with open_rasterio(
+            tmp_file, band_as_variable=True, mask_and_scale=False
+        ) as riods:
             for band in (1, 2, 3):
                 band_name = f"band_{band}"
                 assert_allclose(riods[band_name], expected.sel(band=band).drop("band"))
