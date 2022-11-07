@@ -934,7 +934,7 @@ def open_rasterio(
     parse_coordinates: Optional[bool] = None,
     chunks: Optional[Union[int, Tuple, Dict]] = None,
     cache: Optional[bool] = None,
-    lock: Any = None,
+    lock: Optional[Any] = None,
     masked: bool = False,
     mask_and_scale: bool = False,
     variable: Optional[Union[str, List[str], Tuple[str, ...]]] = None,
