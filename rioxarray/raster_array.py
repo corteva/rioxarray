@@ -724,7 +724,7 @@ class RasterArray(XRasterBase):
         maxy: float,
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
-        crs: Any = None,
+        crs: Optional[Any] = None,
     ) -> xarray.DataArray:
         """Clip the :obj:`xarray.DataArray` by a bounding box.
 
@@ -845,7 +845,7 @@ class RasterArray(XRasterBase):
     def clip(
         self,
         geometries: Iterable,
-        crs: Any = None,
+        crs: Optional[Any] = None,
         all_touched: bool = False,
         drop: bool = True,
         invert: bool = False,
@@ -1051,9 +1051,9 @@ class RasterArray(XRasterBase):
     def to_raster(
         self,
         raster_path: Union[str, os.PathLike],
-        driver: str = None,
-        dtype: Union[str, np.dtype] = None,
-        tags: Dict[str, str] = None,
+        driver: Optional[str] = None,
+        dtype: Optional[Union[str, np.dtype]] = None,
+        tags: Optional[Dict[str, str]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
         lock: Optional[bool] = None,

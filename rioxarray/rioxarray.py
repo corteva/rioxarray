@@ -435,8 +435,8 @@ class XRasterBase:
 
     def write_crs(
         self,
-        input_crs: Any = None,
-        grid_mapping_name: str = None,
+        input_crs: Optional[Any] = None,
+        grid_mapping_name: Optional[str] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
@@ -1197,7 +1197,7 @@ class XRasterBase:
         self,
         gcps: Iterable[GroundControlPoint],
         gcp_crs: Any,
-        grid_mapping_name: str = None,
+        grid_mapping_name: Optional[str] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
