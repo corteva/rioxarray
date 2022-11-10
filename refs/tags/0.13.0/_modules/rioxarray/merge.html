@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rioxarray.merge &mdash; rioxarray 0.13.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> rioxarray
+          </a>
+              <div class="version">
+                0.13.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rioxarray.merge</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rioxarray.merge</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module allows you to merge xarray Datasets/DataArrays</span>
+<span class="sd">geospatially with the `rasterio.merge` module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span> <span class="nn">rasterio.merge</span> <span class="kn">import</span> <span class="n">merge</span> <span class="k">as</span> <span class="n">_rio_merge</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
+
+<span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">_get_nonspatial_coords</span><span class="p">,</span> <span class="n">_make_coords</span>
+
+
+<span class="k">class</span> <span class="nc">RasterioDatasetDuck</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is to provide the attributes and methods necessary</span>
+<span class="sd">    to make the :func:`rasterio.merge.merge` function think that</span>
+<span class="sd">    the :obj:`xarray.DataArray` is a :obj:`rasterio.io.DatasetReader`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xds</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span> <span class="o">=</span> <span class="n">xds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">xds</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodatavals</span> <span class="o">=</span> <span class="p">[</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rio_file</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profile</span> <span class="o">=</span> <span class="n">rio_file</span><span class="o">.</span><span class="n">profile</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profile</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">nodata</span><span class="o">=</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Lazy load colormap through _manager.acquire()</span>
+<span class="sd">        for the scenario many file handles are opened</span>
+
+<span class="sd">        See: https://github.com/corteva/rioxarray/issues/479</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rio_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">rio_file</span><span class="o">.</span><span class="n">colormap</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">out_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">:</span>
+        <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is meant to be used by the rasterio.merge.merge function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_window</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">out_shape</span><span class="p">:</span>
+            <span class="c1"># in this section, the data is geographically the same</span>
+            <span class="c1"># however it is not the same dimensions as requested</span>
+            <span class="c1"># so need to resample to the requested shape</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span> <span class="o">=</span> <span class="n">out_shape</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span> <span class="o">=</span> <span class="n">out_shape</span>
+            <span class="n">data_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodatavals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">fill_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data_window</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">data_window</span> <span class="o">==</span> <span class="n">nodata</span>
+            <span class="n">fill_value</span> <span class="o">=</span> <span class="n">nodata</span>
+
+        <span class="c1"># make sure the returned shape matches</span>
+        <span class="c1"># the expected shape. This can be the case</span>
+        <span class="c1"># when the xarray dataset was squeezed to 2D beforehand</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_window</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">data_window</span> <span class="o">=</span> <span class="n">data_window</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">data_window</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="merge_arrays"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.merge.merge_arrays">[docs]</a><span class="k">def</span> <span class="nf">merge_arrays</span><span class="p">(</span>
+    <span class="n">dataarrays</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">],</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">parse_coordinates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge data arrays geospatially.</span>
+
+<span class="sd">    Uses :func:`rasterio.merge.merge`</span>
+
+<span class="sd">    .. versionadded:: 0.2 crs</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataarrays: List[xarray.DataArray]</span>
+<span class="sd">        List of xarray.DataArray&#39;s with all geo attributes.</span>
+<span class="sd">        The first one is assumed to have the same</span>
+<span class="sd">        CRS, dtype, and dimensions as the others in the array.</span>
+<span class="sd">    bounds: tuple, optional</span>
+<span class="sd">        Bounds of the output image (left, bottom, right, top).</span>
+<span class="sd">        If not set, bounds are determined from bounds of input DataArrays.</span>
+<span class="sd">    res: tuple, optional</span>
+<span class="sd">        Output resolution in units of coordinate reference system.</span>
+<span class="sd">        If not set, the resolution of the first DataArray is used.</span>
+<span class="sd">        If a single value is passed, output pixels will be square.</span>
+<span class="sd">    nodata: float, optional</span>
+<span class="sd">        nodata value to use in output file.</span>
+<span class="sd">        If not set, uses the nodata value in the first input DataArray.</span>
+<span class="sd">    precision: float, optional</span>
+<span class="sd">        Number of decimal points of precision when computing inverse transform.</span>
+<span class="sd">    method: str or callable, optional</span>
+<span class="sd">        See :func:`rasterio.merge.merge` for details.</span>
+<span class="sd">    crs: rasterio.crs.CRS, optional</span>
+<span class="sd">        Output CRS. If not set, the CRS of the first DataArray is used.</span>
+<span class="sd">    parse_coordinates: bool, optional</span>
+<span class="sd">        If False, it will disable loading spatial coordinates.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :obj:`xarray.DataArray`:</span>
+<span class="sd">        The geospatially merged data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">dataarrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">res_val</span> <span class="ow">in</span> <span class="n">dataarrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">())</span>
+
+    <span class="c1"># prepare the duck arrays</span>
+    <span class="n">rioduckarrays</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dataarray</span> <span class="ow">in</span> <span class="n">dataarrays</span><span class="p">:</span>
+        <span class="n">da_res</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">res_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">res_val</span> <span class="ow">in</span> <span class="n">dataarray</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">da_res</span> <span class="o">!=</span> <span class="n">res</span> <span class="ow">or</span> <span class="n">dataarray</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
+            <span class="n">rioduckarrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">RasterioDatasetDuck</span><span class="p">(</span>
+                    <span class="n">dataarray</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="n">dst_crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rioduckarrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RasterioDatasetDuck</span><span class="p">(</span><span class="n">dataarray</span><span class="p">))</span>
+
+    <span class="c1"># use rasterio to merge</span>
+    <span class="n">merged_data</span><span class="p">,</span> <span class="n">merged_transform</span> <span class="o">=</span> <span class="n">_rio_merge</span><span class="p">(</span>
+        <span class="n">rioduckarrays</span><span class="p">,</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">input_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="c1"># generate merged data array</span>
+    <span class="n">representative_array</span> <span class="o">=</span> <span class="n">rioduckarrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_xds</span>
+    <span class="k">if</span> <span class="n">parse_coordinates</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">_make_coords</span><span class="p">(</span>
+            <span class="n">representative_array</span><span class="p">,</span>
+            <span class="n">merged_transform</span><span class="p">,</span>
+            <span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">representative_array</span><span class="p">)</span>
+
+    <span class="c1"># make sure the output merged data shape is 2D if the</span>
+    <span class="c1"># original data was 2D. this can happen if the</span>
+    <span class="c1"># xarray datasarray was squeezed.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">representative_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">merged_data</span> <span class="o">=</span> <span class="n">merged_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="n">xda</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">representative_array</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">merged_data</span><span class="p">,</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">representative_array</span><span class="o">.</span><span class="n">dims</span><span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="n">representative_array</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span>
+        <span class="n">nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">representative_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">representative_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">merged_transform</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xda</span></div>
+
+
+<div class="viewcode-block" id="merge_datasets"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.merge.merge_datasets">[docs]</a><span class="k">def</span> <span class="nf">merge_datasets</span><span class="p">(</span>
+    <span class="n">datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dataset</span><span class="p">],</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge datasets geospatially.</span>
+
+<span class="sd">    Uses :func:`rasterio.merge.merge`</span>
+
+<span class="sd">    .. versionadded:: 0.2 crs</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datasets: List[xarray.Dataset]</span>
+<span class="sd">        List of xarray.Dataset&#39;s with all geo attributes.</span>
+<span class="sd">        The first one is assumed to have the same</span>
+<span class="sd">        CRS, dtype, dimensions, and data_vars as the others in the array.</span>
+<span class="sd">    bounds: tuple, optional</span>
+<span class="sd">        Bounds of the output image (left, bottom, right, top).</span>
+<span class="sd">        If not set, bounds are determined from bounds of input Dataset.</span>
+<span class="sd">    res: tuple, optional</span>
+<span class="sd">        Output resolution in units of coordinate reference system.</span>
+<span class="sd">        If not set, the resolution of the first Dataset is used.</span>
+<span class="sd">        If a single value is passed, output pixels will be square.</span>
+<span class="sd">    nodata: float, optional</span>
+<span class="sd">        nodata value to use in output file.</span>
+<span class="sd">        If not set, uses the nodata value in the first input Dataset.</span>
+<span class="sd">    precision: float, optional</span>
+<span class="sd">        Number of decimal points of precision when computing inverse transform.</span>
+<span class="sd">    method: str or callable, optional</span>
+<span class="sd">        See rasterio docs.</span>
+<span class="sd">    crs: rasterio.crs.CRS, optional</span>
+<span class="sd">        Output CRS. If not set, the CRS of the first DataArray is used.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :obj:`xarray.Dataset`:</span>
+<span class="sd">        The geospatially merged data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">representative_ds</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">merged_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">data_var</span> <span class="ow">in</span> <span class="n">representative_ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+        <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_arrays</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">],</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+            <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span>
+            <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+            <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">parse_coordinates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">data_var</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">representative_ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
+        <span class="n">merged_data</span><span class="p">,</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span>
+            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">],</span>
+            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
+            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">force_generate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="n">representative_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xds</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, rioxarray Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
