@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.13.0
 -------
 - ENH: Added band_as_variable option to open_rasterio (#600)
