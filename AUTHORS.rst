@@ -49,12 +49,13 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
       </tr>
       <tr>
         <td align="center"><a href="https://github.com/JessicaS11"><img src="https://avatars.githubusercontent.com/u/11756442?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jessica Scheick</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=JessicaS11" title="Documentation">📖</a></td>
+        <td align="center"><a href="https://www.linkedin.com/in/micheleclaus/"><img src="https://avatars.githubusercontent.com/u/31700619?v=4?s=100" width="100px;" alt=""/><br /><sub><b>clausmichele</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/pulls?q=is%3Apr+reviewed-by%3Aclausmichele" title="Reviewed Pull Requests">👀</a></td>
       </tr>
     </table>
 
-    <!-- markdownlint-restore -->
-    <!-- prettier-ignore-end -->
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
-    <!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the `all-contributors <https://github.com/all-contributors/all-contributors>`_ specification. Contributions of any kind welcome!
