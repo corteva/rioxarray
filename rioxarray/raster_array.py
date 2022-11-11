@@ -12,6 +12,7 @@ datacube is licensed under the Apache License, Version 2.0:
 import copy
 import importlib.metadata
 import os
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -1106,8 +1107,12 @@ class RasterArray(XRasterBase):
             is True. Otherwise None is returned.
 
         """
-        if driver is None and not _RASTERIO_GTE_12:
-            driver = "GTiff"
+        if driver is None:
+            extension = Path(raster_path).suffix
+            # https://github.com/rasterio/rasterio/pull/2634
+            # https://github.com/rasterio/rasterio/pull/2008
+            if not _RASTERIO_GTE_12 or extension in (".tif", ".tiff"):
+                driver = "GTiff"
 
         # get the output profile from the rasterio object
         # if opened with xarray.open_rasterio()

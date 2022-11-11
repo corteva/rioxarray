@@ -14,6 +14,7 @@ concurrency:
 
 env:
   PIP_NO_BINARY: rasterio
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   linting:
@@ -35,7 +36,7 @@ jobs:
         rasterio-version: ['']
         xarray-version: ['']
         run-with-scipy: ['YES']
-        gdal-version: ['3.5.3']
+        gdal-version: ['3.6.0']
         include:
           - python-version: '3.8'
             rasterio-version: ''

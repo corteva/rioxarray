@@ -4,10 +4,11 @@ History
 Latest
 ------
 - BUG: Fix closing files manually (pull #607)
+- BUG: Add GDAL 3.6 driver auto-select fix (pull #606)
 
 0.13.0
 -------
-- ENH: Added band_as_variable option to open_rasterio (#600)
+- ENH: Added band_as_variable option to open_rasterio (pull #600)
 
 0.12.4
 ------
