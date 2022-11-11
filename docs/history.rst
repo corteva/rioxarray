@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.13.1
 ------
 - BUG: Fix closing files manually (pull #607)
 - BUG: Add GDAL 3.6 driver auto-select fix (pull #606)
