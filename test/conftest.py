@@ -2,11 +2,14 @@ import importlib.metadata
 import os
 
 import pytest
+import xarray
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 
 import rioxarray
 from rioxarray.raster_array import UNWANTED_RIO_ATTRS
+
+xarray.set_options(warn_for_unclosed_files=True)
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "test_data")
 TEST_INPUT_DATA_DIR = os.path.join(TEST_DATA_DIR, "input")

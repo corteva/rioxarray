@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Fix closing files manually (pull #607)
 
 0.13.0
 -------

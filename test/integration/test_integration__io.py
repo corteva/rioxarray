@@ -222,10 +222,11 @@ def test_open_multiple_resolution():
     )
     assert isinstance(rds_list, list)
     assert len(rds_list) == 2
-    for rds in rds_list:
-        assert rds.attrs["SHORTNAME"] == "MOD09GA"
     assert rds_list[0].dims == {"y": 1200, "x": 1200, "band": 1}
     assert rds_list[1].dims == {"y": 2400, "x": 2400, "band": 1}
+    for rds in rds_list:
+        assert rds.attrs["SHORTNAME"] == "MOD09GA"
+        rds.close()
 
 
 def test_open_group_filter(open_rasterio):
@@ -1060,17 +1061,17 @@ def test_rasterio_vrt_gcps__data_exists():
         # NOTE: Eventually src_crs will not need to be provided
         # https://github.com/mapbox/rasterio/pull/2193
         with rasterio.vrt.WarpedVRT(src, src_crs=crs) as vrt:
-            rds = rioxarray.open_rasterio(vrt)
-            assert rds.values.any()
+            with rioxarray.open_rasterio(vrt) as rds:
+                assert rds.values.any()
 
 
 @pytest.mark.parametrize("lock", [True, False])
 def test_open_cog(lock):
     cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
-    rdsm = rioxarray.open_rasterio(cog_file)
-    assert rdsm.shape == (1, 500, 500)
-    rdso = rioxarray.open_rasterio(cog_file, lock=lock, overview_level=0)
-    assert rdso.shape == (1, 250, 250)
+    with rioxarray.open_rasterio(cog_file) as rdsm:
+        assert rdsm.shape == (1, 500, 500)
+    with rioxarray.open_rasterio(cog_file, lock=lock, overview_level=0) as rdso:
+        assert rdso.shape == (1, 250, 250)
 
 
 def test_mask_and_scale(open_rasterio):
@@ -1287,23 +1288,25 @@ def test_non_rectilinear():
 
 def test_non_rectilinear__load_coords(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
-    xds = open_rasterio(test_file)
-    assert xds.rio.shape == (10, 10)
-    with rasterio.open(test_file) as rds:
-        assert rds.transform == xds.rio.transform()
-        for xi, yi in itertools.product(range(rds.width), range(rds.height)):
-            subset = xds.isel(x=xi, y=yi)
-            assert_almost_equal(rds.xy(yi, xi), (subset.xc.item(), subset.yc.item()))
+    with open_rasterio(test_file) as xds:
+        assert xds.rio.shape == (10, 10)
+        with rasterio.open(test_file) as rds:
+            assert rds.transform == xds.rio.transform()
+            for xi, yi in itertools.product(range(rds.width), range(rds.height)):
+                subset = xds.isel(x=xi, y=yi)
+                assert_almost_equal(
+                    rds.xy(yi, xi), (subset.xc.item(), subset.yc.item())
+                )
 
 
 def test_non_rectilinear__skip_parse_coordinates(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
-    xds = open_rasterio(test_file, parse_coordinates=False)
-    assert "xc" not in xds.coords
-    assert "yc" not in xds.coords
-    assert xds.rio.shape == (10, 10)
-    with rasterio.open(test_file) as rds:
-        assert rds.transform == xds.rio.transform()
+    with open_rasterio(test_file, parse_coordinates=False) as xds:
+        assert "xc" not in xds.coords
+        assert "yc" not in xds.coords
+        assert xds.rio.shape == (10, 10)
+        with rasterio.open(test_file) as rds:
+            assert rds.transform == xds.rio.transform()
 
 
 def test_rotation_affine():
@@ -1331,14 +1334,14 @@ def test_rotation_affine():
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
-    xds = rioxarray.open_rasterio(test_file)
-    assert xds.rio.shape == (100, 100)
-    assert xds.dtype == "complex64"
-    assert xds.encoding["rasterio_dtype"] == "complex_int16"
+    with rioxarray.open_rasterio(test_file) as xds:
+        assert xds.rio.shape == (100, 100)
+        assert xds.dtype == "complex64"
+        assert xds.encoding["rasterio_dtype"] == "complex_int16"
 
-    tmp_output = tmp_path / "tmp_cint16.tif"
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype=dtype)
+        tmp_output = tmp_path / "tmp_cint16.tif"
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype=dtype)
     with rasterio.open(str(tmp_output)) as riofh:
         data = riofh.read()
         assert "complex_int16" in riofh.dtypes
@@ -1351,20 +1354,20 @@ def test_cint16_dtype(dtype, tmp_path):
 )
 def test_cint16_dtype_nodata(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
-    xds = rioxarray.open_rasterio(test_file)
-    assert xds.rio.nodata == 0
+    with rioxarray.open_rasterio(test_file) as xds:
+        assert xds.rio.nodata == 0
 
-    tmp_output = tmp_path / "tmp_cint16.tif"
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
-    with rasterio.open(str(tmp_output)) as riofh:
-        assert riofh.nodata == 0
+        tmp_output = tmp_path / "tmp_cint16.tif"
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+        with rasterio.open(str(tmp_output)) as riofh:
+            assert riofh.nodata == 0
 
-    # Assign nodata=None
-    tmp_output = tmp_path / "tmp_cint16_nodata.tif"
-    xds.rio.write_nodata(None, inplace=True)
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
+        # Assign nodata=None
+        tmp_output = tmp_path / "tmp_cint16_nodata.tif"
+        xds.rio.write_nodata(None, inplace=True)
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype="complex_int16")
     with rasterio.open(str(tmp_output)) as riofh:
         assert riofh.nodata is None
 
@@ -1373,15 +1376,15 @@ def test_cint16_dtype_nodata(tmp_path):
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype_masked(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
-    xds = rioxarray.open_rasterio(test_file, masked=True)
-    assert xds.rio.shape == (100, 100)
-    assert xds.dtype == "complex64"
-    assert xds.rio.encoded_nodata == 0
-    assert np.isnan(xds.rio.nodata)
+    with rioxarray.open_rasterio(test_file, masked=True) as xds:
+        assert xds.rio.shape == (100, 100)
+        assert xds.dtype == "complex64"
+        assert xds.rio.encoded_nodata == 0
+        assert np.isnan(xds.rio.nodata)
 
-    tmp_output = tmp_path / "tmp_cint16.tif"
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype=dtype)
+        tmp_output = tmp_path / "tmp_cint16.tif"
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype=dtype)
     with rasterio.open(str(tmp_output)) as riofh:
         data = riofh.read()
         assert "complex_int16" in riofh.dtypes
@@ -1392,20 +1395,20 @@ def test_cint16_dtype_masked(dtype, tmp_path):
 @cint_skip
 def test_cint16_promote_dtype(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
-    xds = rioxarray.open_rasterio(test_file)
+    with rioxarray.open_rasterio(test_file) as xds:
 
-    tmp_output = tmp_path / "tmp_cfloat64.tif"
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype="complex64")
-    with rasterio.open(str(tmp_output)) as riofh:
-        data = riofh.read()
-        assert "complex64" in riofh.dtypes
-        assert riofh.nodata == 0
-        assert data.dtype == "complex64"
+        tmp_output = tmp_path / "tmp_cfloat64.tif"
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype="complex64")
+        with rasterio.open(str(tmp_output)) as riofh:
+            data = riofh.read()
+            assert "complex64" in riofh.dtypes
+            assert riofh.nodata == 0
+            assert data.dtype == "complex64"
 
-    tmp_output = tmp_path / "tmp_cfloat128.tif"
-    with pytest.warns(NotGeoreferencedWarning):
-        xds.rio.to_raster(str(tmp_output), dtype="complex128")
+        tmp_output = tmp_path / "tmp_cfloat128.tif"
+        with pytest.warns(NotGeoreferencedWarning):
+            xds.rio.to_raster(str(tmp_output), dtype="complex128")
     with rasterio.open(str(tmp_output)) as riofh:
         data = riofh.read()
         assert "complex128" in riofh.dtypes
@@ -1469,13 +1472,15 @@ def test_read_file_handle_with_dask():
     with open(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"
     ) as src:
-        rioxarray.open_rasterio(src, chunks=2048)
+        with rioxarray.open_rasterio(src, chunks=2048):
+            pass
 
 
 @cint_skip
 def test_read_cint16_with_dask():
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
-    rioxarray.open_rasterio(test_file, chunks=True)
+    with rioxarray.open_rasterio(test_file, chunks=True):
+        pass
 
 
 @python_vsi_skip

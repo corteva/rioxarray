@@ -418,25 +418,25 @@ def test_clip_box__one_dimension_error(modis_clip):
 
 
 def test_clip_box__nodata_in_bounds():
-    xds = rioxarray.open_rasterio(
+    with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "clip_bbox__out_of_bounds.tif")
-    )
-    with pytest.raises(NoDataInBounds):
-        xds.rio.clip_box(
-            135.7821043660001123,
-            -17.1608065079999506,
-            135.7849362810001139,
-            -17.1580839999999739,
-            crs="EPSG:4326",
-        )
+    ) as xds:
+        with pytest.raises(NoDataInBounds):
+            xds.rio.clip_box(
+                135.7821043660001123,
+                -17.1608065079999506,
+                135.7849362810001139,
+                -17.1580839999999739,
+                crs="EPSG:4326",
+            )
 
-    with pytest.raises(NoDataInBounds):
-        xds.rio.reproject("EPSG:4326").rio.clip_box(
-            135.7821043660001123,
-            -17.1608065079999506,
-            135.7849362810001139,
-            -17.1580839999999739,
-        )
+        with pytest.raises(NoDataInBounds):
+            xds.rio.reproject("EPSG:4326").rio.clip_box(
+                135.7821043660001123,
+                -17.1608065079999506,
+                135.7849362810001139,
+                -17.1580839999999739,
+            )
 
 
 def test_clip_box__reproject_bounds(modis_clip):
@@ -1070,27 +1070,27 @@ def test_reproject__gcps_kwargs(tmp_path):
     ) as source:
         source.gcps = (src_gcps, crs)
 
-    rds = rioxarray.open_rasterio(tiffname)
-    rds.rio.write_crs(crs, inplace=True)
-    rds = rds.rio.reproject(
-        crs,
-        gcps=src_gcps,
-    )
-    assert rds.rio.height == 923
-    assert rds.rio.width == 1027
-    assert rds.rio.crs == crs
-    assert rds.rio.transform().almost_equals(
-        Affine(
-            216.8587081056465,
-            0.0,
-            115698.25,
-            0.0,
-            -216.8587081056465,
-            2818720.0,
+    with rioxarray.open_rasterio(tiffname) as rds:
+        rds.rio.write_crs(crs, inplace=True)
+        rds = rds.rio.reproject(
+            crs,
+            gcps=src_gcps,
         )
-    )
-    assert (rds.coords["x"].values > 11000).all()
-    assert (rds.coords["y"].values > 281700).all()
+        assert rds.rio.height == 923
+        assert rds.rio.width == 1027
+        assert rds.rio.crs == crs
+        assert rds.rio.transform().almost_equals(
+            Affine(
+                216.8587081056465,
+                0.0,
+                115698.25,
+                0.0,
+                -216.8587081056465,
+                2818720.0,
+            )
+        )
+        assert (rds.coords["x"].values > 11000).all()
+        assert (rds.coords["y"].values > 281700).all()
 
 
 def test_reproject_match(modis_reproject_match):
@@ -1803,11 +1803,11 @@ def test_to_raster__different_dtype(tmp_path, windowed):
         ),
     ):
         test_nd.rio.to_raster(tmpfile, dtype=numpy.uint8, windowed=windowed)
-    xds = rioxarray.open_rasterio(tmpfile)
-    assert str(xds.dtype) == "uint8"
-    assert xds.attrs["_FillValue"] == 255
-    assert xds.rio.nodata == 255
-    assert xds.squeeze().values[1, 1] == 255
+    with rioxarray.open_rasterio(tmpfile) as xds:
+        assert str(xds.dtype) == "uint8"
+        assert xds.attrs["_FillValue"] == 255
+        assert xds.rio.nodata == 255
+        assert xds.squeeze().values[1, 1] == 255
 
 
 def test_missing_spatial_dimensions():
@@ -2605,40 +2605,42 @@ def test_missing_crs_error_msg():
 
 
 def test_missing_transform_bounds():
-    xds = rioxarray.open_rasterio(
+    with rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
-    )
-    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
-    with pytest.raises(DimensionMissingCoordinateError):
-        xds.rio.bounds()
+    ) as xds:
+        xds.coords["spatial_ref"].attrs.pop("GeoTransform")
+        with pytest.raises(DimensionMissingCoordinateError):
+            xds.rio.bounds()
 
 
 def test_missing_transform_resolution():
-    xds = rioxarray.open_rasterio(
+    with rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
-    )
-    xds.coords["spatial_ref"].attrs.pop("GeoTransform")
-    with pytest.raises(DimensionMissingCoordinateError):
-        xds.rio.resolution()
+    ) as xds:
+        xds.coords["spatial_ref"].attrs.pop("GeoTransform")
+        with pytest.raises(DimensionMissingCoordinateError):
+            xds.rio.resolution()
 
 
 def test_shape_order():
-    rds = rioxarray.open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"))
-    assert rds.air_temperature.rio.shape == (585, 1386)
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    ) as rds:
+        assert rds.air_temperature.rio.shape == (585, 1386)
 
 
 def test_write_transform__from_read(tmp_path):
-    xds = rioxarray.open_rasterio(
+    with rioxarray.open_rasterio(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
         parse_coordinates=False,
-    )
-    out_file = tmp_path / "test_geotransform.nc"
-    xds.to_netcdf(out_file)
-    xds2 = rioxarray.open_rasterio(out_file, parse_coordinates=False)
-    assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
-    assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform
+    ) as xds:
+        out_file = tmp_path / "test_geotransform.nc"
+        xds.to_netcdf(out_file)
+        with rioxarray.open_rasterio(out_file, parse_coordinates=False) as xds2:
+            assert_almost_equal(tuple(xds2.rio.transform()), tuple(xds.rio.transform()))
+            assert xds.spatial_ref.GeoTransform == xds2.spatial_ref.GeoTransform
 
 
 def test_write_transform():
@@ -2829,18 +2831,18 @@ def test_grid_mapping_default():
 
 
 def test_estimate_utm_crs():
-    xds = rioxarray.open_rasterio(
+    with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"),
-    )
-    if PYPROJ_LT_3:
-        with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
-            xds.rio.estimate_utm_crs()
-    else:
-        assert xds.rio.estimate_utm_crs().to_epsg() in (32618, 32655)
-        assert xds.rio.reproject("EPSG:4326").rio.estimate_utm_crs() == CRS.from_epsg(
-            32618
-        )
-        assert xds.rio.estimate_utm_crs("WGS 72") in (32218, 32255)
+    ) as xds:
+        if PYPROJ_LT_3:
+            with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
+                xds.rio.estimate_utm_crs()
+        else:
+            assert xds.rio.estimate_utm_crs().to_epsg() in (32618, 32655)
+            assert xds.rio.reproject(
+                "EPSG:4326"
+            ).rio.estimate_utm_crs() == CRS.from_epsg(32618)
+            assert xds.rio.estimate_utm_crs("WGS 72") in (32218, 32255)
 
 
 @pytest.mark.skipif(PYPROJ_LT_3, reason="pyproj 3+ required")
@@ -2976,23 +2978,23 @@ def test_reproject__gcps_file(tmp_path):
     ) as source:
         source.gcps = (src_gcps, crs)
 
-    rds = rioxarray.open_rasterio(tiffname)
-    rds = rds.rio.reproject(
-        crs,
-    )
-    assert rds.rio.height == 923
-    assert rds.rio.width == 1027
-    assert rds.rio.crs == crs
-    assert rds.rio.transform().almost_equals(
-        Affine(
-            216.8587081056465,
-            0.0,
-            115698.25,
-            0.0,
-            -216.8587081056465,
-            2818720.0,
+    with rioxarray.open_rasterio(tiffname) as rds:
+        rds = rds.rio.reproject(
+            crs,
         )
-    )
+        assert rds.rio.height == 923
+        assert rds.rio.width == 1027
+        assert rds.rio.crs == crs
+        assert rds.rio.transform().almost_equals(
+            Affine(
+                216.8587081056465,
+                0.0,
+                115698.25,
+                0.0,
+                -216.8587081056465,
+                2818720.0,
+            )
+        )
 
 
 def test_bounds__ordered__dataarray():

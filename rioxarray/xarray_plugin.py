@@ -70,8 +70,12 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             **open_kwargs,
         )
         if isinstance(rds, xr.DataArray):
-            rds = rds.to_dataset()
-        if not isinstance(rds, xr.Dataset):
+            dataset = rds.to_dataset()
+            dataset.set_close(rds._close)
+            rds = dataset
+        if isinstance(rds, list):
+            for dataset in rds:
+                dataset.close()
             raise RioXarrayError(
                 "Multiple resolution sets found. "
                 "Use 'variable' or 'group' to filter."
