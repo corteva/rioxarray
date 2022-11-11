@@ -13,6 +13,7 @@ import os
 import re
 import threading
 import warnings
+from collections import defaultdict
 from typing import Any, Dict, Hashable, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
@@ -737,6 +738,30 @@ def _pop_global_netcdf_attrs_from_vars(dataset_to_clean: Dataset) -> Dataset:
     return dataset_to_clean
 
 
+def _subdataset_groups_to_dataset(
+    dim_groups: Dict[Hashable, Dict[Hashable, DataArray]], global_tags: Dict
+) -> Union[Dataset, List[Dataset]]:
+    if dim_groups:
+        dataset: Union[Dataset, List[Dataset]] = []
+        for dim_group in dim_groups.values():
+            dataset_group = _pop_global_netcdf_attrs_from_vars(
+                Dataset(dim_group, attrs=global_tags)
+            )
+
+            def _ds_close():
+                # pylint: disable=cell-var-from-loop
+                for data_var in dim_group.values():
+                    data_var.close()
+
+            dataset_group.set_close(_ds_close)
+            dataset.append(dataset_group)
+        if len(dataset) == 1:
+            dataset = dataset.pop()
+    else:
+        dataset = Dataset(attrs=global_tags)
+    return dataset
+
+
 def _load_subdatasets(
     riods: RasterioReader,
     group: Optional[Union[str, List[str], Tuple[str, ...]]],
@@ -754,8 +779,7 @@ def _load_subdatasets(
     """
     Load in rasterio subdatasets
     """
-    global_tags = _parse_tags(riods.tags())
-    dim_groups = {}
+    dim_groups: Dict[Hashable, Dict[Hashable, DataArray]] = defaultdict(dict)
     subdataset_filter = None
     if any((group, variable)):
         subdataset_filter = build_subdataset_filter(group, variable)
@@ -777,23 +801,10 @@ def _load_subdatasets(
             decode_timedelta=decode_timedelta,
             **open_kwargs,
         )
-        if shape not in dim_groups:
-            dim_groups[shape] = {rioda.name: rioda}
-        else:
-            dim_groups[shape][rioda.name] = rioda
-
-    if len(dim_groups) > 1:
-        dataset: Union[Dataset, List[Dataset]] = [
-            _pop_global_netcdf_attrs_from_vars(Dataset(dim_group, attrs=global_tags))
-            for dim_group in dim_groups.values()
-        ]
-    elif not dim_groups:
-        dataset = Dataset(attrs=global_tags)
-    else:
-        dataset = _pop_global_netcdf_attrs_from_vars(
-            Dataset(list(dim_groups.values())[0], attrs=global_tags)
-        )
-    return dataset
+        dim_groups[shape][rioda.name] = rioda
+    return _subdataset_groups_to_dataset(
+        dim_groups=dim_groups, global_tags=_parse_tags(riods.tags())
+    )
 
 
 def _load_bands_as_variables(
@@ -836,7 +847,14 @@ def _load_bands_as_variables(
             .squeeze()  # type: ignore
             .drop("band")  # type: ignore
         )
-    return Dataset(data_vars, attrs=global_tags)
+    dataset = Dataset(data_vars, attrs=global_tags)
+
+    def _ds_close():
+        for data_var in data_vars.values():
+            data_var.close()
+
+    dataset.set_close(_ds_close)
+    return dataset
 
 
 def _prepare_dask(
@@ -1070,7 +1088,7 @@ def open_rasterio(
         captured_warnings = rio_warnings.copy()
 
     if band_as_variable:
-        return _load_bands_as_variables(
+        dataset_result = _load_bands_as_variables(
             riods=riods,
             parse_coordinates=parse_coordinates,
             chunks=chunks,
@@ -1082,6 +1100,8 @@ def open_rasterio(
             decode_timedelta=decode_timedelta,
             **open_kwargs,
         )
+        manager.close()
+        return dataset_result
 
     # raise the NotGeoreferencedWarning if applicable
     for rio_warning in captured_warnings:
@@ -1092,7 +1112,7 @@ def open_rasterio(
 
     # open the subdatasets if they exist
     if riods.subdatasets:
-        return _load_subdatasets(
+        subdataset_result = _load_subdatasets(
             riods=riods,
             group=group,
             variable=variable,
@@ -1106,6 +1126,8 @@ def open_rasterio(
             decode_timedelta=decode_timedelta,
             **open_kwargs,
         )
+        manager.close()
+        return subdataset_result
 
     if vrt_params is not None:
         riods = WarpedVRT(riods, **vrt_params)
@@ -1204,9 +1226,6 @@ def open_rasterio(
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)
 
-    # Make the file closeable
-    result.set_close(manager.close)
-    result.rio._manager = manager
     # add file path to encoding
     result.encoding["source"] = riods.name
     result.encoding["rasterio_dtype"] = str(riods.dtypes[0])
@@ -1224,4 +1243,7 @@ def open_rasterio(
             for attr, value in result.attrs.items()
             if not attr.startswith(f"{result.name}#")
         }
+    # Make the file closeable
+    result.set_close(manager.close)
+    result.rio._manager = manager
     return result

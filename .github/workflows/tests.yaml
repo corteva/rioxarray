@@ -26,8 +26,8 @@ jobs:
   docker_tests:
     needs: linting
     runs-on: ubuntu-latest
-    name: Docker | python=${{ matrix.python-version }} | rasterio${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
-    container: osgeo/gdal:ubuntu-full-3.4.2
+    name: Docker | GDAL=${{ matrix.gdal-version }} | python=${{ matrix.python-version }} | rasterio${{ matrix.rasterio-version }} | scipy ${{ matrix.run-with-scipy }}
+    container: osgeo/gdal:ubuntu-full-${{ matrix.gdal-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -35,23 +35,28 @@ jobs:
         rasterio-version: ['']
         xarray-version: ['']
         run-with-scipy: ['YES']
+        gdal-version: ['3.5.3']
         include:
           - python-version: '3.8'
             rasterio-version: ''
             xarray-version: '==0.17'
             run-with-scipy: 'YES'
+            gdal-version: '3.4.3'
           - python-version: '3.8'
             rasterio-version: '==1.1'
             xarray-version: ''
             run-with-scipy: 'YES'
+            gdal-version: '3.4.3'
           - python-version: '3.8'
             rasterio-version: '==1.2.1'
             xarray-version: ''
             run-with-scipy: 'YES'
+            gdal-version: '3.5.3'
           - python-version: '3.9'
             rasterio-version: ''
             xarray-version: ''
             run-with-scipy: 'NO'
+            gdal-version: '3.5.3'
     steps:
       - uses: actions/checkout@v3
 
