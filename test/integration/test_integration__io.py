@@ -29,6 +29,7 @@ import rioxarray
 from rioxarray._io import build_subdataset_filter
 from rioxarray.rioxarray import DEFAULT_GRID_MAP
 from test.conftest import (
+    GDAL_GE_36,
     RASTERIO_GE_13,
     RASTERIO_GE_125,
     RASTERIO_VERSION,
@@ -1183,8 +1184,12 @@ def test_mask_and_scale__unicode(open_rasterio):
         assert test_encoding["add_offset"] == 190
         assert test_encoding["scale_factor"] == pytest.approx(0.0025)
         assert test_encoding["_FillValue"] == 65535
-        assert test_encoding["dtype"] == "int16"
-        assert test_encoding["rasterio_dtype"] == "int16"
+        expected_dtype = "int16"
+        if GDAL_GE_36:
+            # https://github.com/OSGeo/gdal/pull/6369
+            expected_dtype = "uint16"
+        assert test_encoding["dtype"] == expected_dtype
+        assert test_encoding["rasterio_dtype"] == expected_dtype
 
 
 def test_mask_and_scale__unicode__to_raster(open_rasterio, tmp_path):
