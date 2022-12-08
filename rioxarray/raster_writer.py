@@ -36,6 +36,57 @@ UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 # Note: transform & crs are removed in write_transform/write_crs
 
 
+def _write_tags(raster_handle, tags):
+    """
+    Write tags to raster dataset
+    """
+    # filter out attributes that should be written in a different location
+    skip_tags = (
+        UNWANTED_RIO_ATTRS
+        + FILL_VALUE_NAMES
+        + (
+            "crs",
+            "transform",
+            "scales",
+            "scale_factor",
+            "add_offset",
+            "offsets",
+            "grid_mapping",
+        )
+    )
+    # this is for when multiple values are used
+    # in this case, it will be stored in the raster description
+    if not isinstance(tags.get("long_name"), str):
+        skip_tags += ("long_name",)
+    band_tags = tags.pop("band_tags", [])
+    tags = {key: value for key, value in tags.items() if key not in skip_tags}
+    raster_handle.update_tags(**tags)
+
+    if isinstance(band_tags, list):
+        for iii, band_tag in enumerate(band_tags):
+            raster_handle.update_tags(iii + 1, **band_tag)
+
+
+def _write_band_description(raster_handle, xarray_dataset):
+    """
+    Write band descriptions using the long name
+    """
+    long_name = xarray_dataset.attrs.get("long_name")
+    if isinstance(long_name, (tuple, list)):
+        if len(long_name) != raster_handle.count:
+            raise RioXarrayError(
+                "Number of names in the 'long_name' attribute does not equal "
+                "the number of bands."
+            )
+        for iii, band_description in enumerate(long_name):
+            raster_handle.set_band_description(iii + 1, band_description)
+    else:
+        band_description = long_name or xarray_dataset.name
+        if band_description:
+            for iii in range(raster_handle.count):
+                raster_handle.set_band_description(iii + 1, band_description)
+
+
 def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     """
     Write the metadata stored in the xarray object to raster metadata
@@ -62,42 +113,8 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
         if add_offset is not None:
             raster_handle.offsets = (add_offset,) * raster_handle.count
 
-    # filter out attributes that should be written in a different location
-    skip_tags = (
-        UNWANTED_RIO_ATTRS
-        + FILL_VALUE_NAMES
-        + (
-            "crs",
-            "transform",
-            "scales",
-            "scale_factor",
-            "add_offset",
-            "offsets",
-            "grid_mapping",
-        )
-    )
-    # this is for when multiple values are used
-    # in this case, it will be stored in the raster description
-    if not isinstance(tags.get("long_name"), str):
-        skip_tags += ("long_name",)
-    tags = {key: value for key, value in tags.items() if key not in skip_tags}
-    raster_handle.update_tags(**tags)
-
-    # write band name information
-    long_name = xarray_dataset.attrs.get("long_name")
-    if isinstance(long_name, (tuple, list)):
-        if len(long_name) != raster_handle.count:
-            raise RioXarrayError(
-                "Number of names in the 'long_name' attribute does not equal "
-                "the number of bands."
-            )
-        for iii, band_description in enumerate(long_name):
-            raster_handle.set_band_description(iii + 1, band_description)
-    else:
-        band_description = long_name or xarray_dataset.name
-        if band_description:
-            for iii in range(raster_handle.count):
-                raster_handle.set_band_description(iii + 1, band_description)
+    _write_tags(raster_handle=raster_handle, tags=tags)
+    _write_band_description(raster_handle=raster_handle, xarray_dataset=xarray_dataset)
 
 
 def _ensure_nodata_dtype(original_nodata, new_dtype):

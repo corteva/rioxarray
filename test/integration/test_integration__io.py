@@ -484,25 +484,41 @@ def test_utm():
             assert "y" not in rioda.coords
 
 
-def test_band_as_variable(open_rasterio):
+def test_band_as_variable(open_rasterio, tmp_path):
+    test_raster = tmp_path / "test.tif"
+
     with create_tmp_geotiff() as (tmp_file, expected):
         with open_rasterio(
             tmp_file, band_as_variable=True, mask_and_scale=False
         ) as riods:
-            for band in (1, 2, 3):
-                band_name = f"band_{band}"
-                assert_allclose(riods[band_name], expected.sel(band=band).drop("band"))
-                assert riods[band_name].attrs["BAND"] == band
-                assert riods[band_name].attrs["scale_factor"] == 1.0
-                assert riods[band_name].attrs["add_offset"] == 0.0
-                assert riods[band_name].attrs["long_name"] == f"d{band}"
-                assert riods[band_name].attrs["units"] == f"u{band}"
-                assert riods[band_name].rio.crs == expected.rio.crs
-                assert_array_equal(
-                    riods[band_name].rio.resolution(), expected.rio.resolution()
-                )
-                assert isinstance(riods[band_name].rio._cached_transform(), Affine)
-                assert riods[band_name].rio.nodata is None
+
+            def _check_raster(raster_ds):
+                for band in (1, 2, 3):
+                    band_name = f"band_{band}"
+                    assert_allclose(
+                        raster_ds[band_name], expected.sel(band=band).drop("band")
+                    )
+                    assert raster_ds[band_name].attrs["BAND"] == band
+                    assert raster_ds[band_name].attrs["scale_factor"] == 1.0
+                    assert raster_ds[band_name].attrs["add_offset"] == 0.0
+                    assert raster_ds[band_name].attrs["long_name"] == f"d{band}"
+                    assert raster_ds[band_name].attrs["units"] == f"u{band}"
+                    assert raster_ds[band_name].rio.crs == expected.rio.crs
+                    assert_array_equal(
+                        raster_ds[band_name].rio.resolution(), expected.rio.resolution()
+                    )
+                    assert isinstance(
+                        raster_ds[band_name].rio._cached_transform(), Affine
+                    )
+                    assert raster_ds[band_name].rio.nodata is None
+
+            _check_raster(riods)
+            # test roundtrip
+            riods.rio.to_raster(test_raster)
+            with open_rasterio(
+                test_raster, band_as_variable=True, mask_and_scale=False
+            ) as riods_round:
+                _check_raster(riods_round)
 
 
 def test_platecarree():

@@ -497,18 +497,23 @@ class RasterDataset(XRasterBase):
         """
         variable_dim = f"band_{uuid4()}"
         data_array = self._obj.to_array(dim=variable_dim)
-        # write data array names to raster
-        data_array.attrs["long_name"] = data_array[variable_dim].values.tolist()
         # ensure raster metadata preserved
         scales = []
         offsets = []
         nodatavals = []
+        band_tags = []
+        long_name = []
         for data_var in data_array[variable_dim].values:
             scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
             offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
+            long_name.append(self._obj[data_var].attrs.get("long_name", data_var))
             nodatavals.append(self._obj[data_var].rio.nodata)
+            band_tags.append(self._obj[data_var].attrs.copy())
         data_array.attrs["scales"] = scales
         data_array.attrs["offsets"] = offsets
+        data_array.attrs["band_tags"] = band_tags
+        data_array.attrs["long_name"] = long_name
+
         nodata = nodatavals[0]
         if (
             all(nodataval == nodata for nodataval in nodatavals)
