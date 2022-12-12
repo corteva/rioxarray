@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rioxarray.rioxarray &mdash; rioxarray 0.13.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> rioxarray
+          </a>
+              <div class="version">
+                0.13.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rioxarray.rioxarray</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rioxarray.rioxarray</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is an extension for xarray to provide rasterio capabilities</span>
+<span class="sd">to xarray datasets/dataarrays.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: disable=too-many-lines</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="kn">import</span> <span class="nn">rasterio.warp</span>
+<span class="kn">import</span> <span class="nn">rasterio.windows</span>
+<span class="kn">import</span> <span class="nn">xarray</span>
+<span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">rasterio.control</span> <span class="kn">import</span> <span class="n">GroundControlPoint</span>
+<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
+
+<span class="kn">from</span> <span class="nn">rioxarray._options</span> <span class="kn">import</span> <span class="n">EXPORT_GRID_MAPPING</span><span class="p">,</span> <span class="n">get_option</span>
+<span class="kn">from</span> <span class="nn">rioxarray.crs</span> <span class="kn">import</span> <span class="n">crs_from_user_input</span>
+<span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DimensionError</span><span class="p">,</span>
+    <span class="n">DimensionMissingCoordinateError</span><span class="p">,</span>
+    <span class="n">InvalidDimensionOrder</span><span class="p">,</span>
+    <span class="n">MissingCRS</span><span class="p">,</span>
+    <span class="n">MissingSpatialDimensionError</span><span class="p">,</span>
+    <span class="n">NoDataInBounds</span><span class="p">,</span>
+    <span class="n">OneDimensionalRaster</span><span class="p">,</span>
+    <span class="n">RioXarrayError</span><span class="p">,</span>
+    <span class="n">TooManyDimensions</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">DEFAULT_GRID_MAP</span> <span class="o">=</span> <span class="s2">&quot;spatial_ref&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if the affine has rotation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    affine: :obj:`affine.Affine`</span>
+<span class="sd">        The affine of the grid.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">affine</span><span class="o">.</span><span class="n">b</span> <span class="o">==</span> <span class="n">affine</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">_resolution</span><span class="p">(</span><span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if the resolution of the affine.</span>
+<span class="sd">    If it has rotation, the sign of the resolution is lost.</span>
+
+<span class="sd">    Based on: https://github.com/mapbox/rasterio/blob/6185a4e4ad72b5669066d2d5004bf46d94a6d298/rasterio/_base.pyx#L943-L951</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    affine: :obj:`affine.Affine`</span>
+<span class="sd">        The affine of the grid.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    x_resolution: float</span>
+<span class="sd">        The X resolution of the affine.</span>
+<span class="sd">    y_resolution: float</span>
+<span class="sd">        The Y resolution of the affine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">affine</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">affine</span><span class="o">.</span><span class="n">e</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">affine</span><span class="o">.</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">affine</span><span class="o">.</span><span class="n">d</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">affine</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">affine</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">affine_to_coords</span><span class="p">(</span>
+    <span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Generate 1d pixel centered coordinates from affine.</span>
+
+<span class="sd">    Based on code from the xarray rasterio backend.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    affine: :obj:`affine.Affine`</span>
+<span class="sd">        The affine of the grid.</span>
+<span class="sd">    width: int</span>
+<span class="sd">        The width of the grid.</span>
+<span class="sd">    height: int</span>
+<span class="sd">        The height of the grid.</span>
+<span class="sd">    x_dim: str, optional</span>
+<span class="sd">        The name of the X dimension. Default is &#39;x&#39;.</span>
+<span class="sd">    y_dim: str, optional</span>
+<span class="sd">        The name of the Y dimension. Default is &#39;y&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict: x and y coordinate arrays.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">affine</span> <span class="o">*</span> <span class="n">affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">affine</span><span class="o">.</span><span class="n">is_rectilinear</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">):</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_coords</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="n">x_coords</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_generate_spatial_coords</span><span class="p">(</span>
+    <span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;get spatial coords in new transform&quot;&quot;&quot;</span>
+    <span class="n">new_spatial_coords</span> <span class="o">=</span> <span class="n">affine_to_coords</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
+        <span class="s2">&quot;yc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_get_nonspatial_coords</span><span class="p">(</span>
+    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">]]:</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span>
+        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span>
+        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span>
+        <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
+    <span class="p">}:</span>
+        <span class="k">if</span> <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">coords</span>
+
+
+<span class="k">def</span> <span class="nf">_make_coords</span><span class="p">(</span>
+    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
+    <span class="n">dst_affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span>
+    <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">force_generate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Generate the coordinates of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">force_generate</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span>
+        <span class="ow">and</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span>
+    <span class="p">):</span>
+        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">_generate_spatial_coords</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">)</span>
+        <span class="n">new_coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_coords</span>
+    <span class="k">return</span> <span class="n">coords</span>
+
+
+<span class="k">def</span> <span class="nf">_get_data_var_message</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get message for named data variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot; Data variable: </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_get_spatial_dims</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">var</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the spatial dimensions of the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
+    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                <span class="n">x_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
+        <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">err</span> <span class="kn">from</span> <span class="bp">None</span>
+
+
+<span class="k">def</span> <span class="nf">_has_spatial_dims</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">var</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check to see if the variable in the Dataset has spatial dimensions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># pylint: disable=pointless-statement</span>
+        <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">_order_bounds</span><span class="p">(</span>
+    <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">resolution_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">resolution_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure that the bounds are in the correct order</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">maxy</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">miny</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">miny</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">maxy</span>
+    <span class="k">if</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">maxx</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">minx</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">minx</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">maxx</span>
+
+    <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+
+<div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray_obj</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Determine the spatial dimensions of the `xarray.DataArray`</span>
+        <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;y&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;longitude&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;latitude&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># look for coordinates with CF attributes</span>
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="c1"># make sure to only look in 1D coordinates</span>
+                <span class="c1"># that has the same dimension name as the coordinate</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">coord</span><span class="p">,):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;projection_x_coordinate&quot;</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">coord</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;projection_y_coordinate&quot;</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">coord</span>
+
+        <span class="c1"># properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`rasterio.crs.CRS`:</span>
+<span class="sd">        Retrieve projection from :obj:`xarray.Dataset` | :obj:`xarray.DataArray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+        <span class="c1"># look in wkt attributes to avoid using</span>
+        <span class="c1"># pyproj CRS if possible for performance</span>
+        <span class="k">for</span> <span class="n">crs_attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;crs_wkt&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">crs_attr</span><span class="p">],</span>
+                    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># look in grid_mapping</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+                <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CRSError</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># look in attrs for &#39;crs&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+    <span class="k">def</span> <span class="nf">_get_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the object to modify.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inplace: bool</span>
+<span class="sd">            If True, returns self.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="n">obj_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># preserve attribute information</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="k">return</span> <span class="n">obj_copy</span>
+
+<div class="viewcode-block" id="XRasterBase.set_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_crs">[docs]</a>    <span class="k">def</span> <span class="nf">set_crs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the CRS value for the Dataset/DataArray without modifying</span>
+<span class="sd">        the dataset/data array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_crs: object</span>
+<span class="sd">            Anything accepted by `rasterio.crs.CRS.from_user_input`.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Dataset with crs attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_from_user_input</span><span class="p">(</span><span class="n">input_crs</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">grid_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        str: The CF grid_mapping attribute. &#39;spatial_ref&#39; is the default.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">grid_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">grid_mapping</span>
+        <span class="n">grid_mapping</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span>
+        <span class="c1"># search the dataset for the grid mapping name</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
+            <span class="n">grid_mappings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_spatial_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">var_grid_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">var_grid_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">grid_mapping</span> <span class="o">=</span> <span class="n">var_grid_mapping</span>
+                    <span class="n">grid_mappings</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">grid_mapping</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_mappings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;Multiple grid mappings exist.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grid_mapping</span>
+
+<div class="viewcode-block" id="XRasterBase.write_grid_mapping"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_grid_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">write_grid_mapping</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the CF grid_mapping attribute.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the grid_mapping coordinate.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with CF compliant CRS information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># remove grid_mapping from attributes if it exists</span>
+                <span class="c1"># and update the grid_mapping in encoding</span>
+                <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                    <span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+        <span class="c1"># remove grid_mapping from attributes if it exists</span>
+        <span class="c1"># and update the grid_mapping in encoding</span>
+        <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">grid_mapping</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.write_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs">[docs]</a>    <span class="k">def</span> <span class="nf">write_crs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the CRS to the dataset in a CF compliant manner.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_crs: Any</span>
+<span class="sd">            Anything accepted by `rasterio.crs.CRS.from_user_input`.</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the grid_mapping coordinate to store the CRS information in.</span>
+<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with CF compliant CRS information.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Write the CRS of the current `xarray` object:</span>
+
+<span class="sd">        &gt;&gt;&gt; raster.rio.write_crs(&quot;epsg:4326&quot;, inplace=True)</span>
+
+<span class="sd">        Write the CRS on a copy:</span>
+
+<span class="sd">        &gt;&gt;&gt; raster = raster.rio.write_crs(&quot;epsg:4326&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">input_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+
+        <span class="c1"># get original transform</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+        <span class="c1"># remove old grid maping coordinate if exists</span>
+        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
+                <span class="s2">&quot;CRS not found. Please set the CRS with &#39;rio.write_crs()&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># add grid mapping coordinate</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">get_option</span><span class="p">(</span><span class="n">EXPORT_GRID_MAPPING</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_cf</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="c1"># spatial_ref is for compatibility with GDAL</span>
+        <span class="n">crs_wkt</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
+        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
+        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;crs_wkt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
+            <span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># remove old crs if exists</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_grid_mapping</span><span class="p">(</span>
+            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.estimate_utm_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the estimated UTM CRS based on the bounds of the dataset.</span>
+
+<span class="sd">        .. versionadded:: 0.2</span>
+
+<span class="sd">        .. note:: Requires pyproj 3+</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        datum_name : str, optional</span>
+<span class="sd">            The name of the datum to use in the query. Default is WGS 84.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rasterio.crs.CRS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pyproj.aoi</span> <span class="kn">import</span> <span class="n">AreaOfInterest</span>
+            <span class="kn">from</span> <span class="nn">pyproj.database</span> <span class="kn">import</span> <span class="n">query_utm_crs_info</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;pyproj 3+ required for estimate_utm_crs.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;crs must be set to estimate UTM CRS.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ensure using geographic coordinates</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">x_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">])</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">])</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="n">utm_crs_list</span> <span class="o">=</span> <span class="n">query_utm_crs_info</span><span class="p">(</span>
+            <span class="n">datum_name</span><span class="o">=</span><span class="n">datum_name</span><span class="p">,</span>
+            <span class="n">area_of_interest</span><span class="o">=</span><span class="n">AreaOfInterest</span><span class="p">(</span>
+                <span class="n">west_lon_degree</span><span class="o">=</span><span class="n">x_center</span><span class="p">,</span>
+                <span class="n">south_lat_degree</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span>
+                <span class="n">east_lon_degree</span><span class="o">=</span><span class="n">x_center</span><span class="p">,</span>
+                <span class="n">north_lat_degree</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">utm_crs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unable to determine UTM CRS&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the transform from:</span>
+<span class="sd">        1. The GeoTransform metatada property in the grid mapping</span>
+<span class="sd">        2. The transform attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># look in grid_mapping</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># Calling .tolist() to assure the arguments are Python float and JSON serializable</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span><span class="o">*</span><span class="n">transform</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="XRasterBase.write_transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>    <span class="k">def</span> <span class="nf">write_transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. versionadded:: 0.0.30</span>
+
+<span class="sd">        Write the GeoTransform to the dataset where GDAL can read it in.</span>
+
+<span class="sd">        https://gdal.org/drivers/raster/netcdf.html#georeference</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transform: affine.Affine, optional</span>
+<span class="sd">            The transform of the dataset. If not provided, it will be calculated.</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the grid_mapping coordinate to store the transform information in.</span>
+<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with Geo Transform written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># delete the old attribute to prevent confusion</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
+        <span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_grid_mapping</span><span class="p">(</span>
+            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Affine</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            If True, it will re-calculate the transform instead of using</span>
+<span class="sd">            the cached transform.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`affine.Afffine`:</span>
+<span class="sd">            The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">transform</span><span class="o">.</span><span class="n">is_rectilinear</span> <span class="ow">or</span> <span class="n">_affine_has_rotation</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">recalc</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Transform that is non-rectilinear or with rotation found. &quot;</span>
+                    <span class="s2">&quot;Unable to recalculate.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">transform</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">src_left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">src_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unordered_bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DimensionMissingCoordinateError</span><span class="p">,</span> <span class="n">DimensionError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span> <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">transform</span>
+        <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">src_left</span><span class="p">,</span> <span class="n">src_top</span><span class="p">)</span> <span class="o">*</span> <span class="n">Affine</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+            <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.write_coordinate_system"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">write_coordinate_system</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the coordinate system CF metadata.</span>
+
+<span class="sd">        .. versionadded:: 0.0.30</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The dataset with the CF coordinate system attributes added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># add metadata to x,y coordinates</span>
+        <span class="n">is_projected</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_projected</span>
+        <span class="n">is_geographic</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span>
+        <span class="n">x_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="n">y_coord_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="k">if</span> <span class="n">is_projected</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;linear_units_factor&quot;</span><span class="p">):</span>
+                <span class="n">unit_factor</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">linear_units_factor</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">unit_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">units</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">unit_factor</span><span class="si">}</span><span class="s2"> metre&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;metre&quot;</span>
+            <span class="c1"># X metadata</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;x coordinate of projection&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;projection_x_coordinate&quot;</span>
+            <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+            <span class="c1"># Y metadata</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;y coordinate of projection&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;projection_y_coordinate&quot;</span>
+            <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="k">elif</span> <span class="n">is_geographic</span><span class="p">:</span>
+            <span class="c1"># X metadata</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="n">x_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_east&quot;</span>
+            <span class="c1"># Y metadata</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
+            <span class="n">y_coord_attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_north&quot;</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">y_coord_attrs</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">x_coord_attrs</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the attributes of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_attrs: dict</span>
+<span class="sd">            A dictionary of new attributes.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with new attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># set the attributes</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">new_attrs</span>
+        <span class="c1"># reset rioxarray properties depending</span>
+        <span class="c1"># on attributes to be generated</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.update_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">update_attrs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the attributes of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_attrs: dict</span>
+<span class="sd">            A dictionary of new attributes to update with.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with updated attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">data_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_attrs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">data_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.set_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the encoding of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        .. versionadded:: 0.4</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_encoding: dict</span>
+<span class="sd">            A dictionary for encoding.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with new attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="c1"># set the attributes</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">new_encoding</span>
+        <span class="c1"># reset rioxarray properties depending</span>
+        <span class="c1"># on attributes to be generated</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.update_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">update_encoding</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the encoding of the dataset/dataarray and reset</span>
+<span class="sd">        rioxarray properties to re-search for them.</span>
+
+<span class="sd">        .. versionadded:: 0.4</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_encoding: dict</span>
+<span class="sd">            A dictionary with encoding values to update with.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with updated attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_encoding</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="n">data_encoding</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">(</span><span class="n">data_encoding</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.set_spatial_dims"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims">[docs]</a>    <span class="k">def</span> <span class="nf">set_spatial_dims</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This sets the spatial dimensions of the dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x_dim: str</span>
+<span class="sd">            The name of the x dimension.</span>
+<span class="sd">        y_dim: str</span>
+<span class="sd">            The name of the y dimension.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will modify the dataframe in place.</span>
+<span class="sd">            Otherwise it will return a modified copy.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Dataset with spatial dimensions set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_dim</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">x_dim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;x dimension (</span><span class="si">{</span><span class="n">x_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">data_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">y_dim</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">y_dim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;y dimension (</span><span class="si">{</span><span class="n">y_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">data_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Hashable: The dimension for the X-axis.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span>
+        <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
+            <span class="s2">&quot;x dimension not found. &#39;rio.set_spatial_dims()&#39; or &quot;</span>
+            <span class="s2">&quot;using &#39;rename()&#39; to change the dimension name to &#39;x&#39; can address this.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Hashable: The dimension for the Y-axis.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span>
+        <span class="k">raise</span> <span class="n">MissingSpatialDimensionError</span><span class="p">(</span>
+            <span class="s2">&quot;y dimension not found. &#39;rio.set_spatial_dims()&#39; or &quot;</span>
+            <span class="s2">&quot;using &#39;rename()&#39; to change the dimension name to &#39;y&#39; can address this.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the width of the dataset (x dimension size)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the height of the dataset (y dimension size)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;tuple(int, int): Returns the shape (height, width)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function validates that the dimensions 2D/3D and</span>
+<span class="sd">        they are are in the proper order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or None: Name extra dimension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extra_dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooManyDimensions</span><span class="p">(</span>
+                <span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
+            <span class="n">dim_info</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{</span><span class="n">dim_info</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{</span><span class="n">dim_info</span><span class="si">}</span><span class="s2">`&quot;</span>
+                <span class="s2">&quot; to reorder your dimensions.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">extra_dims</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
+            <span class="n">dim_info</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidDimensionOrder</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid dimension order. Expected order: </span><span class="si">{</span><span class="n">dim_info</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;You can use `DataArray.transpose</span><span class="si">{</span><span class="n">dim_info</span><span class="si">}</span><span class="s2">`&quot;</span>
+                <span class="s2">&quot; to reorder your dimensions.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">extra_dims</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the band count (z dimension size)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+        <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">extra_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+
+    <span class="k">def</span> <span class="nf">_internal_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Determine the internal bounds of the `xarray.DataArray`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> missing coordinates.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to determine bounds from coordinates.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+<div class="viewcode-block" id="XRasterBase.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine if the resolution of the grid.</span>
+<span class="sd">        If the transformation has rotation, the sign of the resolution is lost.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the resolution to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x_resolution, y_resolution: float</span>
+<span class="sd">            The resolution of the `xarray.DataArray` | `xarray.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">recalc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_resolution</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+
+        <span class="c1"># if the coordinates of the spatial dimensions are missing</span>
+        <span class="c1"># use the cached transform resolution</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">return</span> <span class="n">_resolution</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
+                <span class="s2">&quot;Only 1 dimenional array found. Cannot calculate the resolution.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">resolution_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
+
+    <span class="k">def</span> <span class="nf">_unordered_bounds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unordered bounds.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># attempt to get bounds from xarray coordinate values</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+            <span class="n">left</span> <span class="o">-=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">right</span> <span class="o">+=</span> <span class="n">resolution_x</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">top</span> <span class="o">-=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">bottom</span> <span class="o">+=</span> <span class="n">resolution_y</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="k">except</span> <span class="n">DimensionMissingCoordinateError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">transform</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;Transform not able to be determined.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">top</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
+
+<div class="viewcode-block" id="XRasterBase.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the</span>
+<span class="sd">            transform attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_order_bounds</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_unordered_bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">Window</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a rasterio.windows.Window to select a subset of the data.</span>
+
+<span class="sd">        .. versionadded:: 0.6.0 pad</span>
+
+<span class="sd">        .. warning:: Float indices are converted to integers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        window: :class:`rasterio.windows.Window`</span>
+<span class="sd">            The window of the dataset to read.</span>
+<span class="sd">        pad: bool, default=False</span>
+<span class="sd">            Set to True to expand returned DataArray to dimensions of the window</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The data in the window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">row_stop</span><span class="p">),</span> <span class="p">(</span><span class="n">col_start</span><span class="p">,</span> <span class="n">col_stop</span><span class="p">)</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">toranges</span><span class="p">()</span>
+        <span class="n">row_start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">row_start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">row_start</span><span class="p">)</span>
+        <span class="n">row_stop</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">row_stop</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">row_stop</span><span class="p">)</span>
+        <span class="n">col_start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">col_start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">col_start</span><span class="p">)</span>
+        <span class="n">col_stop</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">col_stop</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">col_stop</span><span class="p">)</span>
+        <span class="n">row_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row_start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row_stop</span><span class="p">))</span>
+        <span class="n">col_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">col_start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">col_stop</span><span class="p">))</span>
+        <span class="n">array_subset</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">row_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">col_slice</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                    <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">Window</span><span class="o">.</span><span class="n">from_slices</span><span class="p">(</span>
+                        <span class="n">rows</span><span class="o">=</span><span class="n">row_slice</span><span class="p">,</span>
+                        <span class="n">cols</span><span class="o">=</span><span class="n">col_slice</span><span class="p">,</span>
+                        <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                        <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array_subset</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">array_subset</span></div>
+
+<div class="viewcode-block" id="XRasterBase.slice_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.slice_xy">[docs]</a>    <span class="k">def</span> <span class="nf">slice_xy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Slice the array by x,y bounds.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minx: float</span>
+<span class="sd">            Minimum bound for x coordinate.</span>
+<span class="sd">        miny: float</span>
+<span class="sd">            Minimum bound for y coordinate.</span>
+<span class="sd">        maxx: float</span>
+<span class="sd">            Maximum bound for x coordinate.</span>
+<span class="sd">        maxy: float</span>
+<span class="sd">            Maximum bound for y coordinate.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            The data in the slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_bounds</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">top</span> <span class="o">&gt;</span> <span class="n">bottom</span><span class="p">:</span>
+            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxy</span><span class="p">,</span> <span class="n">miny</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">minx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">)</span>
+
+        <span class="n">subset</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">x_slice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_slice</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># this is to prevent sharing coordinates with the original dataset</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">x_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">subset</span></div>
+
+<div class="viewcode-block" id="XRasterBase.transform_bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">densify_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Transform bounds from src_crs to dst_crs.</span>
+
+<span class="sd">        Optionally densifying the edges (to account for nonlinear transformations</span>
+<span class="sd">        along these edges) and extracting the outermost bounds.</span>
+
+<span class="sd">        Note: this does not account for the antimeridian.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dst_crs: str, :obj:`rasterio.crs.CRS`, or dict</span>
+<span class="sd">            Target coordinate reference system.</span>
+<span class="sd">        densify_pts: uint, optional</span>
+<span class="sd">            Number of points to add to each edge to account for nonlinear</span>
+<span class="sd">            edges produced by the transform process.  Large numbers will produce</span>
+<span class="sd">            worse performance.  Default: 21 (gdal default).</span>
+<span class="sd">        recalc: bool, optional</span>
+<span class="sd">            Will force the bounds to be recalculated instead of using the transform</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        left, bottom, right, top: float</span>
+<span class="sd">            Outermost coordinates in target coordinate reference system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span> <span class="n">densify_pts</span><span class="o">=</span><span class="n">densify_pts</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="XRasterBase.write_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">write_gcps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">gcps</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">],</span>
+        <span class="n">gcp_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the GroundControlPoints to the dataset.</span>
+
+<span class="sd">        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gcp: list of :obj:`rasterio.control.GroundControlPoint`</span>
+<span class="sd">            The Ground Control Points to integrate to the dataset.</span>
+<span class="sd">        gcp_crs: str, :obj:`rasterio.crs.CRS`, or dict</span>
+<span class="sd">            Coordinate reference system for the GCPs.</span>
+<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">            Name of the grid_mapping coordinate to store the GCPs information in.</span>
+<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
+<span class="sd">            Modified dataset with Ground Control Points written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
+        <span class="p">)</span>
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">data_obj</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span>
+            <span class="n">gcp_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span>
+        <span class="p">)</span>
+        <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="n">_convert_gcps_to_geojson</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geojson_gcps</span>
+        <span class="k">return</span> <span class="n">data_obj</span></div>
+
+<div class="viewcode-block" id="XRasterBase.get_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">get_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the GroundControlPoints from the dataset.</span>
+
+<span class="sd">        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#ground-control-points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :obj:`rasterio.control.GroundControlPoint` or None</span>
+<span class="sd">            The Ground Control Points from the dataset or None if not applicable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">gcps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">GroundControlPoint</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">row</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;row&quot;</span><span class="p">],</span>
+                <span class="n">col</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;col&quot;</span><span class="p">],</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                <span class="n">info</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;info&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">geojson_gcps</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">gcps</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_convert_gcps_to_geojson</span><span class="p">(</span>
+    <span class="n">gcps</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert GCPs to geojson.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gcps: The list of GroundControlPoint instances.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A FeatureCollection dict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">gcp</span><span class="o">.</span><span class="n">col</span><span class="p">),</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="n">gcp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">z</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">gcps</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, rioxarray Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
