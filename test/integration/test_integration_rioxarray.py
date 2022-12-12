@@ -1740,7 +1740,7 @@ def test_to_raster__dataset__mask_and_scale(chunks, tmpdir):
     with rioxarray.open_rasterio(str(output_raster)) as rdscompare:
         assert rdscompare.scale_factor == 0.1
         assert rdscompare.add_offset == 220.0
-        assert rdscompare.long_name == "air_temperature"
+        assert rdscompare.long_name == "tmmx"
         assert rdscompare.rio.crs == rds.rio.crs
         assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
 
