@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.13.2
 ------
 - BUG:dataset: Fix writing tags for bands (issue #615)
 - BUG:dataset: prevent overwriting long_name attribute (pull #616)
