@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.13.2
 ------
 - BUG:dataset: Fix writing tags for bands (issue #615)
