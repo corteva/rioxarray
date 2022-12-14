@@ -65,8 +65,8 @@ _RASTERIO_GTE_12 = version.parse(
 
 # DTYPE TO NODATA MAP
 # Based on: https://github.com/OSGeo/gdal/blob/
-# cde27dc7641964a872efdc6bbcf5e3d3f7ab9cfd/gdal/
-# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L62
+# dee861e7c91c2da7ef8ff849947713e4d9bd115c/
+# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61
 _NODATA_DTYPE_MAP = {
     1: 255,  # GDT_Byte
     2: 65535,  # GDT_UInt16

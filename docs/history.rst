@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Handle data type error in `rio.reproject` (issue #618)
 
 0.13.2
 ------
