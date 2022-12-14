@@ -75,10 +75,13 @@ _NODATA_DTYPE_MAP = {
     5: -2147483647,  # GDT_Int32
     6: 3.402823466e38,  # GDT_Float32
     7: 1.7976931348623158e308,  # GDT_Float64
-    8: -32768,  # GDT_CInt16
-    9: -2147483647,  # GDT_CInt32
+    8: None,  # GDT_CInt16
+    9: None,  # GDT_CInt32
     10: 3.402823466e38,  # GDT_CFloat32
     11: 1.7976931348623158e308,  # GDT_CFloat64
+    12: None,  # GDT_Int64
+    13: None,  # GDT_UInt64
+    14: None,  # GDT_Int8
 }
 
 
