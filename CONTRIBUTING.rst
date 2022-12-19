@@ -105,6 +105,27 @@ Using python::
 9. Submit a pull request through the GitHub website.
 
 
+Running tests with docker
+-------------------------
+
+This assumes you have cloned the rioxarray repository and are in the base folder.
+
+1. Build the docker image
+
+.. code-block:: bash
+
+    docker build -t rioxarray .
+
+2. Run the tests
+
+.. code-block:: bash
+
+    docker run --rm \
+        -v $PWD/test/:/app/test \
+        -t rioxarray \
+        'source /venv/bin/activate && python -m pytest'
+
+
 Pull Request Guidelines
 -----------------------
 
