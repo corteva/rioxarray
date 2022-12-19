@@ -23,6 +23,7 @@ RASTERIO_EQ_122 = RASTERIO_VERSION == version.parse("1.2.2")
 RASTERIO_GE_125 = RASTERIO_VERSION >= version.parse("1.2.5")
 RASTERIO_GE_13 = version.parse(RASTERIO_VERSION.base_version) >= version.parse("1.3.0")
 GDAL_GE_36 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.0")
+GDAL_GE_361 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.1")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)
