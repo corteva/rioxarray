@@ -513,7 +513,7 @@ class RasterArray(XRasterBase):
 
     def _get_dst_nodata(self, nodata: Optional[float]) -> Optional[float]:
         default_nodata = (
-            _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
+            _NODATA_DTYPE_MAP.get(dtype_rev[self._obj.dtype.name])
             if self.nodata is None
             else self.nodata
         )
