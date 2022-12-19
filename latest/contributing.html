@@ -60,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests-with-docker">Running tests with docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pull-request-guidelines">Pull Request Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tips">Tips</a></li>
 </ul>
@@ -216,6 +217,25 @@ $ git push origin name-of-your-bugfix-or-feature
 </li>
 <li><p>Submit a pull request through the GitHub website.</p></li>
 </ol>
+</section>
+<section id="running-tests-with-docker">
+<h2>Running tests with docker<a class="headerlink" href="#running-tests-with-docker" title="Permalink to this heading"></a></h2>
+<p>This assumes you have cloned the rioxarray repository and are in the base folder.</p>
+<ol class="arabic simple">
+<li><p>Build the docker image</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t rioxarray .
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Run the tests</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run --rm <span class="se">\</span>
+    -v <span class="nv">$PWD</span>/test/:/app/test <span class="se">\</span>
+    -t rioxarray <span class="se">\</span>
+    <span class="s1">&#39;source /venv/bin/activate &amp;&amp; python -m pytest&#39;</span>
+</pre></div>
+</div>
 </section>
 <section id="pull-request-guidelines">
 <h2>Pull Request Guidelines<a class="headerlink" href="#pull-request-guidelines" title="Permalink to this heading"></a></h2>
