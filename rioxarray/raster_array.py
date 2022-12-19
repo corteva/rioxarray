@@ -65,8 +65,8 @@ _RASTERIO_GTE_12 = version.parse(
 
 # DTYPE TO NODATA MAP
 # Based on: https://github.com/OSGeo/gdal/blob/
-# cde27dc7641964a872efdc6bbcf5e3d3f7ab9cfd/gdal/
-# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L62
+# dee861e7c91c2da7ef8ff849947713e4d9bd115c/
+# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61
 _NODATA_DTYPE_MAP = {
     1: 255,  # GDT_Byte
     2: 65535,  # GDT_UInt16
@@ -75,10 +75,13 @@ _NODATA_DTYPE_MAP = {
     5: -2147483647,  # GDT_Int32
     6: 3.402823466e38,  # GDT_Float32
     7: 1.7976931348623158e308,  # GDT_Float64
-    8: -32768,  # GDT_CInt16
-    9: -2147483647,  # GDT_CInt32
+    8: None,  # GDT_CInt16
+    9: None,  # GDT_CInt32
     10: 3.402823466e38,  # GDT_CFloat32
     11: 1.7976931348623158e308,  # GDT_CFloat64
+    12: None,  # GDT_Int64
+    13: None,  # GDT_UInt64
+    14: None,  # GDT_Int8
 }
 
 
@@ -510,7 +513,7 @@ class RasterArray(XRasterBase):
 
     def _get_dst_nodata(self, nodata: Optional[float]) -> Optional[float]:
         default_nodata = (
-            _NODATA_DTYPE_MAP[dtype_rev[self._obj.dtype.name]]
+            _NODATA_DTYPE_MAP.get(dtype_rev[self._obj.dtype.name])
             if self.nodata is None
             else self.nodata
         )
