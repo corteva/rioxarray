@@ -324,6 +324,16 @@
       "contributions": [
         "review"
       ]
+    },
+    {
+      "login": "caldwellst",
+      "name": "Seth Caldwell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8086547?v=4",
+      "profile": "https://github.com/caldwellst",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
