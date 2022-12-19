@@ -144,8 +144,8 @@
 
 <span class="c1"># DTYPE TO NODATA MAP</span>
 <span class="c1"># Based on: https://github.com/OSGeo/gdal/blob/</span>
-<span class="c1"># cde27dc7641964a872efdc6bbcf5e3d3f7ab9cfd/gdal/</span>
-<span class="c1"># swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L62</span>
+<span class="c1"># dee861e7c91c2da7ef8ff849947713e4d9bd115c/</span>
+<span class="c1"># swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61</span>
 <span class="n">_NODATA_DTYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="mi">255</span><span class="p">,</span>  <span class="c1"># GDT_Byte</span>
     <span class="mi">2</span><span class="p">:</span> <span class="mi">65535</span><span class="p">,</span>  <span class="c1"># GDT_UInt16</span>
@@ -154,10 +154,13 @@
     <span class="mi">5</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span>  <span class="c1"># GDT_Int32</span>
     <span class="mi">6</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_Float32</span>
     <span class="mi">7</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_Float64</span>
-    <span class="mi">8</span><span class="p">:</span> <span class="o">-</span><span class="mi">32768</span><span class="p">,</span>  <span class="c1"># GDT_CInt16</span>
-    <span class="mi">9</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span>  <span class="c1"># GDT_CInt32</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_CInt16</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_CInt32</span>
     <span class="mi">10</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_CFloat32</span>
     <span class="mi">11</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_CFloat64</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_Int64</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_UInt64</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_Int8</span>
 <span class="p">}</span>
 
 
@@ -589,7 +592,7 @@
 
     <span class="k">def</span> <span class="nf">_get_dst_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="n">default_nodata</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">_NODATA_DTYPE_MAP</span><span class="p">[</span><span class="n">dtype_rev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">]]</span>
+            <span class="n">_NODATA_DTYPE_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dtype_rev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
         <span class="p">)</span>
