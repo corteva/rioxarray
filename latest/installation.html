@@ -115,7 +115,7 @@
 <li><p>Use pip to install package from <a class="reference external" href="https://pypi.org/project/rioxarray/">PyPI</a>:</p></li>
 </ol>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install rioxarray
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rioxarray
 </pre></div>
 </div>
 </div></blockquote>
@@ -123,10 +123,10 @@
 <li><p>Use <a class="reference external" href="https://conda.io/en/latest/">conda</a> with the <a class="reference external" href="https://conda-forge.org/">conda-forge</a> channel:</p></li>
 </ol>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --prepend channels conda-forge
-conda config --set channel_priority strict
-conda create -n rioxarray_env rioxarray
-conda activate rioxarray_env
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>config<span class="w"> </span>--prepend<span class="w"> </span>channels<span class="w"> </span>conda-forge
+conda<span class="w"> </span>config<span class="w"> </span>--set<span class="w"> </span>channel_priority<span class="w"> </span>strict
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>rioxarray_env<span class="w"> </span>rioxarray
+conda<span class="w"> </span>activate<span class="w"> </span>rioxarray_env
 </pre></div>
 </div>
 <ul class="simple">
@@ -154,13 +154,13 @@ recipe: <a class="reference external" href="https://github.com/conda-forge/stage
 <section id="from-source">
 <h2>From source<a class="headerlink" href="#from-source" title="Permalink to this heading"></a></h2>
 <p>The source for rioxarray can be installed from the <a class="reference external" href="https://github.com/corteva/rioxarray">GitHub repo</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m pip install git+git://github.com/corteva/rioxarray.git#egg<span class="o">=</span>rioxarray
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+git://github.com/corteva/rioxarray.git#egg<span class="o">=</span>rioxarray
 </pre></div>
 </div>
 <p>To install for local development:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:corteva/rioxarray.git
-<span class="nb">cd</span> rioxarray
-python -m pip install -e .<span class="o">[</span>dev<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:corteva/rioxarray.git
+<span class="nb">cd</span><span class="w"> </span>rioxarray
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
 </pre></div>
 </div>
 </section>

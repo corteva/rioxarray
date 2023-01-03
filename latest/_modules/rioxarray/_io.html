@@ -121,7 +121,7 @@
 
 
 <span class="k">class</span> <span class="nc">SingleBandDatasetReader</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hack to have a DatasetReader behave like it only has one band</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -134,68 +134,68 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        int: band count</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Nodata value for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">nodatavals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">offsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Offset value for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">scales</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scale value for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unit for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Description for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">descriptions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        dtype for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        indexes for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span><span class="p">]]</span>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        read data for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">indexes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bidx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        read tags for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="n">bidx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -215,7 +215,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_unsigned_dtype</span><span class="p">(</span><span class="n">unsigned</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Based on: https://github.com/pydata/xarray/blob/abe1e613a96b000ae603c53d135828df532b952e/xarray/coding/variables.py#L306-L334</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
@@ -227,7 +227,7 @@
 
 
 <span class="k">class</span> <span class="nc">FileHandleLocal</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This contains the thread local ThreadURIManager</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -236,7 +236,7 @@
 
 
 <span class="k">class</span> <span class="nc">ThreadURIManager</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This handles opening &amp; closing file handles in each thread.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -255,7 +255,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">file_handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        File handle returned by the opener.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -264,7 +264,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Close file handle.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -282,7 +282,7 @@
 
 
 <span class="k">class</span> <span class="nc">URIManager</span><span class="p">(</span><span class="n">FileManager</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The URI manager is used for lockless reading</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -323,17 +323,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">needs_lock</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;State for pickling.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;State for pickling.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_opener</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Restore from a pickle.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore from a pickle.&quot;&quot;&quot;</span>
         <span class="n">opener</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">state</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">opener</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">RasterioArrayWrapper</span><span class="p">(</span><span class="n">BackendArray</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A wrapper around rasterio dataset objects&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper around rasterio dataset objects&quot;&quot;&quot;</span>
 
     <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
@@ -388,27 +388,27 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Data type of the array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fill_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fill value of the array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shape of the array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
 
     <span class="k">def</span> <span class="nf">_get_indexer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get indexer for rasterio array.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get indexer for rasterio array.</span>
 
 <span class="sd">        Parameter</span>
 <span class="sd">        ---------</span>
@@ -505,7 +505,7 @@
 
 
 <span class="k">def</span> <span class="nf">_parse_envi</span><span class="p">(</span><span class="n">meta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Parse ENVI metadata into Python data structures.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse ENVI metadata into Python data structures.</span>
 
 <span class="sd">    See the link for information on the ENVI header file format:</span>
 <span class="sd">    http://www.harrisgeospatial.com/docs/enviheaderfiles.html</span>
@@ -535,7 +535,7 @@
 
 
 <span class="k">def</span> <span class="nf">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Numpy dtype from first entry of rasterio dataset.dtypes&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Numpy dtype from first entry of rasterio dataset.dtypes&quot;&quot;&quot;</span>
     <span class="c1"># rasterio has some special dtype names (complex_int16 -&gt; np.complex64)</span>
     <span class="k">if</span> <span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;complex_int16&quot;</span><span class="p">:</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;complex64&quot;</span><span class="p">)</span>
@@ -546,7 +546,7 @@
 
 
 <span class="k">def</span> <span class="nf">_to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the value to a number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -600,7 +600,7 @@
 
 
 <span class="k">def</span> <span class="nf">_load_netcdf_attrs</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data_array</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads the netCDF attributes into the data array</span>
 
 <span class="sd">    Attributes stored in this format:</span>
@@ -617,7 +617,7 @@
 
 
 <span class="k">def</span> <span class="nf">_parse_netcdf_attr_array</span><span class="p">(</span><span class="n">attr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Expected format: &#39;{2,6}&#39; or &#39;[2. 6.]&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span>
@@ -634,7 +634,7 @@
 
 
 <span class="k">def</span> <span class="nf">_load_netcdf_1d_coords</span><span class="p">(</span><span class="n">tags</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dimension information:</span>
 <span class="sd">        - NETCDF_DIM_EXTRA: &#39;{time}&#39; (comma separated list of dim names)</span>
 <span class="sd">        - NETCDF_DIM_time_DEF: &#39;{2,6}&#39; or &#39;[2. 6.]&#39; (dim size, dim dtype)</span>
@@ -661,7 +661,7 @@
     <span class="n">group_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
     <span class="n">variable_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Example::</span>
 <span class="sd">        &#39;HDF4_EOS:EOS_GRID:&quot;./modis/MOD09GQ.A2017290.h11v04.006.NRT.hdf&quot;:</span>
 <span class="sd">        MODIS_Grid_2D:sur_refl_b01_1&#39;</span>
@@ -699,7 +699,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_rasterio_attrs</span><span class="p">(</span><span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get rasterio specific attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># pylint: disable=too-many-branches</span>
@@ -747,7 +747,7 @@
     <span class="n">decode_times</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decide the datetime based on CF conventions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">decode_timedelta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -855,7 +855,7 @@
     <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load in rasterio subdatasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dim_groups</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
@@ -898,7 +898,7 @@
     <span class="n">decode_timedelta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load in rasterio bands as variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">global_tags</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">())</span>
@@ -942,7 +942,7 @@
     <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare the data for dask computations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># pylint: disable=import-outside-toplevel</span>
@@ -979,7 +979,7 @@
     <span class="n">da_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">],</span>
     <span class="n">unsigned</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make sure encoding handled properly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;grid_mapping&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
@@ -1011,7 +1011,7 @@
 
 
 <span class="k">def</span> <span class="nf">_single_band_open</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">bidx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Open file as if it only has a single band</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SingleBandDatasetReader</span><span class="p">(</span>
@@ -1043,7 +1043,7 @@
     <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]]:</span>
     <span class="c1"># pylint: disable=too-many-statements,too-many-locals,too-many-branches</span>
-    <span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a file with rasterio (experimental).</span>
 
 <span class="sd">    This should work with any file that rasterio can open (most often:</span>
 <span class="sd">    geoTIFF). The x and y coordinates are generated automatically from the</span>

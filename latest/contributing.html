@@ -168,22 +168,22 @@ are welcome :)</p></li>
 <ol class="arabic">
 <li><p>Fork the <cite>rioxarray</cite> repo on GitHub.</p></li>
 <li><p>Clone your fork locally:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git clone git@github.com:your_name_here/rioxarray.git
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:your_name_here/rioxarray.git
 </pre></div>
 </div>
 </li>
 <li><p>Create a python virtual environment</p></li>
 </ol>
 <p>Using conda:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> rioxarray/
-$ conda env create
-$ conda activate rioxarray
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>rioxarray/
+$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create
+$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>rioxarray
 </pre></div>
 </div>
 <p>Using python:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> rioxarray/
-$ python -m venv venv
-$ . venv/bin/activate
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>rioxarray/
+$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+$<span class="w"> </span>.<span class="w"> </span>venv/bin/activate
 </pre></div>
 </div>
 <ol class="arabic" start="4">
@@ -193,25 +193,25 @@ $ . venv/bin/activate
 </div></blockquote>
 </li>
 <li><p>Setup pre-commit hooks:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pre-commit install
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pre-commit<span class="w"> </span>install
 </pre></div>
 </div>
 </li>
 <li><p>Create a branch for local development:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git checkout -b name-of-your-bugfix-or-feature
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>name-of-your-bugfix-or-feature
 </pre></div>
 </div>
 <p>Now you can make your changes locally.</p>
 </li>
 <li><p>When you’re done making changes, check that the tests pass:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pytest
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pytest
 </pre></div>
 </div>
 </li>
 <li><p>Commit your changes and push your branch to GitHub (this should trigger pre-commit checks):</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git add .
-$ git commit -m <span class="s2">&quot;Your detailed description of your changes.&quot;</span>
-$ git push origin name-of-your-bugfix-or-feature
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Your detailed description of your changes.&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>name-of-your-bugfix-or-feature
 </pre></div>
 </div>
 </li>
@@ -224,16 +224,16 @@ $ git push origin name-of-your-bugfix-or-feature
 <ol class="arabic simple">
 <li><p>Build the docker image</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t rioxarray .
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>rioxarray<span class="w"> </span>.
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Run the tests</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run --rm <span class="se">\</span>
-    -v <span class="nv">$PWD</span>/test/:/app/test <span class="se">\</span>
-    -t rioxarray <span class="se">\</span>
-    <span class="s1">&#39;source /venv/bin/activate &amp;&amp; python -m pytest&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span><span class="nv">$PWD</span>/test/:/app/test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>rioxarray<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s1">&#39;source /venv/bin/activate &amp;&amp; python -m pytest&#39;</span>
 </pre></div>
 </div>
 </section>
@@ -251,7 +251,7 @@ feature to the list in README.rst.</p></li>
 <section id="tips">
 <h2>Tips<a class="headerlink" href="#tips" title="Permalink to this heading"></a></h2>
 <p>To run a subset of tests:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pytest test/unit/test_show_versions.py::test_get_main_info
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pytest<span class="w"> </span>test/unit/test_show_versions.py::test_get_main_info
 </pre></div>
 </div>
 </section>
