@@ -879,7 +879,7 @@ class RasterArray(XRasterBase):
         Parameters
         ----------
         geometries: Iterable
-            A list of geojson geometry dicts or objects with __geom_interface__ with
+            A list of geojson geometry dicts or objects with __geo_interface__ with
             if you have rasterio 1.2+.
         crs: :obj:`rasterio.crs.CRS`, optional
             The CRS of the input geometries. Default is to assume it is the same
