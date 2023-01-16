@@ -395,7 +395,7 @@ class XRasterBase:
         self, grid_mapping_name: str = DEFAULT_GRID_MAP, inplace: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Write the CF grid_mapping attribute.
+        Write the CF grid_mapping attribute to the encoding.
 
         Parameters
         ----------
@@ -441,6 +441,8 @@ class XRasterBase:
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write the CRS to the dataset in a CF compliant manner.
+
+        .. warning:: The grid_mapping attribute is written to the encoding.
 
         Parameters
         ----------
