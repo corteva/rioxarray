@@ -334,6 +334,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "stefank0",
+      "name": "stefank0",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32932217?v=4",
+      "profile": "https://github.com/stefank0",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
