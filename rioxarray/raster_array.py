@@ -326,11 +326,9 @@ class RasterArray(XRasterBase):
         if input_nodata is not False:
             input_nodata = _ensure_nodata_dtype(input_nodata, self._obj.dtype)
             if encoded:
-                data_obj.rio.update_encoding(
-                    dict(_FillValue=input_nodata), inplace=True
-                )
+                data_obj.rio.update_encoding({"_FillValue": input_nodata}, inplace=True)
             else:
-                data_obj.rio.update_attrs(dict(_FillValue=input_nodata), inplace=True)
+                data_obj.rio.update_attrs({"_FillValue": input_nodata}, inplace=True)
         if input_nodata is False or encoded:
             new_attrs = dict(data_obj.attrs)
             new_attrs.pop("_FillValue", None)

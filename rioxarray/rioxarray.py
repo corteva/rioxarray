@@ -421,7 +421,7 @@ class XRasterBase:
                 new_attrs = dict(data_obj[var].attrs)
                 new_attrs.pop("grid_mapping", None)
                 data_obj[var].rio.update_encoding(
-                    dict(grid_mapping=grid_mapping_name), inplace=True
+                    {"grid_mapping": grid_mapping_name}, inplace=True
                 ).rio.update_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
                     x_dim=x_dim, y_dim=y_dim, inplace=True
                 )
@@ -430,7 +430,7 @@ class XRasterBase:
         new_attrs = dict(data_obj.attrs)
         new_attrs.pop("grid_mapping", None)
         return data_obj.rio.update_encoding(
-            dict(grid_mapping=grid_mapping_name), inplace=True
+            {"grid_mapping": grid_mapping_name}, inplace=True
         ).rio.update_attrs(new_attrs, inplace=True)
 
     def write_crs(
@@ -1282,11 +1282,16 @@ def _convert_gcps_to_geojson(
     A FeatureCollection dict.
     """
     features = [
-        dict(
-            type="Feature",
-            properties=dict(id=gcp.id, info=gcp.info, row=gcp.row, col=gcp.col),
-            geometry=dict(type="Point", coordinates=[gcp.x, gcp.y, gcp.z]),
-        )
+        {
+            "type": "Feature",
+            "properties": {
+                "id": gcp.id,
+                "info": gcp.info,
+                "row": gcp.row,
+                "col": gcp.col,
+            },
+            "geometry": {"type": "Point", "coordinates": [gcp.x, gcp.y, gcp.z]},
+        }
         for gcp in gcps
     ]
-    return dict(type="FeatureCollection", features=features)
+    return {"type": "FeatureCollection", "features": features}

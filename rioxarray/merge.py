@@ -143,9 +143,13 @@ def merge_arrays(
     :obj:`xarray.DataArray`:
         The geospatially merged data.
     """
-    input_kwargs = dict(
-        bounds=bounds, res=res, nodata=nodata, precision=precision, method=method
-    )
+    input_kwargs = {
+        "bounds": bounds,
+        "res": res,
+        "nodata": nodata,
+        "precision": precision,
+        "method": method,
+    }
 
     if crs is None:
         crs = dataarrays[0].rio.crs
