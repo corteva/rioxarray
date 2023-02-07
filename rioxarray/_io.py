@@ -1053,20 +1053,20 @@ def open_rasterio(
     elif isinstance(filename, rasterio.vrt.WarpedVRT):
         vrt = filename
         filename = vrt.src_dataset.name
-        vrt_params = dict(
-            src_crs=vrt.src_crs.to_string() if vrt.src_crs else None,
-            crs=vrt.dst_crs.to_string() if vrt.dst_crs else None,
-            resampling=vrt.resampling,
-            tolerance=vrt.tolerance,
-            src_nodata=vrt.src_nodata,
-            nodata=vrt.dst_nodata,
-            width=vrt.dst_width,
-            height=vrt.dst_height,
-            src_transform=vrt.src_transform,
-            transform=vrt.dst_transform,
-            dtype=vrt.working_dtype,
+        vrt_params = {
+            "src_crs": vrt.src_crs.to_string() if vrt.src_crs else None,
+            "crs": vrt.dst_crs.to_string() if vrt.dst_crs else None,
+            "resampling": vrt.resampling,
+            "tolerance": vrt.tolerance,
+            "src_nodata": vrt.src_nodata,
+            "nodata": vrt.dst_nodata,
+            "width": vrt.dst_width,
+            "height": vrt.dst_height,
+            "src_transform": vrt.src_transform,
+            "transform": vrt.dst_transform,
+            "dtype": vrt.working_dtype,
             **vrt.warp_extras,
-        )
+        }
 
     if lock in (True, None):
         lock = RASTERIO_LOCK
