@@ -1132,20 +1132,20 @@
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">):</span>
         <span class="n">vrt</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_dataset</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">vrt_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">src_crs</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">src_crs</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="k">if</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_crs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">crs</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">dst_crs</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="k">if</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_crs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">resampling</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">resampling</span><span class="p">,</span>
-            <span class="n">tolerance</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">tolerance</span><span class="p">,</span>
-            <span class="n">src_nodata</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">src_nodata</span><span class="p">,</span>
-            <span class="n">nodata</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">dst_nodata</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">dst_width</span><span class="p">,</span>
-            <span class="n">height</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">dst_height</span><span class="p">,</span>
-            <span class="n">src_transform</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">src_transform</span><span class="p">,</span>
-            <span class="n">transform</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">dst_transform</span><span class="p">,</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">vrt</span><span class="o">.</span><span class="n">working_dtype</span><span class="p">,</span>
+        <span class="n">vrt_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;src_crs&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_crs</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="k">if</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_crs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_crs</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span> <span class="k">if</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_crs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;resampling&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">resampling</span><span class="p">,</span>
+            <span class="s2">&quot;tolerance&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">tolerance</span><span class="p">,</span>
+            <span class="s2">&quot;src_nodata&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_nodata</span><span class="p">,</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_nodata</span><span class="p">,</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_width</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_height</span><span class="p">,</span>
+            <span class="s2">&quot;src_transform&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">src_transform</span><span class="p">,</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">dst_transform</span><span class="p">,</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">vrt</span><span class="o">.</span><span class="n">working_dtype</span><span class="p">,</span>
             <span class="o">**</span><span class="n">vrt</span><span class="o">.</span><span class="n">warp_extras</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">lock</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">lock</span> <span class="o">=</span> <span class="n">RASTERIO_LOCK</span>
