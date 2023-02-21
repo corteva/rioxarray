@@ -642,7 +642,7 @@ class XRasterBase:
 
         Returns
         -------
-        :obj:`affine.Afffine`:
+        :obj:`affine.Affine`:
             The affine of the :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
         """
         transform = self._cached_transform()
