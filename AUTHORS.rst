@@ -52,6 +52,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://www.linkedin.com/in/micheleclaus/"><img src="https://avatars.githubusercontent.com/u/31700619?v=4?s=100" width="100px;" alt=""/><br /><sub><b>clausmichele</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/pulls?q=is%3Apr+reviewed-by%3Aclausmichele" title="Reviewed Pull Requests">👀</a></td>
         <td align="center"><a href="https://github.com/caldwellst"><img src="https://avatars.githubusercontent.com/u/8086547?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Caldwell</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3Acaldwellst" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=caldwellst" title="Code">💻</a></td>
         <td align="center"><a href="https://github.com/stefank0"><img src="https://avatars.githubusercontent.com/u/32932217?v=4?s=100" width="100px;" alt=""/><br /><sub><b>stefank0</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=stefank0" title="Documentation">📖</a></td>
+        <td align="center"><a href="https://itcarroll.github.io/"><img src="https://avatars.githubusercontent.com/u/3383837?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ian Carroll</b></sub></a><br /><a href="#maintenance-itcarroll" title="Maintenance">🚧</a></td>
       </tr>
     </table>
 

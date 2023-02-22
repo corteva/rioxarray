@@ -343,6 +343,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "itcarroll",
+      "name": "Ian Carroll",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3383837?v=4",
+      "profile": "https://itcarroll.github.io/",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7
