@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.13.4
 ------
 - DEP: pin numpy>=1.21 (pull #636)
 
