@@ -3,7 +3,8 @@ This module allows you to merge xarray Datasets/DataArrays
 geospatially with the `rasterio.merge` module.
 """
 
-from typing import Callable, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import Callable, Optional, Union
 
 import numpy
 from rasterio.crs import CRS
@@ -98,8 +99,8 @@ class RasterioDatasetDuck:
 
 def merge_arrays(
     dataarrays: Sequence[DataArray],
-    bounds: Optional[Tuple] = None,
-    res: Optional[Tuple] = None,
+    bounds: Optional[tuple] = None,
+    res: Optional[tuple] = None,
     nodata: Optional[float] = None,
     precision: Optional[float] = None,
     method: Union[str, Callable, None] = None,
@@ -115,7 +116,7 @@ def merge_arrays(
 
     Parameters
     ----------
-    dataarrays: List[xarray.DataArray]
+    dataarrays: list[xarray.DataArray]
         List of xarray.DataArray's with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, and dimensions as the others in the array.
@@ -209,8 +210,8 @@ def merge_arrays(
 
 def merge_datasets(
     datasets: Sequence[Dataset],
-    bounds: Optional[Tuple] = None,
-    res: Optional[Tuple] = None,
+    bounds: Optional[tuple] = None,
+    res: Optional[tuple] = None,
     nodata: Optional[float] = None,
     precision: Optional[float] = None,
     method: Union[str, Callable, None] = None,
@@ -225,7 +226,7 @@ def merge_datasets(
 
     Parameters
     ----------
-    datasets: List[xarray.Dataset]
+    datasets: list[xarray.Dataset]
         List of xarray.Dataset's with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, dimensions, and data_vars as the others in the array.

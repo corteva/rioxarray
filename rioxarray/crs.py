@@ -1,4 +1,3 @@
-# -- coding: utf-8 --
 """
 This module contains helper methods for rasterio.crs.CRS.
 """

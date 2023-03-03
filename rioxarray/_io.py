@@ -14,7 +14,8 @@ import re
 import threading
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, Hashable, Iterable, List, Optional, Tuple, Union
+from collections.abc import Hashable, Iterable
+from typing import Any, Optional, Union
 
 import numpy as np
 import rasterio
@@ -480,7 +481,7 @@ def _to_numeric(value: Any) -> float:
     return value
 
 
-def _parse_tag(key: str, value: Any) -> Tuple[str, Any]:
+def _parse_tag(key: str, value: Any) -> tuple[str, Any]:
     # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
     key = key.split("NC_GLOBAL#")[-1]
     if value.startswith("{") and value.endswith("}"):
@@ -495,7 +496,7 @@ def _parse_tag(key: str, value: Any) -> Tuple[str, Any]:
     return key, value
 
 
-def _parse_tags(tags: Dict) -> Dict:
+def _parse_tags(tags: dict) -> dict:
     parsed_tags = {}
     for key, value in tags.items():
         key, value = _parse_tag(key, value)
@@ -520,7 +521,7 @@ NETCDF_DTYPE_MAP = {
 }
 
 
-def _load_netcdf_attrs(tags: Dict, data_array: DataArray) -> None:
+def _load_netcdf_attrs(tags: dict, data_array: DataArray) -> None:
     """
     Loads the netCDF attributes into the data array
 
@@ -541,7 +542,7 @@ def _parse_netcdf_attr_array(attr: Union[NDArray, str], dtype=None) -> NDArray:
     """
     Expected format: '{2,6}' or '[2. 6.]'
     """
-    value: Union[NDArray, str, List]
+    value: Union[NDArray, str, list]
     if isinstance(attr, str):
         if attr.startswith("{"):
             value = attr.strip("{}").split(",")
@@ -554,7 +555,7 @@ def _parse_netcdf_attr_array(attr: Union[NDArray, str], dtype=None) -> NDArray:
     return np.array(value, dtype=dtype)
 
 
-def _load_netcdf_1d_coords(tags: Dict) -> Dict:
+def _load_netcdf_1d_coords(tags: dict) -> dict:
     """
     Dimension information:
         - NETCDF_DIM_EXTRA: '{time}' (comma separated list of dim names)
@@ -579,8 +580,8 @@ def _load_netcdf_1d_coords(tags: Dict) -> Dict:
 
 
 def build_subdataset_filter(
-    group_names: Optional[Union[str, List[str], Tuple[str, ...]]],
-    variable_names: Optional[Union[str, List[str], Tuple[str, ...]]],
+    group_names: Optional[Union[str, list[str], tuple[str, ...]]],
+    variable_names: Optional[Union[str, list[str], tuple[str, ...]]],
 ):
     """
     Example::
@@ -706,8 +707,8 @@ def _decode_datetime_cf(
 
 def _parse_driver_tags(
     riods: RasterioReader,
-    attrs: Dict,
-    coords: Dict,
+    attrs: dict,
+    coords: dict,
 ) -> None:
     # Parse extra metadata from tags, if supported
     parsers = {"ENVI": _parse_envi}
@@ -739,10 +740,10 @@ def _pop_global_netcdf_attrs_from_vars(dataset_to_clean: Dataset) -> Dataset:
 
 
 def _subdataset_groups_to_dataset(
-    dim_groups: Dict[Hashable, Dict[Hashable, DataArray]], global_tags: Dict
-) -> Union[Dataset, List[Dataset]]:
+    dim_groups: dict[Hashable, dict[Hashable, DataArray]], global_tags: dict
+) -> Union[Dataset, list[Dataset]]:
     if dim_groups:
-        dataset: Union[Dataset, List[Dataset]] = []
+        dataset: Union[Dataset, list[Dataset]] = []
         for dim_group in dim_groups.values():
             dataset_group = _pop_global_netcdf_attrs_from_vars(
                 Dataset(dim_group, attrs=global_tags)
@@ -764,10 +765,10 @@ def _subdataset_groups_to_dataset(
 
 def _load_subdatasets(
     riods: RasterioReader,
-    group: Optional[Union[str, List[str], Tuple[str, ...]]],
-    variable: Optional[Union[str, List[str], Tuple[str, ...]]],
+    group: Optional[Union[str, list[str], tuple[str, ...]]],
+    variable: Optional[Union[str, list[str], tuple[str, ...]]],
     parse_coordinates: bool,
-    chunks: Optional[Union[int, Tuple, Dict]],
+    chunks: Optional[Union[int, tuple, dict]],
     cache: Optional[bool],
     lock: Any,
     masked: bool,
@@ -775,11 +776,11 @@ def _load_subdatasets(
     decode_times: bool,
     decode_timedelta: Optional[bool],
     **open_kwargs,
-) -> Union[Dataset, List[Dataset]]:
+) -> Union[Dataset, list[Dataset]]:
     """
     Load in rasterio subdatasets
     """
-    dim_groups: Dict[Hashable, Dict[Hashable, DataArray]] = defaultdict(dict)
+    dim_groups: dict[Hashable, dict[Hashable, DataArray]] = defaultdict(dict)
     subdataset_filter = None
     if any((group, variable)):
         subdataset_filter = build_subdataset_filter(group, variable)
@@ -810,7 +811,7 @@ def _load_subdatasets(
 def _load_bands_as_variables(
     riods: RasterioReader,
     parse_coordinates: bool,
-    chunks: Optional[Union[int, Tuple, Dict]],
+    chunks: Optional[Union[int, tuple, dict]],
     cache: Optional[bool],
     lock: Any,
     masked: bool,
@@ -818,7 +819,7 @@ def _load_bands_as_variables(
     decode_times: bool,
     decode_timedelta: Optional[bool],
     **open_kwargs,
-) -> Union[Dataset, List[Dataset]]:
+) -> Union[Dataset, list[Dataset]]:
     """
     Load in rasterio bands as variables
     """
@@ -861,7 +862,7 @@ def _prepare_dask(
     result: DataArray,
     riods: RasterioReader,
     filename: Union[str, os.PathLike],
-    chunks: Union[int, Tuple, Dict],
+    chunks: Union[int, tuple, dict],
 ) -> DataArray:
     """
     Prepare the data for dask computations
@@ -950,19 +951,19 @@ def open_rasterio(
         SingleBandDatasetReader,
     ],
     parse_coordinates: Optional[bool] = None,
-    chunks: Optional[Union[int, Tuple, Dict]] = None,
+    chunks: Optional[Union[int, tuple, dict]] = None,
     cache: Optional[bool] = None,
     lock: Optional[Any] = None,
     masked: bool = False,
     mask_and_scale: bool = False,
-    variable: Optional[Union[str, List[str], Tuple[str, ...]]] = None,
-    group: Optional[Union[str, List[str], Tuple[str, ...]]] = None,
+    variable: Optional[Union[str, list[str], tuple[str, ...]]] = None,
+    group: Optional[Union[str, list[str], tuple[str, ...]]] = None,
     default_name: Optional[str] = None,
     decode_times: bool = True,
     decode_timedelta: Optional[bool] = None,
     band_as_variable: bool = False,
     **open_kwargs,
-) -> Union[Dataset, DataArray, List[Dataset]]:
+) -> Union[Dataset, DataArray, list[Dataset]]:
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     """Open a file with rasterio (experimental).
 
@@ -1036,7 +1037,7 @@ def open_rasterio(
 
     Returns
     -------
-    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | List[:obj:`xarray.Dataset`]:
+    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | list[:obj:`xarray.Dataset`]:
         The newly created dataset(s).
     """
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
@@ -1169,7 +1170,7 @@ def open_rasterio(
         )
 
     unsigned = None
-    encoding: Dict[Hashable, Any] = {}
+    encoding: dict[Hashable, Any] = {}
     if mask_and_scale and "_Unsigned" in attrs:
         unsigned = variables.pop_to(attrs, encoding, "_Unsigned") == "true"
 

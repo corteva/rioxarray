@@ -153,7 +153,7 @@ def _get_dtypes(rasterio_dtype, encoded_rasterio_dtype, dataarray_dtype):
 
     Returns
     -------
-    Tuple[Union[str, numpy.dtype], Union[str, numpy.dtype]]:
+    tuple[Union[str, numpy.dtype], Union[str, numpy.dtype]]:
         The rasterio dtype and numpy dtype.
     """
     # SCENARIO 1: User wants to write to complex_int16

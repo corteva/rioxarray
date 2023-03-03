@@ -83,7 +83,7 @@ def _assert_xarrays_equal(
                     input_xarray[var], compare_xarray[var], precision=precision
                 )
             except AssertionError:
-                print("Error with variable {}".format(var))
+                print(f"Error with variable {var}")
                 raise
     else:
         try:

@@ -9,10 +9,9 @@ import importlib.metadata
 import os
 import platform
 import sys
-from typing import Dict
 
 
-def _get_sys_info() -> Dict[str, str]:
+def _get_sys_info() -> dict[str, str]:
     """System information
     Return
     ------
@@ -28,7 +27,7 @@ def _get_sys_info() -> Dict[str, str]:
     return dict(blob)
 
 
-def _get_main_info() -> Dict[str, str]:
+def _get_main_info() -> dict[str, str]:
     """Get the main dependency information to hightlight.
 
     Returns
@@ -60,7 +59,7 @@ def _get_main_info() -> Dict[str, str]:
     return dict(blob)
 
 
-def _get_deps_info() -> Dict[str, str]:
+def _get_deps_info() -> dict[str, str]:
     """Overview of the installed version of dependencies
     Returns
     -------
@@ -78,7 +77,7 @@ def _get_deps_info() -> Dict[str, str]:
     return {dep: get_version(dep) for dep in deps}
 
 
-def _print_info_dict(info_dict: Dict[str, str]) -> None:
+def _print_info_dict(info_dict: dict[str, str]) -> None:
     """Print the information dictionary"""
     for key, stat in info_dict.items():
         print(f"{key:>10}: {stat}")

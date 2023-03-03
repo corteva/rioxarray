@@ -3,7 +3,8 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets.
 """
 import os
-from typing import Any, Dict, Iterable, List, Literal, Mapping, Optional, Tuple, Union
+from collections.abc import Iterable, Mapping
+from typing import Any, Literal, Optional, Union
 from uuid import uuid4
 
 import numpy as np
@@ -22,7 +23,7 @@ class RasterDataset(XRasterBase):
     """This is the GIS extension for :class:`xarray.Dataset`"""
 
     @property
-    def vars(self) -> List:
+    def vars(self) -> list:
         """list: Returns non-coordinate varibles"""
         return list(self._obj.data_vars)
 
@@ -57,8 +58,8 @@ class RasterDataset(XRasterBase):
     def reproject(
         self,
         dst_crs: Any,
-        resolution: Optional[Union[float, Tuple[float, float]]] = None,
-        shape: Optional[Tuple[int, int]] = None,
+        resolution: Optional[Union[float, tuple[float, float]]] = None,
+        shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
         resampling: Resampling = Resampling.nearest,
         nodata: Optional[float] = None,
@@ -194,7 +195,7 @@ class RasterDataset(XRasterBase):
         maxx: float,
         maxy: float,
         constant_values: Union[
-            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+            float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
     ) -> xarray.Dataset:
         """Pad the :class:`xarray.Dataset` to a bounding box.
@@ -442,7 +443,7 @@ class RasterDataset(XRasterBase):
         raster_path: Union[str, os.PathLike],
         driver: Optional[str] = None,
         dtype: Optional[Union[str, np.dtype]] = None,
-        tags: Optional[Dict[str, str]] = None,
+        tags: Optional[dict[str, str]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
         lock: Optional[bool] = None,
