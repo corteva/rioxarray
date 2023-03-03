@@ -866,10 +866,6 @@ def test_rasterio_environment():
                     assert_allclose(actual, expected)
 
 
-@pytest.mark.xfail(
-    RASTERIO_VERSION == version.parse("1.1.1"),
-    reason="https://github.com/mapbox/rasterio/issues/1833",
-)
 def test_rasterio_vrt():
     # tmp_file default crs is UTM: CRS({'init': 'epsg:32618'}
     with create_tmp_geotiff() as (tmp_file, expected):

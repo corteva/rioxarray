@@ -10,7 +10,6 @@ datacube is licensed under the Apache License, Version 2.0:
 
 """
 import copy
-import importlib.metadata
 import os
 from pathlib import Path
 from typing import (
@@ -32,7 +31,6 @@ import rasterio.mask
 import rasterio.warp
 import xarray
 from affine import Affine
-from packaging import version
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
@@ -58,10 +56,6 @@ from rioxarray.rioxarray import (
     _make_coords,
     _order_bounds,
 )
-
-_RASTERIO_GTE_12 = version.parse(
-    importlib.metadata.version("rasterio")
-) >= version.parse("1.2")
 
 # DTYPE TO NODATA MAP
 # Based on: https://github.com/OSGeo/gdal/blob/
@@ -911,13 +905,7 @@ class RasterArray(XRasterBase):
             )
         crs = crs_from_user_input(crs) if crs is not None else self.crs
         if self.crs != crs:
-            if _RASTERIO_GTE_12:
-                geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)
-            else:
-                geometries = [
-                    rasterio.warp.transform_geom(crs, self.crs, geometry)
-                    for geometry in geometries
-                ]
+            geometries = rasterio.warp.transform_geom(crs, self.crs, geometries)
         cropped_ds = None
         if from_disk:
             cropped_ds = _clip_from_disk(
@@ -1110,9 +1098,8 @@ class RasterArray(XRasterBase):
         """
         if driver is None:
             extension = Path(raster_path).suffix
-            # https://github.com/rasterio/rasterio/pull/2634
             # https://github.com/rasterio/rasterio/pull/2008
-            if not _RASTERIO_GTE_12 or extension in (".tif", ".tiff"):
+            if extension in (".tif", ".tiff"):
                 driver = "GTiff"
 
         # get the output profile from the rasterio object
