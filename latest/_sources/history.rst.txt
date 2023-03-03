@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- DEP: Drop Python 3.8 support (issue #582)
 
 0.13.4
 ------
