@@ -11,19 +11,9 @@ datacube is licensed under the Apache License, Version 2.0:
 """
 import copy
 import os
+from collections.abc import Hashable, Iterable, Mapping
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Hashable,
-    Iterable,
-    List,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import Any, Literal, Optional, Union
 
 import numpy as np
 import rasterio
@@ -81,7 +71,7 @@ _NODATA_DTYPE_MAP = {
 
 def _generate_attrs(
     src_data_array: xarray.DataArray, dst_nodata: Optional[float]
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
     # remove all nodata information
@@ -134,8 +124,8 @@ def _make_dst_affine(
     src_data_array: xarray.DataArray,
     src_crs: rasterio.crs.CRS,
     dst_crs: rasterio.crs.CRS,
-    dst_resolution: Optional[Union[float, Tuple[float, float]]] = None,
-    dst_shape: Optional[Tuple[float, float]] = None,
+    dst_resolution: Optional[Union[float, tuple[float, float]]] = None,
+    dst_shape: Optional[tuple[float, float]] = None,
     **kwargs,
 ):
     """Determine the affine of the new projected `xarray.DataArray`"""
@@ -380,8 +370,8 @@ class RasterArray(XRasterBase):
     def reproject(
         self,
         dst_crs: Any,
-        resolution: Optional[Union[float, Tuple[float, float]]] = None,
-        shape: Optional[Tuple[int, int]] = None,
+        resolution: Optional[Union[float, tuple[float, float]]] = None,
+        shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
         resampling: Resampling = Resampling.nearest,
         nodata: Optional[float] = None,
@@ -476,7 +466,7 @@ class RasterArray(XRasterBase):
         # add necessary attributes
         new_attrs = _generate_attrs(self._obj, dst_nodata)
         # make sure dimensions with coordinates renamed to x,y
-        dst_dims: List[Hashable] = []
+        dst_dims: list[Hashable] = []
         for dim in self._obj.dims:
             if dim == self.x_dim:
                 dst_dims.append("x")
@@ -592,7 +582,7 @@ class RasterArray(XRasterBase):
         maxx: float,
         maxy: float,
         constant_values: Union[
-            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+            float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
     ) -> xarray.DataArray:
         """Pad the array to x,y bounds.
@@ -671,7 +661,7 @@ class RasterArray(XRasterBase):
         maxx: float,
         maxy: float,
         constant_values: Union[
-            float, Tuple[int, int], Mapping[Any, Tuple[int, int]], None
+            float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
     ) -> xarray.DataArray:
         """Pad the :obj:`xarray.DataArray` to a bounding box
@@ -1043,7 +1033,7 @@ class RasterArray(XRasterBase):
         raster_path: Union[str, os.PathLike],
         driver: Optional[str] = None,
         dtype: Optional[Union[str, np.dtype]] = None,
-        tags: Optional[Dict[str, str]] = None,
+        tags: Optional[dict[str, str]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
         lock: Optional[bool] = None,

@@ -5,7 +5,8 @@ to xarray datasets/dataarrays.
 # pylint: disable=too-many-lines
 import math
 import warnings
-from typing import Any, Dict, Hashable, Iterable, List, Literal, Optional, Tuple, Union
+from collections.abc import Hashable, Iterable
+from typing import Any, Literal, Optional, Union
 
 import numpy as np
 import pyproj
@@ -49,7 +50,7 @@ def _affine_has_rotation(affine: Affine) -> bool:
     return affine.b == affine.d != 0
 
 
-def _resolution(affine: Affine) -> Tuple[float, float]:
+def _resolution(affine: Affine) -> tuple[float, float]:
     """
     Determine if the resolution of the affine.
     If it has rotation, the sign of the resolution is lost.
@@ -79,7 +80,7 @@ def _resolution(affine: Affine) -> Tuple[float, float]:
 
 def affine_to_coords(
     affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y"
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """Generate 1d pixel centered coordinates from affine.
 
     Based on code from the xarray rasterio backend.
@@ -116,7 +117,7 @@ def affine_to_coords(
 
 def _generate_spatial_coords(
     affine: Affine, width: int, height: int
-) -> Dict[Hashable, Any]:
+) -> dict[Hashable, Any]:
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
     if new_spatial_coords["x"].ndim == 1:
@@ -132,8 +133,8 @@ def _generate_spatial_coords(
 
 def _get_nonspatial_coords(
     src_data_array: Union[xarray.DataArray, xarray.Dataset]
-) -> Dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
-    coords: Dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
+) -> dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
+    coords: dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
     for coord in set(src_data_array.coords) - {
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
@@ -160,7 +161,7 @@ def _make_coords(
     dst_width: int,
     dst_height: int,
     force_generate: bool = False,
-) -> Dict[Hashable, Any]:
+) -> dict[Hashable, Any]:
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
     if force_generate or (
@@ -185,7 +186,7 @@ def _get_data_var_message(obj: Union[xarray.DataArray, xarray.Dataset]) -> str:
 
 def _get_spatial_dims(
     obj: Union[xarray.Dataset, xarray.DataArray], var: Union[Any, Hashable]
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Retrieve the spatial dimensions of the dataset
     """
@@ -222,7 +223,7 @@ def _order_bounds(
     maxy: float,
     resolution_x: float,
     resolution_y: float,
-) -> Tuple[float, float, float, float]:
+) -> tuple[float, float, float, float]:
     """
     Make sure that the bounds are in the correct order
     """
@@ -723,7 +724,7 @@ class XRasterBase:
         return data_obj
 
     def set_attrs(
-        self, new_attrs: Dict, inplace: bool = False
+        self, new_attrs: dict, inplace: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Set the attributes of the dataset/dataarray and reset
@@ -751,7 +752,7 @@ class XRasterBase:
         return data_obj
 
     def update_attrs(
-        self, new_attrs: Dict, inplace: bool = False
+        self, new_attrs: dict, inplace: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Update the attributes of the dataset/dataarray and reset
@@ -774,7 +775,7 @@ class XRasterBase:
         return self.set_attrs(data_attrs, inplace=inplace)
 
     def set_encoding(
-        self, new_encoding: Dict, inplace: bool = False
+        self, new_encoding: dict, inplace: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Set the encoding of the dataset/dataarray and reset
@@ -804,7 +805,7 @@ class XRasterBase:
         return data_obj
 
     def update_encoding(
-        self, new_encoding: Dict, inplace: bool = False
+        self, new_encoding: dict, inplace: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Update the encoding of the dataset/dataarray and reset
@@ -904,7 +905,7 @@ class XRasterBase:
         return self._height
 
     @property
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """tuple(int, int): Returns the shape (height, width)"""
         return (self.height, self.width)
 
@@ -917,14 +918,14 @@ class XRasterBase:
         -------
         str or None: Name extra dimension.
         """
-        extra_dims = tuple(set(list(self._obj.dims)) - set([self.x_dim, self.y_dim]))
+        extra_dims = tuple(set(list(self._obj.dims)) - {self.x_dim, self.y_dim})
         if len(extra_dims) > 1:
             raise TooManyDimensions(
                 "Only 2D and 3D data arrays supported."
                 f"{_get_data_var_message(self._obj)}"
             )
         if extra_dims and self._obj.dims != (extra_dims[0], self.y_dim, self.x_dim):
-            dim_info: Tuple = (extra_dims[0], self.y_dim, self.x_dim)
+            dim_info: tuple = (extra_dims[0], self.y_dim, self.x_dim)
             raise InvalidDimensionOrder(
                 f"Invalid dimension order. Expected order: {dim_info}. "
                 f"You can use `DataArray.transpose{dim_info}`"
@@ -952,7 +953,7 @@ class XRasterBase:
             self._count = self._obj[extra_dim].size
         return self._count
 
-    def _internal_bounds(self) -> Tuple[float, float, float, float]:
+    def _internal_bounds(self) -> tuple[float, float, float, float]:
         """Determine the internal bounds of the `xarray.DataArray`"""
         if self.x_dim not in self._obj.coords:
             raise DimensionMissingCoordinateError(f"{self.x_dim} missing coordinates.")
@@ -970,7 +971,7 @@ class XRasterBase:
             ) from None
         return left, bottom, right, top
 
-    def resolution(self, recalc: bool = False) -> Tuple[float, float]:
+    def resolution(self, recalc: bool = False) -> tuple[float, float]:
         """
         Determine if the resolution of the grid.
         If the transformation has rotation, the sign of the resolution is lost.
@@ -1014,7 +1015,7 @@ class XRasterBase:
 
     def _unordered_bounds(
         self, recalc: bool = False
-    ) -> Tuple[float, float, float, float]:
+    ) -> tuple[float, float, float, float]:
         """
         Unordered bounds.
 
@@ -1049,7 +1050,7 @@ class XRasterBase:
 
         return left, bottom, right, top
 
-    def bounds(self, recalc: bool = False) -> Tuple[float, float, float, float]:
+    def bounds(self, recalc: bool = False) -> tuple[float, float, float, float]:
         """
         Parameters
         ----------
@@ -1166,7 +1167,7 @@ class XRasterBase:
 
     def transform_bounds(
         self, dst_crs: Any, densify_pts: int = 21, recalc: bool = False
-    ) -> Tuple[float, float, float, float]:
+    ) -> tuple[float, float, float, float]:
         """Transform bounds from src_crs to dst_crs.
 
         Optionally densifying the edges (to account for nonlinear transformations
@@ -1236,7 +1237,7 @@ class XRasterBase:
         data_obj.coords[grid_mapping_name].attrs["gcps"] = geojson_gcps
         return data_obj
 
-    def get_gcps(self) -> Optional[List[GroundControlPoint]]:
+    def get_gcps(self) -> Optional[list[GroundControlPoint]]:
         """
         Get the GroundControlPoints from the dataset.
 
@@ -1269,7 +1270,7 @@ class XRasterBase:
 
 def _convert_gcps_to_geojson(
     gcps: Iterable[GroundControlPoint],
-) -> Dict:
+) -> dict:
     """
     Convert GCPs to geojson.
 
