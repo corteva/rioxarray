@@ -23,7 +23,7 @@ jobs:
       - name: Setup Conda
         uses: s-weigand/setup-conda@v1
         with:
-          python-version: 3.8
+          python-version: 3.9
           conda-channels: conda-forge
 
       - name: Install and Build
@@ -31,7 +31,7 @@ jobs:
         run: |
           conda config --prepend channels conda-forge
           conda config --set channel_priority strict
-          conda create -n docs python=3.8 rasterio xarray scipy pyproj pandoc
+          conda create -n docs python=3.9 rasterio xarray scipy pyproj pandoc
           source activate docs
           python -m pip install -e .[doc]
           sphinx-build -b html docs/ docs/_build/
