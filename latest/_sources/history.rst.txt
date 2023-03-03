@@ -4,6 +4,7 @@ History
 Latest
 ------
 - DEP: Drop Python 3.8 support (issue #582)
+- DEP: pin rasterio>=1.2 (pull #642)
 
 0.13.4
 ------
