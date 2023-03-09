@@ -600,7 +600,6 @@ def test_indexing():
         8, 10, 3, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
     ) as (tmp_file, expected):
         with rioxarray.open_rasterio(tmp_file, cache=False) as actual:
-
             # tests
             # assert_allclose checks all data + coordinates
             assert_allclose(actual, expected)
@@ -717,7 +716,6 @@ def test_caching():
     ) as (tmp_file, expected):
         # Cache is the default
         with rioxarray.open_rasterio(tmp_file) as actual:
-
             # This should cache everything
             assert_allclose(actual, expected)
 
@@ -866,7 +864,8 @@ def test_rasterio_environment():
                     assert_allclose(actual, expected)
 
 
-def test_rasterio_vrt():
+@pytest.mark.parametrize("band_as_variable", [True, False])
+def test_rasterio_vrt(band_as_variable):
     # tmp_file default crs is UTM: CRS({'init': 'epsg:32618'}
     with create_tmp_geotiff() as (tmp_file, expected):
         with rasterio.open(tmp_file) as src:
@@ -874,7 +873,12 @@ def test_rasterio_vrt():
                 # Value of single pixel in center of image
                 lon, lat = vrt.xy(vrt.width // 2, vrt.height // 2)
                 expected_val = next(vrt.sample([(lon, lat)]))
-                with rioxarray.open_rasterio(vrt) as rds:
+                with rioxarray.open_rasterio(
+                    vrt, band_as_variable=band_as_variable
+                ) as rds:
+                    if band_as_variable:
+                        rds = rds.band_1
+
                     actual_val = rds.sel(dict(x=lon, y=lat), method="nearest").data
 
                     assert_array_equal(rds.rio.shape, (vrt.height, vrt.width))
@@ -1413,7 +1417,6 @@ def test_cint16_dtype_masked(dtype, tmp_path):
 def test_cint16_promote_dtype(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     with rioxarray.open_rasterio(test_file) as xds:
-
         tmp_output = tmp_path / "tmp_cfloat64.tif"
         with pytest.warns(NotGeoreferencedWarning):
             xds.rio.to_raster(str(tmp_output), dtype="complex64")
