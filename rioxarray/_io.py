@@ -5,7 +5,7 @@ Credits:
 This file was adopted from: https://github.com/pydata/xarray # noqa
 Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py # noqa
 """
-
+# pylint: disable=too-many-lines
 import contextlib
 import functools
 import importlib.metadata
@@ -42,17 +42,46 @@ RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
 
 
+def _ensure_warped_vrt(riods, vrt_params):
+    """
+    Ensuire the dataset is represented as a warped vrt
+    """
+    if vrt_params is None:
+        return riods
+    if isinstance(riods, SingleBandDatasetReader):
+        riods._create_vrt(vrt_params)
+    else:
+        riods = WarpedVRT(riods, **vrt_params)
+    return riods
+
+
 class SingleBandDatasetReader:
     """
     Hack to have a DatasetReader behave like it only has one band
     """
 
-    def __init__(self, riods, bidx) -> None:
+    def __init__(self, riods, bidx, vrt_params=None) -> None:
         self._riods = riods
         self._bidx = bidx
+        self._vrt_params = vrt_params
+        self._create_vrt(vrt_params=vrt_params)
 
     def __getattr__(self, __name: str) -> Any:
         return getattr(self._riods, __name)
+
+    def _create_vrt(self, vrt_params):
+        if vrt_params is not None and not isinstance(self._riods, WarpedVRT):
+            self._riods = WarpedVRT(self._riods, **vrt_params)
+        self._vrt_params = vrt_params
+
+    @property
+    def name(self):
+        """
+        str: name of the dataset. Usually the path.
+        """
+        if isinstance(self._riods, rasterio.vrt.WarpedVRT):
+            return self._riods.src_dataset.name
+        return self._riods.name
 
     @property
     def count(self):
@@ -275,9 +304,7 @@ class RasterioArrayWrapper(BackendArray):
         self.mask_and_scale = mask_and_scale
 
         # cannot save riods as an attribute: this would break pickleability
-        riods = manager.acquire()
-        if vrt_params is not None:
-            riods = WarpedVRT(riods, **vrt_params)
+        riods = _ensure_warped_vrt(manager.acquire(), vrt_params)
         self.vrt_params = vrt_params
         self._shape = (riods.count, riods.height, riods.width)
 
@@ -395,9 +422,9 @@ class RasterioArrayWrapper(BackendArray):
             out = np.zeros(shape, dtype=self.dtype)
         else:
             with self.lock:
-                riods = self.manager.acquire(needs_lock=False)
-                if self.vrt_params is not None:
-                    riods = WarpedVRT(riods, **self.vrt_params)
+                riods = _ensure_warped_vrt(
+                    self.manager.acquire(needs_lock=False), self.vrt_params
+                )
                 out = riods.read(band_key, window=window, masked=self.masked)
                 if self._unsigned_dtype is not None:
                     out = out.astype(self._unsigned_dtype)
@@ -818,6 +845,7 @@ def _load_bands_as_variables(
     mask_and_scale: bool,
     decode_times: bool,
     decode_timedelta: Optional[bool],
+    vrt_params: Optional[dict],
     **open_kwargs,
 ) -> Union[Dataset, list[Dataset]]:
     """
@@ -829,6 +857,7 @@ def _load_bands_as_variables(
         band_riods = SingleBandDatasetReader(
             riods=riods,
             bidx=band - 1,
+            vrt_params=vrt_params,
         )
         band_name = f"band_{band}"
         data_vars[band_name] = (
@@ -1049,6 +1078,7 @@ def open_rasterio(
             _single_band_open,
             bidx=filename._bidx,
         )
+        vrt_params = filename._vrt_params
     if isinstance(filename, (rasterio.io.DatasetReader, SingleBandDatasetReader)):
         filename = filename.name
     elif isinstance(filename, rasterio.vrt.WarpedVRT):
@@ -1088,22 +1118,6 @@ def open_rasterio(
         riods = manager.acquire()
         captured_warnings = rio_warnings.copy()
 
-    if band_as_variable:
-        dataset_result = _load_bands_as_variables(
-            riods=riods,
-            parse_coordinates=parse_coordinates,
-            chunks=chunks,
-            cache=cache,
-            lock=lock,
-            masked=masked,
-            mask_and_scale=mask_and_scale,
-            decode_times=decode_times,
-            decode_timedelta=decode_timedelta,
-            **open_kwargs,
-        )
-        manager.close()
-        return dataset_result
-
     # raise the NotGeoreferencedWarning if applicable
     for rio_warning in captured_warnings:
         if not riods.subdatasets or not isinstance(
@@ -1130,11 +1144,27 @@ def open_rasterio(
         manager.close()
         return subdataset_result
 
-    if vrt_params is not None:
-        riods = WarpedVRT(riods, **vrt_params)
+    if band_as_variable:
+        dataset_result = _load_bands_as_variables(
+            riods=riods,
+            parse_coordinates=parse_coordinates,
+            chunks=chunks,
+            cache=cache,
+            lock=lock,
+            masked=masked,
+            mask_and_scale=mask_and_scale,
+            decode_times=decode_times,
+            decode_timedelta=decode_timedelta,
+            vrt_params=vrt_params,
+            **open_kwargs,
+        )
+        manager.close()
+        return dataset_result
 
     if cache is None:
         cache = chunks is None
+
+    riods = _ensure_warped_vrt(riods, vrt_params)
 
     # Get bands
     if riods.count < 1:
