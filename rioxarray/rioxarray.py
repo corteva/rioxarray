@@ -1235,11 +1235,18 @@ class XRasterBase:
         )
         data_obj = self._get_obj(inplace=True)
 
-        data_obj = data_obj.rio.write_crs(
-            gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
-        )
+        if gcp_crs:
+            data_obj = data_obj.rio.write_crs(
+                gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
+            )
+        try:
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+        except KeyError:
+            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
         geojson_gcps = _convert_gcps_to_geojson(gcps)
-        data_obj.coords[grid_mapping_name].attrs["gcps"] = json.dumps(geojson_gcps)
+        grid_map_attrs["gcps"] = json.dumps(geojson_gcps)
+        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
         self._gcps = list(gcps)
         return data_obj
 

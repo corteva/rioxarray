@@ -2967,6 +2967,19 @@ def test_rio_write_gcps(with_z):
     _check_rio_gcps(darr, gdal_gcps, gcp_crs)
 
 
+def test_rio_write_gcps_no_crs():
+    """
+    Test setting gcps in dataarray, when gcp_crs is not present.
+    """
+    gdal_gcps, _ = _create_gdal_gcps()
+    gcp_crs = None
+
+    darr = xarray.DataArray(1)
+    darr.rio.write_gcps(gdal_gcps, gcp_crs, inplace=True)
+
+    _check_rio_gcps(darr, gdal_gcps, gcp_crs)
+
+
 def _create_gdal_gcps(with_z=True):
     src_gcps = [
         GroundControlPoint(
