@@ -36,7 +36,7 @@ jobs:
         rasterio-version: ['']
         xarray-version: ['']
         run-with-scipy: ['YES']
-        gdal-version: ['3.6.1']
+        gdal-version: ['3.6.3']
         include:
           - python-version: '3.9'
             rasterio-version: ''
