@@ -1229,7 +1229,7 @@ class XRasterBase:
             self.grid_mapping if grid_mapping_name is None else grid_mapping_name
         )
         data_obj = self._get_obj(inplace=True)
-        
+
         if gcp_crs:
             data_obj = data_obj.rio.write_crs(
                 gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
