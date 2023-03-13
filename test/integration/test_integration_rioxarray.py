@@ -2935,13 +2935,13 @@ def test_rio_write_gcps():
 
 def test_rio_write_gcps_no_crs():
     """
-    Test setting gcps in dataarray, when gcp_crs is not present 
+    Test setting gcps in dataarray, when gcp_crs is not present.
     """
     gdal_gcps, _ = _create_gdal_gcps()
     gcp_crs = None
 
     darr = xarray.DataArray(1)
-    darr['spatial_ref'] = None
+    darr["spatial_ref"] = None
     darr.rio.write_gcps(gdal_gcps, gcp_crs, inplace=True)
 
     _check_rio_gcps(darr, gdal_gcps, gcp_crs)
