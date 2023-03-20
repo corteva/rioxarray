@@ -105,6 +105,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xds</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_xds</span> <span class="o">=</span> <span class="n">xds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">xds</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span>
