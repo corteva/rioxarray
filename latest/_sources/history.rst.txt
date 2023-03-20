@@ -6,6 +6,7 @@ Latest
 - DEP: Drop Python 3.8 support (issue #582)
 - DEP: pin rasterio>=1.2 (pull #642)
 - BUG: Fix WarpedVRT in :func:`rioxarray.open_rasterio` when band_as_variable=True (issue #644)
+- BUG: Fix usage of `encode_cf_variable` in `rio.to_raster` (pull #652)
 
 0.13.4
 ------
