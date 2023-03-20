@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Fix :mod:`rioxarray.merge` CRS check
 
 0.14.0
 ------

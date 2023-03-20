@@ -25,6 +25,7 @@ class RasterioDatasetDuck:
 
     def __init__(self, xds: DataArray):
         self._xds = xds
+        self.crs = xds.rio.crs
         self.bounds = xds.rio.bounds(recalc=True)
         self.count = int(xds.rio.count)
         self.dtypes = [xds.dtype]
