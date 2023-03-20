@@ -285,7 +285,9 @@ class RasterioWriter:
                         out_data = xarray_dataarray.rio.isel_window(window)
                     else:
                         out_data = xarray_dataarray
-                    data = encode_cf_variable(out_data).values.astype(numpy_dtype)
+                    data = encode_cf_variable(out_data.variable).values.astype(
+                        numpy_dtype
+                    )
                     if data.ndim == 2:
                         rds.write(data, 1, window=window)
                     else:
@@ -293,7 +295,7 @@ class RasterioWriter:
 
         if lock and is_dask_collection(xarray_dataarray.data):
             return dask.array.store(
-                encode_cf_variable(xarray_dataarray).data.astype(numpy_dtype),
+                encode_cf_variable(xarray_dataarray.variable).data.astype(numpy_dtype),
                 self,
                 lock=lock,
                 compute=compute,
