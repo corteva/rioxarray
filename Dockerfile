@@ -1,5 +1,5 @@
 ARG GDAL=ubuntu-full-3.6.1
-FROM osgeo/gdal:${GDAL}
+FROM ghcr.io/osgeo/gdal:${GDAL}
 ARG PYTHON_VERSION="3.9"
 ENV LANG="C.UTF-8"
 ENV LC_ALL="C.UTF-8"
