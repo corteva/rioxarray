@@ -8,7 +8,7 @@ Welcome! This page aims to help you gain a foundational understanding of rioxarr
 rio accessor
 -------------
 
-rioxarray `extends xarray <http://xarray.pydata.org/en/stable/internals.html#extending-xarray>`__
+rioxarray `extends xarray <https://docs.xarray.dev/en/stable/internals/extending-xarray.html>`__
 with the `rio` accessor. The `rio` accessor is activated by importing rioxarray like so:
 
 .. code-block:: python
