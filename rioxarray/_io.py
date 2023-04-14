@@ -37,6 +37,8 @@ from xarray.core.variable import as_variable
 from rioxarray.exceptions import RioXarrayError
 from rioxarray.rioxarray import _generate_spatial_coords
 
+FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
+UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
@@ -654,6 +656,10 @@ def _get_rasterio_attrs(riods: RasterioReader):
     # pylint: disable=too-many-branches
     # Add rasterio attributes
     attrs = _parse_tags({**riods.tags(), **riods.tags(1)})
+    # remove attributes with informaiton
+    # that should be added by GDAL/rasterio
+    for unwanted_attr in FILL_VALUE_NAMES + UNWANTED_RIO_ATTRS:
+        attrs.pop(unwanted_attr, None)
     if riods.nodata is not None:
         # The nodata values for the raster bands
         attrs["_FillValue"] = riods.nodata

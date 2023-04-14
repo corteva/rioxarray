@@ -15,7 +15,7 @@ import rasterio
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
-from rioxarray._io import _get_unsigned_dtype
+from rioxarray._io import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS, _get_unsigned_dtype
 from rioxarray.exceptions import RioXarrayError
 
 try:
@@ -31,8 +31,6 @@ except ImportError:
         return False
 
 
-FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 # Note: transform & crs are removed in write_transform/write_crs
 
 

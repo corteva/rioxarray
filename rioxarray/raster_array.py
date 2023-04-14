@@ -27,6 +27,7 @@ from rasterio.features import geometry_mask
 from xarray.backends.file_manager import FileManager
 from xarray.core.dtypes import get_fill_value
 
+from rioxarray._io import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS
 from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
     MissingCRS,
@@ -34,12 +35,7 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.raster_writer import (
-    FILL_VALUE_NAMES,
-    UNWANTED_RIO_ATTRS,
-    RasterioWriter,
-    _ensure_nodata_dtype,
-)
+from rioxarray.raster_writer import RasterioWriter, _ensure_nodata_dtype
 from rioxarray.rioxarray import (
     XRasterBase,
     _get_data_var_message,
