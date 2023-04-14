@@ -117,6 +117,8 @@
 <span class="kn">from</span> <span class="nn">rioxarray.exceptions</span> <span class="kn">import</span> <span class="n">RioXarrayError</span>
 <span class="kn">from</span> <span class="nn">rioxarray.rioxarray</span> <span class="kn">import</span> <span class="n">_generate_spatial_coords</span>
 
+<span class="n">FILL_VALUE_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_value&quot;</span><span class="p">,</span> <span class="s2">&quot;nodata&quot;</span><span class="p">)</span>
+<span class="n">UNWANTED_RIO_ATTRS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;nodatavals&quot;</span><span class="p">,</span> <span class="s2">&quot;is_tiled&quot;</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">)</span>
 <span class="c1"># TODO: should this be GDAL_LOCK instead?</span>
 <span class="n">RASTERIO_LOCK</span> <span class="o">=</span> <span class="n">SerializableLock</span><span class="p">()</span>
 <span class="n">NO_LOCK</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>
@@ -734,6 +736,10 @@
     <span class="c1"># pylint: disable=too-many-branches</span>
     <span class="c1"># Add rasterio attributes</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">_parse_tags</span><span class="p">({</span><span class="o">**</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(),</span> <span class="o">**</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(</span><span class="mi">1</span><span class="p">)})</span>
+    <span class="c1"># remove attributes with informaiton</span>
+    <span class="c1"># that should be added by GDAL/rasterio</span>
+    <span class="k">for</span> <span class="n">unwanted_attr</span> <span class="ow">in</span> <span class="n">FILL_VALUE_NAMES</span> <span class="o">+</span> <span class="n">UNWANTED_RIO_ATTRS</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">unwanted_attr</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># The nodata values for the raster bands</span>
         <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;_FillValue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
