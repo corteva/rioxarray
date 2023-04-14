@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example - Reading COGs in Parallel &mdash; rioxarray 0.14.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example - Reproject" href="reproject.html" />
+    <link rel="prev" title="Example - Pad Box" href="pad_box.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rioxarray
+          </a>
+              <div class="version">
+                0.14.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Usage Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="resampling.html">Example - Resampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_to_raster.html">Example - Convert dataset to raster (GeoTiff)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clip_box.html">Example - Clip Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pad_box.html">Example - Pad Box</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Reading COGs in Parallel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Scheduler-Choice">Scheduler Choice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Reading-without-Locks">Reading without Locks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Chunking">Chunking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Caching-Considerations">Caching Considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reproject.html">Example - Reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reproject_match.html">Example - Reproject Match (For Raster Calculations/Stacking)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="merge.html">Example - Merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interpolate_na.html">Example - Interpolate Missing Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/346899/144357">Create a new raster TIFF file which is masked based on the GeoJSON file</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/354798/144357">How to mask NetCDF time series data from a shapefile in Python?</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/358058/144357">Extract data from raster at a point</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/358057/144357">Convert raster to CSV with lat, lon, and value columns</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="examples.html">Usage Examples</a></li>
+      <li class="breadcrumb-item active">Example - Reading COGs in Parallel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/read-locks.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Example---Reading-COGs-in-Parallel">
+<h1>Example - Reading COGs in Parallel<a class="headerlink" href="#Example---Reading-COGs-in-Parallel" title="Permalink to this heading"></a></h1>
+<p>Cloud Optimized Geotiffs (COGs) can be internally chunked, which makes it possible to read them in parallel from multiple threads. However, the libraries <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> builds on, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">GDAL</span></code>, require some care to be used safely from multiple threads within a single process. By default, <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a> will acquire a per-process lock when reading a chunk of a COG.</p>
+<p>If you’re using <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> with <a class="reference external" href="http://docs.dask.org/">Dask</a> through the <code class="docutils literal notranslate"><span class="pre">chunks</span></code> keyword, you can also specify the <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> keyword to ensure that reading <em>and</em> operating on your data happen in parallel.</p>
+<p>Note: Also see <a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p>
+<section id="Scheduler-Choice">
+<h2>Scheduler Choice<a class="headerlink" href="#Scheduler-Choice" title="Permalink to this heading"></a></h2>
+<p>Dask has <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html">several schedulers</a> which run computations in parallel. Which scheduler is best depends on a variety of factors, including whether your computation holds Python’s Global Interpreter Lock, whether how much data needs to be moved around, and whether you need more than one machine’s computational power. This section about read-locks only applies if you have more than one thread in a process. This will happen with Dask’s <a class="reference external" href="https://docs.dask.org/en/latest/scheduling.html#local-threads">local threaded
+scheduler</a> and its <a class="reference external" href="https://distributed.dask.org/en/latest/">distributed scheduler</a> when configured to use more than one thread per worker.</p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> objects will use the local <code class="docutils literal notranslate"><span class="pre">threaded</span></code> scheduler.</p>
+</section>
+<section id="Reading-without-Locks">
+<h2>Reading without Locks<a class="headerlink" href="#Reading-without-Locks" title="Permalink to this heading"></a></h2>
+<p>To read a COG without any locks, you’d specify <code class="docutils literal notranslate"><span class="pre">lock=False</span></code>. This tells <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> to open a new <code class="docutils literal notranslate"><span class="pre">rasterio.DatasetReader</span></code> in each thread, rather than trying to share one amongst multiple threads.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
+
+url = (
+    &quot;https://naipeuwest.blob.core.windows.net/naip/v002/md/2013/md_100cm_2013/&quot;
+    &quot;39076/m_3907617_ne_18_1_20130924.tif&quot;
+)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.4 s, sys: 361 ms, total: 2.76 s
+Wall time: 3.32 s
+</pre></div></div>
+</div>
+<p>Note: these timings are from a VM in the same Azure data center that’s hosting the COG. Running this locally will give different times.</p>
+</section>
+<section id="Chunking">
+<h2>Chunking<a class="headerlink" href="#Chunking" title="Permalink to this heading"></a></h2>
+<p>For maximum read performance, the chunking pattern you request should align with the internal chunking of the COG. Typically this means reading the data in a “row major” format: your chunks should be as wide as possible along the columns. We did that above with the chunks of <code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">&quot;auto&quot;,</span> <span class="pre">-1)</span></code>. The <code class="docutils literal notranslate"><span class="pre">-1</span></code> says “include all the columns”, and the <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> will make the chunking along the rows as large as possible while staying in a reasonable limit (specified in
+<code class="docutils literal notranslate"><span class="pre">dask.config.get(&quot;array.chunk-size&quot;)</span></code>).</p>
+<p>If we flipped that, and instead read as much of the rows as possible, we’ll see slower performance.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(1, -1, &quot;auto&quot;))
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 8.58 s, sys: 1.08 s, total: 9.66 s
+Wall time: 11.2 s
+</pre></div></div>
+</div>
+<p>That said, reading is typically just the first step in a larger computation. You’d want to consider what chunking is best for your whole computation. See <a class="reference external" href="https://docs.dask.org/en/latest/array-chunks.html">https://docs.dask.org/en/latest/array-chunks.html</a> for more on choosing chunks.</p>
+</section>
+<section id="Caching-Considerations">
+<h2>Caching Considerations<a class="headerlink" href="#Caching-Considerations" title="Permalink to this heading"></a></h2>
+<p>Specifying <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> will disable some internal caching done by xarray or rasterio. For example, the first and second reads here are roughly the same, since nothing is cached.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.49 s, sys: 392 ms, total: 2.88 s
+Wall time: 3.25 s
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.48 s, sys: 292 ms, total: 2.78 s
+Wall time: 2.97 s
+</pre></div></div>
+</div>
+<p>By default and when a lock is passed in, the initial read is slower (since some threads are waiting around for a lock).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, chunks=(4, &quot;auto&quot;, -1))  # use the default locking
+%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 2.15 s, sys: 284 ms, total: 2.44 s
+Wall time: 5.03 s
+</pre></div></div>
+</div>
+<p>But thanks to caching, subsequent reads are much faster.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 223 ms, sys: 64.9 ms, total: 288 ms
+Wall time: 200 ms
+</pre></div></div>
+</div>
+<p>If you’re reapeatedly reading subsets of the data, using the default lock or <code class="docutils literal notranslate"><span class="pre">lock=some_lock_object</span></code> to benefit from the caching.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pad_box.html" class="btn btn-neutral float-left" title="Example - Pad Box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reproject.html" class="btn btn-neutral float-right" title="Example - Reproject" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2023, Corteva Agriscience™.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

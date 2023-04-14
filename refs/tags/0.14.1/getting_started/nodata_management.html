@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nodata Management &mdash; rioxarray 0.14.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Managing Information Loss with xarray operations" href="manage_information_loss.html" />
+    <link rel="prev" title="Coordinate Reference System Management" href="crs_management.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rioxarray
+          </a>
+              <div class="version">
+                0.14.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#rio-accessor">rio accessor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#reading-files">Reading Files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="getting_started.html#introductory-information">Introductory Information</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Nodata Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Search-order-for-nodata-(DataArray-only):">Search order for nodata (DataArray only):</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#API-Documentation">API Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="getting_started.html">Getting Started</a></li>
+      <li class="breadcrumb-item active">Nodata Management</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/nodata_management.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Nodata-Management">
+<h1>Nodata Management<a class="headerlink" href="#Nodata-Management" title="Permalink to this heading"></a></h1>
+<p>If you have opened a dataset and the nodata value can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> accessors.</p>
+<p>If your dataset’s nodata value cannot be determined, you can use the <code class="docutils literal notranslate"><span class="pre">rio.write_nodata</span></code> method.</p>
+<section id="Search-order-for-nodata-(DataArray-only):">
+<h2>Search order for nodata (DataArray only):<a class="headerlink" href="#Search-order-for-nodata-(DataArray-only):" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Check if DataArray values are masked. If they are masked, return <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. If the DataArray is masked, the original nodata value can be retreived from <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code>.</p></li>
+<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">_FillValue</span></code> then <code class="docutils literal notranslate"><span class="pre">missing_value</span></code> then <code class="docutils literal notranslate"><span class="pre">fill_value</span></code> and finally <code class="docutils literal notranslate"><span class="pre">nodata</span></code>.</p></li>
+<li><p>Look in the <code class="docutils literal notranslate"><span class="pre">nodatavals</span></code> attribute. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
+</ol>
+</section>
+<section id="API-Documentation">
+<h2>API Documentation<a class="headerlink" href="#API-Documentation" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata"><span class="std std-ref">rio.nodata</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.encoded_nodata"><span class="std std-ref">rio.encoded_nodata</span></a></p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
+import xarray
+
+file_path = &quot;../../test/test_data/input/tmmx_20190121.nc&quot;
+</pre></div>
+</div>
+</div>
+<section id="Example-of-loading-unmaksed-data">
+<h3>Example of loading unmaksed data<a class="headerlink" href="#Example-of-loading-unmaksed-data" title="Permalink to this heading"></a></h3>
+<p>In this case, the nodata value is in the attributes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path, mask_and_scale=False) # performs mask_and_scale by default
+rds = rioxarray.open_rasterio(file_path)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;nodata:&quot;)
+print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.nodata}&quot;)
+print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.nodata}&quot;)
+print(&quot;\nencoded_nodata:&quot;)
+print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.encoded_nodata}&quot;)
+print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata:
+- xarray.open_dataset: 32767
+- rioxarray.open_rasterio: 32767
+
+encoded_nodata:
+- xarray.open_dataset: None
+- rioxarray.open_rasterio: None
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;attributes:&quot;)
+print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.attrs}&quot;)
+print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.attrs}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+attributes:
+
+- xarray.open_dataset:
+    {&#39;_FillValue&#39;: 32767, &#39;units&#39;: &#39;K&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_Unsigned&#39;: &#39;true&#39;}
+
+- rioxarray.open_rasterio:
+    {&#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;missing_value&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;, &#39;_FillValue&#39;: 32767.0, &#39;_Unsigned&#39;: &#39;true&#39;}
+</pre></div></div>
+</div>
+</section>
+<section id="Example-of-data-loaded-in-with-mask_and_scale=True">
+<h3>Example of data loaded in with mask_and_scale=True<a class="headerlink" href="#Example-of-data-loaded-in-with-mask_and_scale=True" title="Permalink to this heading"></a></h3>
+<p>When the dataset is opened with <code class="docutils literal notranslate"><span class="pre">mask_and_scale=True</span></code> with <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>, the nodata metadata is written to the encoding attribute. Then, when the dataset is written using <code class="docutils literal notranslate"><span class="pre">to_netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">rio.to_raster</span></code> the data is decoded and it writes the original nodata value to the raster.</p>
+<p>When this happens, <code class="docutils literal notranslate"><span class="pre">rio.nodata</span></code> returns <code class="docutils literal notranslate"><span class="pre">numpy.nan</span></code> and <code class="docutils literal notranslate"><span class="pre">rio.encoded_nodata</span></code> contains the original value.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path) # performs mask_and_scale by default
+rds = rioxarray.open_rasterio(file_path, mask_and_scale=True)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/snowal/miniconda/envs/midas/lib/python3.10/site-packages/rioxarray/_io.py:618: SerializationWarning: variable &#39;air_temperature&#39; has _Unsigned attribute but is not of integer type. Ignoring attribute.
+  rioda = open_rasterio(
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;nodata:&quot;)
+print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.nodata}&quot;)
+print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.nodata}&quot;)
+print(&quot;\nencoded_nodata:&quot;)
+print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.encoded_nodata}&quot;)
+print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata:
+- xarray.open_dataset: nan
+- rioxarray.open_rasterio: nan
+
+encoded_nodata:
+- xarray.open_dataset: 32767.0
+- rioxarray.open_rasterio: 32767.0
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;attributes:&quot;)
+print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.attrs}&quot;)
+print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.attrs}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+attributes:
+
+- xarray.open_dataset:
+    {&#39;units&#39;: &#39;K&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;}
+
+- rioxarray.open_rasterio:
+    {&#39;coordinates&#39;: &#39;day&#39;, &#39;coordinate_system&#39;: &#39;WGS84,EPSG:4326&#39;, &#39;description&#39;: &#39;Daily Maximum Temperature&#39;, &#39;dimensions&#39;: &#39;lon lat time&#39;, &#39;long_name&#39;: &#39;tmmx&#39;, &#39;standard_name&#39;: &#39;tmmx&#39;, &#39;units&#39;: &#39;K&#39;}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;encoding:&quot;)
+print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.encoding}&quot;)
+print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.encoding}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+encoding:
+
+- xarray.open_dataset:
+    {&#39;zlib&#39;: True, &#39;shuffle&#39;: True, &#39;complevel&#39;: 5, &#39;fletcher32&#39;: False, &#39;contiguous&#39;: False, &#39;chunksizes&#39;: (585, 1386), &#39;source&#39;: &#39;/home/snowal/scripts/rioxarray/test/test_data/input/tmmx_20190121.nc&#39;, &#39;original_shape&#39;: (585, 1386), &#39;dtype&#39;: dtype(&#39;uint16&#39;), &#39;_Unsigned&#39;: &#39;true&#39;, &#39;missing_value&#39;: 32767, &#39;_FillValue&#39;: 32767, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;coordinates&#39;: &#39;day&#39;}
+
+- rioxarray.open_rasterio:
+    {&#39;_Unsigned&#39;: &#39;true&#39;, &#39;dtype&#39;: &#39;uint16&#39;, &#39;grid_mapping&#39;: &#39;crs&#39;, &#39;scale_factor&#39;: 0.1, &#39;add_offset&#39;: 220.0, &#39;_FillValue&#39;: 32767.0, &#39;missing_value&#39;: 32767, &#39;source&#39;: &#39;netcdf:../../test/test_data/input/tmmx_20190121.nc:air_temperature&#39;, &#39;rasterio_dtype&#39;: &#39;uint16&#39;}
+</pre></div></div>
+</div>
+</section>
+<section id="Manually-masking-data">
+<h3>Manually masking data<a class="headerlink" href="#Manually-masking-data" title="Permalink to this heading"></a></h3>
+<p>If you use <code class="docutils literal notranslate"><span class="pre">xarray.where</span></code> to mask you data, then you need to ensure that the attributes stored on the DataArray reflect the correct values. <a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.write_nodata"><span class="std std-ref">rio.write_nodata()</span></a> can help ensure that the nodata attributes are written correctly.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path, mask_and_scale=False) # performs mask_and_scale by default
+raster = xds.air_temperature
+raster = raster.where(raster != raster.rio.nodata)
+# nodata does not reflect the data has been masked
+print(f&quot;nodata: {raster.rio.nodata}&quot;)
+print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata: 32767.0
+encoded_nodata: None
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># update nodata value to show the data has been masked
+raster.rio.write_nodata(raster.rio.nodata, encoded=True, inplace=True)
+print(f&quot;nodata: {raster.rio.nodata}&quot;)
+print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+nodata: nan
+encoded_nodata: 32767.0
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="crs_management.html" class="btn btn-neutral float-left" title="Coordinate Reference System Management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="manage_information_loss.html" class="btn btn-neutral float-right" title="Managing Information Loss with xarray operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2023, Corteva Agriscience™.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
