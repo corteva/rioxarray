@@ -1106,7 +1106,6 @@ def test_mask_and_scale(open_rasterio):
             "add_offset": 220.0,
             "scale_factor": 0.1,
             "_FillValue": 32767.0,
-            "missing_value": 32767,
             "grid_mapping": "crs",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
@@ -1137,7 +1136,6 @@ def test_no_mask_and_scale(open_rasterio):
         )
         assert test_encoding == {
             "_FillValue": 32767.0,
-            "missing_value": 32767,
             "grid_mapping": "crs",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",

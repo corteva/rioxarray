@@ -3,7 +3,8 @@ History
 
 Latest
 ------
-- BUG: Fix :mod:`rioxarray.merge` CRS check
+- BUG: Fix :mod:`rioxarray.merge` CRS check (pull #655)
+- BUG: Remove tags with metadata added by rasterio in :func:`rioxarray.open_rasterio` (issue #666)
 
 0.14.0
 ------
