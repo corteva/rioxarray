@@ -38,6 +38,7 @@ from test.conftest import (
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
+    _ensure_dataset,
     open_rasterio_engine,
 )
 
@@ -1658,6 +1659,7 @@ def test_to_raster__scale_factor_and_add_offset(chunks, tmpdir):
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
+        rds = _ensure_dataset(rds)
         assert rds.air_temperature.scale_factor == 0.1
         assert rds.air_temperature.add_offset == 220.0
         rds.air_temperature.rio.to_raster(str(tmp_raster))
@@ -1680,6 +1682,7 @@ def test_to_raster__offsets_and_scales(chunks, tmpdir):
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
+        rds = _ensure_dataset(rds)
         attrs = dict(rds.air_temperature.attrs)
         attrs["scales"] = [0.1]
         attrs["offsets"] = [220.0]
@@ -1769,14 +1772,15 @@ def test_to_raster__dataset__mask_and_scale(chunks, tmpdir):
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
     ) as rds:
+        rds = _ensure_dataset(rds)
         rds.isel(band=0).rio.to_raster(str(output_raster))
 
-    with rioxarray.open_rasterio(str(output_raster)) as rdscompare:
-        assert rdscompare.scale_factor == 0.1
-        assert rdscompare.add_offset == 220.0
-        assert rdscompare.long_name == "tmmx"
-        assert rdscompare.rio.crs == rds.rio.crs
-        assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
+        with rioxarray.open_rasterio(str(output_raster)) as rdscompare:
+            assert rdscompare.scale_factor == 0.1
+            assert rdscompare.add_offset == 220.0
+            assert rdscompare.long_name == "tmmx"
+            assert rdscompare.rio.crs == rds.rio.crs
+            assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
 
 
 def test_to_raster__dataset__different_crs(tmpdir):
@@ -2662,6 +2666,7 @@ def test_shape_order():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     ) as rds:
+        rds = _ensure_dataset(rds)
         assert rds.air_temperature.rio.shape == (585, 1386)
 
 
@@ -2835,7 +2840,7 @@ def test_nonstandard_dims_write_coordinate_system__no_crs():
 def test_grid_mapping__pre_existing(open_func):
     with open_func(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")) as xdi:
         assert xdi.rio.grid_mapping == "crs"
-        assert xdi.air_temperature.rio.grid_mapping == "crs"
+        assert _ensure_dataset(xdi).air_temperature.rio.grid_mapping == "crs"
 
 
 @pytest.mark.parametrize(
@@ -2844,6 +2849,7 @@ def test_grid_mapping__pre_existing(open_func):
 )
 def test_grid_mapping__change(open_func):
     with open_func(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")) as xdi:
+        xdi = _ensure_dataset(xdi)
         # part 1: check changing the data var grid mapping
         xdi["dummy"] = xdi.air_temperature.copy()
         xdi.dummy.rio.write_grid_mapping("different_crs", inplace=True)
