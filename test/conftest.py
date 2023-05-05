@@ -24,6 +24,7 @@ RASTERIO_GE_125 = RASTERIO_VERSION >= version.parse("1.2.5")
 RASTERIO_GE_13 = version.parse(RASTERIO_VERSION.base_version) >= version.parse("1.3.0")
 GDAL_GE_36 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.0")
 GDAL_GE_361 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.1")
+GDAL_GE_364 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.4")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)
@@ -122,3 +123,10 @@ def open_rasterio_engine(file_name_or_object, **kwargs):
 )
 def open_rasterio(request):
     return request.param
+
+
+def _ensure_dataset(rds):
+    # https://github.com/OSGeo/gdal/issues/7695
+    if GDAL_GE_364 and isinstance(rds, xarray.DataArray):
+        rds = rds.to_dataset()
+    return rds
