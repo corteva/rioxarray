@@ -383,6 +383,10 @@ class RasterArray(XRasterBase):
             a 'crs' attribute to be set containing a valid CRS.
             If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.
 
+        .. note:: To re-project with dask, see
+            `odc-geo <https://odc-geo.readthedocs.io/>`__ &
+            `pyresample <https://pyresample.readthedocs.io/>`__.
+
         .. versionadded:: 0.0.27 shape
         .. versionadded:: 0.0.28 transform
         .. versionadded:: 0.5.0 nodata, kwargs
