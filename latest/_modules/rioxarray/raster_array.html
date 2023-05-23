@@ -10,6 +10,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -462,6 +464,10 @@
 <span class="sd">            Requires either a grid mapping variable with &#39;spatial_ref&#39; or</span>
 <span class="sd">            a &#39;crs&#39; attribute to be set containing a valid CRS.</span>
 <span class="sd">            If using a WKT (e.g. from spatiareference.org), make sure it is an OGC WKT.</span>
+
+<span class="sd">        .. note:: To re-project with dask, see</span>
+<span class="sd">            `odc-geo &lt;https://odc-geo.readthedocs.io/&gt;`__ &amp;</span>
+<span class="sd">            `pyresample &lt;https://pyresample.readthedocs.io/&gt;`__.</span>
 
 <span class="sd">        .. versionadded:: 0.0.27 shape</span>
 <span class="sd">        .. versionadded:: 0.0.28 transform</span>
