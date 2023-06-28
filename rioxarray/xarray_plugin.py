@@ -38,8 +38,6 @@ class RasterioBackend(xarray.backends.common.BackendEntrypoint):
         filename_or_obj,
         drop_variables=None,
         parse_coordinates=None,
-        chunks=None,
-        cache=None,
         lock=None,
         masked=False,
         mask_and_scale=True,
@@ -53,6 +51,8 @@ class RasterioBackend(xarray.backends.common.BackendEntrypoint):
     ):
         if open_kwargs is None:
             open_kwargs = {}
+        chunks = {}
+        cache = None
         rds = _io.open_rasterio(
             filename_or_obj,
             parse_coordinates=parse_coordinates,
