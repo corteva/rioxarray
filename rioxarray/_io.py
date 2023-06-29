@@ -924,7 +924,6 @@ def _prepare_dask(
             dtype=_rasterio_to_numpy_dtype(riods.dtypes),
             previous_chunks=tuple((c,) for c in block_shape),
         )
-        breakpoint()
     token = tokenize(filename, mtime, chunks)
     name_prefix = f"open_rasterio-{token}"
     return result.chunk(chunks, name_prefix=name_prefix, token=token)
