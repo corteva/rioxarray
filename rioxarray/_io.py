@@ -1264,7 +1264,7 @@ def open_rasterio(
         result = _prepare_dask(result, riods, filename, chunks)
 
     result.encoding["preferred_chunks"] = {
-        "y": riods.block_shapes[0][0],
+        riods.rio.y_dim: riods.block_shapes[0][0],
         "x": riods.block_shapes[0][1],
         coord_name: 1,
     }
