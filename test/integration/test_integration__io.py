@@ -313,7 +313,6 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
-            "preferred_chunks": {"band": 1, "x": 574, "y": 7},
         }
         attrs = dict(xdi.attrs)
         assert_almost_equal(
@@ -357,7 +356,6 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
-            "preferred_chunks": {"band": 1, "x": 574, "y": 7},
         }
 
         # test dataset
@@ -373,7 +371,6 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
-            "preferred_chunks": {"band": 1, "x": 574, "y": 7},
         }
 
 

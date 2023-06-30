@@ -1262,12 +1262,12 @@ def open_rasterio(
 
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)
-
-    result.encoding["preferred_chunks"] = {
-        riods.rio.y_dim: riods.block_shapes[0][0],
-        "x": riods.block_shapes[0][1],
-        coord_name: 1,
-    }
+    else:
+        result.encoding["preferred_chunks"] = {
+            result.rio.y_dim: riods.block_shapes[0][0],
+            result.rio.x_dim: riods.block_shapes[0][1],
+            coord_name: 1,
+        }
 
     # add file path to encoding
     result.encoding["source"] = riods.name
