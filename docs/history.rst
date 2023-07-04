@@ -4,6 +4,7 @@ History
 Latest
 ------
 - BUG: Fix setting spatial dims internally during propagation (pull #682)
+- ENH: Pass on on-disk chunk sizes as preferred chunk sizes to the xarray backend (pull #678)
 
 0.14.1
 ------
