@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Fix setting spatial dims internally during propagation (pull #682)
 
 0.14.1
 ------
