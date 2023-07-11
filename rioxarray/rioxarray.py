@@ -195,7 +195,7 @@ def _get_spatial_dims(
     except MissingSpatialDimensionError as err:
         try:
             obj[var].rio.set_spatial_dims(
-                x_dim=obj.rio.x_dim, y_dim=obj.rio.x_dim, inplace=True
+                x_dim=obj.rio.x_dim, y_dim=obj.rio.y_dim, inplace=True
             )
             return obj.rio.x_dim, obj.rio.y_dim
         except MissingSpatialDimensionError:
