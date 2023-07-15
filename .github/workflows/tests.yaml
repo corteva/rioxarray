@@ -60,6 +60,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Remove unused apt repo
+        if: ${{ matrix.gdal-version }} == '3.5.3'
+        run: |
+          rm -f /etc/apt/sources.list.d/apache-arrow.sources
+
       - name: Update
         run: |
           apt-get update
