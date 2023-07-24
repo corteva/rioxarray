@@ -54,6 +54,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://github.com/stefank0"><img src="https://avatars.githubusercontent.com/u/32932217?v=4?s=100" width="100px;" alt=""/><br /><sub><b>stefank0</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=stefank0" title="Documentation">📖</a></td>
         <td align="center"><a href="https://itcarroll.github.io/"><img src="https://avatars.githubusercontent.com/u/3383837?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ian Carroll</b></sub></a><br /><a href="#maintenance-itcarroll" title="Maintenance">🚧</a></td>
         <td align="center"><a href="https://github.com/yvonnefroehlich"><img src="https://avatars.githubusercontent.com/u/94163266?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yvonne Fröhlich</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=yvonnefroehlich" title="Documentation">📖</a></td>
+        <td align="center"><a href="https://github.com/Kirill888"><img src="https://avatars.githubusercontent.com/u/1428024?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kirill Kouzoubov</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=Kirill888" title="Code">💻</a></td>
       </tr>
     </table>
 
