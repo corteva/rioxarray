@@ -192,8 +192,7 @@ jobs:
           conda create -n test python=3.9 proj libgdal cython netcdf4
           source activate test
           python -m pip install \
-            --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple \
-            --trusted-host pypi.anaconda.org \
+            --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple \
             --no-deps --pre --upgrade \
             numpy \
             pandas \
