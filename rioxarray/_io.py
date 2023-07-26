@@ -17,7 +17,7 @@ from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from typing import Any, Optional, Union
 
-import numpy as np
+import numpy
 import rasterio
 from numpy.typing import NDArray
 from packaging import version
@@ -171,11 +171,11 @@ def _get_unsigned_dtype(unsigned, dtype):
     """
     Based on: https://github.com/pydata/xarray/blob/abe1e613a96b000ae603c53d135828df532b952e/xarray/coding/variables.py#L306-L334
     """
-    dtype = np.dtype(dtype)
+    dtype = numpy.dtype(dtype)
     if unsigned is True and dtype.kind == "i":
-        return np.dtype(f"u{dtype.itemsize}")
+        return numpy.dtype(f"u{dtype.itemsize}")
     if unsigned is False and dtype.kind == "u":
-        return np.dtype(f"i{dtype.itemsize}")
+        return numpy.dtype(f"i{dtype.itemsize}")
     return None
 
 
@@ -314,7 +314,7 @@ class RasterioArrayWrapper(BackendArray):
         self._unsigned_dtype = None
         self._fill_value = riods.nodata
         dtypes = riods.dtypes
-        if not np.all(np.asarray(dtypes) == dtypes[0]):
+        if not numpy.all(numpy.asarray(dtypes) == dtypes[0]):
             raise ValueError("All bands should have the same dtype")
 
         dtype = _rasterio_to_numpy_dtype(dtypes)
@@ -385,9 +385,9 @@ class RasterioArrayWrapper(BackendArray):
         # bands (axis=0) cannot be windowed but they can be listed
         if isinstance(band_key, slice):
             start, stop, step = band_key.indices(self.shape[0])
-            band_key = np.arange(start, stop, step)
+            band_key = numpy.arange(start, stop, step)
         # be sure we give out a list
-        band_key = (np.asarray(band_key) + 1).tolist()
+        band_key = (numpy.asarray(band_key) + 1).tolist()
         if isinstance(band_key, list):  # if band_key is not a scalar
             np_inds.append(slice(None))
 
@@ -406,13 +406,13 @@ class RasterioArrayWrapper(BackendArray):
                 start = ikey
                 stop = ikey + 1
             else:
-                start, stop = np.min(ikey), np.max(ikey) + 1
+                start, stop = numpy.min(ikey), numpy.max(ikey) + 1
                 np_inds.append(ikey - start)
             window.append((start, stop))
 
-        if isinstance(key[1], np.ndarray) and isinstance(key[2], np.ndarray):
+        if isinstance(key[1], numpy.ndarray) and isinstance(key[2], numpy.ndarray):
             # do outer-style indexing
-            np_inds[-2:] = np.ix_(*np_inds[-2:])
+            np_inds[-2:] = numpy.ix_(*np_inds[-2:])
 
         return band_key, tuple(window), tuple(squeeze_axis), tuple(np_inds)
 
@@ -421,7 +421,7 @@ class RasterioArrayWrapper(BackendArray):
         if not band_key or any(start == stop for (start, stop) in window):
             # no need to do IO
             shape = (len(band_key),) + tuple(stop - start for (start, stop) in window)
-            out = np.zeros(shape, dtype=self.dtype)
+            out = numpy.zeros(shape, dtype=self.dtype)
         else:
             with self.lock:
                 riods = _ensure_warped_vrt(
@@ -431,7 +431,7 @@ class RasterioArrayWrapper(BackendArray):
                 if self._unsigned_dtype is not None:
                     out = out.astype(self._unsigned_dtype)
                 if self.masked:
-                    out = np.ma.filled(out.astype(self.dtype), self.fill_value)
+                    out = numpy.ma.filled(out.astype(self.dtype), self.fill_value)
                 if self.mask_and_scale:
                     if not isinstance(band_key, Iterable):
                         out = (
@@ -439,14 +439,14 @@ class RasterioArrayWrapper(BackendArray):
                             + riods.offsets[band_key - 1]
                         )
                     else:
-                        for iii, band_iii in enumerate(np.atleast_1d(band_key) - 1):
+                        for iii, band_iii in enumerate(numpy.atleast_1d(band_key) - 1):
                             out[iii] = (
                                 out[iii] * riods.scales[band_iii]
                                 + riods.offsets[band_iii]
                             )
 
         if squeeze_axis:
-            out = np.squeeze(out, axis=squeeze_axis)
+            out = numpy.squeeze(out, axis=squeeze_axis)
         return out[np_inds]
 
     def __getitem__(self, key):
@@ -475,7 +475,7 @@ def _parse_envi(meta):
     """
 
     def parsevec(value):
-        return np.fromstring(value.strip("{}"), dtype="float", sep=",")
+        return numpy.fromstring(value.strip("{}"), dtype="float", sep=",")
 
     def default(value):
         return value.strip("{}")
@@ -487,11 +487,11 @@ def _parse_envi(meta):
 
 def _rasterio_to_numpy_dtype(dtypes):
     """Numpy dtype from first entry of rasterio dataset.dtypes"""
-    # rasterio has some special dtype names (complex_int16 -> np.complex64)
+    # rasterio has some special dtype names (complex_int16 -> numpy.complex64)
     if dtypes[0] == "complex_int16":
-        dtype = np.dtype("complex64")
+        dtype = numpy.dtype("complex64")
     else:
-        dtype = np.dtype(dtypes[0])
+        dtype = numpy.dtype(dtypes[0])
 
     return dtype
 
@@ -515,7 +515,7 @@ def _parse_tag(key: str, value: Any) -> tuple[str, Any]:
     key = key.split("NC_GLOBAL#")[-1]
     if value.startswith("{") and value.endswith("}"):
         try:
-            new_val = np.fromstring(value.strip("{}"), dtype="float", sep=",")
+            new_val = numpy.fromstring(value.strip("{}"), dtype="float", sep=",")
             # pylint: disable=len-as-condition
             value = new_val if len(new_val) else _to_numeric(value)
         except ValueError:
@@ -535,17 +535,17 @@ def _parse_tags(tags: dict) -> dict:
 
 NETCDF_DTYPE_MAP = {
     0: object,  # NC_NAT
-    1: np.byte,  # NC_BYTE
-    2: np.char,  # NC_CHAR
-    3: np.short,  # NC_SHORT
-    4: np.int_,  # NC_INT, NC_LONG
+    1: numpy.byte,  # NC_BYTE
+    2: numpy.char,  # NC_CHAR
+    3: numpy.short,  # NC_SHORT
+    4: numpy.int_,  # NC_INT, NC_LONG
     5: float,  # NC_FLOAT
-    6: np.double,  # NC_DOUBLE
-    7: np.ubyte,  # NC_UBYTE
-    8: np.ushort,  # NC_USHORT
-    9: np.uint,  # NC_UINT
-    10: np.int64,  # NC_INT64
-    11: np.uint64,  # NC_UINT64
+    6: numpy.double,  # NC_DOUBLE
+    7: numpy.ubyte,  # NC_UBYTE
+    8: numpy.ushort,  # NC_USHORT
+    9: numpy.uint,  # NC_UINT
+    10: numpy.int64,  # NC_INT64
+    11: numpy.uint64,  # NC_UINT64
     12: object,  # NC_STRING
 }
 
@@ -581,7 +581,7 @@ def _parse_netcdf_attr_array(attr: Union[NDArray, str], dtype=None) -> NDArray:
         value = [attr]
     else:
         value = attr
-    return np.array(value, dtype=dtype)
+    return numpy.array(value, dtype=dtype)
 
 
 def _load_netcdf_1d_coords(tags: dict) -> dict:
@@ -753,8 +753,8 @@ def _parse_driver_tags(
         for key, value in meta.items():
             # Add values as coordinates if they match the band count,
             # as attributes otherwise
-            if isinstance(value, (list, np.ndarray)) and len(value) == riods.count:
-                coords[key] = ("band", np.asarray(value))
+            if isinstance(value, (list, numpy.ndarray)) and len(value) == riods.count:
+                coords[key] = ("band", numpy.asarray(value))
             else:
                 attrs[key] = value
 
@@ -1193,7 +1193,7 @@ def open_rasterio(
             break
     else:
         coord_name = "band"
-        coords[coord_name] = np.asarray(riods.indexes)
+        coords[coord_name] = numpy.asarray(riods.indexes)
 
     has_gcps = riods.gcps[0]
     if has_gcps:

@@ -111,8 +111,8 @@ def _assert_xarrays_equal(
 
 
 def open_rasterio_engine(file_name_or_object, **kwargs):
-    xr = pytest.importorskip("xarray", minversion="0.18")
-    return xr.open_dataset(file_name_or_object, engine="rasterio", **kwargs)
+    xarray = pytest.importorskip("xarray", minversion="0.18")
+    return xarray.open_dataset(file_name_or_object, engine="rasterio", **kwargs)
 
 
 @pytest.fixture(

@@ -10,10 +10,10 @@ import warnings
 from unittest.mock import patch
 
 import dask.array
-import numpy as np
+import numpy
 import pytest
 import rasterio
-import xarray as xr
+import xarray
 from affine import Affine
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
@@ -298,14 +298,14 @@ def test_open_rasterio_mask_chunk_clip():
         chunks=True,
         default_name="dem",
     ) as xdi:
-        if isinstance(xdi, xr.Dataset):
+        if isinstance(xdi, xarray.Dataset):
             xdi = xdi.dem
         assert xdi.name == "dem"
         assert str(xdi.dtype) == "float32"
         assert str(xdi.data.dtype) == "float32"
         assert str(type(xdi.data)) == "<class 'dask.array.core.Array'>"
         assert xdi.chunks == ((1,), (245,), (574,))
-        assert np.isnan(xdi.values).sum() == 52119
+        assert numpy.isnan(xdi.values).sum() == 52119
         test_encoding = dict(xdi.encoding)
         assert test_encoding.pop("source").endswith("small_dem_3m_merged.tif")
         assert test_encoding == {
@@ -418,7 +418,7 @@ def create_tmp_geotiff(
         else:
             data_shape = nz, ny, nx
             write_kwargs = {}
-        data = np.arange(nz * ny * nx, dtype=rasterio.float32).reshape(*data_shape)
+        data = numpy.arange(nz * ny * nx, dtype=rasterio.float32).reshape(*data_shape)
         if transform is None and transform_args is not None:
             transform = from_origin(*transform_args)
         if additional_attrs is None:
@@ -451,18 +451,18 @@ def create_tmp_geotiff(
             a, b, c, d = tt.c, tt.f, -tt.e, tt.a
         else:
             a, b, c, d = transform_args
-        data = data[np.newaxis, ...] if nz == 1 else data
+        data = data[numpy.newaxis, ...] if nz == 1 else data
         expected = DataArray(
             data,
             dims=("band", "y", "x"),
             coords={
-                "band": np.arange(nz) + 1,
-                "y": -np.arange(ny) * d + b + dy / 2,
-                "x": np.arange(nx) * c + a + dx / 2,
+                "band": numpy.arange(nz) + 1,
+                "y": -numpy.arange(ny) * d + b + dy / 2,
+                "x": numpy.arange(nx) * c + a + dx / 2,
             },
         )
         if crs_wkt is not None:
-            expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+            expected.coords[DEFAULT_GRID_MAP] = xarray.Variable((), 0)
             expected.coords[DEFAULT_GRID_MAP].attrs["spatial_ref"] = crs_wkt
         yield tmp_file, expected
 
@@ -473,7 +473,7 @@ def test_serialization():
         with rioxarray.open_rasterio(tmp_file, mask_and_scale=True) as rioda:
             with create_tmp_file(suffix=".nc") as tmp_nc_file:
                 rioda.to_netcdf(tmp_nc_file)
-                with xr.open_dataarray(tmp_nc_file, decode_coords="all") as ncds:
+                with xarray.open_dataarray(tmp_nc_file, decode_coords="all") as ncds:
                     assert_identical(rioda, ncds)
 
 
@@ -568,7 +568,9 @@ def test_notransform():
         with create_tmp_file(suffix=".tif") as tmp_file:
             # data
             nx, ny, nz = 4, 3, 3
-            data = np.arange(nx * ny * nz, dtype=rasterio.float32).reshape(nz, ny, nx)
+            data = numpy.arange(nx * ny * nz, dtype=rasterio.float32).reshape(
+                nz, ny, nx
+            )
             with rasterio.open(
                 tmp_file,
                 "w",
@@ -592,7 +594,7 @@ def test_notransform():
                     "x": [0.5, 1.5, 2.5, 3.5],
                 },
             )
-            expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+            expected.coords[DEFAULT_GRID_MAP] = xarray.Variable((), 0)
             expected.coords[DEFAULT_GRID_MAP].attrs[
                 "GeoTransform"
             ] = "0.0 1.0 0.0 0.0 0.0 1.0"
@@ -632,32 +634,32 @@ def test_indexing():
 
             # orthogonal indexer
             ind = {
-                "band": np.array([2, 1, 0]),
-                "x": np.array([1, 0]),
-                "y": np.array([0, 2]),
+                "band": numpy.array([2, 1, 0]),
+                "x": numpy.array([1, 0]),
+                "y": numpy.array([0, 2]),
             }
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
-            ind = {"band": np.array([2, 1, 0]), "x": np.array([1, 0]), "y": 0}
+            ind = {"band": numpy.array([2, 1, 0]), "x": numpy.array([1, 0]), "y": 0}
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
-            ind = {"band": 0, "x": np.array([0, 0]), "y": np.array([1, 1, 1])}
+            ind = {"band": 0, "x": numpy.array([0, 0]), "y": numpy.array([1, 1, 1])}
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
             # minus-stepped slice
-            ind = {"band": np.array([2, 1, 0]), "x": slice(-1, None, -1), "y": 0}
+            ind = {"band": numpy.array([2, 1, 0]), "x": slice(-1, None, -1), "y": 0}
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
-            ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(-1, 1, -2)}
+            ind = {"band": numpy.array([2, 1, 0]), "x": 1, "y": slice(-1, 1, -2)}
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
             # empty selection
-            ind = {"band": np.array([2, 1, 0]), "x": 1, "y": slice(2, 2, 1)}
+            ind = {"band": numpy.array([2, 1, 0]), "x": 1, "y": slice(2, 2, 1)}
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
 
@@ -669,7 +671,7 @@ def test_indexing():
             ind = {
                 "band": DataArray([2, 1, 0], dims="a"),
                 "x": DataArray([1, 0, 0], dims="a"),
-                "y": np.array([0, 2]),
+                "y": numpy.array([0, 2]),
             }
             assert_allclose(expected.isel(**ind), actual.isel(**ind))
             assert not actual.variable._in_memory
@@ -788,7 +790,7 @@ def test_ENVI_tags():
     with create_tmp_file(suffix=".dat") as tmp_file:
         # data
         nx, ny, nz = 4, 3, 3
-        data = np.arange(nx * ny * nz, dtype=rasterio.float32).reshape(nz, ny, nx)
+        data = numpy.arange(nx * ny * nz, dtype=rasterio.float32).reshape(nz, ny, nx)
         transform = from_origin(5000, 80000, 1000, 2000.0)
         with rasterio.open(
             tmp_file,
@@ -814,13 +816,13 @@ def test_ENVI_tags():
         # Tests
         coords = {
             "band": [1, 2, 3],
-            "y": -np.arange(ny) * 2000 + 80000 + dy / 2,
-            "x": np.arange(nx) * 1000 + 5000 + dx / 2,
-            "wavelength": ("band", np.array([123, 234.234, 345.345678])),
-            "fwhm": ("band", np.array([1, 0.234, 0.000345])),
+            "y": -numpy.arange(ny) * 2000 + 80000 + dy / 2,
+            "x": numpy.arange(nx) * 1000 + 5000 + dx / 2,
+            "wavelength": ("band", numpy.array([123, 234.234, 345.345678])),
+            "fwhm": ("band", numpy.array([1, 0.234, 0.000345])),
         }
         expected = DataArray(data, dims=("band", "y", "x"), coords=coords)
-        expected.coords[DEFAULT_GRID_MAP] = xr.Variable((), 0)
+        expected.coords[DEFAULT_GRID_MAP] = xarray.Variable((), 0)
         expected.coords[DEFAULT_GRID_MAP].attrs["crs_wkt"] = crs_wkt
 
         with rioxarray.open_rasterio(tmp_file) as rioda:
@@ -979,7 +981,7 @@ def test_rasterio_vrt_gcps(tmp_path):
         height=800,
         width=800,
         count=3,
-        dtype=np.uint8,
+        dtype=numpy.uint8,
         driver="GTiff",
     ) as source:
         source.gcps = (src_gcps, crs)
@@ -1066,7 +1068,7 @@ def test_rasterio_vrt_warp_extras(tmp_path):
         height=23063,
         width=25313,
         count=1,
-        dtype=np.uint8,
+        dtype=numpy.uint8,
         driver="GTiff",
     ) as source:
         source.gcps = (src_gcps, crs)
@@ -1107,8 +1109,8 @@ def test_mask_and_scale(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
     with open_rasterio(test_file, mask_and_scale=True) as rds:
         rds = _ensure_dataset(rds)
-        assert np.nanmin(rds.air_temperature.values) == np.float32(248.7)
-        assert np.nanmax(rds.air_temperature.values) == np.float32(302.1)
+        assert numpy.nanmin(rds.air_temperature.values) == numpy.float32(248.7)
+        assert numpy.nanmax(rds.air_temperature.values) == numpy.float32(302.1)
         test_encoding = dict(rds.air_temperature.encoding)
         _assert_tmmx_source(test_encoding.pop("source"))
         assert test_encoding == {
@@ -1134,8 +1136,8 @@ def test_no_mask_and_scale(open_rasterio):
         masked=True,
     ) as rds:
         rds = _ensure_dataset(rds)
-        assert np.nanmin(rds.air_temperature.values) == 287
-        assert np.nanmax(rds.air_temperature.values) == 821
+        assert numpy.nanmin(rds.air_temperature.values) == 287
+        assert numpy.nanmax(rds.air_temperature.values) == 821
         test_encoding = dict(rds.air_temperature.encoding)
         source = test_encoding.pop("source")
         _assert_tmmx_source(source)
@@ -1155,19 +1157,19 @@ def test_no_mask_and_scale(open_rasterio):
 def test_mask_and_scale__select_band_values(open_rasterio, tmp_path):
     # https://github.com/corteva/rioxarray/issues/580
     output_nc = tmp_path / "test.nc"
-    data = np.hypot(
-        *np.meshgrid(np.linspace(-100, 500, 50), np.linspace(-150, 700, 60))
+    data = numpy.hypot(
+        *numpy.meshgrid(numpy.linspace(-100, 500, 50), numpy.linspace(-150, 700, 60))
     )
-    xds = xr.Dataset(
+    xds = xarray.Dataset(
         {"var": (["y", "x"], data)},
-        coords={"x": np.linspace(40, 51, 50), "y": np.linspace(55, 62, 60)},
+        coords={"x": numpy.linspace(40, 51, 50), "y": numpy.linspace(55, 62, 60)},
     )
     xds.rio.write_crs(4326, inplace=True)
     xds.rio.write_coordinate_system(inplace=True)
     encoding = {"var": {"scale_factor": 0.01, "_FillValue": -9999, "dtype": "int32"}}
     xds.to_netcdf(output_nc, encoding=encoding)
     with open_rasterio(output_nc) as rds:
-        if isinstance(rds, xr.Dataset):
+        if isinstance(rds, xarray.Dataset):
             rds = rds["var"]
         assert_array_equal(rds.values[0], rds.isel(band=0).values)
 
@@ -1190,8 +1192,8 @@ def test_mask_and_scale__unicode(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "unicode.nc")
     with open_rasterio(test_file, mask_and_scale=True) as rds:
         rds = _ensure_dataset(rds)
-        assert np.nanmin(rds.LST.values) == np.float32(270.4925)
-        assert np.nanmax(rds.LST.values) == np.float32(276.6025)
+        assert numpy.nanmin(rds.LST.values) == numpy.float32(270.4925)
+        assert numpy.nanmax(rds.LST.values) == numpy.float32(276.6025)
         test_encoding = dict(rds.LST.encoding)
         assert test_encoding["_Unsigned"] == "true"
         assert test_encoding["add_offset"] == 190
@@ -1257,7 +1259,7 @@ def test_nc_attr_loading__disable_decode_times(open_rasterio):
         assert rds.y.attrs["units"] == "metre"
         assert rds.x.attrs["units"] == "metre"
         assert rds.time.encoding == {}
-        assert np.isnan(rds.time.attrs.pop("_FillValue"))
+        assert numpy.isnan(rds.time.attrs.pop("_FillValue"))
         assert rds.time.attrs == {
             "units": "seconds since 2016-12-19T10:27:29.687763",
             "calendar": "proleptic_gregorian",
@@ -1398,7 +1400,7 @@ def test_cint16_dtype_masked(dtype, tmp_path):
         assert xds.rio.shape == (100, 100)
         assert xds.dtype == "complex64"
         assert xds.rio.encoded_nodata == 0
-        assert np.isnan(xds.rio.nodata)
+        assert numpy.isnan(xds.rio.nodata)
 
         tmp_output = tmp_path / "tmp_cint16.tif"
         with pytest.warns(NotGeoreferencedWarning):
@@ -1447,7 +1449,7 @@ def test_reading_gcps(tmp_path):
         height=800,
         width=800,
         count=3,
-        dtype=np.uint8,
+        dtype=numpy.uint8,
         driver="GTiff",
     ) as source:
         source.gcps = gdal_gcps
@@ -1471,7 +1473,7 @@ def test_writing_gcps(tmp_path):
         height=800,
         width=800,
         count=3,
-        dtype=np.uint8,
+        dtype=numpy.uint8,
         driver="GTiff",
     ) as source:
         source.gcps = gdal_gcps

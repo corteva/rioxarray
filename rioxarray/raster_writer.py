@@ -237,10 +237,10 @@ class RasterioWriter:
             Call ".compute()" on the Delayed object to compute the result
             later. Call ``dask.compute(delayed1, delayed2)`` to save
             multiple delayed files at once.
-        dtype: np.dtype
+        dtype: numpy.dtype
             Numpy-compliant dtype used to save raster. If data is not already
             represented by this dtype in memory it is recast. dtype='complex_int16'
-            is a special case to write in-memory np.complex64 to CInt16.
+            is a special case to write in-memory numpy.complex64 to CInt16.
         **kwargs
             Keyword arguments to pass into writing the raster.
         """
