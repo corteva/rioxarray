@@ -97,7 +97,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
 <span class="kn">import</span> <span class="nn">rasterio.mask</span>
 <span class="kn">import</span> <span class="nn">rasterio.warp</span>
@@ -252,9 +252,11 @@
             <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
             <span class="n">crop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">):</span>
-            <span class="n">out_image</span> <span class="o">=</span> <span class="n">out_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-            <span class="n">out_image</span><span class="p">[</span><span class="n">out_image</span> <span class="o">==</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span>
+            <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span>
+        <span class="p">):</span>
+            <span class="n">out_image</span> <span class="o">=</span> <span class="n">out_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">out_image</span><span class="p">[</span><span class="n">out_image</span> <span class="o">==</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">out_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
         <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
@@ -298,10 +300,10 @@
         <span class="p">)</span>
         <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span>
             <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">)</span>
+                <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">clip_mask_arr</span><span class="p">,</span> <span class="o">~</span><span class="n">clip_mask_arr</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">):</span>
         <span class="n">cropped_ds</span> <span class="o">=</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">cropped_ds</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xds</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
@@ -584,15 +586,15 @@
         <span class="n">dst_nodata</span> <span class="o">=</span> <span class="n">default_nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
         <span class="k">return</span> <span class="n">dst_nodata</span>
 
-    <span class="k">def</span> <span class="nf">_create_dst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_create_dst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">extra_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_dimensions</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">extra_dim</span><span class="p">:</span>
-            <span class="n">dst_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="n">dst_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">extra_dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dst_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">dst_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dst_data</span>
 
 <div class="viewcode-block" id="RasterArray.reproject_match"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match">[docs]</a>    <span class="k">def</span> <span class="nf">reproject_match</span><span class="p">(</span>
@@ -683,7 +685,7 @@
 <span class="sd">            Maximum bound for y coordinate.</span>
 <span class="sd">        constant_values: scalar, tuple or mapping of hashable to tuple</span>
 <span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
-<span class="sd">            set, and np.nan otherwise.</span>
+<span class="sd">            set, and numpy.nan otherwise.</span>
 
 
 <span class="sd">        Returns</span>
@@ -696,33 +698,33 @@
         <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
         <span class="n">y_before</span> <span class="o">=</span> <span class="n">y_after</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">x_before</span> <span class="o">=</span> <span class="n">x_after</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">y_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
-        <span class="n">x_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
+        <span class="n">y_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
+        <span class="n">x_coord</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">top</span> <span class="o">-</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="n">maxy</span><span class="p">:</span>
-            <span class="n">new_y_coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_y</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_y_coord</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_y</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">y_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_y_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
             <span class="n">y_coord</span> <span class="o">=</span> <span class="n">new_y_coord</span>
             <span class="n">top</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">resolution_y</span> <span class="o">&gt;</span> <span class="n">miny</span><span class="p">:</span>
-            <span class="n">new_y_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">resolution_y</span><span class="p">)</span>
+            <span class="n">new_y_coord</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">resolution_y</span><span class="p">)</span>
             <span class="n">y_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_y_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
             <span class="n">y_coord</span> <span class="o">=</span> <span class="n">new_y_coord</span>
             <span class="n">bottom</span> <span class="o">=</span> <span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">left</span> <span class="o">-</span> <span class="n">resolution_x</span> <span class="o">&gt;</span> <span class="n">minx</span><span class="p">:</span>
-            <span class="n">new_x_coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_x</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_x_coord</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="o">-</span><span class="n">resolution_x</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">x_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
             <span class="n">x_coord</span> <span class="o">=</span> <span class="n">new_x_coord</span>
             <span class="n">left</span> <span class="o">=</span> <span class="n">x_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">right</span> <span class="o">+</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="n">maxx</span><span class="p">:</span>
-            <span class="n">new_x_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">resolution_x</span><span class="p">)</span>
+            <span class="n">new_x_coord</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">resolution_x</span><span class="p">)</span>
             <span class="n">x_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x_coord</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
             <span class="n">x_coord</span> <span class="o">=</span> <span class="n">new_x_coord</span>
             <span class="n">right</span> <span class="o">=</span> <span class="n">x_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">constant_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">constant_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
+            <span class="n">constant_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
 
         <span class="n">superset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
             <span class="n">pad_width</span><span class="o">=</span><span class="p">{</span>
@@ -762,7 +764,7 @@
 <span class="sd">            Maximum bound for y coordinate.</span>
 <span class="sd">        constant_values: scalar, tuple or mapping of hashable to tuple</span>
 <span class="sd">            The value used for padding. If None, nodata will be used if it is</span>
-<span class="sd">            set, and np.nan otherwise.</span>
+<span class="sd">            set, and numpy.nan otherwise.</span>
 
 
 <span class="sd">        Returns</span>
@@ -872,10 +874,10 @@
         <span class="n">window_error</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">window</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">from_bounds</span><span class="p">(</span>
-                <span class="n">left</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-                <span class="n">bottom</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-                <span class="n">right</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-                <span class="n">top</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">top</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+                <span class="n">left</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+                <span class="n">bottom</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+                <span class="n">right</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+                <span class="n">top</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">top</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
                 <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">cl_array</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel_window</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -1011,7 +1013,7 @@
 
     <span class="k">def</span> <span class="nf">_interpolate_na</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">src_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;cubic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method uses scipy.interpolate.griddata to interpolate missing data.</span>
 
@@ -1038,18 +1040,18 @@
 
         <span class="n">src_data_flat</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">data_isnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">data_isnan</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">data_isnan</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data_isnan</span><span class="p">:</span>
             <span class="n">data_bool</span> <span class="o">=</span> <span class="n">src_data_flat</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">data_bool</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_data_flat</span><span class="p">)</span>
+            <span class="n">data_bool</span> <span class="o">=</span> <span class="o">~</span><span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_data_flat</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data_bool</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">src_data</span>
 
-        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="p">)</span>
 
@@ -1092,7 +1094,7 @@
                 <span class="n">interp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_na</span><span class="p">(</span><span class="n">sub_xds</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
                 <span class="p">)</span>
-            <span class="n">interp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interp_data</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">interp_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interp_data</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">interp_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_na</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
@@ -1114,7 +1116,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">raster_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
         <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">windowed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">recalc_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
