@@ -7,7 +7,7 @@ from collections.abc import Iterable, Mapping
 from typing import Any, Literal, Optional, Union
 from uuid import uuid4
 
-import numpy as np
+import numpy
 import rasterio.crs
 import xarray
 from affine import Affine
@@ -221,7 +221,7 @@ class RasterDataset(XRasterBase):
             Maximum bound for y coordinate.
         constant_values: scalar, tuple or mapping of hashable to tuple
             The value used for padding. If None, nodata will be used if it is
-            set, and np.nan otherwise.
+            set, and numpy.nan otherwise.
 
         Returns
         -------
@@ -446,7 +446,7 @@ class RasterDataset(XRasterBase):
         self,
         raster_path: Union[str, os.PathLike],
         driver: Optional[str] = None,
-        dtype: Optional[Union[str, np.dtype]] = None,
+        dtype: Optional[Union[str, numpy.dtype]] = None,
         tags: Optional[dict[str, str]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
@@ -522,7 +522,7 @@ class RasterDataset(XRasterBase):
         nodata = nodatavals[0]
         if (
             all(nodataval == nodata for nodataval in nodatavals)
-            or np.isnan(nodatavals).all()
+            or numpy.isnan(nodatavals).all()
         ):
             data_array.rio.write_nodata(nodata, inplace=True)
         else:

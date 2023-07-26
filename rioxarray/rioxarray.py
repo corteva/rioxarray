@@ -8,7 +8,7 @@ import warnings
 from collections.abc import Hashable, Iterable
 from typing import Any, Literal, Optional, Union
 
-import numpy as np
+import numpy
 import pyproj
 import rasterio.warp
 import rasterio.windows
@@ -80,7 +80,7 @@ def _resolution(affine: Affine) -> tuple[float, float]:
 
 def affine_to_coords(
     affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y"
-) -> dict[str, np.ndarray]:
+) -> dict[str, numpy.ndarray]:
     """Generate 1d pixel centered coordinates from affine.
 
     Based on code from the xarray rasterio backend.
@@ -105,12 +105,12 @@ def affine_to_coords(
     """
     transform = affine * affine.translation(0.5, 0.5)
     if affine.is_rectilinear and not _affine_has_rotation(affine):
-        x_coords, _ = transform * (np.arange(width), np.zeros(width))
-        _, y_coords = transform * (np.zeros(height), np.arange(height))
+        x_coords, _ = transform * (numpy.arange(width), numpy.zeros(width))
+        _, y_coords = transform * (numpy.zeros(height), numpy.arange(height))
     else:
-        x_coords, y_coords = transform * np.meshgrid(
-            np.arange(width),
-            np.arange(height),
+        x_coords, y_coords = transform * numpy.meshgrid(
+            numpy.arange(width),
+            numpy.arange(height),
         )
     return {y_dim: y_coords, x_dim: x_coords}
 
@@ -547,8 +547,8 @@ class XRasterBase:
         else:
             minx, miny, maxx, maxy = self.transform_bounds("EPSG:4326", recalc=True)
 
-        x_center = np.mean([minx, maxx]).item()
-        y_center = np.mean([miny, maxy]).item()
+        x_center = numpy.mean([minx, maxx]).item()
+        y_center = numpy.mean([miny, maxy]).item()
 
         utm_crs_list = query_utm_crs_info(
             datum_name=datum_name,
@@ -572,7 +572,7 @@ class XRasterBase:
         """
         try:
             # look in grid_mapping
-            transform = np.fromstring(
+            transform = numpy.fromstring(
                 self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
             )
             # Calling .tolist() to assure the arguments are Python float and JSON serializable

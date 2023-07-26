@@ -5,7 +5,7 @@ through a backend entrypoint.
 # pylint: disable=arguments-differ
 import os.path
 
-import xarray as xr
+import xarray
 
 from . import _io
 from .exceptions import RioXarrayError
@@ -26,7 +26,7 @@ CAN_OPEN_EXTS = {
 }
 
 
-class RasterioBackend(xr.backends.common.BackendEntrypoint):
+class RasterioBackend(xarray.backends.common.BackendEntrypoint):
     """
     Requires xarray 0.18+
 
@@ -69,7 +69,7 @@ class RasterioBackend(xr.backends.common.BackendEntrypoint):
             band_as_variable=band_as_variable,
             **open_kwargs,
         )
-        if isinstance(rds, xr.DataArray):
+        if isinstance(rds, xarray.DataArray):
             dataset = rds.to_dataset()
             dataset.set_close(rds._close)
             rds = dataset

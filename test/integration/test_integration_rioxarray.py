@@ -5,7 +5,7 @@ import platform
 import threading
 from functools import partial
 
-import dask.array as da
+import dask.array
 import numpy
 import pytest
 import rasterio
@@ -1554,7 +1554,7 @@ def test_to_raster(
             )
         }
 
-    if write_lock is None or not isinstance(xds.data, da.Array) or compute:
+    if write_lock is None or not isinstance(xds.data, dask.array.Array) or compute:
         assert delayed is None
     else:
         assert isinstance(delayed, Delayed)
@@ -1608,7 +1608,7 @@ def test_to_raster_3d(open_method, windowed, write_lock, compute, tmpdir):
             not in ("add_offset", "nodata", "scale_factor", "transform", "grid_mapping")
         }
 
-    if write_lock is None or not isinstance(xds.data, da.Array) or compute:
+    if write_lock is None or not isinstance(xds.data, dask.array.Array) or compute:
         assert delayed is None
     else:
         assert isinstance(delayed, Delayed)

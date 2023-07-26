@@ -15,7 +15,7 @@ from collections.abc import Hashable, Iterable, Mapping
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
 
-import numpy as np
+import numpy
 import rasterio
 import rasterio.mask
 import rasterio.warp
@@ -170,9 +170,11 @@ def _clip_from_disk(
             invert=invert,
             crop=drop,
         )
-        if xds.rio.encoded_nodata is not None and not np.isnan(xds.rio.encoded_nodata):
-            out_image = out_image.astype(np.float64)
-            out_image[out_image == xds.rio.encoded_nodata] = np.nan
+        if xds.rio.encoded_nodata is not None and not numpy.isnan(
+            xds.rio.encoded_nodata
+        ):
+            out_image = out_image.astype(numpy.float64)
+            out_image[out_image == xds.rio.encoded_nodata] = numpy.nan
 
         height, width = out_image.shape[-2:]
         cropped_ds = xarray.DataArray(
@@ -216,10 +218,10 @@ def _clip_xarray(
         )
         cropped_ds = cropped_ds.rio.isel_window(
             rasterio.windows.get_data_window(
-                np.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
+                numpy.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
             )
         )
-    if xds.rio.nodata is not None and not np.isnan(xds.rio.nodata):
+    if xds.rio.nodata is not None and not numpy.isnan(xds.rio.nodata):
         cropped_ds = cropped_ds.fillna(xds.rio.nodata)
 
     return cropped_ds.astype(xds.dtype)
@@ -502,15 +504,15 @@ class RasterArray(XRasterBase):
         dst_nodata = default_nodata if nodata is None else nodata
         return dst_nodata
 
-    def _create_dst_data(self, dst_height: int, dst_width: int) -> np.ndarray:
+    def _create_dst_data(self, dst_height: int, dst_width: int) -> numpy.ndarray:
         extra_dim = self._check_dimensions()
         if extra_dim:
-            dst_data = np.zeros(
+            dst_data = numpy.zeros(
                 (self._obj[extra_dim].size, dst_height, dst_width),
                 dtype=self._obj.dtype.type,
             )
         else:
-            dst_data = np.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
+            dst_data = numpy.zeros((dst_height, dst_width), dtype=self._obj.dtype.type)
         return dst_data
 
     def reproject_match(
@@ -601,7 +603,7 @@ class RasterArray(XRasterBase):
             Maximum bound for y coordinate.
         constant_values: scalar, tuple or mapping of hashable to tuple
             The value used for padding. If None, nodata will be used if it is
-            set, and np.nan otherwise.
+            set, and numpy.nan otherwise.
 
 
         Returns
@@ -614,33 +616,33 @@ class RasterArray(XRasterBase):
         resolution_x, resolution_y = self.resolution()
         y_before = y_after = 0
         x_before = x_after = 0
-        y_coord: Union[xarray.DataArray, np.ndarray] = self._obj[self.y_dim]
-        x_coord: Union[xarray.DataArray, np.ndarray] = self._obj[self.x_dim]
+        y_coord: Union[xarray.DataArray, numpy.ndarray] = self._obj[self.y_dim]
+        x_coord: Union[xarray.DataArray, numpy.ndarray] = self._obj[self.x_dim]
 
         if top - resolution_y < maxy:
-            new_y_coord: np.ndarray = np.arange(bottom, maxy, -resolution_y)[::-1]
+            new_y_coord: numpy.ndarray = numpy.arange(bottom, maxy, -resolution_y)[::-1]
             y_before = len(new_y_coord) - len(y_coord)
             y_coord = new_y_coord
             top = y_coord[0]
         if bottom + resolution_y > miny:
-            new_y_coord = np.arange(top, miny, resolution_y)
+            new_y_coord = numpy.arange(top, miny, resolution_y)
             y_after = len(new_y_coord) - len(y_coord)
             y_coord = new_y_coord
             bottom = y_coord[-1]
 
         if left - resolution_x > minx:
-            new_x_coord: np.ndarray = np.arange(right, minx, -resolution_x)[::-1]
+            new_x_coord: numpy.ndarray = numpy.arange(right, minx, -resolution_x)[::-1]
             x_before = len(new_x_coord) - len(x_coord)
             x_coord = new_x_coord
             left = x_coord[0]
         if right + resolution_x < maxx:
-            new_x_coord = np.arange(left, maxx, resolution_x)
+            new_x_coord = numpy.arange(left, maxx, resolution_x)
             x_after = len(new_x_coord) - len(x_coord)
             x_coord = new_x_coord
             right = x_coord[-1]
 
         if constant_values is None:
-            constant_values = np.nan if self.nodata is None else self.nodata
+            constant_values = numpy.nan if self.nodata is None else self.nodata
 
         superset = self._obj.pad(
             pad_width={
@@ -680,7 +682,7 @@ class RasterArray(XRasterBase):
             Maximum bound for y coordinate.
         constant_values: scalar, tuple or mapping of hashable to tuple
             The value used for padding. If None, nodata will be used if it is
-            set, and np.nan otherwise.
+            set, and numpy.nan otherwise.
 
 
         Returns
@@ -790,10 +792,10 @@ class RasterArray(XRasterBase):
         window_error = None
         try:
             window = rasterio.windows.from_bounds(
-                left=np.array(left).item(),
-                bottom=np.array(bottom).item(),
-                right=np.array(right).item(),
-                top=np.array(top).item(),
+                left=numpy.array(left).item(),
+                bottom=numpy.array(bottom).item(),
+                right=numpy.array(right).item(),
+                top=numpy.array(top).item(),
                 transform=self.transform(recalc=True),
             )
             cl_array: xarray.DataArray = self.isel_window(window)  # type: ignore
@@ -929,7 +931,7 @@ class RasterArray(XRasterBase):
 
     def _interpolate_na(
         self, src_data: Any, method: Literal["linear", "nearest", "cubic"] = "nearest"
-    ) -> np.ndarray:
+    ) -> numpy.ndarray:
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
 
@@ -956,18 +958,18 @@ class RasterArray(XRasterBase):
 
         src_data_flat = src_data.flatten()
         try:
-            data_isnan = np.isnan(self.nodata)  # type: ignore
+            data_isnan = numpy.isnan(self.nodata)  # type: ignore
         except TypeError:
             data_isnan = False
         if not data_isnan:
             data_bool = src_data_flat != self.nodata
         else:
-            data_bool = ~np.isnan(src_data_flat)
+            data_bool = ~numpy.isnan(src_data_flat)
 
         if not data_bool.any():
             return src_data
 
-        x_coords, y_coords = np.meshgrid(
+        x_coords, y_coords = numpy.meshgrid(
             self._obj.coords[self.x_dim].values, self._obj.coords[self.y_dim].values
         )
 
@@ -1010,7 +1012,7 @@ class RasterArray(XRasterBase):
                 interp_data.append(
                     self._interpolate_na(sub_xds.load().data, method=method)
                 )
-            interp_data = np.array(interp_data)  # type: ignore
+            interp_data = numpy.array(interp_data)  # type: ignore
         else:
             interp_data = self._interpolate_na(self._obj.load().data, method=method)  # type: ignore
 
@@ -1032,7 +1034,7 @@ class RasterArray(XRasterBase):
         self,
         raster_path: Union[str, os.PathLike],
         driver: Optional[str] = None,
-        dtype: Optional[Union[str, np.dtype]] = None,
+        dtype: Optional[Union[str, numpy.dtype]] = None,
         tags: Optional[dict[str, str]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
