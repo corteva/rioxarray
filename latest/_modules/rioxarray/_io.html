@@ -1318,7 +1318,7 @@
     <span class="p">)</span>
     <span class="n">result</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span>
 
-    <span class="c1"># update attributes from NetCDF attributess</span>
+    <span class="c1"># update attributes from NetCDF attributes</span>
     <span class="n">_load_netcdf_attrs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">tags</span><span class="p">(),</span> <span class="n">result</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_decode_datetime_cf</span><span class="p">(</span>
         <span class="n">result</span><span class="p">,</span> <span class="n">decode_times</span><span class="o">=</span><span class="n">decode_times</span><span class="p">,</span> <span class="n">decode_timedelta</span><span class="o">=</span><span class="n">decode_timedelta</span>
@@ -1344,6 +1344,12 @@
 
     <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;preferred_chunks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">coord_name</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="c1"># add file path to encoding</span>
     <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">name</span>
