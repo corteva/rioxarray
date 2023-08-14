@@ -1121,6 +1121,7 @@ def test_mask_and_scale(open_rasterio):
             "grid_mapping": "crs",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
+            "preferred_chunks": dict(band=1, x=1386, y=585),
         }
         attrs = rds.air_temperature.attrs
         assert "_Unsigned" not in attrs
@@ -1146,6 +1147,7 @@ def test_no_mask_and_scale(open_rasterio):
             "grid_mapping": "crs",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
+            "preferred_chunks": {"band": 1, "x": 1386, "y": 585},
         }
         attrs = rds.air_temperature.attrs
         assert attrs["_Unsigned"] == "true"

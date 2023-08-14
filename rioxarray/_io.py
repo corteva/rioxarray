@@ -1236,7 +1236,7 @@ def open_rasterio(
     )
     result.encoding = encoding
 
-    # update attributes from NetCDF attributess
+    # update attributes from NetCDF attributes
     _load_netcdf_attrs(riods.tags(), result)
     result = _decode_datetime_cf(
         result, decode_times=decode_times, decode_timedelta=decode_timedelta
@@ -1262,6 +1262,12 @@ def open_rasterio(
 
     if chunks is not None:
         result = _prepare_dask(result, riods, filename, chunks)
+    else:
+        result.encoding["preferred_chunks"] = {
+            result.rio.y_dim: riods.block_shapes[0][0],
+            result.rio.x_dim: riods.block_shapes[0][1],
+            coord_name: 1,
+        }
 
     # add file path to encoding
     result.encoding["source"] = riods.name

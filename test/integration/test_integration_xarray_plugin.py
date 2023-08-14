@@ -20,6 +20,7 @@ def test_xarray_open_dataset():
     assert "spatial_ref" in ds.coords
     assert "grid_mapping" not in ds.data_vars["band_data"].attrs
     assert "grid_mapping" in ds.data_vars["band_data"].encoding
+    assert "preferred_chunks" in ds.data_vars["band_data"].encoding
 
     ds = xarray.open_dataset(cog_file)
 
