@@ -20,7 +20,7 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
       - uses: pre-commit/action@v3.0.0
 
@@ -58,7 +58,7 @@ jobs:
             run-with-scipy: 'NO'
             gdal-version: '3.5.3'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Remove unused apt repo
         if: ${{ matrix.gdal-version }} == '3.5.3'
@@ -114,7 +114,7 @@ jobs:
         run-with-scipy: ['YES']
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Conda
         uses: s-weigand/setup-conda@v1
@@ -176,7 +176,7 @@ jobs:
     name: Test latest dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Conda
         uses: s-weigand/setup-conda@v1
