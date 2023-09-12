@@ -10,11 +10,11 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7ca791fc"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -325,7 +325,9 @@
     <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
 
 
-<div class="viewcode-block" id="XRasterBase"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a><span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
+<div class="viewcode-block" id="XRasterBase">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase">[docs]</a>
+<span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]):</span>
@@ -423,7 +425,9 @@
         <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
         <span class="k">return</span> <span class="n">obj_copy</span>
 
-<div class="viewcode-block" id="XRasterBase.set_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_crs">[docs]</a>    <span class="k">def</span> <span class="nf">set_crs</span><span class="p">(</span>
+<div class="viewcode-block" id="XRasterBase.set_crs">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_crs">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_crs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">input_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -446,6 +450,7 @@
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
         <span class="k">return</span> <span class="n">obj</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grid_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -474,7 +479,9 @@
                 <span class="k">raise</span> <span class="n">RioXarrayError</span><span class="p">(</span><span class="s2">&quot;Multiple grid mappings exist.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">grid_mapping</span>
 
-<div class="viewcode-block" id="XRasterBase.write_grid_mapping"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_grid_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">write_grid_mapping</span><span class="p">(</span>
+<div class="viewcode-block" id="XRasterBase.write_grid_mapping">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_grid_mapping">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_grid_mapping</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -516,7 +523,10 @@
             <span class="p">{</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">:</span> <span class="n">grid_mapping_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.write_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs">[docs]</a>    <span class="k">def</span> <span class="nf">write_crs</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.write_crs">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_crs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -597,7 +607,10 @@
             <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.estimate_utm_crs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">:</span>
+
+<div class="viewcode-block" id="XRasterBase.estimate_utm_crs">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.estimate_utm_crs">[docs]</a>
+    <span class="k">def</span> <span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the estimated UTM CRS based on the bounds of the dataset.</span>
 
 <span class="sd">        .. versionadded:: 0.2</span>
@@ -646,6 +659,7 @@
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unable to determine UTM CRS&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
+
     <span class="k">def</span> <span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the transform from:</span>
@@ -667,7 +681,9 @@
                 <span class="k">pass</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="XRasterBase.write_transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>    <span class="k">def</span> <span class="nf">write_transform</span><span class="p">(</span>
+<div class="viewcode-block" id="XRasterBase.write_transform">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_transform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -715,7 +731,10 @@
             <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.transform"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Affine</span><span class="p">:</span>
+
+<div class="viewcode-block" id="XRasterBase.transform">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Affine</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -748,7 +767,10 @@
             <span class="n">src_resolution_x</span><span class="p">,</span> <span class="n">src_resolution_y</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.write_coordinate_system"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">write_coordinate_system</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.write_coordinate_system">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_coordinate_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_coordinate_system</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -805,7 +827,10 @@
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">x_coord_attrs</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
-<div class="viewcode-block" id="XRasterBase.set_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.set_attrs">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_attrs">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -833,7 +858,10 @@
         <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
-<div class="viewcode-block" id="XRasterBase.update_attrs"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">update_attrs</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.update_attrs">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_attrs">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_attrs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">new_attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -856,7 +884,10 @@
         <span class="n">data_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_attrs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">data_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.set_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.set_encoding">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_encoding">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -886,7 +917,10 @@
         <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
-<div class="viewcode-block" id="XRasterBase.update_encoding"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">update_encoding</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.update_encoding">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.update_encoding">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_encoding</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">new_encoding</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -911,7 +945,10 @@
         <span class="n">data_encoding</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">new_encoding</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">(</span><span class="n">data_encoding</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.set_spatial_dims"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims">[docs]</a>    <span class="k">def</span> <span class="nf">set_spatial_dims</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.set_spatial_dims">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.set_spatial_dims">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_spatial_dims</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -947,6 +984,7 @@
                 <span class="sa">f</span><span class="s2">&quot;y dimension (</span><span class="si">{</span><span class="n">y_dim</span><span class="si">}</span><span class="s2">) not found.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="n">data_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
@@ -1053,7 +1091,9 @@
             <span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
 
-<div class="viewcode-block" id="XRasterBase.resolution"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.resolution">[docs]</a>    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<div class="viewcode-block" id="XRasterBase.resolution">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.resolution">[docs]</a>
+    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determine if the resolution of the grid.</span>
 <span class="sd">        If the transformation has rotation, the sign of the resolution is lost.</span>
@@ -1095,6 +1135,7 @@
         <span class="n">resolution_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">resolution_x</span><span class="p">,</span> <span class="n">resolution_y</span></div>
 
+
     <span class="k">def</span> <span class="nf">_unordered_bounds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -1132,7 +1173,9 @@
 
         <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
 
-<div class="viewcode-block" id="XRasterBase.bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<div class="viewcode-block" id="XRasterBase.bounds">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds">[docs]</a>
+    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1150,7 +1193,10 @@
             <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.isel_window"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.isel_window">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window">[docs]</a>
+    <span class="k">def</span> <span class="nf">isel_window</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">Window</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1202,7 +1248,10 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">array_subset</span></div>
 
-<div class="viewcode-block" id="XRasterBase.slice_xy"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.slice_xy">[docs]</a>    <span class="k">def</span> <span class="nf">slice_xy</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.slice_xy">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.slice_xy">[docs]</a>
+    <span class="k">def</span> <span class="nf">slice_xy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1247,7 +1296,10 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">subset</span></div>
 
-<div class="viewcode-block" id="XRasterBase.transform_bounds"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.transform_bounds">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform_bounds">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform_bounds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">densify_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="n">recalc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform bounds from src_crs to dst_crs.</span>
@@ -1278,7 +1330,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dst_crs</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc</span><span class="p">),</span> <span class="n">densify_pts</span><span class="o">=</span><span class="n">densify_pts</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="XRasterBase.write_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">write_gcps</span><span class="p">(</span>
+
+<div class="viewcode-block" id="XRasterBase.write_gcps">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_gcps">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_gcps</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">gcps</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">],</span>
         <span class="n">gcp_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -1319,7 +1374,10 @@
         <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geojson_gcps</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
-<div class="viewcode-block" id="XRasterBase.get_gcps"><a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">get_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">]]:</span>
+
+<div class="viewcode-block" id="XRasterBase.get_gcps">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_gcps">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the GroundControlPoints from the dataset.</span>
 
@@ -1347,7 +1405,9 @@
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">geojson_gcps</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span>
         <span class="p">]</span>
-        <span class="k">return</span> <span class="n">gcps</span></div></div>
+        <span class="k">return</span> <span class="n">gcps</span></div>
+</div>
+
 
 
 <span class="k">def</span> <span class="nf">_convert_gcps_to_geojson</span><span class="p">(</span>
