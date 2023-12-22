@@ -1,4 +1,3 @@
-import importlib.metadata
 import os
 
 import pytest
@@ -15,8 +14,6 @@ xarray.set_options(warn_for_unclosed_files=True)
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "test_data")
 TEST_INPUT_DATA_DIR = os.path.join(TEST_DATA_DIR, "input")
 TEST_COMPARE_DATA_DIR = os.path.join(TEST_DATA_DIR, "compare")
-PYPROJ_VERSION = version.parse(importlib.metadata.version("pyproj"))
-PYPROJ_LT_3 = PYPROJ_VERSION < version.parse("3")
 GDAL_GE_36 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.0")
 GDAL_GE_361 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.1")
 GDAL_GE_364 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.4")
