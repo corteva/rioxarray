@@ -98,6 +98,8 @@
 <span class="kn">import</span> <span class="nn">rasterio.windows</span>
 <span class="kn">import</span> <span class="nn">xarray</span>
 <span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">pyproj.aoi</span> <span class="kn">import</span> <span class="n">AreaOfInterest</span>
+<span class="kn">from</span> <span class="nn">pyproj.database</span> <span class="kn">import</span> <span class="n">query_utm_crs_info</span>
 <span class="kn">from</span> <span class="nn">rasterio.control</span> <span class="kn">import</span> <span class="n">GroundControlPoint</span>
 <span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 
@@ -628,13 +630,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        rasterio.crs.CRS</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># pylint: disable=import-outside-toplevel</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pyproj.aoi</span> <span class="kn">import</span> <span class="n">AreaOfInterest</span>
-            <span class="kn">from</span> <span class="nn">pyproj.database</span> <span class="kn">import</span> <span class="n">query_utm_crs_info</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;pyproj 3+ required for estimate_utm_crs.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;crs must be set to estimate UTM CRS.&quot;</span><span class="p">)</span>
 
