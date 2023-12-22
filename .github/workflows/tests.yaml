@@ -35,20 +35,17 @@ jobs:
         python-version: ['3.10', '3.11', '3.12']
         rasterio-version: ['']
         xarray-version: ['']
-        pandas-version: ['']
         run-with-scipy: ['YES']
         gdal-version: ['3.8.2']
         include:
           - python-version: '3.10'
             rasterio-version: ''
-            xarray-version: '==0.17'
-            pandas-version: '<2'
+            xarray-version: '==2022.3.0'
             run-with-scipy: 'YES'
             gdal-version: '3.6.4'
           - python-version: '3.10'
             rasterio-version: ''
             xarray-version: ''
-            pandas-version: ''
             run-with-scipy: 'NO'
             gdal-version: '3.7.3'
     steps:
@@ -76,7 +73,7 @@ jobs:
           python${{ matrix.python-version }} -m venv testenv
           . testenv/bin/activate
           python -m pip install --upgrade pip
-          export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }} pandas${{ matrix.pandas-version }}'
+          export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           python -m pip install $INSTALL_DEPS
           python -m pip install -e .[dev,doc]
