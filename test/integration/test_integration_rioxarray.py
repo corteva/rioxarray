@@ -31,7 +31,6 @@ from rioxarray.exceptions import (
 from rioxarray.rioxarray import _make_coords
 from test.conftest import (
     GDAL_GE_361,
-    PYPROJ_LT_3,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -2852,18 +2851,13 @@ def test_estimate_utm_crs():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"),
     ) as xds:
-        if PYPROJ_LT_3:
-            with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
-                xds.rio.estimate_utm_crs()
-        else:
-            assert xds.rio.estimate_utm_crs().to_epsg() in (32618, 32655)
-            assert xds.rio.reproject(
-                "EPSG:4326"
-            ).rio.estimate_utm_crs() == CRS.from_epsg(32618)
-            assert xds.rio.estimate_utm_crs("WGS 72") in (32218, 32255)
+        assert xds.rio.estimate_utm_crs().to_epsg() in (32618, 32655)
+        assert xds.rio.reproject("EPSG:4326").rio.estimate_utm_crs() == CRS.from_epsg(
+            32618
+        )
+        assert xds.rio.estimate_utm_crs("WGS 72") in (32218, 32255)
 
 
-@pytest.mark.skipif(PYPROJ_LT_3, reason="pyproj 3+ required")
 def test_estimate_utm_crs__missing_crs():
     with pytest.raises(RuntimeError, match=r"crs must be set to estimate UTM CRS"):
         xarray.Dataset().rio.estimate_utm_crs("NAD83")
@@ -2879,12 +2873,8 @@ def test_estimate_utm_crs__out_of_bounds():
         },
     )
     xds.rio.write_crs("EPSG:4326", inplace=True)
-    if PYPROJ_LT_3:
-        with pytest.raises(RuntimeError, match=r"pyproj 3\+ required"):
-            xds.rio.estimate_utm_crs()
-    else:
-        with pytest.raises(RuntimeError, match=r"Unable to determine UTM CRS"):
-            xds.rio.estimate_utm_crs()
+    with pytest.raises(RuntimeError, match=r"Unable to determine UTM CRS"):
+        xds.rio.estimate_utm_crs()
 
 
 def test_interpolate_na_missing_nodata():
