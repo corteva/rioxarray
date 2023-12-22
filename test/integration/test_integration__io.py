@@ -1230,10 +1230,6 @@ def test_nc_attr_loading(open_rasterio):
         assert str(rds.time.values[1]) == "2016-12-29 12:52:42.347451"
 
 
-@pytest.mark.xfail(
-    version.parse(rasterio.__gdal_version__) < version.parse("3.0.4"),
-    reason="This was fixed in GDAL 3.0.4",
-)
 def test_nc_attr_loading__disable_decode_times(open_rasterio):
     with open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), decode_times=False
