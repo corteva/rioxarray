@@ -37,27 +37,22 @@ jobs:
         xarray-version: ['']
         pandas-version: ['']
         run-with-scipy: ['YES']
-        gdal-version: ['3.6.4']
+        gdal-version: ['3.8.2']
         include:
           - python-version: '3.10'
             rasterio-version: ''
             xarray-version: '==0.17'
             pandas-version: '<2'
             run-with-scipy: 'YES'
-            gdal-version: '3.4.3'
+            gdal-version: '3.6.4'
           - python-version: '3.10'
             rasterio-version: ''
             xarray-version: ''
             pandas-version: ''
             run-with-scipy: 'NO'
-            gdal-version: '3.5.3'
+            gdal-version: '3.7.3'
     steps:
       - uses: actions/checkout@v4
-
-      - name: Remove unused apt repo
-        if: ${{ matrix.gdal-version }} == '3.5.3'
-        run: |
-          rm -f /etc/apt/sources.list.d/apache-arrow.sources
 
       - name: Update
         run: |
