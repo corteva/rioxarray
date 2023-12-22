@@ -32,9 +32,6 @@ from rioxarray.rioxarray import _make_coords
 from test.conftest import (
     GDAL_GE_361,
     PYPROJ_LT_3,
-    RASTERIO_EQ_122,
-    RASTERIO_GE_13,
-    RASTERIO_LT_122,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -382,16 +379,9 @@ def test_clip_box__auto_expand(modis_clip):
 
 def test_clip_box__nodata_error(modis_clip):
     with modis_clip["open"](modis_clip["input"]) as xdi:
-        var_match = ""
-        if hasattr(xdi, "name") and xdi.name:
-            var_match = " Data variable: __xarray_dataarray_variable__"
-        if RASTERIO_LT_122:
-            expected_exception = NoDataInBounds
-        else:
-            expected_exception = rasterio.errors.WindowError
-            var_match = "Bounds and transform are inconsistent"
-
-        with pytest.raises(expected_exception, match=var_match):
+        with pytest.raises(
+            rasterio.errors.WindowError, match="Bounds and transform are inconsistent"
+        ):
             xdi.rio.clip_box(
                 minx=-8272735.53951584,  # xdi.x[5].values
                 miny=8048371.187465771,  # xdi.y[7].values
@@ -405,19 +395,13 @@ def test_clip_box__one_dimension_error(modis_clip):
         var_match = ""
         if hasattr(xdi, "name") and xdi.name:
             var_match = " Data variable: __xarray_dataarray_variable__"
-        if RASTERIO_EQ_122:
-            expected_exception = rasterio.errors.WindowError
-            var_match = "Bounds and transform are inconsistent"
-        else:
-            expected_exception = OneDimensionalRaster
-            var_match = (
-                "At least one of the clipped raster x,y coordinates has "
-                f"only one point.{var_match}"
-            )
         # test exception after raster clipped
         with pytest.raises(
-            expected_exception,
-            match=var_match,
+            OneDimensionalRaster,
+            match=(
+                "At least one of the clipped raster x,y coordinates has "
+                f"only one point.{var_match}"
+            ),
         ):
             xdi.rio.clip_box(
                 minx=-7272735.53951584,  # xdi.x[5].values
@@ -477,10 +461,6 @@ def test_clip_box__reproject_bounds(modis_clip):
         )
 
 
-@pytest.mark.skipif(
-    not RASTERIO_GE_13,
-    reason="Antimeridian Support added in 1.3.0",
-)
 def test_clip_box__antimeridian():
     xds = xarray.DataArray(
         numpy.zeros((5, 5)),
@@ -968,7 +948,6 @@ def test_reproject__grid_mapping(modis_reproject):
     with modis_reproject["open"](
         modis_reproject["input"], **mask_args
     ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
-
         # remove 'crs' attribute and add grid mapping
         # keep a copy of the crs before setting the spatial_ref to 0 as that will
         # set `rio.crs` to None.
@@ -1222,7 +1201,6 @@ def test_make_src_affine(open_func, modis_reproject):
     with xarray.open_dataarray(
         modis_reproject["input"], decode_coords="all"
     ) as xdi, open_func(modis_reproject["input"]) as xri:
-
         # check the transform
         attribute_transform = tuple(xdi.attrs["transform"])
         attribute_transform_func = tuple(xdi.rio.transform())

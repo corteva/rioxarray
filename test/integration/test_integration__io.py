@@ -31,9 +31,6 @@ from rioxarray.rioxarray import DEFAULT_GRID_MAP
 from test.conftest import (
     GDAL_GE_36,
     GDAL_GE_364,
-    RASTERIO_GE_13,
-    RASTERIO_GE_125,
-    RASTERIO_VERSION,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -42,16 +39,6 @@ from test.conftest import (
 from test.integration.test_integration_rioxarray import (
     _check_rio_gcps,
     _create_gdal_gcps,
-)
-
-cint_skip = pytest.mark.skipif(
-    RASTERIO_VERSION < version.parse("1.2.4"),
-    reason="https://github.com/mapbox/rasterio/issues/2182",
-)
-
-python_vsi_skip = pytest.mark.skipif(
-    not RASTERIO_GE_13,
-    reason="Python VSI Support added in 1.3.0",
 )
 
 
@@ -1006,10 +993,6 @@ def test_rasterio_vrt_gcps(tmp_path):
                 )
 
 
-@pytest.mark.skipif(
-    not RASTERIO_GE_13,
-    reason="warp options support added in 1.3.0",
-)
 def test_rasterio_vrt_warp_extras(tmp_path):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
@@ -1083,7 +1066,6 @@ def test_rasterio_vrt_warp_extras(tmp_path):
             assert vrt.shape == (28286, 29338)
 
 
-@cint_skip
 def test_rasterio_vrt_gcps__data_exists():
     # https://github.com/corteva/rioxarray/issues/515
     vrt_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
@@ -1352,7 +1334,6 @@ def test_rotation_affine():
             assert rioda.rio.resolution() == (10, 10)
 
 
-@cint_skip
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
@@ -1370,10 +1351,6 @@ def test_cint16_dtype(dtype, tmp_path):
         assert data.dtype == "complex64"
 
 
-@pytest.mark.skipif(
-    not RASTERIO_GE_125,
-    reason="https://github.com/mapbox/rasterio/issues/2206",
-)
 def test_cint16_dtype_nodata(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     with rioxarray.open_rasterio(test_file) as xds:
@@ -1394,7 +1371,6 @@ def test_cint16_dtype_nodata(tmp_path):
         assert riofh.nodata is None
 
 
-@cint_skip
 @pytest.mark.parametrize("dtype", [None, "complex_int16"])
 def test_cint16_dtype_masked(dtype, tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
@@ -1414,7 +1390,6 @@ def test_cint16_dtype_masked(dtype, tmp_path):
         assert data.dtype == "complex64"
 
 
-@cint_skip
 def test_cint16_promote_dtype(tmp_path):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     with rioxarray.open_rasterio(test_file) as xds:
@@ -1488,7 +1463,6 @@ def test_writing_gcps(tmp_path):
         _check_rio_gcps(darr, *gdal_gcps)
 
 
-@python_vsi_skip
 def test_read_file_handle_with_dask():
     with open(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"
@@ -1497,14 +1471,12 @@ def test_read_file_handle_with_dask():
             pass
 
 
-@cint_skip
 def test_read_cint16_with_dask():
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     with rioxarray.open_rasterio(test_file, chunks=True):
         pass
 
 
-@python_vsi_skip
 def test_read_ascii__from_bytesio():
     ascii_raster_string = """ncols        5
     nrows        5
