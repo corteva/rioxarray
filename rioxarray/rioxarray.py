@@ -14,6 +14,8 @@ import rasterio.warp
 import rasterio.windows
 import xarray
 from affine import Affine
+from pyproj.aoi import AreaOfInterest
+from pyproj.database import query_utm_crs_info
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 
@@ -531,13 +533,6 @@ class XRasterBase:
         -------
         rasterio.crs.CRS
         """
-        # pylint: disable=import-outside-toplevel
-        try:
-            from pyproj.aoi import AreaOfInterest
-            from pyproj.database import query_utm_crs_info
-        except ImportError:
-            raise RuntimeError("pyproj 3+ required for estimate_utm_crs.") from None
-
         if self.crs is None:
             raise RuntimeError("crs must be set to estimate UTM CRS.")
 

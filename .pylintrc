@@ -1,5 +1,5 @@
 [MASTER]
-extension-pkg-whitelist=rasterio.crs
+extension-pkg-whitelist=rasterio.crs,pyproj.database
 
 [MESSAGES CONTROL]
 disable=logging-fstring-interpolation,
