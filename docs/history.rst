@@ -3,6 +3,8 @@ History
 
 Latest
 -------
+- DEP: Support Python 3.10-3.12 (pull #723)
+- DEP: rasterio 1.3+, pyproj 3.3+ (pull #725, #727)
 
 0.15.0
 ------
