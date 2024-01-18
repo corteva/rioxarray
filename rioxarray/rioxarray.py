@@ -1248,18 +1248,20 @@ class XRasterBase:
         except (KeyError, AttributeError):
             return None
 
-        gcps = [
-            GroundControlPoint(
-                x=gcp["geometry"]["coordinates"][0],
-                y=gcp["geometry"]["coordinates"][1],
-                z=gcp["geometry"]["coordinates"][2],
+        def parse_gcp(gcp) -> GroundControlPoint:
+            x, y, *z = gcp["geometry"]["coordinates"]
+            z = z[0] if len(z) > 0 else None
+            return GroundControlPoint(
+                x=x,
+                y=y,
+                z=z,
                 row=gcp["properties"]["row"],
                 col=gcp["properties"]["col"],
                 id=gcp["properties"]["id"],
                 info=gcp["properties"]["info"],
             )
-            for gcp in geojson_gcps["features"]
-        ]
+
+        gcps = [parse_gcp(gcp) for gcp in geojson_gcps["features"]]
         return gcps
 
 
@@ -1277,6 +1279,12 @@ def _convert_gcps_to_geojson(
     -------
     A FeatureCollection dict.
     """
+
+    def gcp_coordinates(gcp):
+        if gcp.z is None:
+            return [gcp.x, gcp.y]
+        return [gcp.x, gcp.y, gcp.z]
+
     features = [
         {
             "type": "Feature",
@@ -1286,7 +1294,7 @@ def _convert_gcps_to_geojson(
                 "row": gcp.row,
                 "col": gcp.col,
             },
-            "geometry": {"type": "Point", "coordinates": [gcp.x, gcp.y, gcp.z]},
+            "geometry": {"type": "Point", "coordinates": gcp_coordinates(gcp)},
         }
         for gcp in gcps
     ]
