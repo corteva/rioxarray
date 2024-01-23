@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.15.1
 -------
 - DEP: Support Python 3.10-3.12 (pull #723)
