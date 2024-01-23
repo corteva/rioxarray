@@ -2895,11 +2895,12 @@ def test_interpolate_na_missing_nodata():
         test_da.to_dataset().rio.interpolate_na()
 
 
-def test_rio_write_gcps():
+@pytest.mark.parametrize("with_z", [True, False])
+def test_rio_write_gcps(with_z):
     """
     Test setting gcps in dataarray.
     """
-    gdal_gcps, gcp_crs = _create_gdal_gcps()
+    gdal_gcps, gcp_crs = _create_gdal_gcps(with_z)
 
     darr = xarray.DataArray(1)
     darr.rio.write_gcps(gdal_gcps, gcp_crs, inplace=True)
@@ -2907,7 +2908,7 @@ def test_rio_write_gcps():
     _check_rio_gcps(darr, gdal_gcps, gcp_crs)
 
 
-def _create_gdal_gcps():
+def _create_gdal_gcps(with_z=True):
     src_gcps = [
         GroundControlPoint(
             row=0, col=0, x=0.0, y=0.0, z=12.0, id="1", info="the first gcp"
@@ -2922,6 +2923,9 @@ def _create_gdal_gcps():
             row=800, col=0, x=0.0, y=10.0, z=5.5, id="4", info="the fourth gcp"
         ),
     ]
+    if with_z is False:
+        for gcp in src_gcps:
+            gcp.z = None
     crs = CRS.from_epsg(4326)
     gdal_gcps = (src_gcps, crs)
     return gdal_gcps
@@ -2943,14 +2947,18 @@ def _check_rio_gcps(darr, src_gcps, crs):
         assert feature["properties"]["row"] == gcp.row
         assert feature["properties"]["col"] == gcp.col
         assert feature["geometry"]["type"] == "Point"
-        assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+        if gcp.z is not None:
+            assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y, gcp.z]
+        else:
+            assert feature["geometry"]["coordinates"] == [gcp.x, gcp.y]
 
 
-def test_rio_get_gcps():
+@pytest.mark.parametrize("with_z", [True, False])
+def test_rio_get_gcps(with_z):
     """
     Test setting gcps in dataarray.
     """
-    gdal_gcps, gdal_crs = _create_gdal_gcps()
+    gdal_gcps, gdal_crs = _create_gdal_gcps(with_z)
 
     darr = xarray.DataArray(1)
     darr.rio.write_gcps(gdal_gcps, gdal_crs, inplace=True)
