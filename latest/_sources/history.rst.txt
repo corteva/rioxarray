@@ -6,6 +6,7 @@ Latest
 - DEP: Support Python 3.10-3.12 (pull #723)
 - DEP: rasterio 1.3+, pyproj 3.3+ (pull #725, #727)
 - DEP: xarray 2022.3.0+ & numpy 1.23+ (pull #728)
+- ENH: Robust handling of GCPs without `z` component (issue #731)
 
 0.15.0
 ------
