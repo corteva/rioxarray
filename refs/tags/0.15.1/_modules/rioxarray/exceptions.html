@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rioxarray.exceptions &mdash; rioxarray 0.15.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=4befc426"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rioxarray
+          </a>
+              <div class="version">
+                0.15.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rioxarray.exceptions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rioxarray.exceptions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This contains exceptions for rioxarray.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="RioXarrayError">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.RioXarrayError">[docs]</a>
+<span class="k">class</span> <span class="nc">RioXarrayError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the base exception for errors in the rioxarray extension.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NoDataInBounds">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.NoDataInBounds">[docs]</a>
+<span class="k">class</span> <span class="nc">NoDataInBounds</span><span class="p">(</span><span class="n">RioXarrayError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is for when there are no data in the bounds for clipping a raster.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="SingleVariableDataset">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.SingleVariableDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">SingleVariableDataset</span><span class="p">(</span><span class="n">RioXarrayError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is for when you have a dataset with a single variable.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DimensionError">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.DimensionError">[docs]</a>
+<span class="k">class</span> <span class="nc">DimensionError</span><span class="p">(</span><span class="n">RioXarrayError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is raised when there are more dimensions than is supported by the method&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MissingSpatialDimensionError">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.MissingSpatialDimensionError">[docs]</a>
+<span class="k">class</span> <span class="nc">MissingSpatialDimensionError</span><span class="p">(</span><span class="n">DimensionError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is raised when the dimension cannot be found&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="TooManyDimensions">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.TooManyDimensions">[docs]</a>
+<span class="k">class</span> <span class="nc">TooManyDimensions</span><span class="p">(</span><span class="n">DimensionError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is raised when there are more dimensions than is supported by the method&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="InvalidDimensionOrder">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.InvalidDimensionOrder">[docs]</a>
+<span class="k">class</span> <span class="nc">InvalidDimensionOrder</span><span class="p">(</span><span class="n">DimensionError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is raised when there the dimensions are not ordered correctly.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="OneDimensionalRaster">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.OneDimensionalRaster">[docs]</a>
+<span class="k">class</span> <span class="nc">OneDimensionalRaster</span><span class="p">(</span><span class="n">DimensionError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is an error when you have a 1 dimensional raster.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DimensionMissingCoordinateError">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.DimensionMissingCoordinateError">[docs]</a>
+<span class="k">class</span> <span class="nc">DimensionMissingCoordinateError</span><span class="p">(</span><span class="n">RioXarrayError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is raised when the dimension does not have the supporting coordinate.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MissingCRS">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.exceptions.MissingCRS">[docs]</a>
+<span class="k">class</span> <span class="nc">MissingCRS</span><span class="p">(</span><span class="n">RioXarrayError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Missing the CRS in the dataset.&quot;&quot;&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2023, Corteva Agriscience™.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
