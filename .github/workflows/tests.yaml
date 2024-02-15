@@ -83,7 +83,7 @@ jobs:
           . testenv/bin/activate
           python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
 
 
   conda_test:
@@ -154,7 +154,7 @@ jobs:
           source activate test
           sphinx-build -b html docs/ docs/_build/
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
 
 
   test_latest:
