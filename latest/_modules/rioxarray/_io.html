@@ -965,7 +965,7 @@
                 <span class="o">**</span><span class="n">open_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
-            <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;band&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">global_tags</span><span class="p">)</span>
 
