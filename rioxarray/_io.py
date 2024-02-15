@@ -881,7 +881,7 @@ def _load_bands_as_variables(
                 **open_kwargs,
             )
             .squeeze()  # type: ignore
-            .drop("band")  # type: ignore
+            .drop_vars("band")  # type: ignore
         )
     dataset = Dataset(data_vars, attrs=global_tags)
 
