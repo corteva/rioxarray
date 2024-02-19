@@ -107,7 +107,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Fill misssing with interpolate_na\n",
+    "## Fill missing with interpolate_na\n",
     "\n",
     "API Reference:\n",
     "\n",
