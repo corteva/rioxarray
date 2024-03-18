@@ -33,6 +33,7 @@ class RasterioBackend(xarray.backends.common.BackendEntrypoint):
     .. versionadded:: 0.4
     """
 
+    # pylint: disable=abstract-method
     def open_dataset(
         self,
         filename_or_obj,
