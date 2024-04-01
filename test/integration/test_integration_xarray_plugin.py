@@ -8,10 +8,12 @@ from test.conftest import TEST_INPUT_DATA_DIR
 xarray = pytest.importorskip("xarray", minversion="0.18")
 
 
-def test_xarray_open_dataset():
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"engine": "rasterio"}, {"decode_coords": "all"}]
+)
+def test_xarray_open_dataset(kwargs):
     cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
-
-    ds = xarray.open_dataset(cog_file, engine="rasterio")
+    ds = xarray.open_dataset(cog_file, **kwargs)
 
     assert isinstance(ds, xarray.Dataset)
     assert "band_data" in ds.data_vars
@@ -21,10 +23,6 @@ def test_xarray_open_dataset():
     assert "grid_mapping" not in ds.data_vars["band_data"].attrs
     assert "grid_mapping" in ds.data_vars["band_data"].encoding
     assert "preferred_chunks" in ds.data_vars["band_data"].encoding
-
-    ds = xarray.open_dataset(cog_file)
-
-    assert isinstance(ds, xarray.Dataset)
 
 
 def test_xarray_open_dataset__drop_variables():
@@ -66,3 +64,9 @@ def test_open_multiple_resolution():
             engine="rasterio",
             drop_variables="QC_500m_1",
         )
+
+
+def test_xarray_open_dataset__invalid_decode_coords():
+    cog_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    with pytest.raises(RioXarrayError):
+        xarray.open_dataset(cog_file, decode_coords=False)
