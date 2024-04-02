@@ -35,29 +35,17 @@ class RasterioDatasetDuck:
         res = xds.rio.resolution(recalc=True)
         self.res = (abs(res[0]), abs(res[1]))
         self.transform = xds.rio.transform(recalc=True)
-        try:
-            rio_file = xds.rio._manager.acquire()
-            self.profile = rio_file.profile
-        except AttributeError:
-            self.profile = {}
-        self.profile.update(
-            dtype=xds.dtype,
-            crs=xds.rio.crs,
-            nodata=xds.rio.nodata,
-        )
+        # profile is only used for writing to a file.
+        # This never happens with rioxarray merge.
+        self.profile: dict = {}
 
-    def colormap(self, *args, **kwargs):
+    def colormap(self, *args, **kwargs) -> None:
         """
-        Lazy load colormap through _manager.acquire()
-        for the scenario many file handles are opened
-
-        See: https://github.com/corteva/rioxarray/issues/479
+        colormap is only used for writing to a file.
+        This never happens with rioxarray merge.
         """
-        try:
-            rio_file = self._xds.rio._manager.acquire()
-            return rio_file.colormap(*args, **kwargs)
-        except AttributeError:
-            return None
+        # pylint: disable=unused-argument
+        return None
 
     def read(self, *args, **kwargs) -> numpy.ma.MaskedArray:
         """
