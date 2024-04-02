@@ -4,6 +4,7 @@ History
 0.15.2
 ------
 - BUG: Add decode_coords kwarg to backend entrypoint (pull #763)
+- BUG: Avoid DeprecationWarning: xr.Dataset.drop() -> xr.Dataset.drop_vars() (pull #740)
 
 0.15.1
 -------
