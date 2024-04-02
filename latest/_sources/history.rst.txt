@@ -1,10 +1,9 @@
 History
 =======
 
-Latest
+0.15.2
 ------
 - BUG: Add decode_coords kwarg to backend entrypoint (pull #763)
-
 
 0.15.1
 -------
