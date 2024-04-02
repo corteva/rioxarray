@@ -45,11 +45,14 @@ class RasterioBackend(xarray.backends.common.BackendEntrypoint):
         variable=None,
         group=None,
         default_name="band_data",
+        decode_coords="all",
         decode_times=True,
         decode_timedelta=None,
         band_as_variable=False,
         open_kwargs=None,
     ):
+        if decode_coords != "all":
+            raise RioXarrayError("Only 'all' is supported for 'decode_coords'.")
         if open_kwargs is None:
             open_kwargs = {}
         rds = _io.open_rasterio(

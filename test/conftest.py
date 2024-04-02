@@ -1,4 +1,5 @@
 import os
+from functools import partial
 
 import pytest
 import rasterio
@@ -102,9 +103,7 @@ def _assert_xarrays_equal(
             assert unwanted_attr not in input_xarray.attrs
 
 
-def open_rasterio_engine(file_name_or_object, **kwargs):
-    xarray = pytest.importorskip("xarray", minversion="0.18")
-    return xarray.open_dataset(file_name_or_object, engine="rasterio", **kwargs)
+open_rasterio_engine = partial(xarray.open_dataset, engine="rasterio")
 
 
 @pytest.fixture(
