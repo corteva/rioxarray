@@ -1,0 +1,5 @@
+-r doc.txt
+-r test.txt
+pylint
+mypy
+pre-commit
