@@ -65,7 +65,8 @@ jobs:
             python${{ matrix.python-version }}-dev \
             python${{ matrix.python-version }}-venv \
             python3-pip \
-            g++
+            g++ \
+            git
           chown -R $(whoami) /github/home/
 
       - name: Install dependencies
