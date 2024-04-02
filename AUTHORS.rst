@@ -56,6 +56,9 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://github.com/yvonnefroehlich"><img src="https://avatars.githubusercontent.com/u/94163266?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yvonne Fröhlich</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=yvonnefroehlich" title="Documentation">📖</a></td>
         <td align="center"><a href="https://github.com/Kirill888"><img src="https://avatars.githubusercontent.com/u/1428024?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kirill Kouzoubov</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=Kirill888" title="Code">💻</a></td>
       </tr>
+      <tr>
+        <td align="center"><a href="https://github.com/xaviernogueira"><img src="https://avatars.githubusercontent.com/u/58796351?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xavier Nogueira</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3Axaviernogueira" title="Bug reports">🐛</a></td>
+      </tr>
     </table>
 
     <!-- markdownlint-restore -->
