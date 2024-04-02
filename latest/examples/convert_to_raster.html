@@ -655,13 +655,18 @@ dtype(&#39;float64&#39;)
 <h2>Memory efficient raster writing<a class="headerlink" href="#Memory-efficient-raster-writing" title="Link to this heading"></a></h2>
 <p>Useful for reading and writing larger rasters to disk.</p>
 <p>Note: This will increase the time it takes to generate the raster.</p>
-<p>Also see: <a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p>
+<p>Also see:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="dask_read_write.html"><span class="doc">Reading and Writing with Dask</span></a></p></li>
+<li><p><a class="reference internal" href="read-locks.html"><span class="doc">Reading COGs in Parallel</span></a></p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds = rioxarray.open_rasterio(
     &quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;,
+    lock=False,  # disable internal caching
     cache=False,  # don&#39;t keep data loaded in memory. pull from disk every time
 )
 

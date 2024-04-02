@@ -3,7 +3,8 @@ History
 
 Latest
 ------
-
+- BUG:merge: Use `rasterio.io.MemoryFile`` for reading (pull #765)
+- BUG:merge: Add simple defaults for unused payload/colormap (pull #766)
 
 0.15.2
 ------
