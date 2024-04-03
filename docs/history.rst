@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.15.3
 ------
 - BUG:merge: Use `rasterio.io.MemoryFile`` for reading (pull #765)
