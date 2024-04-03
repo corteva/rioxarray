@@ -80,7 +80,8 @@ Using python::
 
 4. Install your local copy into a virtualenv.
 
-    $ pip install -e .[dev]
+    $ python -m pip install -e .[all]
+    $ python -m pip install -r requirements/dev.txt
 
 5. Setup pre-commit hooks::
 

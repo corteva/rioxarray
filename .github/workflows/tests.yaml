@@ -77,7 +77,8 @@ jobs:
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           python -m pip install $INSTALL_DEPS
-          python -m pip install -e .[dev,doc]
+          python -m pip install -e .[all]
+          python -m pip install -r requirements/test.txt
 
       - name: run tests
         run: |
@@ -118,7 +119,8 @@ jobs:
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           conda create -n test $INSTALL_DEPS
           source activate test
-          python -m pip install -e .[dev,doc]
+          python -m pip install -e .[all]
+          python -m pip install -r requirements/dev.txt
 
       - name: Check and Log Environment
         shell: bash
@@ -191,6 +193,7 @@ jobs:
             git+https://github.com/pyproj4/pyproj.git@main \
             git+https://github.com/pydata/xarray.git@main;
           python -m pip install -e .[all]
+          python -m pip install -r requirements/test.txt
 
       - name: Check and Log Environment
         shell: bash
