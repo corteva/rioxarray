@@ -33,7 +33,8 @@ jobs:
           conda config --set channel_priority strict
           conda create -n docs python=3.10 rasterio xarray scipy pyproj pandoc
           source activate docs
-          python -m pip install -e .[doc]
+          python -m pip install -e .[all]
+          python -m pip install -r requirements/doc.txt
           sphinx-build -b html docs/ docs/_build/
 
       - name: Deploy 🚀
