@@ -781,6 +781,28 @@ def test_reproject_match__non_geospatial(dummy_dataset_non_geospatial):
         assert "non_geo_stuff" in ds_reproject.data_vars
 
 
+def test_reproject_match__geographic_dataset():
+    lat = [0.1, 0.15, 0.2]
+    lon = [0.1, 0.15, 0.2]
+    data = numpy.arange(1, 10).reshape(3, 3)
+    ds = xarray.Dataset(
+        data_vars={
+            "foo": (["lat", "lon"], data),
+            "bar": (["lat", "lon"], data),
+        },
+        coords={"lat": lat, "lon": lon},
+    )
+
+    ds = (
+        ds.rio.write_crs(4326, inplace=True)
+        .rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=True)
+        .rio.write_coordinate_system(inplace=True)
+    )
+    ds_match = ds.rio.reproject_match(ds)
+    assert_almost_equal(ds_match.x.values, ds.lon.values)
+    assert_almost_equal(ds_match.y.values, ds.lat.values)
+
+
 def test_interpolate_na__non_geospatial(dummy_dataset_non_geospatial):
     pytest.importorskip("scipy")
     ds = dummy_dataset_non_geospatial

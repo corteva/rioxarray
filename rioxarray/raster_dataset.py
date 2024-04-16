@@ -188,9 +188,7 @@ class RasterDataset(XRasterBase):
                 ):
                     raise
                 resampled_dataset[var] = self._obj[var].copy()
-        return resampled_dataset.rio.set_spatial_dims(
-            x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
-        )
+        return resampled_dataset
 
     def pad_box(
         self,
