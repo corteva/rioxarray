@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.15.4
 ------
 - BUG:reproject_match: Remove setting spatial dims on output resampled dataset (issue #768)
