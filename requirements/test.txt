@@ -1,5 +1,6 @@
+cftime
+dask
+netcdf4
 pytest>=3.6
 pytest-cov
 pytest-timeout
-dask
-netcdf4
