@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+- BUG:reproject_match: Remove setting spatial dims on output resampled dataset (issue #768)
+
 0.15.3
 ------
 - BUG:merge: Use `rasterio.io.MemoryFile`` for reading (pull #765)
