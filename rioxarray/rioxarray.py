@@ -141,8 +141,10 @@ def _get_nonspatial_coords(
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
         DEFAULT_GRID_MAP,
+        "xc",
+        "yc",
     }:
-        if src_data_array[coord].dims:
+        if src_data_array[coord].ndim == 1:
             coords[coord] = xarray.IndexVariable(
                 src_data_array[coord].dims,
                 src_data_array[coord].values,
@@ -166,9 +168,13 @@ def _make_coords(
 ) -> dict[Hashable, Any]:
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
-    if force_generate or (
-        src_data_array.rio.x_dim in src_data_array.coords
-        and src_data_array.rio.y_dim in src_data_array.coords
+    if (
+        force_generate
+        or (
+            src_data_array.rio.x_dim in src_data_array.coords
+            and src_data_array.rio.y_dim in src_data_array.coords
+        )
+        or ("xc" in src_data_array.coords and "yc" in src_data_array.coords)
     ):
         new_coords = _generate_spatial_coords(dst_affine, dst_width, dst_height)
         new_coords.update(coords)
