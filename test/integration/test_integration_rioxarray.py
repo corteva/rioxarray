@@ -28,7 +28,7 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.rioxarray import _make_coords
+from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
     GDAL_GE_361,
     TEST_COMPARE_DATA_DIR,
@@ -801,6 +801,60 @@ def test_reproject_match__geographic_dataset():
     ds_match = ds.rio.reproject_match(ds)
     assert_almost_equal(ds_match.x.values, ds.lon.values)
     assert_almost_equal(ds_match.y.values, ds.lat.values)
+
+
+def test_reproject_match__rotated():
+    rotated_affine = Affine(1, 0.2, 0, 0, 1, 0)
+    image = numpy.random.randint(0, 255, size=(100, 100), dtype=numpy.uint8)
+    rotated_dataset = (
+        xarray.DataArray(
+            image,
+            dims=("y", "x"),
+            coords=_generate_spatial_coords(
+                affine=rotated_affine,
+                width=image.shape[1],
+                height=image.shape[0],
+            ),
+        )
+        .astype("uint16")
+        .rio.write_nodata(0, inplace=True)
+        .rio.write_crs("EPSG:4326", inplace=True)
+        .rio.write_transform(rotated_affine, inplace=True)
+        .rio.write_coordinate_system(inplace=True)
+    )
+    squared_affine = Affine(1, 0, 0, 0, 1, 0)
+    squared_dataset = (
+        xarray.DataArray(
+            image,
+            dims=("y", "x"),
+            coords=_generate_spatial_coords(
+                affine=squared_affine,
+                width=image.shape[1],
+                height=image.shape[0],
+            ),
+        )
+        .astype("uint16")
+        .rio.write_nodata(0, inplace=True)
+        .rio.write_crs("EPSG:4326", inplace=True)
+        .rio.write_transform(squared_affine, inplace=True)
+        .rio.write_coordinate_system(inplace=True)
+    )
+    reprojected_to_squared_dataset = rotated_dataset.rio.reproject_match(
+        squared_dataset
+    )
+    reprojected_to_rotated_dataset = squared_dataset.rio.reproject_match(
+        rotated_dataset
+    )
+    assert (
+        "xc" in reprojected_to_rotated_dataset.coords
+        and "yc" in reprojected_to_rotated_dataset.coords
+    )
+    assert (
+        "x" in reprojected_to_squared_dataset.coords
+        and "y" in reprojected_to_squared_dataset.coords
+    )
+    assert reprojected_to_squared_dataset.rio.transform() == squared_affine
+    assert reprojected_to_rotated_dataset.rio.transform() == rotated_affine
 
 
 def test_interpolate_na__non_geospatial(dummy_dataset_non_geospatial):
