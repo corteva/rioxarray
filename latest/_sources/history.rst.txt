@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.15.5
 ------
 - BUG:reproject: Allow rotated rasters (issue #746)
 
