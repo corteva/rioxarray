@@ -21,21 +21,24 @@ jobs:
           persist-credentials: false
 
       - name: Setup Conda
-        uses: s-weigand/setup-conda@v1
+        uses: mamba-org/setup-micromamba@v1
         with:
-          python-version: '3.10'
-          conda-channels: conda-forge
+          init-shell: bash
+          environment-name: docs
+          create-args: >-
+            python=3.10
+            rasterio
+            xarray
+            scipy
+            pyproj
+            pandoc
 
       - name: Install and Build
         shell: bash
         run: |
-          conda config --prepend channels conda-forge
-          conda config --set channel_priority strict
-          conda create -n docs python=3.10 rasterio xarray scipy pyproj pandoc
-          source activate docs
-          python -m pip install -e .[all]
-          python -m pip install -r requirements/doc.txt
-          sphinx-build -b html docs/ docs/_build/
+          micromamba run -n docs python -m pip install -e .[all]
+          micromamba run -n docs python -m pip install -r requirements/doc.txt
+          micromamba run -n docs sphinx-build -b html docs/ docs/_build/
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
