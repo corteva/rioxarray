@@ -1886,19 +1886,9 @@ def test_to_raster__different_dtype(tmp_path, windowed):
     )
     test_nd.rio.write_crs("EPSG:4326", inplace=True)
     tmpfile = tmp_path / "dtype.tif"
-    with pytest.warns(
-        UserWarning,
-        match=(
-            r"The nodata value \(-1.1\) has been automatically changed to "
-            r"\(255\) to match the dtype of the data."
-        ),
-    ):
+
+    with pytest.raises(OverflowError, match="Unable to convert nodata value"):
         test_nd.rio.to_raster(tmpfile, dtype=numpy.uint8, windowed=windowed)
-    with rioxarray.open_rasterio(tmpfile) as xds:
-        assert str(xds.dtype) == "uint8"
-        assert xds.attrs["_FillValue"] == 255
-        assert xds.rio.nodata == 255
-        assert xds.squeeze().values[1, 1] == 255
 
 
 def test_missing_spatial_dimensions():
@@ -2384,17 +2374,8 @@ def test_write_nodata__different_dtype(nodata):
         dims=("y", "x"),
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
     )
-    with pytest.warns(
-        UserWarning,
-        match=(
-            r"The nodata value \(-1.1\) has been automatically changed to "
-            r"\(-1\) to match the dtype of the data."
-        ),
-    ):
-        test_nd = test_da.rio.write_nodata(nodata)
-    assert not test_da.attrs
-    assert test_nd.attrs["_FillValue"] == -1
-    assert test_nd.rio.nodata == -1
+    with pytest.raises(OverflowError, match="Unable to convert nodata value"):
+        test_da.rio.write_nodata(nodata)
 
 
 @pytest.mark.parametrize("nodata", [-1.1, "-1.1"])
@@ -2406,14 +2387,8 @@ def test_nodata_reader__different_dtype(nodata):
         attrs={"_FillValue": nodata},
     )
     assert test_da.attrs["_FillValue"] == nodata
-    with pytest.warns(
-        UserWarning,
-        match=(
-            r"The nodata value \(-1.1\) has been automatically changed to "
-            r"\(255\) to match the dtype of the data."
-        ),
-    ):
-        assert test_da.rio.nodata == 255
+    with pytest.raises(OverflowError, match="Unable to convert nodata value"):
+        test_da.rio.nodata
 
 
 def test_isel_window():
