@@ -8,8 +8,6 @@ Source file:
 - https://github.com/dymaxionlabs/dask-rasterio/blob/8dd7fdece7ad094a41908c0ae6b4fe6ca49cf5e1/dask_rasterio/write.py  # noqa: E501
 
 """
-import warnings
-
 import numpy
 import rasterio
 from rasterio.windows import Window
@@ -121,17 +119,21 @@ def _ensure_nodata_dtype(original_nodata, new_dtype):
     if the value of the nodata value changed.
     """
     # Complex-valued rasters can have real-valued nodata
-    if str(new_dtype).startswith("c"):
+    new_dtype = numpy.dtype(new_dtype)
+    if numpy.issubdtype(new_dtype, numpy.complexfloating):
         nodata = original_nodata
     else:
         original_nodata = float(original_nodata)
-        nodata = numpy.dtype(new_dtype).type(original_nodata)
+        failure_message = (
+            f"Unable to convert nodata value ({original_nodata}) to "
+            f"new dtype ({new_dtype})."
+        )
+        try:
+            nodata = new_dtype.type(original_nodata)
+        except OverflowError as error:
+            raise OverflowError(failure_message) from error
         if not numpy.isnan(nodata) and original_nodata != nodata:
-            warnings.warn(
-                f"The nodata value ({original_nodata}) has been automatically "
-                f"changed to ({nodata}) to match the dtype of the data."
-            )
-
+            raise OverflowError(failure_message)
     return nodata
 
 
