@@ -77,7 +77,7 @@ def merge_arrays(
     Parameters
     ----------
     dataarrays: list[xarray.DataArray]
-        List of xarray.DataArray's with all geo attributes.
+        List of multiple xarray.DataArray with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, and dimensions as the others in the array.
     bounds: tuple, optional
@@ -187,7 +187,7 @@ def merge_datasets(
     Parameters
     ----------
     datasets: list[xarray.Dataset]
-        List of xarray.Dataset's with all geo attributes.
+        List of multiple xarray.Dataset with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, dimensions, and data_vars as the others in the array.
     bounds: tuple, optional
