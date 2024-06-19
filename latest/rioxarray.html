@@ -209,7 +209,7 @@ If None (default), assume the same value of decode_time.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataarrays</strong> (<em>list</em><em>[</em><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.6.1.dev0)"><em>xarray.DataArray</em></a><em>]</em>) – List of xarray.DataArray’s with all geo attributes.
+<li><p><strong>dataarrays</strong> (<em>list</em><em>[</em><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.6.1.dev0)"><em>xarray.DataArray</em></a><em>]</em>) – List of multiple xarray.DataArray with all geo attributes.
 The first one is assumed to have the same
 CRS, dtype, and dimensions as the others in the array.</p></li>
 <li><p><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
@@ -245,7 +245,7 @@ If not set, uses the nodata value in the first input DataArray.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datasets</strong> (<em>list</em><em>[</em><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.6.1.dev0)"><em>xarray.Dataset</em></a><em>]</em>) – List of xarray.Dataset’s with all geo attributes.
+<li><p><strong>datasets</strong> (<em>list</em><em>[</em><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.6.1.dev0)"><em>xarray.Dataset</em></a><em>]</em>) – List of multiple xarray.Dataset with all geo attributes.
 The first one is assumed to have the same
 CRS, dtype, dimensions, and data_vars as the others in the array.</p></li>
 <li><p><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Bounds of the output image (left, bottom, right, top).
