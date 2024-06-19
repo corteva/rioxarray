@@ -52,21 +52,8 @@ class RasterioDatasetDuck:
         This method is meant to be used by the rasterio.merge.merge function.
         """
         with MemoryFile() as memfile:
-            with memfile.open(
-                driver="GTiff",
-                height=int(self._xds.rio.height),
-                width=int(self._xds.rio.width),
-                count=self.count,
-                dtype=self.dtypes[0],
-                crs=self.crs,
-                transform=self.transform,
-                nodata=self.nodatavals[0],
-            ) as dataset:
-                data = self._xds.values
-                if data.ndim == 2:
-                    dataset.write(data, 1)
-                else:
-                    dataset.write(data)
+            self._xds.rio.to_raster(memfile.name)
+            with memfile.open() as dataset:
                 return dataset.read(*args, **kwargs)
 
 
