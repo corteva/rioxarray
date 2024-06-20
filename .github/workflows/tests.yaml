@@ -192,8 +192,8 @@ jobs:
             git+https://github.com/mapbox/rasterio.git@main \
             git+https://github.com/pyproj4/pyproj.git@main \
             git+https://github.com/pydata/xarray.git@main;
-          python -m pip install -e .[all]
-          python -m pip install -r requirements/test.txt
+          micromamba run -n test python -m pip install -e .[all]
+          micromamba run -n test python -m pip install -r requirements/test.txt
 
       - name: Check and Log Environment
         shell: bash
