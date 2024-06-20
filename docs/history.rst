@@ -4,6 +4,7 @@ History
 Latest
 ------
 - BUG: Raise OverflowError when nodata data type conversion is unsafe (pull #782)
+- BUG: Support writing GCPs to netCDF (issue #778)
 
 0.15.5
 ------

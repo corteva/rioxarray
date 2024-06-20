@@ -3,6 +3,7 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
 # pylint: disable=too-many-lines
+import json
 import math
 import warnings
 from collections.abc import Hashable, Iterable
@@ -254,6 +255,7 @@ def _order_bounds(
 class XRasterBase:
     """This is the base class for the GIS extensions for xarray"""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, xarray_obj: Union[xarray.DataArray, xarray.Dataset]):
         self._obj: Union[xarray.DataArray, xarray.Dataset] = xarray_obj
 
@@ -289,6 +291,7 @@ class XRasterBase:
         self._height: Optional[int] = None
         self._width: Optional[int] = None
         self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
+        self._gcps: Optional[list[GroundControlPoint]] = None
 
     @property
     def crs(self) -> Optional[rasterio.crs.CRS]:
@@ -347,6 +350,7 @@ class XRasterBase:
         obj_copy.rio._width = self._width
         obj_copy.rio._height = self._height
         obj_copy.rio._crs = self._crs
+        obj_copy.rio._gcps = self._gcps
         return obj_copy
 
     def set_crs(
@@ -1235,7 +1239,8 @@ class XRasterBase:
             gcp_crs, grid_mapping_name=grid_mapping_name, inplace=inplace
         )
         geojson_gcps = _convert_gcps_to_geojson(gcps)
-        data_obj.coords[grid_mapping_name].attrs["gcps"] = geojson_gcps
+        data_obj.coords[grid_mapping_name].attrs["gcps"] = json.dumps(geojson_gcps)
+        self._gcps = list(gcps)
         return data_obj
 
     def get_gcps(self) -> Optional[list[GroundControlPoint]]:
@@ -1249,8 +1254,10 @@ class XRasterBase:
         list of :obj:`rasterio.control.GroundControlPoint` or None
             The Ground Control Points from the dataset or None if not applicable
         """
+        if self._gcps is not None:
+            return self._gcps
         try:
-            geojson_gcps = self._obj.coords[self.grid_mapping].attrs["gcps"]
+            geojson_gcps = json.loads(self._obj.coords[self.grid_mapping].attrs["gcps"])
         except (KeyError, AttributeError):
             return None
 
@@ -1267,8 +1274,8 @@ class XRasterBase:
                 info=gcp["properties"]["info"],
             )
 
-        gcps = [_parse_gcp(gcp) for gcp in geojson_gcps["features"]]
-        return gcps
+        self._gcps = [_parse_gcp(gcp) for gcp in geojson_gcps["features"]]
+        return self._gcps
 
 
 def _convert_gcps_to_geojson(
