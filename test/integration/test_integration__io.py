@@ -222,8 +222,8 @@ def test_open_multiple_resolution():
     )
     assert isinstance(rds_list, list)
     assert len(rds_list) == 2
-    assert rds_list[0].dims == {"y": 1200, "x": 1200, "band": 1}
-    assert rds_list[1].dims == {"y": 2400, "x": 2400, "band": 1}
+    assert rds_list[0].sizes == {"y": 1200, "x": 1200, "band": 1}
+    assert rds_list[1].sizes == {"y": 2400, "x": 2400, "band": 1}
     for rds in rds_list:
         assert rds.attrs["SHORTNAME"] == "MOD09GA"
         rds.close()
@@ -1225,7 +1225,7 @@ def test_notgeoreferenced_warning(open_rasterio):
 )
 def test_nc_attr_loading(open_rasterio):
     with open_rasterio(os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")) as rds:
-        assert rds.dims == {"y": 10, "x": 10, "time": 2}
+        assert rds.sizes == {"y": 10, "x": 10, "time": 2}
         assert rds.attrs == {"coordinates": "spatial_ref"}
         assert rds.y.attrs["units"] == "metre"
         assert rds.x.attrs["units"] == "metre"
@@ -1241,7 +1241,7 @@ def test_nc_attr_loading__disable_decode_times(open_rasterio):
     with open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc"), decode_times=False
     ) as rds:
-        assert rds.dims == {"y": 10, "x": 10, "time": 2}
+        assert rds.sizes == {"y": 10, "x": 10, "time": 2}
         assert rds.attrs == {"coordinates": "spatial_ref"}
         assert rds.y.attrs["units"] == "metre"
         assert rds.x.attrs["units"] == "metre"
