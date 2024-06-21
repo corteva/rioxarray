@@ -1459,6 +1459,34 @@ def test_writing_gcps(tmp_path):
         _check_rio_gcps(darr, *gdal_gcps)
 
 
+def test_writing_gcps__to_netcdf(tmp_path):
+    """
+    Test writing gcps to a netCDF file.
+    """
+    tiffname = tmp_path / "test.tif"
+    nc_name = tmp_path / "test_written.nc"
+
+    src_gcps, crs = _create_gdal_gcps()
+
+    with rasterio.open(
+        tiffname,
+        mode="w",
+        height=800,
+        width=800,
+        count=3,
+        dtype=numpy.uint8,
+        driver="GTiff",
+    ) as source:
+        source.gcps = (src_gcps, crs)
+
+    with rioxarray.open_rasterio(tiffname) as darr:
+        darr.to_netcdf(nc_name)
+
+    with xarray.open_dataset(nc_name, decode_coords="all") as darr:
+        assert "gcps" in darr.coords["spatial_ref"].attrs
+        _check_rio_gcps(darr, src_gcps=src_gcps, crs=crs)
+
+
 def test_read_file_handle_with_dask():
     with open(
         os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"), "rb"

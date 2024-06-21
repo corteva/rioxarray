@@ -2987,7 +2987,7 @@ def _check_rio_gcps(darr, src_gcps, crs):
     assert "y" not in darr.coords
     assert darr.rio.crs == crs
     assert "gcps" in darr.spatial_ref.attrs
-    gcps = darr.spatial_ref.attrs["gcps"]
+    gcps = json.loads(darr.spatial_ref.attrs["gcps"])
     assert gcps["type"] == "FeatureCollection"
     assert len(gcps["features"]) == len(src_gcps)
     for feature, gcp in zip(gcps["features"], src_gcps):
