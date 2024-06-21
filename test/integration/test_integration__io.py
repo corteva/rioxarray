@@ -483,12 +483,16 @@ def test_utm():
             assert "y" not in rioda.coords
 
 
-def test_band_as_variable(open_rasterio, tmp_path):
+@pytest.mark.parametrize("chunks", [True, None])
+def test_band_as_variable(open_rasterio, chunks, tmp_path):
     test_raster = tmp_path / "test.tif"
 
     with create_tmp_geotiff() as (tmp_file, expected):
         with open_rasterio(
-            tmp_file, band_as_variable=True, mask_and_scale=False
+            tmp_file,
+            band_as_variable=True,
+            mask_and_scale=False,
+            chunks=chunks,
         ) as riods:
 
             def _check_raster(raster_ds):
@@ -515,7 +519,10 @@ def test_band_as_variable(open_rasterio, tmp_path):
             # test roundtrip
             riods.rio.to_raster(test_raster)
             with open_rasterio(
-                test_raster, band_as_variable=True, mask_and_scale=False
+                test_raster,
+                band_as_variable=True,
+                mask_and_scale=False,
+                chunks=chunks,
             ) as riods_round:
                 _check_raster(riods_round)
 

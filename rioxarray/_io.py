@@ -7,7 +7,6 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 """
 # pylint: disable=too-many-lines
 import contextlib
-import functools
 import importlib.metadata
 import os
 import re
@@ -145,7 +144,11 @@ class SingleBandDatasetReader:
         """
         read data for the band
         """
-        return self._riods.read(indexes=self._bidx + 1, **kwargs)
+        if numpy.isscalar(indexes):
+            indexes = self._bidx + 1
+        else:
+            indexes = [self._bidx + 1]
+        return self._riods.read(indexes=indexes, **kwargs)
 
     def tags(self, bidx=None, **kwargs):  # pylint: disable=unused-argument
         """
@@ -309,7 +312,6 @@ class RasterioArrayWrapper(BackendArray):
         riods = _ensure_warped_vrt(manager.acquire(), vrt_params)
         self.vrt_params = vrt_params
         self._shape = (riods.count, riods.height, riods.width)
-
         self._dtype = None
         self._unsigned_dtype = None
         self._fill_value = riods.nodata
@@ -898,6 +900,7 @@ def _prepare_dask(
     riods: RasterioReader,
     filename: Union[str, os.PathLike],
     chunks: Union[int, tuple, dict],
+    bidx: Optional[int] = None,
 ) -> DataArray:
     """
     Prepare the data for dask computations
@@ -924,7 +927,10 @@ def _prepare_dask(
             dtype=_rasterio_to_numpy_dtype(riods.dtypes),
             previous_chunks=tuple((c,) for c in block_shape),
         )
-    token = tokenize(filename, mtime, chunks)
+    token_filename = filename
+    if bidx is not None:
+        token_filename = f"{filename}-{bidx}"
+    token = tokenize(token_filename, mtime, chunks)
     name_prefix = f"open_rasterio-{token}"
     return result.chunk(chunks, name_prefix=name_prefix, token=token)
 
@@ -1080,10 +1086,8 @@ def open_rasterio(
     vrt_params = None
     file_opener = rasterio.open
     if isinstance(filename, SingleBandDatasetReader):
-        file_opener = functools.partial(
-            _single_band_open,
-            bidx=filename._bidx,
-        )
+        file_opener = _single_band_open
+        open_kwargs.update(bidx=filename._bidx)
         vrt_params = filename._vrt_params
     if isinstance(filename, (rasterio.io.DatasetReader, SingleBandDatasetReader)):
         filename = filename.name
@@ -1261,7 +1265,13 @@ def open_rasterio(
         result.rio.write_gcps(*riods.gcps, inplace=True)
 
     if chunks is not None:
-        result = _prepare_dask(result, riods, filename, chunks)
+        result = _prepare_dask(
+            result=result,
+            riods=riods,
+            filename=filename,
+            chunks=chunks,
+            bidx=open_kwargs.get("bidx"),
+        )
     else:
         result.encoding["preferred_chunks"] = {
             result.rio.y_dim: riods.block_shapes[0][0],
