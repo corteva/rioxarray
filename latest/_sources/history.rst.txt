@@ -1,11 +1,12 @@
 History
 =======
 
-Latest
+0.15.6
 ------
 - BUG: Raise OverflowError when nodata data type conversion is unsafe (pull #782)
 - BUG: Support writing GCPs to netCDF (issue #778)
 - BUG: Fix reading dask chunks when band_as_variable=True (issue #761)
+- REF:merge: Use merge path & rio.to_raster (pull #781)
 
 0.15.5
 ------
