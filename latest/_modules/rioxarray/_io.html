@@ -91,7 +91,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># pylint: disable=too-many-lines</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">importlib.metadata</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -229,7 +228,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        read data for the band</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">indexes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">indexes</span><span class="p">):</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_riods</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">indexes</span><span class="o">=</span><span class="n">indexes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bidx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -393,7 +396,6 @@
         <span class="n">riods</span> <span class="o">=</span> <span class="n">_ensure_warped_vrt</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">acquire</span><span class="p">(),</span> <span class="n">vrt_params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vrt_params</span> <span class="o">=</span> <span class="n">vrt_params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">riods</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unsigned_dtype</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">nodata</span>
@@ -982,6 +984,7 @@
     <span class="n">riods</span><span class="p">:</span> <span class="n">RasterioReader</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">bidx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare the data for dask computations</span>
@@ -1008,7 +1011,10 @@
             <span class="n">dtype</span><span class="o">=</span><span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">),</span>
             <span class="n">previous_chunks</span><span class="o">=</span><span class="nb">tuple</span><span class="p">((</span><span class="n">c</span><span class="p">,)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">block_shape</span><span class="p">),</span>
         <span class="p">)</span>
-    <span class="n">token</span> <span class="o">=</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mtime</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
+    <span class="n">token_filename</span> <span class="o">=</span> <span class="n">filename</span>
+    <span class="k">if</span> <span class="n">bidx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">token_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">bidx</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">token_filename</span><span class="p">,</span> <span class="n">mtime</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
     <span class="n">name_prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;open_rasterio-</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">name_prefix</span><span class="o">=</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
 
@@ -1166,10 +1172,8 @@
     <span class="n">vrt_params</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">file_opener</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">SingleBandDatasetReader</span><span class="p">):</span>
-        <span class="n">file_opener</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
-            <span class="n">_single_band_open</span><span class="p">,</span>
-            <span class="n">bidx</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">_bidx</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">file_opener</span> <span class="o">=</span> <span class="n">_single_band_open</span>
+        <span class="n">open_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bidx</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">_bidx</span><span class="p">)</span>
         <span class="n">vrt_params</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">_vrt_params</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">SingleBandDatasetReader</span><span class="p">)):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span>
@@ -1347,7 +1351,13 @@
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_gcps</span><span class="p">(</span><span class="o">*</span><span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">riods</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span>
+            <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
+            <span class="n">riods</span><span class="o">=</span><span class="n">riods</span><span class="p">,</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+            <span class="n">bidx</span><span class="o">=</span><span class="n">open_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bidx&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;preferred_chunks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">riods</span><span class="o">.</span><span class="n">block_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
