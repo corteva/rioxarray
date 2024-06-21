@@ -2893,6 +2893,14 @@ def test_grid_mapping__change(open_func):
         assert xdi.rio.grid_mapping == "final_crs"
 
 
+@pytest.mark.parametrize("dataset", [xarray.Dataset, xarray.DataArray])
+def test_grid_mapping__attrs_to_encoding(dataset):
+    xds = dataset(attrs={"grid_mapping": "wrong_spot"})
+    xds.rio.write_grid_mapping("correct_spot", inplace=True)
+    assert xds.encoding["grid_mapping"] == "correct_spot"
+    assert "grid_mapping" not in xds.attrs
+
+
 def test_grid_mapping_default():
     xarray.Dataset().rio.grid_mapping == "spatial_ref"
     xarray.DataArray().rio.grid_mapping == "spatial_ref"
