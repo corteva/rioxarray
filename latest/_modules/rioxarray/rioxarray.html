@@ -87,6 +87,7 @@
 <span class="sd">to xarray datasets/dataarrays.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># pylint: disable=too-many-lines</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Iterable</span>
@@ -340,6 +341,7 @@
 <span class="k">class</span> <span class="nc">XRasterBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the base class for the GIS extensions for xarray&quot;&quot;&quot;</span>
 
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray_obj</span>
 
@@ -375,6 +377,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">]:</span>
@@ -433,6 +436,7 @@
         <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
         <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
         <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="n">obj_copy</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span>
         <span class="k">return</span> <span class="n">obj_copy</span>
 
 <div class="viewcode-block" id="XRasterBase.set_crs">
@@ -1374,7 +1378,8 @@
             <span class="n">gcp_crs</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span>
         <span class="p">)</span>
         <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="n">_convert_gcps_to_geojson</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span>
-        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geojson_gcps</span>
+        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">geojson_gcps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data_obj</span></div>
 
 
@@ -1391,8 +1396,10 @@
 <span class="sd">        list of :obj:`rasterio.control.GroundControlPoint` or None</span>
 <span class="sd">            The Ground Control Points from the dataset or None if not applicable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">]</span>
+            <span class="n">geojson_gcps</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gcps&quot;</span><span class="p">])</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -1409,8 +1416,8 @@
                 <span class="n">info</span><span class="o">=</span><span class="n">gcp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;info&quot;</span><span class="p">],</span>
             <span class="p">)</span>
 
-        <span class="n">gcps</span> <span class="o">=</span> <span class="p">[</span><span class="n">_parse_gcp</span><span class="p">(</span><span class="n">gcp</span><span class="p">)</span> <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">geojson_gcps</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]]</span>
-        <span class="k">return</span> <span class="n">gcps</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span> <span class="o">=</span> <span class="p">[</span><span class="n">_parse_gcp</span><span class="p">(</span><span class="n">gcp</span><span class="p">)</span> <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">geojson_gcps</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcps</span></div>
 </div>
 
 
