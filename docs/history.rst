@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.15.6
 ------
 - BUG: Raise OverflowError when nodata data type conversion is unsafe (pull #782)
