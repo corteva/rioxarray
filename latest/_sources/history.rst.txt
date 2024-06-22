@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Remove grid_mapping from attrs when writing (pull #783)
 
 0.15.6
 ------
