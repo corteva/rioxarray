@@ -435,7 +435,7 @@ class XRasterBase:
                 new_attrs.pop("grid_mapping", None)
                 data_obj[var].rio.update_encoding(
                     {"grid_mapping": grid_mapping_name}, inplace=True
-                ).rio.update_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
+                ).rio.set_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
                     x_dim=x_dim, y_dim=y_dim, inplace=True
                 )
         # remove grid_mapping from attributes if it exists
@@ -444,7 +444,7 @@ class XRasterBase:
         new_attrs.pop("grid_mapping", None)
         return data_obj.rio.update_encoding(
             {"grid_mapping": grid_mapping_name}, inplace=True
-        ).rio.update_attrs(new_attrs, inplace=True)
+        ).rio.set_attrs(new_attrs, inplace=True)
 
     def write_crs(
         self,
