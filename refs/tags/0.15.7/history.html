@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History &mdash; rioxarray 0.15.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=241ed0f2"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Contributors ✨" href="authors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rioxarray
+          </a>
+              <div class="version">
+                0.15.7
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Contributors ✨</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">0.15.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">0.15.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">0.15.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">0.15.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">0.15.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">0.15.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">0.15.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">0.15.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">0.14.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">0.14.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">0.13.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">0.13.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">0.13.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14">0.13.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">0.13.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">0.12.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id17">0.12.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id18">0.12.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id19">0.12.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id20">0.12.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id21">0.11.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id22">0.11.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id23">0.11.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id24">0.10.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id25">0.10.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id26">0.10.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id27">0.10.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id28">0.9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id29">0.9.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id30">0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id31">0.7.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id32">0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id33">0.6.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id34">0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id35">0.5.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id36">0.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id37">0.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id38">0.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id39">0.4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id40">0.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id41">0.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id42">0.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id43">0.1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id44">0.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id45">0.0.31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id46">0.0.30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id47">0.0.29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id48">0.0.28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id49">0.0.27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id50">0.0.26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id51">0.0.25</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id52">0.0.24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id53">0.0.23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id54">0.0.22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id55">0.0.21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id56">0.0.20</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id57">0.0.19</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id58">0.0.18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id59">0.0.17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id60">0.0.16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id61">0.0.15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id62">0.0.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id63">0.0.13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id64">0.0.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id65">0.0.11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id66">0.0.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id67">0.0.9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id68">0.0.8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id69">0.0.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id70">0.0.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id71">0.0.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id72">0.0.4</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">History</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/history.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="history">
+<h1>History<a class="headerlink" href="#history" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>0.15.7<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Remove grid_mapping from attrs when writing (pull #783)</p></li>
+<li><p>BUG: Ensure gcp_crs exists before writing in <cite>rio.write_gcps</cite> (issue #646)</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>0.15.6<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Raise OverflowError when nodata data type conversion is unsafe (pull #782)</p></li>
+<li><p>BUG: Support writing GCPs to netCDF (issue #778)</p></li>
+<li><p>BUG: Fix reading dask chunks when band_as_variable=True (issue #761)</p></li>
+<li><p>REF:merge: Use merge path &amp; rio.to_raster (pull #781)</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>0.15.5<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG:reproject: Allow rotated rasters (issue #746)</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>0.15.4<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG:reproject_match: Remove setting spatial dims on output resampled dataset (issue #768)</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>0.15.3<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG:merge: Use <cite>rasterio.io.MemoryFile`</cite> for reading (pull #765)</p></li>
+<li><p>BUG:merge: Add simple defaults for unused payload/colormap (pull #766)</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>0.15.2<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Add decode_coords kwarg to backend entrypoint (pull #763)</p></li>
+<li><p>BUG: Avoid DeprecationWarning: xr.Dataset.drop() -&gt; xr.Dataset.drop_vars() (pull #740)</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>0.15.1<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: Support Python 3.10-3.12 (pull #723)</p></li>
+<li><p>DEP: rasterio 1.3+, pyproj 3.3+ (pull #725, #727)</p></li>
+<li><p>DEP: xarray 2022.3.0+ &amp; numpy 1.23+ (pull #728)</p></li>
+<li><p>ENH: Robust handling of GCPs without <cite>z</cite> component (issue #731)</p></li>
+</ul>
+</section>
+<section id="id8">
+<h2>0.15.0<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix setting spatial dims internally during propagation (pull #682)</p></li>
+<li><p>ENH: Pass on on-disk chunk sizes as preferred chunk sizes to the xarray backend (pull #678)</p></li>
+<li><p>MNT: add __all__ to top level module (issue #680)</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>0.14.1<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix <code class="xref py py-mod docutils literal notranslate"><span class="pre">rioxarray.merge</span></code> CRS check (pull #655)</p></li>
+<li><p>BUG: Remove tags with metadata added by rasterio in <a class="reference internal" href="rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> (issue #666)</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>0.14.0<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: Drop Python 3.8 support (issue #582)</p></li>
+<li><p>DEP: pin rasterio&gt;=1.2 (pull #642)</p></li>
+<li><p>BUG: Fix WarpedVRT in <a class="reference internal" href="rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> when band_as_variable=True (issue #644)</p></li>
+<li><p>BUG: Fix usage of <cite>encode_cf_variable</cite> in <cite>rio.to_raster</cite> (pull #652)</p></li>
+</ul>
+</section>
+<section id="id11">
+<h2>0.13.4<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: pin numpy&gt;=1.21 (pull #636)</p></li>
+</ul>
+</section>
+<section id="id12">
+<h2>0.13.3<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Handle data type error in <cite>rio.reproject</cite> (issue #618)</p></li>
+</ul>
+</section>
+<section id="id13">
+<h2>0.13.2<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG:dataset: Fix writing tags for bands (issue #615)</p></li>
+<li><p>BUG:dataset: prevent overwriting long_name attribute (pull #616)</p></li>
+</ul>
+</section>
+<section id="id14">
+<h2>0.13.1<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix closing files manually (pull #607)</p></li>
+<li><p>BUG: Add GDAL 3.6 driver auto-select fix (pull #606)</p></li>
+</ul>
+</section>
+<section id="id15">
+<h2>0.13.0<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added band_as_variable option to open_rasterio (pull #600)</p></li>
+</ul>
+</section>
+<section id="id16">
+<h2>0.12.4<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added band_as_variable option to open_rasterio (issue #296)</p></li>
+<li><p>BUG: Pass warp_extras dictionary to raster.vrt.WarpedVRT (issue #598)</p></li>
+</ul>
+</section>
+<section id="id17">
+<h2>0.12.3<a class="headerlink" href="#id17" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Handle CF CRS export errors in <cite>rio.write_crs</cite> (discussion #591)</p></li>
+</ul>
+</section>
+<section id="id18">
+<h2>0.12.2<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix <cite>mask_and_scale</cite> data load after <cite>.sel</cite> (issue #580)</p></li>
+</ul>
+</section>
+<section id="id19">
+<h2>0.12.1<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Handle <cite>_Unsigned</cite> and load in all attributes (pull #575)</p></li>
+</ul>
+</section>
+<section id="id20">
+<h2>0.12.0<a class="headerlink" href="#id20" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Allow passing in bounds of different CRS in <cite>rio.clip_box</cite> (pull #563)</p></li>
+</ul>
+</section>
+<section id="id21">
+<h2>0.11.2<a class="headerlink" href="#id21" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix reading file handle with dask (issue #550)</p></li>
+<li><p>BUG: Fix reading cint16 files with dask (issue #542)</p></li>
+<li><p>BUG: Ensure <cite>rio.bounds</cite> ordered correctly (issue #545)</p></li>
+<li><p>BUG: Allow reading from <cite>io.BytesIO</cite> (issue #549)</p></li>
+</ul>
+</section>
+<section id="id22">
+<h2>0.11.1<a class="headerlink" href="#id22" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix WarpedVRT param cache in <a class="reference internal" href="rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> (issue #515)</p></li>
+<li><p>BUG: Always generate coordinates in <cite>rio.reproject</cite> when GCPS|RPCS present (issue #517)</p></li>
+</ul>
+</section>
+<section id="id23">
+<h2>0.11.0<a class="headerlink" href="#id23" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>TYPE: Add more type hints (issue #373)</p></li>
+<li><p>ENH: Add additional GDAL information to <a class="reference internal" href="rioxarray.html#rioxarray.show_versions" title="rioxarray.show_versions"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.show_versions()</span></code></a> (pull #513)</p></li>
+</ul>
+</section>
+<section id="id24">
+<h2>0.10.3<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Remove xarray crs attribute in rio.write_crs (issue #488)</p></li>
+</ul>
+</section>
+<section id="id25">
+<h2>0.10.2<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Lazy load colormap through _manager.acquire() in merge (issue #479)</p></li>
+</ul>
+</section>
+<section id="id26">
+<h2>0.10.1<a class="headerlink" href="#id26" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: pin rasterio&gt;=1.1.1 (pull #471)</p></li>
+<li><p>BUG: Corrected bounds and transform args to float (pull #475)</p></li>
+</ul>
+</section>
+<section id="id27">
+<h2>0.10.0<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: Drop Python 3.7 support (issue #451)</p></li>
+<li><p>ENH: Add GCPs reading and writing (issue #376)</p></li>
+</ul>
+</section>
+<section id="id28">
+<h2>0.9.1<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Force coordinates to be exactly the same in <cite>rio.reproject_match</cite> (issue #298)</p></li>
+</ul>
+</section>
+<section id="id29">
+<h2>0.9.0<a class="headerlink" href="#id29" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Allow additional kwargs to pass from reproject_match() -&gt; reproject() (pull #436)</p></li>
+</ul>
+</section>
+<section id="id30">
+<h2>0.8.0<a class="headerlink" href="#id30" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: Make scipy an optional dependency (issue #413)</p></li>
+<li><p>BUG: Return cached transform when axis data missing (pull #419)</p></li>
+<li><p>BUG: Fix negative indexes in <cite>rio.isel_window</cite> (issue #421)</p></li>
+</ul>
+</section>
+<section id="id31">
+<h2>0.7.1<a class="headerlink" href="#id31" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Handle transforms with rotation (pull #401)</p></li>
+</ul>
+</section>
+<section id="id32">
+<h2>0.7.0<a class="headerlink" href="#id32" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: <cite>rio.clip</cite> and <cite>rio.clip_box</cite> skip non-geospatial arrays in datasets when clipping (pull #392)</p></li>
+<li><p>ENH: Add option for users to skip variables without spatial dimensions (pull #395)</p></li>
+</ul>
+</section>
+<section id="id33">
+<h2>0.6.1<a class="headerlink" href="#id33" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix indexing error when <cite>mask_and_scale=True</cite> was combined with band dim chunking (issue #387, pull #388)</p></li>
+</ul>
+</section>
+<section id="id34">
+<h2>0.6.0<a class="headerlink" href="#id34" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Add pad option to <cite>rio.isel_window</cite> (issue #381; pull #383)</p></li>
+<li><p>BUG: Fix negative start in row or col window offsets in <cite>rio.isel_window</cite> (issue #381; pull #383)</p></li>
+</ul>
+</section>
+<section id="id35">
+<h2>0.5.0<a class="headerlink" href="#id35" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Allow passing in kwargs to <cite>rio.reproject</cite> (issue #369; pull #370)</p></li>
+<li><p>ENH: Allow nodata override and provide default nodata based on dtype in <cite>rio.reproject</cite> (pull #370)</p></li>
+<li><p>ENH: Add support for passing in gcps to rio.reproject (issue #339; pull #370)</p></li>
+<li><p>BUG: Remove duplicate acquire in open_rasterio (pull #364)</p></li>
+<li><p>BUG: Fix exporting dataset to raster with non-standard dimensions (issue #372)</p></li>
+</ul>
+</section>
+<section id="id36">
+<h2>0.4.3<a class="headerlink" href="#id36" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: support GDAL CInt16, rasterio complex_int16 (pull #353)</p></li>
+<li><p>TST: Fix merge tests for rasterio 1.2.5+ (issue #358)</p></li>
+</ul>
+</section>
+<section id="id37">
+<h2>0.4.2<a class="headerlink" href="#id37" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Improve WarpedVRT support for gcps (pull #351)</p></li>
+</ul>
+</section>
+<section id="id38">
+<h2>0.4.1<a class="headerlink" href="#id38" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: pass kwargs with lock=False (issue #344)</p></li>
+<li><p>BUG: Close file handle with lock=False (pull #346)</p></li>
+</ul>
+</section>
+<section id="id39">
+<h2>0.4.0<a class="headerlink" href="#id39" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>DEP: Python 3.7+ (issue #215)</p></li>
+<li><p>DEP: xarray 0.17+ (needed for issue #282)</p></li>
+<li><p>REF: Store <cite>grid_mapping</cite> in <cite>encoding</cite> instead of <cite>attrs</cite> (issue #282)</p></li>
+<li><p>ENH: enable <cite>engine=”rasterio”</cite> via xarray backend API (issue #197 pull #281)</p></li>
+<li><p>ENH: Generate 2D coordinates for non-rectilinear sources (issue #290)</p></li>
+<li><p>ENH: Add <cite>encoded</cite> kwarg to <cite>rio.write_nodata</cite> (discussions #313)</p></li>
+<li><p>ENH: Added <cite>decode_times</cite> and <cite>decode_timedelta</cite> kwargs to <cite>rioxarray.open_rasterio</cite> (issue #316)</p></li>
+<li><p>BUG: Use float32 for smaller dtypes when masking (discussions #302)</p></li>
+<li><p>BUG: Return correct transform in <cite>rio.transform</cite> with non-rectilinear transform (discussions #280)</p></li>
+<li><p>BUG: Update to handle WindowError in rasterio 1.2.2 (issue #286)</p></li>
+<li><p>BUG: Don’t generate x,y coords in <cite>rio</cite> methods if not previously there (pull #294)</p></li>
+<li><p>BUG: Preserve original data type for writing to disk (issue #305)</p></li>
+<li><p>BUG: handle lock=True in open_rasterio (issue #273)</p></li>
+</ul>
+</section>
+<section id="id40">
+<h2>0.3.1<a class="headerlink" href="#id40" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Compatibility changes with xarray 0.17 (issue #254)</p></li>
+<li><p>BUG: Raise informative error in interpolate_na if missing nodata (#250)</p></li>
+</ul>
+</section>
+<section id="id41">
+<h2>0.3.0<a class="headerlink" href="#id41" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>REF: Reduce pyproj.CRS internal usage for speed (issue #241)</p></li>
+<li><p>ENH: Add <cite>rioxarray.set_options</cite> to disable exporting CRS CF grid mapping (issue #241)</p></li>
+<li><p>BUG: Handle merging 2D DataArray (discussion #244)</p></li>
+</ul>
+</section>
+<section id="id42">
+<h2>0.2.0<a class="headerlink" href="#id42" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added <cite>rio.estimate_utm_crs</cite> (issue #181)</p></li>
+<li><p>ENH: Add support for merging datasets with different CRS (issue #173)</p></li>
+<li><p>ENH: Add support for using dask in <cite>rio.to_raster</cite> (issue #9, pull #219, pull #223)</p></li>
+<li><p>ENH: Use the list version of <cite>transform_geom</cite> with rasterio 1.2+ (issue #180)</p></li>
+<li><p>ENH: Support driver autodetection with rasterio 1.2+ (issue #180)</p></li>
+<li><p>ENH: Allow multithreaded, lockless reads with <cite>rioxarray.open_rasterio</cite> (issue #214)</p></li>
+<li><p>ENH: Add support to clip from disk (issue #115)</p></li>
+<li><p>BUG: Allow <cite>rio.write_crs</cite> when spatial dimensions not found (pull #186)</p></li>
+<li><p>BUG: Update to support rasterio 1.2+ merge (issue #180)</p></li>
+</ul>
+</section>
+<section id="id43">
+<h2>0.1.1<a class="headerlink" href="#id43" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Check all CRS are the same in the dataset in crs() method</p></li>
+</ul>
+</section>
+<section id="id44">
+<h2>0.1.0<a class="headerlink" href="#id44" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Ensure transform correct in rio.clip without coords (pull #165)</p></li>
+<li><p>BUG: Ensure the nodata value matches the dtype (pull #166)</p></li>
+<li><p>Raise deprecation exception in add_spatial_ref and add_xy_grid_meta (pull #168)</p></li>
+</ul>
+</section>
+<section id="id45">
+<h2>0.0.31<a class="headerlink" href="#id45" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Deprecate add_spatial_ref and fix warning for add_xy_grid_meta (pull #158)</p></li>
+</ul>
+</section>
+<section id="id46">
+<h2>0.0.30<a class="headerlink" href="#id46" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix assigning fill value in <cite>rio.pad_box</cite> (pull #140)</p></li>
+<li><p>ENH: Add <cite>rio.write_transform</cite> to store cache in GDAL location (issue #129 &amp; #139)</p></li>
+<li><p>ENH: Use rasterio windows for <cite>rio.clip_box</cite> (issue #142)</p></li>
+<li><p>BUG: Add support for negative indexes in rio.isel_window (pull #145)</p></li>
+<li><p>BUG: Write transform based on window in rio.isel_window (pull #145)</p></li>
+<li><p>ENH: Add <cite>rio.count</cite>, <cite>rio.slice_xy()</cite>, <cite>rio.bounds()</cite>, <cite>rio.resolution()</cite>, <cite>rio.transform_bounds()</cite> to Dataset level</p></li>
+<li><p>ENH: Add <cite>rio.write_coordinate_system()</cite> (issue #147)</p></li>
+<li><p>ENH: Search CF coordinate metadata to find coordinates (issue #147)</p></li>
+<li><p>ENH: Default <cite>rio.clip</cite> to assume geometry has CRS of dataset (pull #150)</p></li>
+<li><p>ENH: Add <cite>rio.grid_mapping</cite> and <cite>rio.write_grid_mapping</cite> &amp; preserve original grid mapping (pull #151)</p></li>
+</ul>
+</section>
+<section id="id47">
+<h2>0.0.29<a class="headerlink" href="#id47" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Remove unnecessary memory copies in reproject method (pull #136)</p></li>
+<li><p>BUG: Fix order of axis in <cite>rio.isel_window</cite> (pull #133)</p></li>
+<li><p>BUG: Allow clipping with disjoint geometries (issue #132)</p></li>
+<li><p>BUG: Remove automatically setting tiled=True for windowed writing (pull #134)</p></li>
+<li><p>ENH: Add <cite>rio.pad_box</cite> (pull #138)</p></li>
+</ul>
+</section>
+<section id="id48">
+<h2>0.0.28<a class="headerlink" href="#id48" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>rio.reproject: change input kwarg dst_affine_width_height -&gt; shape &amp; transform (#125)</p></li>
+<li><p>ENH: Use pyproj.CRS to read/write CF parameters (issue #124)</p></li>
+</ul>
+</section>
+<section id="id49">
+<h2>0.0.27<a class="headerlink" href="#id49" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added optional <cite>shape</cite> argument to <cite>rio.reproject</cite> (pull #116)</p></li>
+<li><p>Fix <code class="docutils literal notranslate"><span class="pre">RasterioDeprecationWarning</span></code> (pull #117)</p></li>
+<li><p>BUG: Make rio.shape order same as rasterio dataset shape (height, width) (pull #121)</p></li>
+<li><p>Fix open_rasterio() for WarpedVRT with specified src_crs (pydata/xarray/pull/4104 &amp; pull #120)</p></li>
+<li><p>BUG: Use internal reprojection as engine for resampling window in merge (pull #123)</p></li>
+</ul>
+</section>
+<section id="id50">
+<h2>0.0.26<a class="headerlink" href="#id50" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added <a class="reference internal" href="rioxarray.html#rioxarray.show_versions" title="rioxarray.show_versions"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.show_versions()</span></code></a> (issue #106)</p></li>
+</ul>
+</section>
+<section id="id51">
+<h2>0.0.25<a class="headerlink" href="#id51" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Use recalc=True when using transform internally &amp; ensure stable when coordinates unavailable. (issue #97)</p></li>
+</ul>
+</section>
+<section id="id52">
+<h2>0.0.24<a class="headerlink" href="#id52" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Add variable names to error messages for clarity (pull #99)</p></li>
+<li><p>BUG: Use assign_coords in _decode_datetime_cf (issue #101)</p></li>
+</ul>
+</section>
+<section id="id53">
+<h2>0.0.23<a class="headerlink" href="#id53" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: Fix ‘rio.set_spatial_dims’ so information saved with ‘rio’ accesors (issue #94)</p></li>
+<li><p>ENH: Make ‘rio.isel_window’ available for datasets (pull #95)</p></li>
+</ul>
+</section>
+<section id="id54">
+<h2>0.0.22<a class="headerlink" href="#id54" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Use pyproj.CRS internally to manage GDAL 2/3 transition (issue #92)</p></li>
+<li><p>ENH: Add MissingCRS exceptions for ‘rio.clip’ and ‘rio.reproject’ (pull #93)</p></li>
+</ul>
+</section>
+<section id="id55">
+<h2>0.0.21<a class="headerlink" href="#id55" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ENH: Added to_raster method for Datasets (issue #76)</p></li>
+</ul>
+</section>
+<section id="id56">
+<h2>0.0.20<a class="headerlink" href="#id56" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BUG: ensure band_key is list when iterating over bands for mask and scale (pull #87)</p></li>
+</ul>
+</section>
+<section id="id57">
+<h2>0.0.19<a class="headerlink" href="#id57" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add support for writing scales &amp; offsets to raster (pull #79)</p></li>
+<li><p>Don’t write standard raster metadata to raster tags (issue #78)</p></li>
+</ul>
+</section>
+<section id="id58">
+<h2>0.0.18<a class="headerlink" href="#id58" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fixed windowed writing to require tiled output raster (pull #66)</p></li>
+<li><p>Write data array attributes using <cite>rio.to_raster</cite> (issue #64)</p></li>
+<li><p>Write variable name to descriptions if possible in <cite>rio.to_raster</cite> (issue #64)</p></li>
+<li><p>Add <cite>mask_and_scale</cite> option to <cite>rioxarray.open_rasterio()</cite> (issue #67)</p></li>
+<li><p>Hide NotGeoreferencedWarning warning when subdatasets are present using open_rasterio (issue #65)</p></li>
+<li><p>Add support for loading in 1D variables in <cite>xarray.open_rasterio()</cite> (issue #43)</p></li>
+<li><p>Load in netCDF metadata on the variable level (pull #73)</p></li>
+<li><p>Add rioxarray.merge module (issue #46)</p></li>
+</ul>
+</section>
+<section id="id59">
+<h2>0.0.17<a class="headerlink" href="#id59" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Renamed <cite>descriptions</cite> to <cite>long_name</cite> when opening with <cite>open_rasterio()</cite> (pull #63)</p></li>
+<li><p>Make <cite>units</cite> &amp; <cite>long_name</cite> scalar if they exist in rasterio attributes (pull #63)</p></li>
+</ul>
+</section>
+<section id="id60">
+<h2>0.0.16<a class="headerlink" href="#id60" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add support for netcdf/hdf groups with different shapes (pull #62)</p></li>
+</ul>
+</section>
+<section id="id61">
+<h2>0.0.15<a class="headerlink" href="#id61" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Added <cite>variable</cite> and <cite>group</cite> kwargs to <cite>rioxarray.open_rasterio()</cite> to allow filtering of subdatasets (pull #57)</p></li>
+<li><p>Added <cite>default_name</cite> kwarg to <cite>rioxarray.open_rasterio()</cite> for backup when the original does not exist (pull #59)</p></li>
+<li><p>Added <cite>recalc_transform</cite> kwarg to <cite>rio.to_raster()</cite> (pull #56)</p></li>
+</ul>
+</section>
+<section id="id62">
+<h2>0.0.14<a class="headerlink" href="#id62" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Added <cite>windowed</cite> kwarg to <cite>rio.to_raster()</cite> to write to raster using windowed writing (pull #54)</p></li>
+<li><p>Added add <cite>rio.isel_window()</cite> to allow selection using a rasterio.windows.Window (pull #54)</p></li>
+</ul>
+</section>
+<section id="id63">
+<h2>0.0.13<a class="headerlink" href="#id63" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Improve CRS searching for xarray.Dataset &amp; use default grid mapping name (pull #51)</p></li>
+</ul>
+</section>
+<section id="id64">
+<h2>0.0.12<a class="headerlink" href="#id64" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use <cite>xarray.open_rasterio()</cite> for <cite>rioxarray.open_rasterio()</cite> with xarray&lt;0.12.3 (pull #40)</p></li>
+</ul>
+</section>
+<section id="id65">
+<h2>0.0.11<a class="headerlink" href="#id65" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Added <cite>open_kwargs</cite> to pass into <cite>rasterio.open()</cite> when using <cite>rioxarray.open_rasterio()</cite> (pull #48)</p></li>
+<li><p>Added example opening Cloud Optimized GeoTiff (issue #45)</p></li>
+</ul>
+</section>
+<section id="id66">
+<h2>0.0.10<a class="headerlink" href="#id66" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add support for opening netcdf/hdf files with <cite>rioxarray.open_rasterio</cite> (issue #32)</p></li>
+<li><p>Added support for custom CRS with wkt attribute for datacube CRS support (issue #35)</p></li>
+<li><p>Added <cite>rio.set_nodata()</cite>, <cite>rio.write_nodata()</cite>, <cite>rio.set_attrs()</cite>, <cite>rio.update_attrs()</cite> (issue #37)</p></li>
+</ul>
+</section>
+<section id="id67">
+<h2>0.0.9<a class="headerlink" href="#id67" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add <cite>rioxarray.open_rasterio</cite> (issue #7)</p></li>
+</ul>
+</section>
+<section id="id68">
+<h2>0.0.8<a class="headerlink" href="#id68" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fix setting nodata in _add_attrs_proj (pull #30)</p></li>
+</ul>
+</section>
+<section id="id69">
+<h2>0.0.7<a class="headerlink" href="#id69" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add option to do an inverted clip (pull #29)</p></li>
+</ul>
+</section>
+<section id="id70">
+<h2>0.0.6<a class="headerlink" href="#id70" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Add support for scalar coordinates in reproject (issue #15)</p></li>
+<li><p>Updated writing encoding for FutureWarning (issue #18)</p></li>
+<li><p>Use input raster profile for defaults to write output raster profile if opened with <cite>xarray.open_rasterio</cite> (issue #19)</p></li>
+<li><p>Preserve None nodata if opened with <cite>xarray.open_rasterio</cite> (issue #20)</p></li>
+<li><p>Added <cite>drop</cite> argument for <cite>clip()</cite> (issue #25)</p></li>
+<li><p>Fix order of <cite>CRS</cite> for reprojecting geometries in <cite>clip()</cite> (pull #24)</p></li>
+<li><p>Added <cite>set_spatial_dims()</cite> method for datasets when dimensions not found (issue #27)</p></li>
+</ul>
+</section>
+<section id="id71">
+<h2>0.0.5<a class="headerlink" href="#id71" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Find nodata and nodatavals in ‘nodata’ property (pull #12)</p></li>
+<li><p>Added ‘encoded_nodata’ property to DataArray (pull #12)</p></li>
+<li><p>Write the raster with encoded_nodata instead of NaN for nodata (pull #12)</p></li>
+<li><p>Added methods to set and write CRS (issue #5)</p></li>
+</ul>
+</section>
+<section id="id72">
+<h2>0.0.4<a class="headerlink" href="#id72" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Added ability to export data array to raster (pull #8)</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="authors.html" class="btn btn-neutral float-left" title="Contributors ✨" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2023, Corteva Agriscience™.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
