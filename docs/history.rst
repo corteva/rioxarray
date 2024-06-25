@@ -1,10 +1,10 @@
 History
 =======
 
-Latest
+0.15.7
 ------
 - BUG: Remove grid_mapping from attrs when writing (pull #783)
-- BUG: Ensure gcp_crs exists before writing in :func:`rioxarray.write_gcps` (issue #646)
+- BUG: Ensure gcp_crs exists before writing in `rio.write_gcps` (issue #646)
 
 0.15.6
 ------
