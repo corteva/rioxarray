@@ -2,6 +2,7 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
+
 # pylint: disable=too-many-lines
 import json
 import math
@@ -375,6 +376,13 @@ class XRasterBase:
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Dataset with crs attribute.
         """
+        warnings.warn(
+            "It is recommended to use `rio.write_crs()` instead. `rio.set_crs() will likely"
+            "be removed in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         crs = crs_from_user_input(input_crs)
         obj = self._get_obj(inplace=inplace)
         obj.rio._crs = crs
