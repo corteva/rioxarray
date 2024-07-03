@@ -78,9 +78,9 @@ Using python::
     $ python -m venv venv
     $ . venv/bin/activate
 
-4. Install your local copy into a virtualenv.
+4. Install your local copy into a virtualenv::
 
-    $ python -m pip install -e .[all]
+    $ python -m pip install -e ".[all]"
     $ python -m pip install -r requirements/dev.txt
 
 5. Setup pre-commit hooks::
