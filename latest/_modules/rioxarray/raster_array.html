@@ -819,10 +819,12 @@
         <span class="n">auto_expand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">auto_expand_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_one_dimensional_raster</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clip the :obj:`xarray.DataArray` by a bounding box.</span>
 
 <span class="sd">        .. versionadded:: 0.12 crs</span>
+<span class="sd">        .. versionadded:: 0.16 allow_one_dimensional_raster</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -842,16 +844,19 @@
 <span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
 <span class="sd">            The CRS of the bounding box. Default is to assume it is the same</span>
 <span class="sd">            as the dataset.</span>
+<span class="sd">        allow_one_dimensional_raster: bool, optional</span>
+<span class="sd">            If True, allow clipping to/from a one dimensional raster.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        xarray.DataArray:</span>
 <span class="sd">            The clipped object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_one_dimensional_raster</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
                 <span class="s2">&quot;At least one of the raster x,y coordinates has only one point.&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;Set allow_one_dimensional_raster=True to disable this error.&quot;</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -925,11 +930,14 @@
                 <span class="k">raise</span> <span class="n">NoDataInBounds</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No data found in bounds.</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_one_dimensional_raster</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cl_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">height</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">):</span>
                 <span class="k">raise</span> <span class="n">OneDimensionalRaster</span><span class="p">(</span>
                     <span class="s2">&quot;At least one of the clipped raster x,y coordinates&quot;</span>
                     <span class="s2">&quot; has only one point.&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Set allow_one_dimensional_raster=True to disable this error.&quot;</span>
                 <span class="p">)</span>
 
         <span class="c1"># make sure correct attributes preserved &amp; projection added</span>

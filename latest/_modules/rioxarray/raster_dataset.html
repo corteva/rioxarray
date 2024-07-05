@@ -353,12 +353,14 @@
         <span class="n">auto_expand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">auto_expand_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_one_dimensional_raster</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clip the :class:`xarray.Dataset` by a bounding box in dimensions &#39;x&#39;/&#39;y&#39;.</span>
 
 <span class="sd">        .. warning:: Clips variables that have dimensions &#39;x&#39;/&#39;y&#39;. Others are appended as is.</span>
 
 <span class="sd">        .. versionadded:: 0.12 crs</span>
+<span class="sd">        .. versionadded:: 0.16 allow_one_dimensional_raster</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -378,6 +380,8 @@
 <span class="sd">        crs: :obj:`rasterio.crs.CRS`, optional</span>
 <span class="sd">            The CRS of the bounding box. Default is to assume it is the same</span>
 <span class="sd">            as the dataset.</span>
+<span class="sd">        allow_one_dimensional_raster: bool, optional</span>
+<span class="sd">            If True, allow clipping to/from a one dimensional raster.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -399,6 +403,7 @@
                         <span class="n">auto_expand</span><span class="o">=</span><span class="n">auto_expand</span><span class="p">,</span>
                         <span class="n">auto_expand_limit</span><span class="o">=</span><span class="n">auto_expand_limit</span><span class="p">,</span>
                         <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+                        <span class="n">allow_one_dimensional_raster</span><span class="o">=</span><span class="n">allow_one_dimensional_raster</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
