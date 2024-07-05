@@ -256,12 +256,14 @@ class RasterDataset(XRasterBase):
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
         crs: Optional[Any] = None,
+        allow_one_dimensional_raster: bool = False,
     ) -> xarray.Dataset:
         """Clip the :class:`xarray.Dataset` by a bounding box in dimensions 'x'/'y'.
 
         .. warning:: Clips variables that have dimensions 'x'/'y'. Others are appended as is.
 
         .. versionadded:: 0.12 crs
+        .. versionadded:: 0.16 allow_one_dimensional_raster
 
         Parameters
         ----------
@@ -281,6 +283,8 @@ class RasterDataset(XRasterBase):
         crs: :obj:`rasterio.crs.CRS`, optional
             The CRS of the bounding box. Default is to assume it is the same
             as the dataset.
+        allow_one_dimensional_raster: bool, optional
+            If True, allow clipping to/from a one dimensional raster.
 
         Returns
         -------
@@ -302,6 +306,7 @@ class RasterDataset(XRasterBase):
                         auto_expand=auto_expand,
                         auto_expand_limit=auto_expand_limit,
                         crs=crs,
+                        allow_one_dimensional_raster=allow_one_dimensional_raster,
                     )
                 )
             except MissingSpatialDimensionError:

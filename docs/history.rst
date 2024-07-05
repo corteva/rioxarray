@@ -1,8 +1,9 @@
 History
 =======
 
-Latest
+0.16.0
 ------
+- ENH: Add `allow_one_dimensional_raster` option to `rio.clip_box` (issue #708)
 
 0.15.7
 ------

@@ -418,6 +418,27 @@ def test_clip_box__one_dimension_error(modis_clip):
             )
 
 
+def test_clip_box__one_dimension_error__allowed(modis_clip):
+    with modis_clip["open"](modis_clip["input"]) as xdi:
+        # test after raster clipped
+        assert xdi.rio.clip_box(
+            minx=-7272735.53951584,  # xdi.x[5].values
+            miny=5048834.500182299,  # xdi.y[5].values
+            maxx=-7272735.53951584,  # xdi.x[5].values
+            maxy=5048834.500182299,  # xdi.y[5].values
+            allow_one_dimensional_raster=True,
+        ).rio.shape == (1, 1)
+        # test before raster clipped
+        if not isinstance(modis_clip["open"], partial):
+            assert xdi.isel(x=slice(5, 6), y=slice(5, 6)).rio.clip_box(
+                minx=-7272735.53951584,  # xdi.x[5].values
+                miny=5048371.187465771,  # xdi.y[7].values
+                maxx=-7272272.226799311,  # xdi.x[7].values
+                maxy=5048834.500182299,  # xdi.y[5].values
+                allow_one_dimensional_raster=True,
+            ).rio.shape == (1, 1)
+
+
 def test_clip_box__nodata_in_bounds():
     with rioxarray.open_rasterio(
         os.path.join(TEST_INPUT_DATA_DIR, "clip_bbox__out_of_bounds.tif")

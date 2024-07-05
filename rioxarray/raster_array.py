@@ -713,10 +713,12 @@ class RasterArray(XRasterBase):
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
         crs: Optional[Any] = None,
+        allow_one_dimensional_raster: bool = False,
     ) -> xarray.DataArray:
         """Clip the :obj:`xarray.DataArray` by a bounding box.
 
         .. versionadded:: 0.12 crs
+        .. versionadded:: 0.16 allow_one_dimensional_raster
 
         Parameters
         ----------
@@ -736,16 +738,19 @@ class RasterArray(XRasterBase):
         crs: :obj:`rasterio.crs.CRS`, optional
             The CRS of the bounding box. Default is to assume it is the same
             as the dataset.
+        allow_one_dimensional_raster: bool, optional
+            If True, allow clipping to/from a one dimensional raster.
 
         Returns
         -------
         xarray.DataArray:
             The clipped object.
         """
-        if self.width == 1 or self.height == 1:
+        if not allow_one_dimensional_raster and (self.width == 1 or self.height == 1):
             raise OneDimensionalRaster(
                 "At least one of the raster x,y coordinates has only one point."
-                f"{_get_data_var_message(self._obj)}"
+                f"{_get_data_var_message(self._obj)}. "
+                "Set allow_one_dimensional_raster=True to disable this error."
             )
 
         if crs is not None and self.crs is None:
@@ -819,11 +824,14 @@ class RasterArray(XRasterBase):
                 raise NoDataInBounds(
                     f"No data found in bounds.{_get_data_var_message(self._obj)}"
                 )
-            if cl_array.rio.width == 1 or cl_array.rio.height == 1:
+            if not allow_one_dimensional_raster and (
+                cl_array.rio.width == 1 or cl_array.rio.height == 1
+            ):
                 raise OneDimensionalRaster(
                     "At least one of the clipped raster x,y coordinates"
                     " has only one point."
-                    f"{_get_data_var_message(self._obj)}"
+                    f"{_get_data_var_message(self._obj)}. "
+                    "Set allow_one_dimensional_raster=True to disable this error."
                 )
 
         # make sure correct attributes preserved & projection added
