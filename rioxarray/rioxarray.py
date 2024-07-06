@@ -374,7 +374,7 @@ class XRasterBase:
 
         Returns
         -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
             Dataset with crs attribute.
         """
         warnings.warn(
@@ -402,7 +402,7 @@ class XRasterBase:
 
         Returns
         -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+        xarray.Dataset | xarray.DataArray
             Dataset with crs attribute.
         """
         crs = crs_from_user_input(input_crs)
