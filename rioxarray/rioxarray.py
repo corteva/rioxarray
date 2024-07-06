@@ -380,7 +380,7 @@ class XRasterBase:
         warnings.warn(
             "It is recommended to use `rio.write_crs()` instead. `rio.set_crs() will likely"
             "be removed in a future release.",
-            DeprecationWarning,
+            FutureWarning,
             stacklevel=2,
         )
 
