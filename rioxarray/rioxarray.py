@@ -361,7 +361,8 @@ class XRasterBase:
         Set the CRS value for the Dataset/DataArray without modifying
         the dataset/data array.
 
-        DeprecationWarning: It is recommended to use `rio.write_crs()` instead. This
+        .. deprecated:: 0.15.8
+            It is recommended to use `rio.write_crs()` instead. This
         method will likely be removed in a future release.
 
         Parameters
