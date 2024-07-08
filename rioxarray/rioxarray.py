@@ -378,7 +378,7 @@ class XRasterBase:
             Dataset with crs attribute.
         """
         warnings.warn(
-            "It is recommended to use `rio.write_crs()` instead. `rio.set_crs() will likely"
+            "It is recommended to use 'rio.write_crs()' instead. 'rio.set_crs()' will likely"
             "be removed in a future release.",
             FutureWarning,
             stacklevel=2,
