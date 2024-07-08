@@ -60,6 +60,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         <td align="center"><a href="https://github.com/xaviernogueira"><img src="https://avatars.githubusercontent.com/u/58796351?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xavier Nogueira</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/issues?q=author%3Axaviernogueira" title="Bug reports">🐛</a></td>
         <td align="center"><a href="https://github.com/valanm22"><img src="https://avatars.githubusercontent.com/u/84893551?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Valan Baptist Mathuranayagam</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=valanm22" title="Documentation">📖</a></td>
         <td align="center"><a href="https://github.com/peterm790"><img src="https://avatars.githubusercontent.com/u/52179978?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Marsh</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=peterm790" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=peterm790" title="Tests">⚠️</a></td>
+        <td align="center"><a href="https://github.com/dluks"><img src="https://avatars.githubusercontent.com/u/4911680?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daniel Lusk</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=dluks" title="Code">💻</a> <a href="https://github.com/corteva/rioxarray/commits?author=dluks" title="Documentation">📖</a></td>
       </tr>
     </table>
 

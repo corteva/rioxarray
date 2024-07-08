@@ -398,6 +398,16 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "dluks",
+      "name": "Daniel Lusk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4911680?v=4",
+      "profile": "https://github.com/dluks",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
