@@ -1980,12 +1980,14 @@ def test_crs_setter():
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
     )
     assert test_da.rio.crs is None
-    out_ds = test_da.rio.set_crs(4326)
+    with pytest.warns(FutureWarning):
+        out_ds = test_da.rio.set_crs(4326)
     assert test_da.rio.crs.to_epsg() == 4326
     assert out_ds.rio.crs.to_epsg() == 4326
     test_ds = test_da.to_dataset(name="test")
     assert test_ds.rio.crs is None
-    out_ds = test_ds.rio.set_crs(4326)
+    with pytest.warns(FutureWarning):
+        out_ds = test_ds.rio.set_crs(4326)
     assert test_ds.rio.crs.to_epsg() == 4326
     assert out_ds.rio.crs.to_epsg() == 4326
 
@@ -1997,12 +1999,14 @@ def test_crs_setter__copy():
         coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
     )
     assert test_da.rio.crs is None
-    out_ds = test_da.rio.set_crs(4326, inplace=False)
+    with pytest.warns(FutureWarning):
+        out_ds = test_da.rio.set_crs(4326, inplace=False)
     assert test_da.rio.crs is None
     assert out_ds.rio.crs.to_epsg() == 4326
     test_ds = test_da.to_dataset(name="test")
     assert test_ds.rio.crs is None
-    out_ds = test_ds.rio.set_crs(4326, inplace=False)
+    with pytest.warns(FutureWarning):
+        out_ds = test_ds.rio.set_crs(4326, inplace=False)
     assert test_ds.rio.crs is None
     assert out_ds.rio.crs.to_epsg() == 4326
 
