@@ -2,6 +2,7 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
+
 # pylint: disable=too-many-lines
 import json
 import math
@@ -305,7 +306,7 @@ class XRasterBase:
         # pyproj CRS if possible for performance
         for crs_attr in ("spatial_ref", "crs_wkt"):
             try:
-                self.set_crs(
+                self._set_crs(
                     self._obj.coords[self.grid_mapping].attrs[crs_attr],
                     inplace=True,
                 )
@@ -315,14 +316,14 @@ class XRasterBase:
 
         # look in grid_mapping
         try:
-            self.set_crs(
+            self._set_crs(
                 pyproj.CRS.from_cf(self._obj.coords[self.grid_mapping].attrs),
                 inplace=True,
             )
         except (KeyError, pyproj.exceptions.CRSError):
             try:
                 # look in attrs for 'crs'
-                self.set_crs(self._obj.attrs["crs"], inplace=True)
+                self._set_crs(self._obj.attrs["crs"], inplace=True)
             except KeyError:
                 self._crs = False
                 return None
@@ -360,6 +361,10 @@ class XRasterBase:
         Set the CRS value for the Dataset/DataArray without modifying
         the dataset/data array.
 
+        .. deprecated:: 0.15.8
+            It is recommended to use `rio.write_crs()` instead. This
+        method will likely be removed in a future release.
+
         Parameters
         ----------
         input_crs: object
@@ -370,6 +375,34 @@ class XRasterBase:
         Returns
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Dataset with crs attribute.
+        """
+        warnings.warn(
+            "It is recommended to use 'rio.write_crs()' instead. 'rio.set_crs()' will likely"
+            "be removed in a future release.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+        return self._set_crs(input_crs, inplace=inplace)
+
+    def _set_crs(
+        self, input_crs: Any, inplace: bool = True
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
+        """
+        Set the CRS value for the Dataset/DataArray without modifying
+        the dataset/data array.
+
+        Parameters
+        ----------
+        input_crs: object
+            Anything accepted by `rasterio.crs.CRS.from_user_input`.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        xarray.Dataset | xarray.DataArray
             Dataset with crs attribute.
         """
         crs = crs_from_user_input(input_crs)
@@ -483,7 +516,7 @@ class XRasterBase:
         >>> raster = raster.rio.write_crs("epsg:4326")
         """
         if input_crs is not None:
-            data_obj = self.set_crs(input_crs, inplace=inplace)
+            data_obj = self._set_crs(input_crs, inplace=inplace)
         else:
             data_obj = self._get_obj(inplace=inplace)
 
