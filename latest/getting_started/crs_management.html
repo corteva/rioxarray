@@ -582,6 +582,7 @@ CRS.from_epsg(32722)
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
 </ul>
+<p><strong>Note:</strong> It is recommended to use <code class="docutils literal notranslate"><span class="pre">rio.write_crs()</span></code> if you want the CRS to persist on the Dataset/DataArray and to write the CRS CF compliant metadata. Calling only <code class="docutils literal notranslate"><span class="pre">rio.set_crs()</span></code> CRS storage method is lossy and will not modify the Dataset/DataArray metadata.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>

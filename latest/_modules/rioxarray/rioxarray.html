@@ -86,6 +86,7 @@
 <span class="sd">This module is an extension for xarray to provide rasterio capabilities</span>
 <span class="sd">to xarray datasets/dataarrays.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="c1"># pylint: disable=too-many-lines</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">math</span>
@@ -391,7 +392,7 @@
         <span class="c1"># pyproj CRS if possible for performance</span>
         <span class="k">for</span> <span class="n">crs_attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;crs_wkt&quot;</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">crs_attr</span><span class="p">],</span>
                     <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -401,14 +402,14 @@
 
         <span class="c1"># look in grid_mapping</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span>
                 <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
                 <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CRSError</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># look in attrs for &#39;crs&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">return</span> <span class="kc">None</span>
@@ -448,6 +449,10 @@
 <span class="sd">        Set the CRS value for the Dataset/DataArray without modifying</span>
 <span class="sd">        the dataset/data array.</span>
 
+<span class="sd">        .. deprecated:: 0.15.8</span>
+<span class="sd">            It is recommended to use `rio.write_crs()` instead. This</span>
+<span class="sd">        method will likely be removed in a future release.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        input_crs: object</span>
@@ -460,11 +465,39 @@
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
 <span class="sd">            Dataset with crs attribute.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;It is recommended to use &#39;rio.write_crs()&#39; instead. &#39;rio.set_crs()&#39; will likely&quot;</span>
+            <span class="s2">&quot;be removed in a future release.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_set_crs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the CRS value for the Dataset/DataArray without modifying</span>
+<span class="sd">        the dataset/data array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_crs: object</span>
+<span class="sd">            Anything accepted by `rasterio.crs.CRS.from_user_input`.</span>
+<span class="sd">        inplace: bool, optional</span>
+<span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xarray.Dataset | xarray.DataArray</span>
+<span class="sd">            Dataset with crs attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">crs_from_user_input</span><span class="p">(</span><span class="n">input_crs</span><span class="p">)</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
-        <span class="k">return</span> <span class="n">obj</span></div>
-
+        <span class="k">return</span> <span class="n">obj</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grid_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -577,7 +610,7 @@
 <span class="sd">        &gt;&gt;&gt; raster = raster.rio.write_crs(&quot;epsg:4326&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">input_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
+            <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">input_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
 
