@@ -47,21 +47,23 @@ from rioxarray.rioxarray import (
 # Based on: https://github.com/OSGeo/gdal/blob/
 # dee861e7c91c2da7ef8ff849947713e4d9bd115c/
 # swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61
+# And: https://github.com/rasterio/rasterio/blob/
+# 9e643c3f563a679aa5400d9b1a263df97b34f9e0/rasterio/dtypes.py#L99-L112
 _NODATA_DTYPE_MAP = {
     1: 255,  # GDT_Byte
     2: 65535,  # GDT_UInt16
     3: -32768,  # GDT_Int16
-    4: 4294967293,  # GDT_UInt32
-    5: -2147483647,  # GDT_Int32
-    6: 3.402823466e38,  # GDT_Float32
-    7: 1.7976931348623158e308,  # GDT_Float64
+    4: 4294967295,  # GDT_UInt32
+    5: -2147483648,  # GDT_Int32
+    6: numpy.nan,  # GDT_Float32
+    7: numpy.nan,  # GDT_Float64
     8: None,  # GDT_CInt16
     9: None,  # GDT_CInt32
-    10: 3.402823466e38,  # GDT_CFloat32
-    11: 1.7976931348623158e308,  # GDT_CFloat64
-    12: None,  # GDT_Int64
-    13: None,  # GDT_UInt64
-    14: None,  # GDT_Int8
+    10: numpy.nan,  # GDT_CFloat32
+    11: numpy.nan,  # GDT_CFloat64
+    12: 18446744073709551615,  # GDT_UInt64
+    13: -9223372036854775808,  # GDT_Int64
+    14: -128,  # GDT_Int8
 }
 
 
