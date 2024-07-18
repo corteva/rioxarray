@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- REF:reproject: Make NaN default float nodata & update integer defaults
 
 0.16.0
 ------

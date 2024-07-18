@@ -123,7 +123,11 @@ def _ensure_nodata_dtype(original_nodata, new_dtype):
     if numpy.issubdtype(new_dtype, numpy.complexfloating):
         nodata = original_nodata
     else:
-        original_nodata = float(original_nodata)
+        original_nodata = (
+            float(original_nodata)
+            if not numpy.issubdtype(type(original_nodata), numpy.integer)
+            else original_nodata
+        )
         failure_message = (
             f"Unable to convert nodata value ({original_nodata}) to "
             f"new dtype ({new_dtype})."

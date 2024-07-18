@@ -2165,6 +2165,35 @@ def test_reproject_transform_missing_shape():
     assert reprojected.rio.transform() == affine
 
 
+@pytest.mark.parametrize(
+    "dtype, expected_nodata",
+    [
+        (numpy.uint8, 255),
+        (numpy.int8, -128),
+        (numpy.uint16, 65535),
+        (numpy.int16, -32768),
+        (numpy.uint32, 4294967295),
+        (numpy.int32, -2147483648),
+        (numpy.float32, numpy.nan),
+        (numpy.float64, numpy.nan),
+        (numpy.complex64, numpy.nan),
+        (numpy.complex128, numpy.nan),
+        (numpy.uint64, 18446744073709551615),
+        (numpy.int64, -9223372036854775808),
+    ],
+)
+def test_reproject_default_nodata(dtype, expected_nodata):
+    test_da = xarray.DataArray(
+        numpy.zeros((5, 5), dtype=dtype),
+        dims=("y", "x"),
+        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
+    ).rio.write_crs("epsg:3857", inplace=True)
+    if numpy.isnan(expected_nodata):
+        assert numpy.isnan(test_da.rio.reproject(4326).rio.nodata)
+    else:
+        assert test_da.rio.reproject(4326).rio.nodata == expected_nodata
+
+
 class CustomCRS:
     @property
     def wkt(self):
