@@ -131,21 +131,23 @@
 <span class="c1"># Based on: https://github.com/OSGeo/gdal/blob/</span>
 <span class="c1"># dee861e7c91c2da7ef8ff849947713e4d9bd115c/</span>
 <span class="c1"># swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61</span>
+<span class="c1"># And: https://github.com/rasterio/rasterio/blob/</span>
+<span class="c1"># 9e643c3f563a679aa5400d9b1a263df97b34f9e0/rasterio/dtypes.py#L99-L112</span>
 <span class="n">_NODATA_DTYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="mi">255</span><span class="p">,</span>  <span class="c1"># GDT_Byte</span>
     <span class="mi">2</span><span class="p">:</span> <span class="mi">65535</span><span class="p">,</span>  <span class="c1"># GDT_UInt16</span>
     <span class="mi">3</span><span class="p">:</span> <span class="o">-</span><span class="mi">32768</span><span class="p">,</span>  <span class="c1"># GDT_Int16</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="mi">4294967293</span><span class="p">,</span>  <span class="c1"># GDT_UInt32</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483647</span><span class="p">,</span>  <span class="c1"># GDT_Int32</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_Float32</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_Float64</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>  <span class="c1"># GDT_UInt32</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="o">-</span><span class="mi">2147483648</span><span class="p">,</span>  <span class="c1"># GDT_Int32</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>  <span class="c1"># GDT_Float32</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>  <span class="c1"># GDT_Float64</span>
     <span class="mi">8</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_CInt16</span>
     <span class="mi">9</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_CInt32</span>
-    <span class="mi">10</span><span class="p">:</span> <span class="mf">3.402823466e38</span><span class="p">,</span>  <span class="c1"># GDT_CFloat32</span>
-    <span class="mi">11</span><span class="p">:</span> <span class="mf">1.7976931348623158e308</span><span class="p">,</span>  <span class="c1"># GDT_CFloat64</span>
-    <span class="mi">12</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_Int64</span>
-    <span class="mi">13</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_UInt64</span>
-    <span class="mi">14</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># GDT_Int8</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>  <span class="c1"># GDT_CFloat32</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>  <span class="c1"># GDT_CFloat64</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="mi">18446744073709551615</span><span class="p">,</span>  <span class="c1"># GDT_UInt64</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="o">-</span><span class="mi">9223372036854775808</span><span class="p">,</span>  <span class="c1"># GDT_Int64</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="o">-</span><span class="mi">128</span><span class="p">,</span>  <span class="c1"># GDT_Int8</span>
 <span class="p">}</span>
 
 
