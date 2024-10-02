@@ -145,6 +145,7 @@
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.merge.merge_arrays">[docs]</a>
 <span class="k">def</span> <span class="nf">merge_arrays</span><span class="p">(</span>
     <span class="n">dataarrays</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -225,10 +226,10 @@
     <span class="n">representative_array</span> <span class="o">=</span> <span class="n">rioduckarrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_xds</span>
     <span class="k">if</span> <span class="n">parse_coordinates</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">_make_coords</span><span class="p">(</span>
-            <span class="n">representative_array</span><span class="p">,</span>
-            <span class="n">merged_transform</span><span class="p">,</span>
-            <span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">src_data_array</span><span class="o">=</span><span class="n">representative_array</span><span class="p">,</span>
+            <span class="n">dst_affine</span><span class="o">=</span><span class="n">merged_transform</span><span class="p">,</span>
+            <span class="n">dst_width</span><span class="o">=</span><span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">dst_height</span><span class="o">=</span><span class="n">merged_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">representative_array</span><span class="p">)</span>
@@ -259,6 +260,7 @@
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.merge.merge_datasets">[docs]</a>
 <span class="k">def</span> <span class="nf">merge_datasets</span><span class="p">(</span>
     <span class="n">datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dataset</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -319,10 +321,10 @@
     <span class="n">xds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
         <span class="n">merged_data</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">_make_coords</span><span class="p">(</span>
-            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">],</span>
-            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
-            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">src_data_array</span><span class="o">=</span><span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">],</span>
+            <span class="n">dst_affine</span><span class="o">=</span><span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">transform</span><span class="p">(),</span>
+            <span class="n">dst_width</span><span class="o">=</span><span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">dst_height</span><span class="o">=</span><span class="n">merged_data</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
             <span class="n">force_generate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">attrs</span><span class="o">=</span><span class="n">representative_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
