@@ -32,7 +32,7 @@ except ImportError:
 # Note: transform & crs are removed in write_transform/write_crs
 
 
-def _write_tags(raster_handle, tags):
+def _write_tags(*, raster_handle, tags):
     """
     Write tags to raster dataset
     """
@@ -63,7 +63,7 @@ def _write_tags(raster_handle, tags):
             raster_handle.update_tags(iii + 1, **band_tag)
 
 
-def _write_band_description(raster_handle, xarray_dataset):
+def _write_band_description(*, raster_handle, xarray_dataset):
     """
     Write band descriptions using the long name
     """
@@ -83,7 +83,7 @@ def _write_band_description(raster_handle, xarray_dataset):
                 raster_handle.set_band_description(iii + 1, band_description)
 
 
-def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
+def _write_metatata_to_raster(*, raster_handle, xarray_dataset, tags):
     """
     Write the metadata stored in the xarray object to raster metadata
     """
@@ -113,7 +113,7 @@ def _write_metatata_to_raster(raster_handle, xarray_dataset, tags):
     _write_band_description(raster_handle=raster_handle, xarray_dataset=xarray_dataset)
 
 
-def _ensure_nodata_dtype(original_nodata, new_dtype):
+def _ensure_nodata_dtype(*, original_nodata, new_dtype):
     """
     Convert the nodata to the new datatype and raise warning
     if the value of the nodata value changed.
@@ -141,7 +141,7 @@ def _ensure_nodata_dtype(original_nodata, new_dtype):
     return nodata
 
 
-def _get_dtypes(rasterio_dtype, encoded_rasterio_dtype, dataarray_dtype):
+def _get_dtypes(*, rasterio_dtype, encoded_rasterio_dtype, dataarray_dtype):
     """
     Determines the rasterio dtype and numpy dtypes based on
     the rasterio dtype and the encoded rasterio dtype.
@@ -223,7 +223,7 @@ class RasterioWriter:
         with rasterio.open(self.raster_path, "r+") as rds:
             rds.write(item, window=Window(chx_off, chy_off, chx, chy), indexes=indexes)
 
-    def to_raster(self, xarray_dataarray, tags, windowed, lock, compute, **kwargs):
+    def to_raster(self, *, xarray_dataarray, tags, windowed, lock, compute, **kwargs):
         """
         This method writes to the raster on disk.
 
@@ -252,9 +252,11 @@ class RasterioWriter:
         """
         xarray_dataarray = xarray_dataarray.copy()
         kwargs["dtype"], numpy_dtype = _get_dtypes(
-            kwargs["dtype"],
-            xarray_dataarray.encoding.get("rasterio_dtype"),
-            xarray_dataarray.encoding.get("dtype", str(xarray_dataarray.dtype)),
+            rasterio_dtype=kwargs["dtype"],
+            encoded_rasterio_dtype=xarray_dataarray.encoding.get("rasterio_dtype"),
+            dataarray_dtype=xarray_dataarray.encoding.get(
+                "dtype", str(xarray_dataarray.dtype)
+            ),
         )
         # there is no equivalent for netCDF _Unsigned
         # across output GDAL formats. It is safest to convert beforehand.
@@ -274,10 +276,14 @@ class RasterioWriter:
             # Ensure dtype of output data matches the expected dtype.
             # This check is added here as the dtype of the data is
             # converted right before writing.
-            kwargs["nodata"] = _ensure_nodata_dtype(kwargs["nodata"], numpy_dtype)
+            kwargs["nodata"] = _ensure_nodata_dtype(
+                original_nodata=kwargs["nodata"], new_dtype=numpy_dtype
+            )
 
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
-            _write_metatata_to_raster(rds, xarray_dataarray, tags)
+            _write_metatata_to_raster(
+                raster_handle=rds, xarray_dataset=xarray_dataarray, tags=tags
+            )
             if not (lock and is_dask_collection(xarray_dataarray.data)):
                 # write data to raster immmediately if not dask array
                 if windowed:

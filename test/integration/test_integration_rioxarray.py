@@ -1347,11 +1347,19 @@ def test_make_coords__calc_trans(open_func, modis_reproject):
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
-        calc_coords_calc_trans = _make_coords(xdi, calculated_transform, width, height)
+        calc_coords_calc_trans = _make_coords(
+            src_data_array=xdi,
+            dst_affine=calculated_transform,
+            dst_width=width,
+            dst_height=height,
+        )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform(recalc=True)
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr
+            src_data_array=xri,
+            dst_affine=calculated_transformr,
+            dst_width=widthr,
+            dst_height=heightr,
         )
 
         assert_almost_equal(calculated_transform, calculated_transformr)
@@ -1388,11 +1396,19 @@ def test_make_coords__attr_trans(open_func, modis_reproject):
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
-        calc_coords_attr_trans = _make_coords(xdi, attr_transform, width, height)
+        calc_coords_attr_trans = _make_coords(
+            src_data_array=xdi,
+            dst_affine=attr_transform,
+            dst_width=width,
+            dst_height=height,
+        )
         widthr, heightr = xri.rio.shape
         calculated_transformr = xri.rio.transform()
         calc_coords_calc_transr = _make_coords(
-            xri, calculated_transformr, widthr, heightr
+            src_data_array=xri,
+            dst_affine=calculated_transformr,
+            dst_width=widthr,
+            dst_height=heightr,
         )
         assert_almost_equal(attr_transform, calculated_transformr)
         # check to see if they all match

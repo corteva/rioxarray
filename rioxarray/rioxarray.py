@@ -83,7 +83,7 @@ def _resolution(affine: Affine) -> tuple[float, float]:
 
 
 def affine_to_coords(
-    affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y"
+    affine: Affine, width: int, height: int, *, x_dim: str = "x", y_dim: str = "y"
 ) -> dict[str, numpy.ndarray]:
     """Generate 1d pixel centered coordinates from affine.
 
@@ -120,7 +120,7 @@ def affine_to_coords(
 
 
 def _generate_spatial_coords(
-    affine: Affine, width: int, height: int
+    *, affine: Affine, width: int, height: int
 ) -> dict[Hashable, Any]:
     """get spatial coords in new transform"""
     new_spatial_coords = affine_to_coords(affine, width, height)
@@ -162,6 +162,7 @@ def _get_nonspatial_coords(
 
 
 def _make_coords(
+    *,
     src_data_array: Union[xarray.DataArray, xarray.Dataset],
     dst_affine: Affine,
     dst_width: int,
@@ -178,7 +179,9 @@ def _make_coords(
         )
         or ("xc" in src_data_array.coords and "yc" in src_data_array.coords)
     ):
-        new_coords = _generate_spatial_coords(dst_affine, dst_width, dst_height)
+        new_coords = _generate_spatial_coords(
+            affine=dst_affine, width=dst_width, height=dst_height
+        )
         new_coords.update(coords)
         return new_coords
     return coords
@@ -195,7 +198,7 @@ def _get_data_var_message(obj: Union[xarray.DataArray, xarray.Dataset]) -> str:
 
 
 def _get_spatial_dims(
-    obj: Union[xarray.Dataset, xarray.DataArray], var: Union[Any, Hashable]
+    obj: Union[xarray.Dataset, xarray.DataArray], *, var: Union[Any, Hashable]
 ) -> tuple[str, str]:
     """
     Retrieve the spatial dimensions of the dataset
@@ -213,20 +216,21 @@ def _get_spatial_dims(
 
 
 def _has_spatial_dims(
-    obj: Union[xarray.Dataset, xarray.DataArray], var: Union[Any, Hashable]
+    obj: Union[xarray.Dataset, xarray.DataArray], *, var: Union[Any, Hashable]
 ) -> bool:
     """
     Check to see if the variable in the Dataset has spatial dimensions
     """
     try:
         # pylint: disable=pointless-statement
-        _get_spatial_dims(obj, var)
+        _get_spatial_dims(obj, var=var)
     except MissingSpatialDimensionError:
         return False
     return True
 
 
 def _order_bounds(
+    *,
     minx: float,
     miny: float,
     maxx: float,
@@ -425,7 +429,7 @@ class XRasterBase:
         if hasattr(self._obj, "data_vars"):
             grid_mappings = set()
             for var in self._obj.data_vars:
-                if not _has_spatial_dims(self._obj, var):
+                if not _has_spatial_dims(self._obj, var=var):
                     continue
                 var_grid_mapping = self._obj[var].encoding.get(
                     "grid_mapping", self._obj[var].attrs.get("grid_mapping")
@@ -459,7 +463,7 @@ class XRasterBase:
         if hasattr(data_obj, "data_vars"):
             for var in data_obj.data_vars:
                 try:
-                    x_dim, y_dim = _get_spatial_dims(data_obj, var)
+                    x_dim, y_dim = _get_spatial_dims(data_obj, var=var)
                 except MissingSpatialDimensionError:
                     continue
                 # remove grid_mapping from attributes if it exists
@@ -1088,7 +1092,7 @@ class XRasterBase:
 
         return left, bottom, right, top
 
-    def bounds(self, recalc: bool = False) -> tuple[float, float, float, float]:
+    def bounds(self, *, recalc: bool = False) -> tuple[float, float, float, float]:
         """
         Parameters
         ----------
@@ -1101,13 +1105,19 @@ class XRasterBase:
         left, bottom, right, top: float
             Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.
         """
+        minx, miny, maxx, maxy = self._unordered_bounds(recalc=recalc)
+        resolution_x, resolution_y = self.resolution(recalc=recalc)
         return _order_bounds(
-            *self._unordered_bounds(recalc=recalc),
-            *self.resolution(recalc=recalc),
+            minx=minx,
+            miny=miny,
+            maxx=maxx,
+            maxy=maxy,
+            resolution_x=resolution_x,
+            resolution_y=resolution_y,
         )
 
     def isel_window(
-        self, window: rasterio.windows.Window, pad: bool = False
+        self, window: rasterio.windows.Window, *, pad: bool = False
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Use a rasterio.windows.Window to select a subset of the data.
@@ -1204,7 +1214,7 @@ class XRasterBase:
         return subset
 
     def transform_bounds(
-        self, dst_crs: Any, densify_pts: int = 21, recalc: bool = False
+        self, dst_crs: Any, *, densify_pts: int = 21, recalc: bool = False
     ) -> tuple[float, float, float, float]:
         """Transform bounds from src_crs to dst_crs.
 
@@ -1238,6 +1248,7 @@ class XRasterBase:
         self,
         gcps: Iterable[GroundControlPoint],
         gcp_crs: Any,
+        *,
         grid_mapping_name: Optional[str] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:

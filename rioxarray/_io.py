@@ -295,6 +295,7 @@ class RasterioArrayWrapper(BackendArray):
 
     def __init__(
         self,
+        *,
         manager,
         lock,
         name,
@@ -512,7 +513,7 @@ def _to_numeric(value: Any) -> float:
     return value
 
 
-def _parse_tag(key: str, value: Any) -> tuple[str, Any]:
+def _parse_tag(*, key: str, value: Any) -> tuple[str, Any]:
     # NC_GLOBAL is appended to tags with netcdf driver and is not really needed
     key = key.split("NC_GLOBAL#")[-1]
     if value.startswith("{") and value.endswith("}"):
@@ -530,7 +531,7 @@ def _parse_tag(key: str, value: Any) -> tuple[str, Any]:
 def _parse_tags(tags: dict) -> dict:
     parsed_tags = {}
     for key, value in tags.items():
-        key, value = _parse_tag(key, value)
+        key, value = _parse_tag(key=key, value=value)
         parsed_tags[key] = value
     return parsed_tags
 
@@ -552,7 +553,7 @@ NETCDF_DTYPE_MAP = {
 }
 
 
-def _load_netcdf_attrs(tags: dict, data_array: DataArray) -> None:
+def _load_netcdf_attrs(*, tags: dict, data_array: DataArray) -> None:
     """
     Loads the netCDF attributes into the data array
 
@@ -560,7 +561,7 @@ def _load_netcdf_attrs(tags: dict, data_array: DataArray) -> None:
     - variable_name#attr_name: attr_value
     """
     for key, value in tags.items():
-        key, value = _parse_tag(key, value)
+        key, value = _parse_tag(key=key, value=value)
         key_split = key.split("#")
         if len(key_split) != 2:
             continue
@@ -569,7 +570,7 @@ def _load_netcdf_attrs(tags: dict, data_array: DataArray) -> None:
             data_array.coords[variable_name].attrs.update({attr_name: value})
 
 
-def _parse_netcdf_attr_array(attr: Union[NDArray, str], dtype=None) -> NDArray:
+def _parse_netcdf_attr_array(attr: Union[NDArray, str], *, dtype=None) -> NDArray:
     """
     Expected format: '{2,6}' or '[2. 6.]'
     """
@@ -775,7 +776,7 @@ def _pop_global_netcdf_attrs_from_vars(dataset_to_clean: Dataset) -> Dataset:
 
 
 def _subdataset_groups_to_dataset(
-    dim_groups: dict[Hashable, dict[Hashable, DataArray]], global_tags: dict
+    *, dim_groups: dict[Hashable, dict[Hashable, DataArray]], global_tags: dict
 ) -> Union[Dataset, list[Dataset]]:
     if dim_groups:
         dataset: Union[Dataset, list[Dataset]] = []
@@ -800,6 +801,7 @@ def _subdataset_groups_to_dataset(
 
 def _load_subdatasets(
     riods: RasterioReader,
+    *,
     group: Optional[Union[str, list[str], tuple[str, ...]]],
     variable: Optional[Union[str, list[str], tuple[str, ...]]],
     parse_coordinates: bool,
@@ -845,6 +847,7 @@ def _load_subdatasets(
 
 def _load_bands_as_variables(
     riods: RasterioReader,
+    *,
     parse_coordinates: bool,
     chunks: Optional[Union[int, tuple, dict]],
     cache: Optional[bool],
@@ -896,6 +899,7 @@ def _load_bands_as_variables(
 
 
 def _prepare_dask(
+    *,
     result: DataArray,
     riods: RasterioReader,
     filename: Union[str, os.PathLike],
@@ -936,6 +940,7 @@ def _prepare_dask(
 
 
 def _handle_encoding(
+    *,
     result: DataArray,
     mask_and_scale: bool,
     masked: bool,
@@ -991,6 +996,7 @@ def open_rasterio(
         rasterio.vrt.WarpedVRT,
         SingleBandDatasetReader,
     ],
+    *,
     parse_coordinates: Optional[bool] = None,
     chunks: Optional[Union[int, tuple, dict]] = None,
     cache: Optional[bool] = None,
@@ -1206,7 +1212,9 @@ def open_rasterio(
     # Get geospatial coordinates
     if parse_coordinates:
         coords.update(
-            _generate_spatial_coords(riods.transform, riods.width, riods.height)
+            _generate_spatial_coords(
+                affine=riods.transform, width=riods.width, height=riods.height
+            )
         )
 
     unsigned = None
@@ -1220,8 +1228,8 @@ def open_rasterio(
     da_name = attrs.pop("NETCDF_VARNAME", default_name)
     data: Any = indexing.LazilyOuterIndexedArray(
         RasterioArrayWrapper(
-            manager,
-            lock,
+            manager=manager,
+            lock=lock,
             name=da_name,
             vrt_params=vrt_params,
             masked=masked,
@@ -1241,7 +1249,7 @@ def open_rasterio(
     result.encoding = encoding
 
     # update attributes from NetCDF attributes
-    _load_netcdf_attrs(riods.tags(), result)
+    _load_netcdf_attrs(tags=riods.tags(), data_array=result)
     result = _decode_datetime_cf(
         result, decode_times=decode_times, decode_timedelta=decode_timedelta
     )
@@ -1251,7 +1259,13 @@ def open_rasterio(
         result.attrs["_FillValue"] = result.dtype.type(result.attrs["_FillValue"])
 
     # handle encoding
-    _handle_encoding(result, mask_and_scale, masked, da_name, unsigned=unsigned)
+    _handle_encoding(
+        result=result,
+        mask_and_scale=mask_and_scale,
+        masked=masked,
+        da_name=da_name,
+        unsigned=unsigned,
+    )
     # Affine transformation matrix (always available)
     # This describes coefficients mapping pixel coordinates to CRS
     # For serialization store as tuple of 6 floats, the last row being
