@@ -873,8 +873,8 @@ class RasterArray(XRasterBase):
     def clip(
         self,
         geometries: Iterable,
-        *,
         crs: Optional[Any] = None,
+        *,
         all_touched: bool = False,
         drop: bool = True,
         invert: bool = False,
