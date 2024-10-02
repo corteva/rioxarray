@@ -1054,12 +1054,13 @@ class RasterArray(XRasterBase):
             interp_data = []
             for _, sub_xds in self._obj.groupby(extra_dim):
                 interp_data.append(
-                    self._interpolate_na(sub_xds.load().data, method=method)
+                    self._interpolate_na(
+                        sub_xds.squeeze(dim=extra_dim).values, method=method
+                    )
                 )
             interp_data = numpy.array(interp_data)  # type: ignore
         else:
-            interp_data = self._interpolate_na(self._obj.load().data, method=method)  # type: ignore
-
+            interp_data = self._interpolate_na(self._obj.values, method=method)  # type: ignore
         interp_array = xarray.DataArray(
             name=self._obj.name,
             data=interp_data,
