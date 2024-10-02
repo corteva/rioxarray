@@ -58,6 +58,7 @@ class RasterDataset(XRasterBase):
     def reproject(
         self,
         dst_crs: Any,
+        *,
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
@@ -116,7 +117,7 @@ class RasterDataset(XRasterBase):
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 resampled_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -141,6 +142,7 @@ class RasterDataset(XRasterBase):
     def reproject_match(
         self,
         match_data_array: Union[xarray.DataArray, xarray.Dataset],
+        *,
         resampling: Resampling = Resampling.nearest,
         **reproject_kwargs,
     ) -> xarray.Dataset:
@@ -174,7 +176,7 @@ class RasterDataset(XRasterBase):
         resampled_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 resampled_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -196,6 +198,7 @@ class RasterDataset(XRasterBase):
         miny: float,
         maxx: float,
         maxy: float,
+        *,
         constant_values: Union[
             float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
@@ -229,7 +232,7 @@ class RasterDataset(XRasterBase):
         padded_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 padded_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -253,6 +256,7 @@ class RasterDataset(XRasterBase):
         miny: float,
         maxx: float,
         maxy: float,
+        *,
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
         crs: Optional[Any] = None,
@@ -294,7 +298,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 clipped_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -322,6 +326,7 @@ class RasterDataset(XRasterBase):
     def clip(
         self,
         geometries: Iterable,
+        *,
         crs: Optional[Any] = None,
         all_touched: bool = False,
         drop: bool = True,
@@ -383,7 +388,7 @@ class RasterDataset(XRasterBase):
         clipped_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 clipped_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -429,7 +434,7 @@ class RasterDataset(XRasterBase):
         interpolated_dataset = xarray.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             try:
-                x_dim, y_dim = _get_spatial_dims(self._obj, var)
+                x_dim, y_dim = _get_spatial_dims(self._obj, var=var)
                 interpolated_dataset[var] = (
                     self._obj[var]
                     .rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
@@ -448,6 +453,7 @@ class RasterDataset(XRasterBase):
     def to_raster(
         self,
         raster_path: Union[str, os.PathLike],
+        *,
         driver: Optional[str] = None,
         dtype: Optional[Union[str, numpy.dtype]] = None,
         tags: Optional[dict[str, str]] = None,

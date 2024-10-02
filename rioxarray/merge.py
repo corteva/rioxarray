@@ -59,6 +59,7 @@ class RasterioDatasetDuck:
 
 def merge_arrays(
     dataarrays: Sequence[DataArray],
+    *,
     bounds: Optional[tuple] = None,
     res: Optional[tuple] = None,
     nodata: Optional[float] = None,
@@ -139,10 +140,10 @@ def merge_arrays(
     representative_array = rioduckarrays[0]._xds
     if parse_coordinates:
         coords = _make_coords(
-            representative_array,
-            merged_transform,
-            merged_data.shape[-1],
-            merged_data.shape[-2],
+            src_data_array=representative_array,
+            dst_affine=merged_transform,
+            dst_width=merged_data.shape[-1],
+            dst_height=merged_data.shape[-2],
         )
     else:
         coords = _get_nonspatial_coords(representative_array)
@@ -170,6 +171,7 @@ def merge_arrays(
 
 def merge_datasets(
     datasets: Sequence[Dataset],
+    *,
     bounds: Optional[tuple] = None,
     res: Optional[tuple] = None,
     nodata: Optional[float] = None,
@@ -230,10 +232,10 @@ def merge_datasets(
     xds = Dataset(
         merged_data,
         coords=_make_coords(
-            merged_data[data_var],
-            merged_data[data_var].rio.transform(),
-            merged_data[data_var].shape[-1],
-            merged_data[data_var].shape[-2],
+            src_data_array=merged_data[data_var],
+            dst_affine=merged_data[data_var].rio.transform(),
+            dst_width=merged_data[data_var].shape[-1],
+            dst_height=merged_data[data_var].shape[-2],
             force_generate=True,
         ),
         attrs=representative_ds.attrs,

@@ -68,7 +68,7 @@ _NODATA_DTYPE_MAP = {
 
 
 def _generate_attrs(
-    src_data_array: xarray.DataArray, dst_nodata: Optional[float]
+    *, src_data_array: xarray.DataArray, dst_nodata: Optional[float]
 ) -> dict[str, Any]:
     # add original attributes
     new_attrs = copy.deepcopy(src_data_array.attrs)
@@ -89,7 +89,7 @@ def _generate_attrs(
 
 
 def _add_attrs_proj(
-    new_data_array: xarray.DataArray, src_data_array: xarray.DataArray
+    *, new_data_array: xarray.DataArray, src_data_array: xarray.DataArray
 ) -> xarray.DataArray:
     """Make sure attributes and projection correct"""
     # make sure dimension information is preserved
@@ -99,7 +99,7 @@ def _add_attrs_proj(
         new_data_array.rio._y_dim = src_data_array.rio.y_dim
 
     # make sure attributes preserved
-    new_attrs = _generate_attrs(src_data_array, None)
+    new_attrs = _generate_attrs(src_data_array=src_data_array, dst_nodata=None)
     # remove fill value if it already exists in the encoding
     # this is for data arrays pulling the encoding from a
     # source data array instead of being generated anew.
@@ -119,6 +119,7 @@ def _add_attrs_proj(
 
 
 def _make_dst_affine(
+    *,
     src_data_array: xarray.DataArray,
     src_crs: rasterio.crs.CRS,
     dst_crs: rasterio.crs.CRS,
@@ -156,6 +157,7 @@ def _make_dst_affine(
 
 def _clip_from_disk(
     xds: xarray.DataArray,
+    *,
     geometries: Iterable,
     all_touched: bool,
     drop: bool,
@@ -182,7 +184,12 @@ def _clip_from_disk(
         cropped_ds = xarray.DataArray(
             name=xds.name,
             data=out_image,
-            coords=_make_coords(xds, out_transform, width, height),
+            coords=_make_coords(
+                src_data_array=xds,
+                dst_affine=out_transform,
+                dst_width=width,
+                dst_height=height,
+            ),
             dims=xds.dims,
             attrs=xds.attrs,
         )
@@ -194,6 +201,7 @@ def _clip_from_disk(
 
 def _clip_xarray(
     xds: xarray.DataArray,
+    *,
     geometries: Iterable,
     all_touched: bool,
     drop: bool,
@@ -243,7 +251,7 @@ class RasterArray(XRasterBase):
         ] = None  # https://github.com/corteva/rioxarray/issues/254
 
     def set_nodata(
-        self, input_nodata: Optional[float], inplace: bool = True
+        self, input_nodata: Optional[float], *, inplace: bool = True
     ) -> xarray.DataArray:
         """
         Set the nodata value for the DataArray without modifying
@@ -266,7 +274,7 @@ class RasterArray(XRasterBase):
         return obj
 
     def write_nodata(
-        self, input_nodata: Optional[float], encoded: bool = False, inplace=False
+        self, input_nodata: Optional[float], *, encoded: bool = False, inplace=False
     ) -> xarray.DataArray:
         """
         Write the nodata to the DataArray in a CF compliant manner.
@@ -308,7 +316,9 @@ class RasterArray(XRasterBase):
         data_obj: xarray.DataArray = self._get_obj(inplace=inplace)  # type: ignore
         input_nodata = False if input_nodata is None else input_nodata
         if input_nodata is not False:
-            input_nodata = _ensure_nodata_dtype(input_nodata, self._obj.dtype)
+            input_nodata = _ensure_nodata_dtype(
+                original_nodata=input_nodata, new_dtype=self._obj.dtype
+            )
             if encoded:
                 data_obj.rio.update_encoding({"_FillValue": input_nodata}, inplace=True)
             else:
@@ -331,7 +341,9 @@ class RasterArray(XRasterBase):
         encoded_nodata = self._obj.encoding.get("_FillValue")
         if encoded_nodata is None:
             return None
-        return _ensure_nodata_dtype(encoded_nodata, self._obj.dtype)
+        return _ensure_nodata_dtype(
+            original_nodata=encoded_nodata, new_dtype=self._obj.dtype
+        )
 
     @property
     def nodata(self) -> Optional[float]:
@@ -364,12 +376,15 @@ class RasterArray(XRasterBase):
             self._nodata = False
             return None
 
-        self._nodata = _ensure_nodata_dtype(self._nodata, self._obj.dtype)
+        self._nodata = _ensure_nodata_dtype(
+            original_nodata=self._nodata, new_dtype=self._obj.dtype
+        )
         return self._nodata
 
     def reproject(
         self,
         dst_crs: Any,
+        *,
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
@@ -442,7 +457,12 @@ class RasterArray(XRasterBase):
         src_affine = None if gcps_or_rpcs else self.transform(recalc=True)
         if transform is None:
             dst_affine, dst_width, dst_height = _make_dst_affine(
-                self._obj, self.crs, dst_crs, resolution, shape, **kwargs
+                src_data_array=self._obj,
+                src_crs=self.crs,
+                dst_crs=dst_crs,
+                dst_resolution=resolution,
+                dst_shape=shape,
+                **kwargs,
             )
         else:
             dst_affine = transform
@@ -451,7 +471,7 @@ class RasterArray(XRasterBase):
             else:
                 dst_height, dst_width = self.shape
 
-        dst_data = self._create_dst_data(dst_height, dst_width)
+        dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
 
         dst_nodata = self._get_dst_nodata(nodata)
 
@@ -468,7 +488,7 @@ class RasterArray(XRasterBase):
             **kwargs,
         )
         # add necessary attributes
-        new_attrs = _generate_attrs(self._obj, dst_nodata)
+        new_attrs = _generate_attrs(src_data_array=self._obj, dst_nodata=dst_nodata)
         # make sure dimensions with coordinates renamed to x,y
         dst_dims: list[Hashable] = []
         for dim in self._obj.dims:
@@ -506,7 +526,7 @@ class RasterArray(XRasterBase):
         dst_nodata = default_nodata if nodata is None else nodata
         return dst_nodata
 
-    def _create_dst_data(self, dst_height: int, dst_width: int) -> numpy.ndarray:
+    def _create_dst_data(self, *, dst_height: int, dst_width: int) -> numpy.ndarray:
         extra_dim = self._check_dimensions()
         if extra_dim:
             dst_data = numpy.zeros(
@@ -520,6 +540,7 @@ class RasterArray(XRasterBase):
     def reproject_match(
         self,
         match_data_array: Union[xarray.DataArray, xarray.Dataset],
+        *,
         resampling: Resampling = Resampling.nearest,
         **reproject_kwargs,
     ) -> xarray.DataArray:
@@ -585,6 +606,7 @@ class RasterArray(XRasterBase):
         miny: float,
         maxx: float,
         maxy: float,
+        *,
         constant_values: Union[
             float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
@@ -664,6 +686,7 @@ class RasterArray(XRasterBase):
         miny: float,
         maxx: float,
         maxy: float,
+        *,
         constant_values: Union[
             float, tuple[int, int], Mapping[Any, tuple[int, int]], None
         ] = None,
@@ -699,10 +722,16 @@ class RasterArray(XRasterBase):
         pad_maxx = maxx + abs(resolution_x) / 2.0
         pad_maxy = maxy + abs(resolution_y) / 2.0
 
-        pd_array = self.pad_xy(pad_minx, pad_miny, pad_maxx, pad_maxy, constant_values)
+        pd_array = self.pad_xy(
+            minx=pad_minx,
+            miny=pad_miny,
+            maxx=pad_maxx,
+            maxy=pad_maxy,
+            constant_values=constant_values,
+        )
 
         # make sure correct attributes preserved & projection added
-        _add_attrs_proj(pd_array, self._obj)
+        _add_attrs_proj(new_data_array=pd_array, src_data_array=self._obj)
 
         return pd_array
 
@@ -712,6 +741,7 @@ class RasterArray(XRasterBase):
         miny: float,
         maxx: float,
         maxy: float,
+        *,
         auto_expand: Union[bool, int] = False,
         auto_expand_limit: int = 3,
         crs: Optional[Any] = None,
@@ -837,12 +867,13 @@ class RasterArray(XRasterBase):
                 )
 
         # make sure correct attributes preserved & projection added
-        _add_attrs_proj(cl_array, self._obj)
+        _add_attrs_proj(new_data_array=cl_array, src_data_array=self._obj)
         return cl_array
 
     def clip(
         self,
         geometries: Iterable,
+        *,
         crs: Optional[Any] = None,
         all_touched: bool = False,
         drop: bool = True,
@@ -935,12 +966,15 @@ class RasterArray(XRasterBase):
             )
 
         # make sure correct attributes preserved & projection added
-        _add_attrs_proj(cropped_ds, self._obj)
+        _add_attrs_proj(new_data_array=cropped_ds, src_data_array=self._obj)
 
         return cropped_ds
 
     def _interpolate_na(
-        self, src_data: Any, method: Literal["linear", "nearest", "cubic"] = "nearest"
+        self,
+        src_data: Any,
+        *,
+        method: Literal["linear", "nearest", "cubic"] = "nearest",
     ) -> numpy.ndarray:
         """
         This method uses scipy.interpolate.griddata to interpolate missing data.
@@ -1036,13 +1070,14 @@ class RasterArray(XRasterBase):
         interp_array.encoding = self._obj.encoding
 
         # make sure correct attributes preserved & projection added
-        _add_attrs_proj(interp_array, self._obj)
+        _add_attrs_proj(new_data_array=interp_array, src_data_array=self._obj)
 
         return interp_array
 
     def to_raster(
         self,
         raster_path: Union[str, os.PathLike],
+        *,
         driver: Optional[str] = None,
         dtype: Optional[Union[str, numpy.dtype]] = None,
         tags: Optional[dict[str, str]] = None,

@@ -37,6 +37,7 @@ class RasterioBackend(xarray.backends.common.BackendEntrypoint):
     def open_dataset(
         self,
         filename_or_obj,
+        *,
         drop_variables=None,
         parse_coordinates=None,
         lock=None,
