@@ -9,6 +9,9 @@ channels:
 dependencies:
 - python
 - rasterio
+- libgdal-netcdf
+- libgdal-hdf4
+- libgdal-hdf5
 - scipy
 - xarray
 - netcdf4
