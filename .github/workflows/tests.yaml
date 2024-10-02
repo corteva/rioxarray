@@ -119,6 +119,9 @@ jobs:
             python=${{ matrix.python-version }}
             rasterio=${{ matrix.rasterio-version }}
             xarray=${{ matrix.xarray-version }}
+            libgdal-netcdf
+            libgdal-hdf4
+            libgdal-hdf5
             pyproj
             netcdf4
             dask
@@ -181,7 +184,10 @@ jobs:
           create-args: >-
             python=3.10
             proj
-            libgdal
+            libgdal-core
+            libgdal-netcdf
+            libgdal-hdf4
+            libgdal-hdf5
             cython
             netcdf4
 
