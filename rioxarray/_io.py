@@ -1015,8 +1015,8 @@ def open_rasterio(
     """Open a file with rasterio (experimental).
 
     This should work with any file that rasterio can open (most often:
-    geoTIFF). The x and y coordinates are generated from the file's 
-    geoinformation and refer to the center of the pixel.
+    geoTIFF). The x and y coordinates are generated automatically from the 
+    file's geoinformation and refer to the center of the pixel.
     
     .. versionadded:: 0.13 band_as_variable
 
