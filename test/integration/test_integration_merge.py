@@ -6,7 +6,7 @@ from numpy.testing import assert_almost_equal
 
 from rioxarray import open_rasterio
 from rioxarray.merge import merge_arrays, merge_datasets
-from test.conftest import TEST_INPUT_DATA_DIR
+from test.conftest import RASTERIO_GE_14, TEST_INPUT_DATA_DIR
 
 
 @pytest.mark.parametrize("squeeze", [True, False])
@@ -82,7 +82,10 @@ def test_merge__different_crs(dataset):
             (-7300984.0238134, 5003618.5908794, -7224054.1109682, 5050108.6101528),
         )
         assert merged.rio.shape == (84, 139)
-        assert_almost_equal(test_sum, -131734881)
+        if RASTERIO_GE_14:
+            assert_almost_equal(test_sum, -126821853)
+        else:
+            assert_almost_equal(test_sum, -131734881)
 
         assert_almost_equal(
             tuple(merged.rio.transform()),
