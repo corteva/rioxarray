@@ -41,7 +41,7 @@ jobs:
         include:
           - python-version: '3.10'
             rasterio-version: ''
-            xarray-version: '==2022.3.0'
+            xarray-version: '==2024.7.0'
             numpy-version: '<2'
             run-with-scipy: 'YES'
             gdal-version: '3.6.4'
