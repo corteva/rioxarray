@@ -94,20 +94,23 @@ def _write_metatata_to_raster(*, raster_handle, xarray_dataset, tags):
     )
 
     # write scales and offsets
-    try:
-        raster_handle.scales = tags["scales"]
-    except KeyError:
+    scales = tags.get("scales", xarray_dataset.encoding.get("scales"))
+    if scales is None:
         scale_factor = tags.get(
             "scale_factor", xarray_dataset.encoding.get("scale_factor")
         )
         if scale_factor is not None:
-            raster_handle.scales = (scale_factor,) * raster_handle.count
-    try:
-        raster_handle.offsets = tags["offsets"]
-    except KeyError:
+            scales = (scale_factor,) * raster_handle.count
+    if scales is not None:
+        raster_handle.scales = scales
+
+    offsets = tags.get("offsets", xarray_dataset.encoding.get("offsets"))
+    if offsets is None:
         add_offset = tags.get("add_offset", xarray_dataset.encoding.get("add_offset"))
         if add_offset is not None:
-            raster_handle.offsets = (add_offset,) * raster_handle.count
+            offsets = (add_offset,) * raster_handle.count
+    if offsets is not None:
+        raster_handle.offsets = offsets
 
     _write_tags(raster_handle=raster_handle, tags=tags)
     _write_band_description(raster_handle=raster_handle, xarray_dataset=xarray_dataset)
