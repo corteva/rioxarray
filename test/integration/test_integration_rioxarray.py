@@ -31,6 +31,7 @@ from rioxarray.exceptions import (
 from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
     GDAL_GE_361,
+    RASTERIO_GE_14,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -805,7 +806,7 @@ def test_reproject_match__non_geospatial(dummy_dataset_non_geospatial):
 def test_reproject_match__geographic_dataset():
     lat = [0.1, 0.15, 0.2]
     lon = [0.1, 0.15, 0.2]
-    data = numpy.arange(1, 10).reshape(3, 3)
+    data = numpy.arange(1, 10, dtype=numpy.float32).reshape(3, 3)
     ds = xarray.Dataset(
         data_vars={
             "foo": (["lat", "lon"], data),
@@ -2185,7 +2186,13 @@ def test_reproject_transform_missing_shape():
     "dtype, expected_nodata",
     [
         (numpy.uint8, 255),
-        (numpy.int8, -128),
+        pytest.param(
+            numpy.int8,
+            -128,
+            marks=pytest.mark.xfail(
+                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
+            ),
+        ),
         (numpy.uint16, 65535),
         (numpy.int16, -32768),
         (numpy.uint32, 4294967295),
@@ -2194,8 +2201,20 @@ def test_reproject_transform_missing_shape():
         (numpy.float64, numpy.nan),
         (numpy.complex64, numpy.nan),
         (numpy.complex128, numpy.nan),
-        (numpy.uint64, 18446744073709551615),
-        (numpy.int64, -9223372036854775808),
+        pytest.param(
+            numpy.uint64,
+            18446744073709551615,
+            marks=pytest.mark.xfail(
+                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
+            ),
+        ),
+        pytest.param(
+            numpy.int64,
+            -9223372036854775808,
+            marks=pytest.mark.xfail(
+                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
+            ),
+        ),
     ],
 )
 def test_reproject_default_nodata(dtype, expected_nodata):
