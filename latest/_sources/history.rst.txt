@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG:merge: Fix merging masked and scaled data (issue #814)
 
 0.17.0
 ------
