@@ -42,12 +42,16 @@ class RasterioDatasetDuck:
             "crs": self.crs,
             "nodata": self.nodatavals[0],
         }
-        self._scale_factor = self._xds.encoding.get("scale_factor", 1.0)
-        self._add_offset = self._xds.encoding.get("add_offset", 0.0)
+        valid_scale_factor = self._xds.encoding.get("scale_factor", 1) != 1 or any(
+            scale != 1 for scale in self._xds.encoding.get("scales", (1,))
+        )
+        valid_offset = self._xds.encoding.get("add_offset", 0.0) != 0 or any(
+            offset != 0 for offset in self._xds.encoding.get("offsets", (0,))
+        )
         self._mask_and_scale = (
             self._xds.rio.encoded_nodata is not None
-            or self._scale_factor != 1
-            or self._add_offset != 0
+            or valid_scale_factor
+            or valid_offset
             or self._xds.encoding.get("_Unsigned") is not None
         )
 
@@ -70,10 +74,9 @@ class RasterioDatasetDuck:
                     kwargs["masked"] = True
                 out = dataset.read(*args, **kwargs)
                 if self._mask_and_scale:
-                    if self._scale_factor != 1:
-                        out = out * self._scale_factor
-                    if self._add_offset != 0:
-                        out = out + self._add_offset
+                    out = out.astype(self._xds.dtype)
+                    for iii in range(self.count):
+                        out[iii] = out[iii] * dataset.scales[iii] + dataset.offsets[iii]
                 return out
 
 

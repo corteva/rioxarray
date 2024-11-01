@@ -1771,7 +1771,8 @@ def test_to_raster__offsets_and_scales(chunks, tmpdir):
     tmp_raster = tmpdir.join("air_temp_offset.tif")
 
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"),
+        chunks=chunks,
     ) as rds:
         rds = _ensure_dataset(rds)
         attrs = dict(rds.air_temperature.attrs)
@@ -1793,6 +1794,38 @@ def test_to_raster__offsets_and_scales(chunks, tmpdir):
         assert rds.scale_factor == 0.1
         assert rds.add_offset == 220.0
         assert rds.rio.nodata == 32767.0
+
+
+@pytest.mark.parametrize("mask_and_scale", [True, False])
+def test_to_raster__scales__offsets(mask_and_scale, tmpdir):
+    tmp_raster = tmpdir.join("air_temp_offset.tif")
+
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"),
+        mask_and_scale=mask_and_scale,
+    ) as rds:
+        rds = _ensure_dataset(rds)
+        rds["air_temperature_2"] = rds.air_temperature.copy()
+        if mask_and_scale:
+            rds.air_temperature_2.encoding["scale_factor"] = 0.2
+            rds.air_temperature_2.encoding["add_offset"] = 110.0
+        else:
+            rds.air_temperature_2.attrs["scale_factor"] = 0.2
+            rds.air_temperature_2.attrs["add_offset"] = 110.0
+        rds.squeeze(dim="band", drop=True).rio.to_raster(str(tmp_raster))
+
+    with rasterio.open(str(tmp_raster)) as rds:
+        assert rds.scales == (0.1, 0.2)
+        assert rds.offsets == (220.0, 110.0)
+
+    # test roundtrip
+    with rioxarray.open_rasterio(str(tmp_raster), mask_and_scale=mask_and_scale) as rds:
+        if mask_and_scale:
+            assert rds.encoding["scales"] == (0.1, 0.2)
+            assert rds.encoding["offsets"] == (220.0, 110.0)
+        else:
+            assert rds.attrs["scales"] == (0.1, 0.2)
+            assert rds.attrs["offsets"] == (220.0, 110.0)
 
 
 def test_to_raster__custom_description__wrong(tmpdir):
@@ -1857,11 +1890,14 @@ def test_to_raster__dataset(tmpdir):
         assert numpy.isnan(rdscompare.rio.nodata)
 
 
+@pytest.mark.parametrize("mask_and_scale", [True, False])
 @pytest.mark.parametrize("chunks", [True, None])
-def test_to_raster__dataset__mask_and_scale(chunks, tmpdir):
+def test_to_raster__dataset__mask_and_scale(chunks, mask_and_scale, tmpdir):
     output_raster = tmpdir.join("tmmx_20190121.tif")
     with rioxarray.open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"), chunks=chunks
+        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"),
+        chunks=chunks,
+        mask_and_scale=mask_and_scale,
     ) as rds:
         rds = _ensure_dataset(rds)
         rds.isel(band=0).rio.to_raster(str(output_raster))
@@ -1871,7 +1907,10 @@ def test_to_raster__dataset__mask_and_scale(chunks, tmpdir):
             assert rdscompare.add_offset == 220.0
             assert rdscompare.long_name == "tmmx"
             assert rdscompare.rio.crs == rds.rio.crs
-            assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
+            if mask_and_scale:
+                assert rdscompare.rio.nodata == rds.air_temperature.rio.encoded_nodata
+            else:
+                assert rdscompare.rio.nodata == rds.air_temperature.rio.nodata
 
 
 def test_to_raster__dataset__different_crs(tmpdir):
