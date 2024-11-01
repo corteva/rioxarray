@@ -328,7 +328,7 @@ class RasterioArrayWrapper(BackendArray):
             )
             if self._unsigned_dtype is not None and self._fill_value is not None:
                 self._fill_value = self._unsigned_dtype.type(self._fill_value)
-            if self._unsigned_dtype is None and dtype.kind not in ("i", "u"):
+            if self._unsigned_dtype is None:
                 warnings.warn(
                     f"variable {name!r} has _Unsigned attribute but is not "
                     "of integer type. Ignoring attribute.",

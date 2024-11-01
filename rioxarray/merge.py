@@ -2,7 +2,6 @@
 This module allows you to merge xarray Datasets/DataArrays
 geospatially with the `rasterio.merge` module.
 """
-
 from collections.abc import Sequence
 from typing import Callable, Optional, Union
 
@@ -12,6 +11,7 @@ from rasterio.io import MemoryFile
 from rasterio.merge import merge as _rio_merge
 from xarray import DataArray, Dataset
 
+from rioxarray._io import open_rasterio
 from rioxarray.rioxarray import _get_nonspatial_coords, _make_coords
 
 
@@ -31,13 +31,25 @@ class RasterioDatasetDuck:
         self.count = int(xds.rio.count)
         self.dtypes = [xds.dtype]
         self.name = xds.name
-        self.nodatavals = [xds.rio.nodata]
+        if xds.rio.encoded_nodata is not None:
+            self.nodatavals = [xds.rio.encoded_nodata]
+        else:
+            self.nodatavals = [xds.rio.nodata]
         res = xds.rio.resolution(recalc=True)
         self.res = (abs(res[0]), abs(res[1]))
         self.transform = xds.rio.transform(recalc=True)
-        # profile is only used for writing to a file.
-        # This never happens with rioxarray merge.
-        self.profile: dict = {}
+        self.profile: dict = {
+            "crs": self.crs,
+            "nodata": self.nodatavals[0],
+        }
+        self._scale_factor = self._xds.encoding.get("scale_factor", 1.0)
+        self._add_offset = self._xds.encoding.get("add_offset", 0.0)
+        self._mask_and_scale = (
+            self._xds.rio.encoded_nodata is not None
+            or self._scale_factor != 1
+            or self._add_offset != 0
+            or self._xds.encoding.get("_Unsigned") is not None
+        )
 
     def colormap(self, *args, **kwargs) -> None:
         """
@@ -54,7 +66,15 @@ class RasterioDatasetDuck:
         with MemoryFile() as memfile:
             self._xds.rio.to_raster(memfile.name)
             with memfile.open() as dataset:
-                return dataset.read(*args, **kwargs)
+                if self._mask_and_scale:
+                    kwargs["masked"] = True
+                out = dataset.read(*args, **kwargs)
+                if self._mask_and_scale:
+                    if self._scale_factor != 1:
+                        out = out * self._scale_factor
+                    if self._add_offset != 0:
+                        out = out + self._add_offset
+                return out
 
 
 def merge_arrays(
@@ -132,41 +152,28 @@ def merge_arrays(
             rioduckarrays.append(RasterioDatasetDuck(dataarray))
 
     # use rasterio to merge
-    merged_data, merged_transform = _rio_merge(
-        rioduckarrays,
-        **{key: val for key, val in input_kwargs.items() if val is not None},
-    )
     # generate merged data array
     representative_array = rioduckarrays[0]._xds
-    if parse_coordinates:
-        coords = _make_coords(
-            src_data_array=representative_array,
-            dst_affine=merged_transform,
-            dst_width=merged_data.shape[-1],
-            dst_height=merged_data.shape[-2],
+    with MemoryFile() as memfile:
+        _rio_merge(
+            rioduckarrays,
+            **{key: val for key, val in input_kwargs.items() if val is not None},
+            dst_path=memfile.name,
         )
-    else:
-        coords = _get_nonspatial_coords(representative_array)
-
-    # make sure the output merged data shape is 2D if the
-    # original data was 2D. this can happen if the
-    # xarray datasarray was squeezed.
-    if len(merged_data.shape) == 3 and len(representative_array.shape) == 2:
-        merged_data = merged_data.squeeze()
-
-    xda = DataArray(
-        name=representative_array.name,
-        data=merged_data,
-        coords=coords,
-        dims=tuple(representative_array.dims),
-        attrs=representative_array.attrs,
-    )
-    xda.rio.write_nodata(
-        nodata if nodata is not None else representative_array.rio.nodata, inplace=True
-    )
-    xda.rio.write_crs(representative_array.rio.crs, inplace=True)
-    xda.rio.write_transform(merged_transform, inplace=True)
-    return xda
+        with open_rasterio(  # type: ignore
+            memfile.name,
+            parse_coordinates=parse_coordinates,
+            mask_and_scale=rioduckarrays[0]._mask_and_scale,
+        ) as xda:
+            xda = xda.load()
+        xda.coords.update(
+            {
+                coord: value
+                for coord, value in _get_nonspatial_coords(representative_array).items()
+                if coord not in xda.coords
+            }
+        )
+    return xda  # type: ignore
 
 
 def merge_datasets(
