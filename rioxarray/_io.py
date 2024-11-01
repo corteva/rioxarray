@@ -929,7 +929,7 @@ def _prepare_dask(
             chunks=(1, "auto", "auto"),
             shape=(riods.count, riods.height, riods.width),
             dtype=_rasterio_to_numpy_dtype(riods.dtypes),
-            previous_chunks=tuple(c for c in block_shape),
+            previous_chunks=block_shape,
         )
     token_filename = filename
     if bidx is not None:
