@@ -3184,3 +3184,29 @@ def test_bounds__ordered__dataarray():
 def test_bounds__ordered__dataset():
     xds = xarray.Dataset(None, coords={"x": range(5), "y": range(5)})
     assert xds.rio.bounds() == (-0.5, -0.5, 4.5, 4.5)
+
+
+@pytest.mark.skipif(not RASTERIO_GE_14, reason="Requires rasterio 1.4+")
+def test_non_rectilinear__reproject(open_rasterio):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
+    with open_rasterio(test_file) as xds:
+        xds_1d = xds.rio.reproject(
+            "EPSG:4326",
+            src_geoloc_array=(
+                xds.coords["xc"].values,
+                xds.coords["yc"].values,
+            ),
+            georeferencing_convention="PIXEL_CENTER",
+        )
+        assert xds_1d.coords["x"].shape == (14,)
+        assert xds_1d.coords["y"].shape == (10,)
+        xds_1d.rio.transform().almost_equals(
+            Affine(
+                216.8587081056465,
+                0.0,
+                115698.25,
+                0.0,
+                -216.8587081056465,
+                2818720.0,
+            )
+        )
