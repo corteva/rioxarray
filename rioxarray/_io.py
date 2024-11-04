@@ -957,8 +957,12 @@ def _handle_encoding(
             variables.pop_to(
                 result.attrs, result.encoding, "scale_factor", name=da_name
             )
+        if "scales" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "scales", name=da_name)
         if "add_offset" in result.attrs:
             variables.pop_to(result.attrs, result.encoding, "add_offset", name=da_name)
+        if "offsets" in result.attrs:
+            variables.pop_to(result.attrs, result.encoding, "offsets", name=da_name)
     if masked:
         if "_FillValue" in result.attrs:
             variables.pop_to(result.attrs, result.encoding, "_FillValue", name=da_name)

@@ -509,35 +509,58 @@ class RasterDataset(XRasterBase):
             is True. Otherwise None is returned.
 
         """
+        # pylint: disable=too-many-locals
         variable_dim = f"band_{uuid4()}"
         data_array = self._obj.to_array(dim=variable_dim)
         # ensure raster metadata preserved
-        scales = []
-        offsets = []
-        nodatavals = []
+        attr_scales = []
+        attr_offsets = []
+        attr_nodatavals = []
+        encoded_scales = []
+        encoded_offsets = []
+        encoded_nodatavals = []
         band_tags = []
         long_name = []
         for data_var in data_array[variable_dim].values:
-            scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
-            offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
+            try:
+                encoded_scales.append(self._obj[data_var].encoding["scale_factor"])
+            except KeyError:
+                attr_scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
+            try:
+                encoded_offsets.append(self._obj[data_var].encoding["add_offset"])
+            except KeyError:
+                attr_offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
             long_name.append(self._obj[data_var].attrs.get("long_name", data_var))
-            nodatavals.append(self._obj[data_var].rio.nodata)
+            if self._obj[data_var].rio.encoded_nodata is not None:
+                encoded_nodatavals.append(self._obj[data_var].rio.encoded_nodata)
+            else:
+                attr_nodatavals.append(self._obj[data_var].rio.nodata)
             band_tags.append(self._obj[data_var].attrs.copy())
-        data_array.attrs["scales"] = scales
-        data_array.attrs["offsets"] = offsets
+        if encoded_scales:
+            data_array.encoding["scales"] = encoded_scales
+        else:
+            data_array.attrs["scales"] = attr_scales
+        if encoded_offsets:
+            data_array.encoding["offsets"] = encoded_offsets
+        else:
+            data_array.attrs["offsets"] = attr_offsets
         data_array.attrs["band_tags"] = band_tags
         data_array.attrs["long_name"] = long_name
 
+        use_encoded_nodatavals = bool(encoded_nodatavals)
+        nodatavals = encoded_nodatavals if use_encoded_nodatavals else attr_nodatavals
         nodata = nodatavals[0]
         if (
             all(nodataval == nodata for nodataval in nodatavals)
             or numpy.isnan(nodatavals).all()
         ):
-            data_array.rio.write_nodata(nodata, inplace=True)
+            data_array.rio.write_nodata(
+                nodata, inplace=True, encoded=use_encoded_nodatavals
+            )
         else:
             raise RioXarrayError(
                 "All nodata values must be the same when exporting to raster. "
-                f"Current values: {nodatavals}"
+                f"Current values: {attr_nodatavals}"
             )
         if self.crs is not None:
             data_array.rio.write_crs(self.crs, inplace=True)
