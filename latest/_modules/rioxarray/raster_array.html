@@ -88,6 +88,7 @@
 <span class="sd">- https://github.com/opendatacube/datacube-core/blob/1d345f08a10a13c316f81100936b0ad8b1a374eb/LICENSE  # noqa: E501</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span>
@@ -207,7 +208,13 @@
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine the affine of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
-    <span class="n">src_bounds</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
+    <span class="n">src_bounds</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;gcps&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="ow">and</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="ow">and</span> <span class="s2">&quot;src_geoloc_array&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="n">src_bounds</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span>
     <span class="n">src_height</span><span class="p">,</span> <span class="n">src_width</span> <span class="o">=</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">dst_shape</span> <span class="k">if</span> <span class="n">dst_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="c1"># pylint: disable=isinstance-second-argument-not-valid-type</span>
@@ -542,8 +549,12 @@
         <span class="k">if</span> <span class="n">gcps</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;gcps&quot;</span><span class="p">,</span> <span class="n">gcps</span><span class="p">)</span>
 
-        <span class="n">gcps_or_rpcs</span> <span class="o">=</span> <span class="s2">&quot;gcps&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
-        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">gcps_or_rpcs</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">use_affine</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;gcps&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s2">&quot;src_geoloc_array&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">use_affine</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
                 <span class="n">src_data_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
@@ -563,7 +574,6 @@
         <span class="n">dst_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dst_data</span><span class="p">(</span><span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">)</span>
 
         <span class="n">dst_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dst_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
-
         <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">destination</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
@@ -595,7 +605,7 @@
                 <span class="n">dst_affine</span><span class="o">=</span><span class="n">dst_affine</span><span class="p">,</span>
                 <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">,</span>
                 <span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span>
-                <span class="n">force_generate</span><span class="o">=</span><span class="n">gcps_or_rpcs</span><span class="p">,</span>
+                <span class="n">force_generate</span><span class="o">=</span><span class="ow">not</span> <span class="n">use_affine</span><span class="p">,</span>
             <span class="p">),</span>
             <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dst_dims</span><span class="p">),</span>
             <span class="n">attrs</span><span class="o">=</span><span class="n">new_attrs</span><span class="p">,</span>
