@@ -40,7 +40,7 @@ jobs:
         gdal-version: ['3.10.0']
         include:
           - python-version: '3.10'
-            rasterio-version: '==1.3'
+            rasterio-version: '==1.3.7'
             xarray-version: '==2024.7.0'
             numpy-version: '<2'
             run-with-scipy: 'YES'
