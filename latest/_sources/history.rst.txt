@@ -1,9 +1,15 @@
 History
 =======
 
-Latest
+0.18.0
 ------
+- ENH:reproject: Support geolocation arrays (pull #822)
+- REF: Add positional arguments requirements (pull #806)
 - BUG:merge: Fix merging masked and scaled data (issue #814)
+- BUG: Fix chunk arguments for normalize_chunks (pull #820)
+- BUG: Squeeze when using interpolate_na with extra dim (pull #810)
+* BUG: Properly handle encoding/decoding scales and offsets by (pull #821)
+- DOC: Clearer coordinate docstring for `open_rasterio` (pull #811)
 
 0.17.0
 ------
