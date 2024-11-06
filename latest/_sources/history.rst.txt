@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+-------
+
 0.18.0
 ------
 - ENH:reproject: Support geolocation arrays (pull #822)
