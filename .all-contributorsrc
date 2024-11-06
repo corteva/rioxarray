@@ -417,6 +417,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "phofl",
+      "name": "Patrick Hoefler",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61934744?v=4",
+      "profile": "https://phofl.github.io/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
