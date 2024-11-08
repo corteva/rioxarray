@@ -12,7 +12,7 @@ from rasterio.merge import merge as _rio_merge
 from xarray import DataArray, Dataset
 
 from rioxarray._io import open_rasterio
-from rioxarray.rioxarray import _get_nonspatial_coords, _make_coords
+from rioxarray.rioxarray import _get_nonspatial_coords
 
 
 class RasterioDatasetDuck:
@@ -167,16 +167,35 @@ def merge_arrays(
             memfile.name,
             parse_coordinates=parse_coordinates,
             mask_and_scale=rioduckarrays[0]._mask_and_scale,
-        ) as xda:
-            xda = xda.load()
-        xda.coords.update(
-            {
-                coord: value
-                for coord, value in _get_nonspatial_coords(representative_array).items()
-                if coord not in xda.coords
-            }
-        )
-    return xda  # type: ignore
+        ) as merged_data:
+            merged_data = merged_data.load()
+
+        # make sure old & new coorinate names match & dimensions are correct
+        rename_map = {}
+        original_extra_dim = representative_array.rio._check_dimensions()
+        new_extra_dim = merged_data.rio._check_dimensions()
+        # make sure the output merged data shape is 2D if the
+        # original data was 2D. this can happen if the
+        # xarray datasarray was squeezed.
+        if len(merged_data.shape) == 3 and len(representative_array.shape) == 2:
+            merged_data = merged_data.squeeze(
+                dim=new_extra_dim, drop=original_extra_dim is None
+            )
+            new_extra_dim = merged_data.rio._check_dimensions()
+        if (
+            original_extra_dim is not None
+            and new_extra_dim is not None
+            and original_extra_dim != new_extra_dim
+        ):
+            rename_map[new_extra_dim] = original_extra_dim
+        if representative_array.rio.x_dim != merged_data.rio.x_dim:
+            rename_map[merged_data.rio.x_dim] = representative_array.rio.x_dim
+        if representative_array.rio.y_dim != merged_data.rio.y_dim:
+            rename_map[merged_data.rio.y_dim] = representative_array.rio.y_dim
+        if rename_map:
+            merged_data = merged_data.rename(rename_map)
+        merged_data.coords.update(_get_nonspatial_coords(representative_array))
+    return merged_data  # type: ignore
 
 
 def merge_datasets(
@@ -227,7 +246,7 @@ def merge_datasets(
 
     representative_ds = datasets[0]
     merged_data = {}
-    for data_var in representative_ds.data_vars:
+    for iii, data_var in enumerate(representative_ds.data_vars):
         merged_data[data_var] = merge_arrays(
             [dataset[data_var] for dataset in datasets],
             bounds=bounds,
@@ -236,18 +255,11 @@ def merge_datasets(
             precision=precision,
             method=method,
             crs=crs,
-            parse_coordinates=False,
+            parse_coordinates=iii == 0,
         )
     data_var = list(representative_ds.data_vars)[0]
     xds = Dataset(
         merged_data,
-        coords=_make_coords(
-            src_data_array=merged_data[data_var],
-            dst_affine=merged_data[data_var].rio.transform(),
-            dst_width=merged_data[data_var].shape[-1],
-            dst_height=merged_data[data_var].shape[-2],
-            force_generate=True,
-        ),
         attrs=representative_ds.attrs,
     )
     xds.rio.write_crs(merged_data[data_var].rio.crs, inplace=True)
