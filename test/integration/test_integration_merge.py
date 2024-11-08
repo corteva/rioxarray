@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import xarray
 from numpy import nansum
 from numpy.testing import assert_almost_equal
 
@@ -48,8 +49,8 @@ def test_merge_arrays(squeeze):
             ),
         )
         assert merged.rio._cached_transform() == merged.rio.transform()
+        assert sorted(merged.coords) == sorted(rds.coords)
         assert merged.coords["band"].values == [1]
-        assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
         assert merged.rio.crs == rds.rio.crs
         assert merged.attrs == {
             "AREA_OR_POINT": "Area",
@@ -63,10 +64,12 @@ def test_merge_arrays(squeeze):
 @pytest.mark.parametrize("dataset", [True, False])
 def test_merge__different_crs(dataset):
     dem_test = os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc")
-    with open_rasterio(dem_test) as rds:
+    with (
+        xarray.open_dataset(dem_test, mask_and_scale=False)
+        if dataset
+        else xarray.open_dataarray(dem_test, mask_and_scale=False)
+    ) as rds:
         crs = rds.rio.crs
-        if dataset:
-            rds = rds.to_dataset()
         arrays = [
             rds.isel(x=slice(100), y=slice(100)).rio.reproject("EPSG:3857"),
             rds.isel(x=slice(100, 200), y=slice(100, 200)),
@@ -106,8 +109,7 @@ def test_merge__different_crs(dataset):
                 1.0,
             ),
         )
-        assert merged.coords["band"].values == [1]
-        assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
+        assert sorted(merged.coords) == sorted(list(rds.coords) + ["spatial_ref"])
         assert merged.rio.crs == rds.rio.crs
         if not dataset:
             assert merged.attrs == {
@@ -151,8 +153,8 @@ def test_merge_arrays__res():
             ),
         )
         assert merged.rio._cached_transform() == merged.rio.transform()
+        assert sorted(merged.coords) == sorted(rds.coords)
         assert merged.coords["band"].values == [1]
-        assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
         assert merged.rio.crs == rds.rio.crs
         assert_almost_equal(merged.rio.nodata, rds.rio.nodata)
         assert_almost_equal(merged.rio.encoded_nodata, rds.rio.encoded_nodata)
@@ -207,8 +209,8 @@ def test_merge_datasets():
                 1.0,
             ),
         )
+        assert sorted(merged.coords) == sorted(rds.coords)
         assert merged.coords["band"].values == [1]
-        assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
         assert merged.rio.crs == rds.rio.crs
         assert merged.attrs == rds.attrs
         assert merged.encoding["grid_mapping"] == "spatial_ref"
@@ -263,7 +265,7 @@ def test_merge_datasets__res():
         )
         assert merged.rio.shape == (1112, 1112)
         assert merged.coords["band"].values == [1]
-        assert sorted(merged.coords) == ["band", "spatial_ref", "x", "y"]
+        assert sorted(merged.coords) == sorted(rds.coords)
         assert merged.rio.crs == rds.rio.crs
         assert merged.attrs == rds.attrs
         assert merged.encoding["grid_mapping"] == "spatial_ref"
@@ -282,8 +284,21 @@ def test_merge_datasets__mask_and_scale(mask_and_scale):
             rds.isel(x=slice(100, None), y=slice(100)),
         ]
         merged = merge_datasets(datasets)
+        assert sorted(merged.coords) == sorted(list(rds.coords) + ["spatial_ref"])
         total = merged.air_temperature.sum()
         if mask_and_scale:
             assert_almost_equal(total, 133376696)
         else:
             assert_almost_equal(total, 10981781386)
+
+
+def test_merge_datasets__preserve_dimension_names():
+    sentinel_2_geographic = os.path.join(
+        TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
+    )
+    with xarray.open_dataset(sentinel_2_geographic) as mda:
+        merged = merge_datasets([mda])
+        assert sorted(merged.coords) == sorted(mda.coords)
+        for data_var in mda.data_vars:
+            assert_almost_equal(merged[data_var].sum(), mda[data_var].sum())
+        assert merged.rio.crs == mda.rio.crs
