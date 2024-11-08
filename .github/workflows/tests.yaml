@@ -32,25 +32,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
         rasterio-version: ['']
         xarray-version: ['']
         numpy-version: ['']
         run-with-scipy: ['YES']
-        gdal-version: ['3.8.2']
+        gdal-version: ['3.10.0']
         include:
           - python-version: '3.10'
-            rasterio-version: '==1.3'
+            rasterio-version: '==1.3.7'
             xarray-version: '==2024.7.0'
             numpy-version: '<2'
             run-with-scipy: 'YES'
-            gdal-version: '3.6.4'
+            gdal-version: '3.8.2'
           - python-version: '3.10'
             rasterio-version: ''
             xarray-version: ''
             numpy-version: ''
             run-with-scipy: 'NO'
-            gdal-version: '3.7.3'
+            gdal-version: '3.9.3'
     steps:
       - uses: actions/checkout@v4
 
@@ -100,7 +100,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
         rasterio-version: ['*']
         xarray-version: ['*']
         run-with-scipy: ['YES']
