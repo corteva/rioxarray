@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.18.1
 -------
 - DEP: Pin rasterio>=1.3.7 (pull #826)
