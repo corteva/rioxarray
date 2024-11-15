@@ -924,7 +924,7 @@ class RasterArray(XRasterBase):
             false, only pixels whose center is within the polygon or that
             are selected by Bresenham's line algorithm will be burned in.
         drop: bool, optional
-            If True, drop the data outside of the extent of the mask geoemtries
+            If True, drop the data outside of the extent of the mask geometries
             Otherwise, it will return the same raster with the data masked.
             Default is True.
         invert: boolean, optional
