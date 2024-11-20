@@ -670,7 +670,7 @@ def _get_rasterio_attrs(riods: RasterioReader):
     if len(set(riods.scales)) > 1:
         attrs["scales"] = riods.scales
         warnings.warn(
-            "Offsets differ across bands. The 'scale_factor' attribute will "
+            "Scales differ across bands. The 'scale_factor' attribute will "
             "not be added. See the 'scales' attribute."
         )
     else:
