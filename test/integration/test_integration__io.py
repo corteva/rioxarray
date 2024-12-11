@@ -1,6 +1,7 @@
 import contextlib
 import io
 import itertools
+import logging
 import os
 import pickle
 import shutil
@@ -863,13 +864,19 @@ def test_http_url():
         assert isinstance(actual.data, dask.array.Array)
 
 
-def test_rasterio_environment():
+def test_rasterio_environment(tmp_path):
+    log = logging.getLogger("rasterio._env")
+    log.setLevel(logging.DEBUG)
+    logfile = tmp_path / "file.log"
+    fh = logging.FileHandler(logfile)
+    log.addHandler(fh)
     with create_tmp_geotiff() as (tmp_file, expected):
         # Should fail with error since suffix not allowed
-        with pytest.raises(Exception):
-            with rasterio.Env(GDAL_SKIP="GTiff"):
-                with rioxarray.open_rasterio(tmp_file) as actual:
-                    assert_allclose(actual, expected)
+        with rasterio.Env(CPL_DEBUG=True):
+            with rioxarray.open_rasterio(tmp_file) as actual:
+                assert_allclose(actual.load(), expected)
+
+    assert f"GDAL: GDALOpen({tmp_file}" in logfile.read_text()
 
 
 @pytest.mark.parametrize("band_as_variable", [True, False])
