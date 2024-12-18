@@ -5,7 +5,6 @@
 name: rioxarray
 channels:
 - conda-forge
-- defaults
 dependencies:
 - python
 - rasterio
