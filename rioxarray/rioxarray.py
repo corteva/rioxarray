@@ -143,9 +143,13 @@ def _get_nonspatial_coords(
         src_data_array.rio.x_dim,
         src_data_array.rio.y_dim,
         DEFAULT_GRID_MAP,
-        "xc",
-        "yc",
     }:
+        # skip 2D spatial coords
+        if (
+            src_data_array.rio.x_dim in src_data_array[coord].dims
+            and src_data_array.rio.y_dim in src_data_array[coord].dims
+        ):
+            continue
         if src_data_array[coord].ndim == 1:
             coords[coord] = xarray.IndexVariable(
                 src_data_array[coord].dims,
