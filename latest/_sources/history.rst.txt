@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.18.2
 ------
 - BUG: Fix reproject with geoloc arrays not named xc|yc (#840)
