@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Example - Reading and Writing with Dask &mdash; rioxarray 0.18.2.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
@@ -130,7 +130,11 @@ import rioxarray
 </pre></div>
 </div>
 </div>
-<p>Tips for using dask locks: - Be careful about what lock you use for your process. It is required to have a lock for each worker, so the more fine-grained the better. - The reading and writing processes need the same type of lock. They don’t have to share the same lock, but they do nead a lock of the same type.</p>
+<p>Tips for using dask locks:</p>
+<ul class="simple">
+<li><p>Be careful about what lock you use for your process. It is required to have a lock for each worker, so the more fine-grained the better.</p></li>
+<li><p>The reading and writing processes need the same type of lock. They don’t have to share the same lock, but they do nead a lock of the same type.</p></li>
+</ul>
 <p>See docs for:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="read-locks.html"><span class="doc">Reading COGs in Parallel</span></a></p></li>

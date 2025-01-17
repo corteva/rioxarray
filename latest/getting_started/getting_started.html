@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Getting Started &mdash; rioxarray 0.18.2.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
@@ -102,7 +102,7 @@
 <h2>rio accessor<a class="headerlink" href="#rio-accessor" title="Link to this heading"></a></h2>
 <p>rioxarray <a class="reference external" href="https://docs.xarray.dev/en/stable/internals/extending-xarray.html">extends xarray</a>
 with the <cite>rio</cite> accessor. The <cite>rio</cite> accessor is activated by importing rioxarray like so:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 </pre></div>
 </div>
 <p>You can learn how to <cite>clip</cite>, <cite>merge</cite>, and <cite>reproject</cite> rasters in the <a class="reference internal" href="../examples/examples.html#usage-examples"><span class="std std-ref">Usage Examples</span></a>
@@ -117,7 +117,7 @@ that as well.</p>
 <cite>xarray</cite> open methods. If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
 to load netCDF files with the default engine, it is recommended to use <cite>decode_coords=”all”</cite>.
 This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
 <span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;file.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 </pre></div>
@@ -128,14 +128,14 @@ This will load the grid mapping variable into coordinates for compatibility with
 <p>rioxarray 0.4+ enables passing <cite>engine=”rasterio”</cite> to <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code>
 and <code class="docutils literal notranslate"><span class="pre">xarray.open_mfdataset</span></code> for xarray 0.18+. This uses
 <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> as the backend and always returns an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
 <span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also use <a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a>. This objects returned depend on
 your input file type.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 
 <span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="s2">&quot;my.tif&quot;</span><span class="p">)</span>
 </pre></div>

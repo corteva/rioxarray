@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rioxarray._show_versions &mdash; rioxarray 0.18.2.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -84,13 +84,13 @@
 <span class="sd">which was adapted from :func:`pandas.show_versions`</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># pylint: disable=import-outside-toplevel</span>
-<span class="kn">import</span> <span class="nn">importlib.metadata</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">platform</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 
-<span class="k">def</span> <span class="nf">_get_sys_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_sys_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;System information</span>
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -106,7 +106,7 @@
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_main_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_main_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the main dependency information to hightlight.</span>
 
 <span class="sd">    Returns</span>
@@ -114,7 +114,7 @@
 <span class="sd">    proj_info: dict</span>
 <span class="sd">        system GDAL information</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">rasterio</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">proj_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">get_proj_data_search_paths</span><span class="p">())</span>
@@ -138,7 +138,7 @@
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_deps_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_deps_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Overview of the installed version of dependencies</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -147,7 +147,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;pyproj&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">get_version</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
@@ -156,7 +156,7 @@
     <span class="k">return</span> <span class="p">{</span><span class="n">dep</span><span class="p">:</span> <span class="n">get_version</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span> <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_print_info_dict</span><span class="p">(</span><span class="n">info_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_print_info_dict</span><span class="p">(</span><span class="n">info_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the information dictionary&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -164,7 +164,7 @@
 
 <div class="viewcode-block" id="show_versions">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.show_versions">[docs]</a>
-<span class="k">def</span> <span class="nf">show_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    .. versionadded:: 0.0.26</span>
 
