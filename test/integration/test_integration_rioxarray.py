@@ -3226,17 +3226,36 @@ def test_bounds__ordered__dataset():
 
 
 @pytest.mark.skipif(not RASTERIO_GE_14, reason="Requires rasterio 1.4+")
-def test_non_rectilinear__reproject(open_rasterio):
+@pytest.mark.parametrize(
+    "rename",
+    [
+        None,
+        {"xc": "longitude", "yc": "latitude"},
+        {"y": "lines", "x": "pixels", "xc": "longitude", "yc": "latitude"},
+    ],
+)
+def test_non_rectilinear__reproject(rename, open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif")
     with open_rasterio(test_file) as xds:
+        x_2d_name = "xc"
+        y_2d_name = "yc"
+        if rename:
+            xds = xds.rename(rename)
+            x_2d_name = rename["xc"]
+            y_2d_name = rename["yc"]
+            if "x" in rename:
+                xds.rio.set_spatial_dims(rename["x"], rename["y"], inplace=True)
+                xds.rio.write_coordinate_system(inplace=True)
         xds_1d = xds.rio.reproject(
             "EPSG:4326",
             src_geoloc_array=(
-                xds.coords["xc"].values,
-                xds.coords["yc"].values,
+                xds.coords[x_2d_name].values,
+                xds.coords[y_2d_name].values,
             ),
             georeferencing_convention="PIXEL_CENTER",
         )
+        assert x_2d_name not in xds_1d.coords
+        assert y_2d_name not in xds_1d.coords
         assert xds_1d.coords["x"].shape == (14,)
         assert xds_1d.coords["y"].shape == (10,)
         xds_1d.rio.transform().almost_equals(
