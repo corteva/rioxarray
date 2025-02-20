@@ -2,12 +2,14 @@ from collections.abc import Hashable, Mapping
 from typing import Any
 
 import numpy as np
+import pandas as pd
 from affine import Affine
 from xarray import DataArray, Index, Variable
+from xarray.core.coordinate_transform import CoordinateTransform
+
 # TODO: import from public API once it is available
 from xarray.core.indexes import CoordinateTransformIndex, PandasIndex
 from xarray.core.indexing import IndexSelResult, merge_sel_results
-from xarray.core.coordinate_transform import CoordinateTransform
 
 
 class AffineTransform(CoordinateTransform):
@@ -27,7 +29,9 @@ class AffineTransform(CoordinateTransform):
         y_dim: str = "y",
         dtype: Any = np.dtype(np.float64),
     ):
-        super().__init__((x_coord_name, y_coord_name), {x_dim: width, y_dim: height}, dtype=dtype)
+        super().__init__(
+            (x_coord_name, y_coord_name), {x_dim: width, y_dim: height}, dtype=dtype
+        )
         self.affine = affine
 
         # array dimensions in reverse order (y = rows, x = cols)
@@ -78,7 +82,7 @@ class AxisAffineTransform(CoordinateTransform):
         is_xaxis: bool,
         dtype: Any = np.dtype(np.float64),
     ):
-        assert (affine.is_rectilinear and (affine.b == affine.d == 0))
+        assert affine.is_rectilinear and (affine.b == affine.d == 0)
 
         super().__init__((coord_name,), {dim: size}, dtype=dtype)
         self.affine = affine
@@ -113,9 +117,13 @@ class AxisAffineTransform(CoordinateTransform):
 
         # only compare the affine parameters of the relevant axis
         if self.is_xaxis:
-            affine_match = self.affine.a == other.affine.a and self.affine.c == other.affine.c
+            affine_match = (
+                self.affine.a == other.affine.a and self.affine.c == other.affine.c
+            )
         else:
-            affine_match = self.affine.e == other.affine.e and self.affine.f == other.affine.f
+            affine_match = (
+                self.affine.e == other.affine.e and self.affine.f == other.affine.f
+            )
 
         return affine_match and self.size == other.size
 
@@ -134,14 +142,25 @@ class AxisAffineTransform(CoordinateTransform):
         assert slice.start < slice.stop
 
         size = stop - start // step
-        scale = 1. / step
+        scale = 1.0 / step
 
         if self.is_xaxis:
-            affine = self.affine * Affine.translation(start, 0.) * Affine.scale(scale, 1.)
+            affine = (
+                self.affine * Affine.translation(start, 0.0) * Affine.scale(scale, 1.0)
+            )
         else:
-            affine = self.affine * Affine.translation(0., start) * Affine.scale(1., scale)
+            affine = (
+                self.affine * Affine.translation(0.0, start) * Affine.scale(1.0, scale)
+            )
 
-        return type(self)(affine, size, self.coord_name, self.dim, is_xaxis=self.is_xaxis, dtype=self.dtype)
+        return type(self)(
+            affine,
+            size,
+            self.coord_name,
+            self.dim,
+            is_xaxis=self.is_xaxis,
+            dtype=self.dtype,
+        )
 
 
 class AxisAffineTransformIndex(CoordinateTransformIndex):
@@ -159,7 +178,11 @@ class AxisAffineTransformIndex(CoordinateTransformIndex):
     - Otherwise data selection creates and returns a new Xarray
       `PandasIndex` object for non-scalar indexers
 
+    - The index can be converted to a `pandas.Index` object (useful for Xarray
+      operations that don't work with Xarray indexes yet).
+
     """
+
     axis_transform: AxisAffineTransform
     dim: str
 
@@ -192,7 +215,9 @@ class AxisAffineTransformIndex(CoordinateTransformIndex):
         if isinstance(label, slice):
             if label.step is None:
                 # continuous interval slice indexing (preserves the index)
-                pos = self.transform.reverse({coord_name: np.array([label.start, label.stop])})
+                pos = self.transform.reverse(
+                    {coord_name: np.array([label.start, label.stop])}
+                )
                 pos = np.round(pos[self.dim]).astype("int")
                 new_start = max(pos[0], 0)
                 new_stop = min(pos[1], self.axis_transform.size)
@@ -221,6 +246,10 @@ class AxisAffineTransformIndex(CoordinateTransformIndex):
 
         return result
 
+    def to_pandas_index(self) -> pd.Index:
+        values = self.transform.generate_coords()
+        return pd.Index(values[self.dim])
+
 
 # The types of Xarray indexes that may be wrapped by RasterIndex
 WrappedIndex = AxisAffineTransformIndex | PandasIndex | CoordinateTransformIndex
@@ -242,7 +271,7 @@ class RasterIndex(Index):
 
     RasterIndex is itself a wrapper around one or more Xarray indexes associated
     with either the raster x or y axis coordinate or both, depending on the
-    affine transformation:
+    affine transformation and prior data selection (if any):
 
     - The affine transformation is not rectilinear or has rotation: this index
       encapsulates a single `CoordinateTransformIndex` object for both the x and
@@ -255,6 +284,7 @@ class RasterIndex(Index):
       after data selection at arbitrary locations).
 
     """
+
     _wrapped_indexes: dict[WrappedIndexCoords, WrappedIndex]
 
     def __init__(self, indexes: Mapping[WrappedIndexCoords, WrappedIndex]):
@@ -262,29 +292,42 @@ class RasterIndex(Index):
         idx_vals = list(indexes.values())
 
         # either one or the other configuration (dependent vs. independent x/y axes)
-        axis_dependent = len(indexes) == 1 and isinstance(idx_keys[0], tuple) and isinstance(idx_vals[0], CoordinateTransformIndex)
-        axis_independent = len(indexes) in (1, 2) and all(isinstance(idx, AxisAffineTransformIndex | PandasIndex) for idx in idx_vals)
+        axis_dependent = (
+            len(indexes) == 1
+            and isinstance(idx_keys[0], tuple)
+            and isinstance(idx_vals[0], CoordinateTransformIndex)
+        )
+        axis_independent = len(indexes) in (1, 2) and all(
+            isinstance(idx, AxisAffineTransformIndex | PandasIndex) for idx in idx_vals
+        )
         assert axis_dependent ^ axis_independent
 
         self._wrapped_indexes = dict(indexes)
 
     @classmethod
-    def from_transform(cls, affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y") -> "RasterIndex":
-        indexes: dict[WrappedIndexCoords, AxisAffineTransformIndex | CoordinateTransformIndex]
+    def from_transform(
+        cls, affine: Affine, width: int, height: int, x_dim: str = "x", y_dim: str = "y"
+    ) -> "RasterIndex":
+        indexes: dict[
+            WrappedIndexCoords, AxisAffineTransformIndex | CoordinateTransformIndex
+        ]
 
         # pixel centered coordinates
         affine = affine * Affine.translation(0.5, 0.5)
 
         if affine.is_rectilinear and affine.b == affine.d == 0:
             x_transform = AxisAffineTransform(affine, width, "x", x_dim, is_xaxis=True)
-            y_transform = AxisAffineTransform(affine, height, "y", y_dim, is_xaxis=False)
+            y_transform = AxisAffineTransform(
+                affine, height, "y", y_dim, is_xaxis=False
+            )
             indexes = {
                 "x": AxisAffineTransformIndex(x_transform),
                 "y": AxisAffineTransformIndex(y_transform),
-
             }
         else:
-            xy_transform = AffineTransform(affine, width, height, x_dim=x_dim, y_dim=y_dim)
+            xy_transform = AffineTransform(
+                affine, width, height, x_dim=x_dim, y_dim=y_dim
+            )
             indexes = {("x", "y"): CoordinateTransformIndex(xy_transform)}
 
         return cls(indexes)
@@ -343,7 +386,9 @@ class RasterIndex(Index):
                 coord_names = (coord_names,)
             index_labels = {k: v for k, v in labels if k in coord_names}
             if index_labels:
-                results.append(index.sel(index_labels, method=method, tolerance=tolerance))
+                results.append(
+                    index.sel(index_labels, method=method, tolerance=tolerance)
+                )
 
         return merge_sel_results(results)
 
@@ -357,3 +402,14 @@ class RasterIndex(Index):
             index.equals(other._wrapped_indexes[k])  # type: ignore[arg-type]
             for k, index in self._wrapped_indexes.items()
         )
+
+    def to_pandas_index(self) -> pd.Index:
+        # conversion is possible only if this raster index encapsulates
+        # exactly one AxisAffineTransformIndex or a PandasIndex associated
+        # to either the x or y axis (1-dimensional) coordinate.
+        if len(self._wrapped_indexes) == 1:
+            index = next(iter(self._wrapped_indexes.values()))
+            if isinstance(index, AxisAffineTransformIndex | PandasIndex):
+                return index.to_pandas_index()
+
+        raise ValueError("Cannot convert RasterIndex to pandas.Index")
