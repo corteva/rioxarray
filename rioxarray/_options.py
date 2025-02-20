@@ -10,15 +10,18 @@ from typing import Any
 
 EXPORT_GRID_MAPPING = "export_grid_mapping"
 SKIP_MISSING_SPATIAL_DIMS = "skip_missing_spatial_dims"
+USE_RASTER_INDEX = "use_raster_index"
 
 OPTIONS = {
     EXPORT_GRID_MAPPING: True,
     SKIP_MISSING_SPATIAL_DIMS: False,
+    USE_RASTER_INDEX: False,
 }
 OPTION_NAMES = set(OPTIONS)
 
 VALIDATORS = {
     EXPORT_GRID_MAPPING: lambda choice: isinstance(choice, bool),
+    USE_RASTER_INDEX: lambda choice: isinstance(choice, bool),
 }
 
 
@@ -60,6 +63,13 @@ class set_options:  # pylint: disable=invalid-name
         If True, it will not perform spatial operations on variables
         within a :class:`xarray.Dataset` if the spatial dimensions
         are not found.
+    use_raster_index: bool, default=False
+        If True, this option will generate (lazy) spatial coordinates wrapping the
+        affine :meth:`~rioxarray.rioxarray.XRasterBase.transform` and will associate
+        them with a custom ``RasterIndex`` Xarray index.
+        Otherwise this will generate spatial coordinates using explict values
+        computed by forward transformation and will associate each of the 1-dimensional
+        spatial coordinates with a default (pandas) index.
 
 
     Usage as a context manager::
