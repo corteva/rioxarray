@@ -93,7 +93,7 @@ class AxisAffineTransform(CoordinateTransform):
         self.size = size
 
     def forward(self, dim_positions: dict[str, Any]) -> dict[Hashable, Any]:
-        positions = dim_positions[self.dim]
+        positions = np.asarray(dim_positions[self.dim])
 
         if self.is_xaxis:
             labels, _ = self.affine * (positions, np.zeros_like(positions))
@@ -103,7 +103,7 @@ class AxisAffineTransform(CoordinateTransform):
         return {self.coord_name: labels}
 
     def reverse(self, coord_labels: dict[Hashable, Any]) -> dict[str, Any]:
-        labels = coord_labels[self.coord_name]
+        labels = np.asarray(coord_labels[self.coord_name])
 
         if self.is_xaxis:
             positions, _ = ~self.affine * (labels, np.zeros_like(labels))
@@ -206,7 +206,9 @@ class AxisAffineTransformIndex(CoordinateTransformIndex):
             return None
         # otherwise return a PandasIndex with values computed by forward transformation
         else:
-            values = np.asarray(self.axis_transform.forward({self.dim: idxer}))
+            values = self.axis_transform.forward({self.dim: idxer})[
+                self.axis_transform.coord_name
+            ]
             return PandasIndex(values, self.dim, coord_dtype=values.dtype)
 
     def sel(self, labels, method=None, tolerance=None):
