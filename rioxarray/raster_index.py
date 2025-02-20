@@ -142,8 +142,8 @@ class AxisAffineTransform(CoordinateTransform):
         # TODO: support reverse transform (i.e., start > stop)?
         assert start < stop
 
-        size = stop - start // step
-        scale = 1.0 / step
+        size = (stop - start) // step
+        scale = float(step)
 
         if self.is_xaxis:
             affine = (
