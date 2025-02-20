@@ -364,7 +364,9 @@ class RasterIndex(Index):
             index_indexers = _filter_dim_indexers(index, indexers)
             if not index_indexers:
                 # no selection to perform: simply propagate the index
-                new_indexes[coord_names] = index
+                # TODO: uncomment when https://github.com/pydata/xarray/issues/10063 is fixed
+                # new_indexes[coord_names] = index
+                ...
             else:
                 new_index = index.isel(index_indexers)
                 if new_index is not None:
