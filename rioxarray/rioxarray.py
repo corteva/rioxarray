@@ -34,6 +34,7 @@ from rioxarray.exceptions import (
     RioXarrayError,
     TooManyDimensions,
 )
+from rioxarray.raster_index import RasterIndex
 
 DEFAULT_GRID_MAP = "spatial_ref"
 
@@ -121,23 +122,31 @@ def affine_to_coords(
 
 def _generate_spatial_coords(
     *, affine: Affine, width: int, height: int
-) -> dict[Hashable, Any]:
+) -> xarray.Coordinates:
     """get spatial coords in new transform"""
-    new_spatial_coords = affine_to_coords(affine, width, height)
-    if new_spatial_coords["x"].ndim == 1:
-        return {
-            "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
-            "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
-        }
-    return {
-        "xc": (("y", "x"), new_spatial_coords["x"]),
-        "yc": (("y", "x"), new_spatial_coords["y"]),
-    }
+
+    if get_option("use_raster_index"):
+        raster_index = RasterIndex.from_transform(affine, width, height)
+        return xarray.Coordinates.from_xindex(raster_index)
+
+    else:
+        new_spatial_coords = affine_to_coords(affine, width, height)
+        if new_spatial_coords["x"].ndim == 1:
+            coords = {
+                "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
+                "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
+            }
+        else:
+            coords = {
+                "xc": (("y", "x"), new_spatial_coords["x"]),
+                "yc": (("y", "x"), new_spatial_coords["y"]),
+            }
+        return xarray.Coordinates(coords)
 
 
 def _get_nonspatial_coords(
     src_data_array: Union[xarray.DataArray, xarray.Dataset]
-) -> dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
+) -> xarray.Coordinates:
     coords: dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
     for coord in set(src_data_array.coords) - {
         src_data_array.rio.x_dim,
@@ -162,7 +171,7 @@ def _get_nonspatial_coords(
                 src_data_array[coord].values,
                 src_data_array[coord].attrs,
             )
-    return coords
+    return xarray.Coordinates(coords)
 
 
 def _make_coords(
@@ -172,7 +181,7 @@ def _make_coords(
     dst_width: int,
     dst_height: int,
     force_generate: bool = False,
-) -> dict[Hashable, Any]:
+) -> xarray.Coordinates:
     """Generate the coordinates of the new projected `xarray.DataArray`"""
     coords = _get_nonspatial_coords(src_data_array)
     if (
