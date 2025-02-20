@@ -43,7 +43,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Example of loading unmaksed data\n",
+    "## Example of loading unmasked data\n",
     "\n",
     "In this case, the nodata value is in the attributes."
    ]
