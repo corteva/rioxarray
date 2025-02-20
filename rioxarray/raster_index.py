@@ -1,3 +1,4 @@
+import textwrap
 from collections.abc import Hashable, Mapping
 from typing import Any
 
@@ -413,3 +414,11 @@ class RasterIndex(Index):
                 return index.to_pandas_index()
 
         raise ValueError("Cannot convert RasterIndex to pandas.Index")
+
+    def __repr__(self):
+        items: list[str] = []
+
+        for coord_names, index in self._wrapped_indexes.items():
+            items += [repr(coord_names) + ":", textwrap.indent(repr(index), "    ")]
+
+        return "RasterIndex\n" + "\n".join(items)
