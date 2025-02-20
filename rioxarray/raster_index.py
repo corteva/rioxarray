@@ -139,7 +139,7 @@ class AxisAffineTransform(CoordinateTransform):
         step = slice.step or 1
 
         # TODO: support reverse transform (i.e., start > stop)?
-        assert slice.start < slice.stop
+        assert start < stop
 
         size = stop - start // step
         scale = 1.0 / step
