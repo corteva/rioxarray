@@ -67,7 +67,7 @@ class set_options:  # pylint: disable=invalid-name
         If True, this option will generate (lazy) spatial coordinates wrapping the
         affine :meth:`~rioxarray.rioxarray.XRasterBase.transform` and will associate
         them with a custom ``RasterIndex`` Xarray index.
-        Otherwise this will generate spatial coordinates using explict values
+        Otherwise this will generate spatial coordinates using explicit values
         computed by forward transformation and will associate each of the 1-dimensional
         spatial coordinates with a default (pandas) index.
 
