@@ -201,15 +201,22 @@ class AxisAffineTransformIndex(CoordinateTransformIndex):
         # generate a new index with updated transform if a slice is given
         if isinstance(idxer, slice):
             return AxisAffineTransformIndex(self.axis_transform.slice(idxer))
+        # no index for vectorized (fancy) indexing with n-dimensional Variable
+        elif isinstance(idxer, Variable) and idxer.ndim > 1:
+            return None
         # no index for scalar value
-        elif np.isscalar(idxer):
+        elif np.ndim(idxer) == 0:
             return None
         # otherwise return a PandasIndex with values computed by forward transformation
         else:
             values = self.axis_transform.forward({self.dim: idxer})[
                 self.axis_transform.coord_name
             ]
-            return PandasIndex(values, self.dim, coord_dtype=values.dtype)
+            if isinstance(idxer, Variable):
+                new_dim = idxer.dims[0]
+            else:
+                new_dim = self.dim
+            return PandasIndex(values, new_dim, coord_dtype=values.dtype)
 
     def sel(self, labels, method=None, tolerance=None):
         coord_name = self.axis_transform.coord_name
