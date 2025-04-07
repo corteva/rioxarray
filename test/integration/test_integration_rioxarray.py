@@ -31,7 +31,6 @@ from rioxarray.exceptions import (
 from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
     GDAL_GE_361,
-    RASTERIO_GE_14,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
     _assert_xarrays_equal,
@@ -2225,12 +2224,9 @@ def test_reproject_transform_missing_shape():
     "dtype, expected_nodata",
     [
         (numpy.uint8, 255),
-        pytest.param(
+        (
             numpy.int8,
             -128,
-            marks=pytest.mark.xfail(
-                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
-            ),
         ),
         (numpy.uint16, 65535),
         (numpy.int16, -32768),
@@ -2240,19 +2236,13 @@ def test_reproject_transform_missing_shape():
         (numpy.float64, numpy.nan),
         (numpy.complex64, numpy.nan),
         (numpy.complex128, numpy.nan),
-        pytest.param(
+        (
             numpy.uint64,
             18446744073709551615,
-            marks=pytest.mark.xfail(
-                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
-            ),
         ),
-        pytest.param(
+        (
             numpy.int64,
             -9223372036854775808,
-            marks=pytest.mark.xfail(
-                not RASTERIO_GE_14, reason="Not worried about it if it works on latest."
-            ),
         ),
     ],
 )
@@ -3225,7 +3215,6 @@ def test_bounds__ordered__dataset():
     assert xds.rio.bounds() == (-0.5, -0.5, 4.5, 4.5)
 
 
-@pytest.mark.skipif(not RASTERIO_GE_14, reason="Requires rasterio 1.4+")
 @pytest.mark.parametrize(
     "rename",
     [

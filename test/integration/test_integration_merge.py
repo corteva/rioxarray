@@ -7,7 +7,7 @@ from numpy.testing import assert_almost_equal
 
 from rioxarray import open_rasterio
 from rioxarray.merge import merge_arrays, merge_datasets
-from test.conftest import RASTERIO_GE_14, RASTERIO_GE_143, TEST_INPUT_DATA_DIR
+from test.conftest import TEST_INPUT_DATA_DIR
 
 
 @pytest.mark.parametrize("squeeze", [True, False])
@@ -52,12 +52,7 @@ def test_merge_arrays(squeeze):
         assert sorted(merged.coords) == sorted(rds.coords)
         assert merged.coords["band"].values == [1]
         assert merged.rio.crs == rds.rio.crs
-        assert merged.attrs == {
-            "AREA_OR_POINT": "Area",
-            "add_offset": 0.0,
-            "scale_factor": 1.0,
-            **rds.attrs,
-        }
+        assert merged.attrs == rds.attrs
         assert merged.encoding["grid_mapping"] == "spatial_ref"
 
 
@@ -90,10 +85,7 @@ def test_merge__different_crs(dataset):
             (-7300984.0238134, 5003618.5908794, -7224054.1109682, 5050108.6101528),
         )
         assert merged.rio.shape == (84, 139)
-        if RASTERIO_GE_14 and not RASTERIO_GE_143:
-            assert_almost_equal(test_sum, -126821853)
-        else:
-            assert_almost_equal(test_sum, -131734881)
+        assert_almost_equal(test_sum, -131734881)
 
         assert_almost_equal(
             tuple(merged.rio.transform()),
@@ -113,10 +105,7 @@ def test_merge__different_crs(dataset):
         assert merged.rio.crs == rds.rio.crs
         if not dataset:
             assert merged.attrs == {
-                "AREA_OR_POINT": "Area",
                 "_FillValue": -28672,
-                "add_offset": 0.0,
-                "scale_factor": 1.0,
             }
         assert merged.encoding["grid_mapping"] == "spatial_ref"
 
@@ -284,7 +273,7 @@ def test_merge_datasets__mask_and_scale(mask_and_scale):
             rds.isel(x=slice(100, None), y=slice(100)),
         ]
         merged = merge_datasets(datasets)
-        assert sorted(merged.coords) == sorted(list(rds.coords) + ["spatial_ref"])
+        assert sorted(merged.coords) == sorted(list(rds.coords))
         total = merged.air_temperature.sum()
         if mask_and_scale:
             assert_almost_equal(total, 133376696)

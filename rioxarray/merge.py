@@ -2,17 +2,16 @@
 This module allows you to merge xarray Datasets/DataArrays
 geospatially with the `rasterio.merge` module.
 """
+
 from collections.abc import Sequence
 from typing import Callable, Optional, Union
 
 import numpy
 from rasterio.crs import CRS
-from rasterio.io import MemoryFile
 from rasterio.merge import merge as _rio_merge
-from xarray import DataArray, Dataset
+from xarray import DataArray, Dataset, IndexVariable
 
-from rioxarray._io import open_rasterio
-from rioxarray.rioxarray import _get_nonspatial_coords
+from rioxarray.rioxarray import _get_nonspatial_coords, _make_coords
 
 
 class RasterioDatasetDuck:
@@ -31,29 +30,13 @@ class RasterioDatasetDuck:
         self.count = int(xds.rio.count)
         self.dtypes = [xds.dtype]
         self.name = xds.name
-        if xds.rio.encoded_nodata is not None:
-            self.nodatavals = [xds.rio.encoded_nodata]
-        else:
-            self.nodatavals = [xds.rio.nodata]
+        self.nodatavals = [xds.rio.nodata]
         res = xds.rio.resolution(recalc=True)
         self.res = (abs(res[0]), abs(res[1]))
         self.transform = xds.rio.transform(recalc=True)
-        self.profile: dict = {
-            "crs": self.crs,
-            "nodata": self.nodatavals[0],
-        }
-        valid_scale_factor = self._xds.encoding.get("scale_factor", 1) != 1 or any(
-            scale != 1 for scale in self._xds.encoding.get("scales", (1,))
-        )
-        valid_offset = self._xds.encoding.get("add_offset", 0.0) != 0 or any(
-            offset != 0 for offset in self._xds.encoding.get("offsets", (0,))
-        )
-        self._mask_and_scale = (
-            self._xds.rio.encoded_nodata is not None
-            or valid_scale_factor
-            or valid_offset
-            or self._xds.encoding.get("_Unsigned") is not None
-        )
+        # profile is only used for writing to a file.
+        # This never happens with rioxarray merge.
+        self.profile: dict = {}
 
     def colormap(self, *args, **kwargs) -> None:
         """
@@ -63,21 +46,44 @@ class RasterioDatasetDuck:
         # pylint: disable=unused-argument
         return None
 
-    def read(self, *args, **kwargs) -> numpy.ma.MaskedArray:
+    def read(self, window, out_shape, *args, **kwargs) -> numpy.ma.MaskedArray:
+        # pylint: disable=unused-argument
         """
         This method is meant to be used by the rasterio.merge.merge function.
         """
-        with MemoryFile() as memfile:
-            self._xds.rio.to_raster(memfile.name)
-            with memfile.open() as dataset:
-                if self._mask_and_scale:
-                    kwargs["masked"] = True
-                out = dataset.read(*args, **kwargs)
-                if self._mask_and_scale:
-                    out = out.astype(self._xds.dtype)
-                    for iii in range(self.count):
-                        out[iii] = out[iii] * dataset.scales[iii] + dataset.offsets[iii]
-                return out
+        data_window = self._xds.rio.isel_window(window)
+        if data_window.shape != out_shape:
+            # in this section, the data is geographically the same
+            # however it is not the same dimensions as requested
+            # so need to resample to the requested shape
+            if len(out_shape) == 3:
+                _, out_height, out_width = out_shape
+            else:
+                out_height, out_width = out_shape
+            data_window = self._xds.rio.reproject(
+                self._xds.rio.crs,
+                transform=self.transform,
+                shape=(out_height, out_width),
+            )
+
+        nodata = self.nodatavals[0]
+        mask = False
+        fill_value = None
+        if nodata is not None and numpy.isnan(nodata):
+            mask = numpy.isnan(data_window)
+        elif nodata is not None:
+            mask = data_window == nodata
+            fill_value = nodata
+
+        # make sure the returned shape matches
+        # the expected shape. This can be the case
+        # when the xarray dataset was squeezed to 2D beforehand
+        if len(out_shape) == 3 and len(data_window.shape) == 2:
+            data_window = data_window.values.reshape((1, out_height, out_width))
+
+        return numpy.ma.array(
+            data_window, mask=mask, fill_value=fill_value, dtype=self.dtypes[0]
+        )
 
 
 def merge_arrays(
@@ -155,47 +161,66 @@ def merge_arrays(
             rioduckarrays.append(RasterioDatasetDuck(dataarray))
 
     # use rasterio to merge
+    merged_data, merged_transform = _rio_merge(
+        rioduckarrays,
+        **{key: val for key, val in input_kwargs.items() if val is not None},
+    )
     # generate merged data array
     representative_array = rioduckarrays[0]._xds
-    with MemoryFile() as memfile:
-        _rio_merge(
-            rioduckarrays,
-            **{key: val for key, val in input_kwargs.items() if val is not None},
-            dst_path=memfile.name,
+    if parse_coordinates:
+        coords = _make_coords(
+            src_data_array=representative_array,
+            dst_affine=merged_transform,
+            dst_width=merged_data.shape[-1],
+            dst_height=merged_data.shape[-2],
         )
-        with open_rasterio(  # type: ignore
-            memfile.name,
-            parse_coordinates=parse_coordinates,
-            mask_and_scale=rioduckarrays[0]._mask_and_scale,
-        ) as merged_data:
-            merged_data = merged_data.load()
-
-        # make sure old & new coorinate names match & dimensions are correct
-        rename_map = {}
-        original_extra_dim = representative_array.rio._check_dimensions()
-        new_extra_dim = merged_data.rio._check_dimensions()
-        # make sure the output merged data shape is 2D if the
-        # original data was 2D. this can happen if the
-        # xarray datasarray was squeezed.
-        if len(merged_data.shape) == 3 and len(representative_array.shape) == 2:
-            merged_data = merged_data.squeeze(
-                dim=new_extra_dim, drop=original_extra_dim is None
-            )
-            new_extra_dim = merged_data.rio._check_dimensions()
         if (
-            original_extra_dim is not None
-            and new_extra_dim is not None
-            and original_extra_dim != new_extra_dim
+            representative_array.rio.x_dim != "x"
+            and "x" in coords
+            and coords["x"].ndim == 1
         ):
-            rename_map[new_extra_dim] = original_extra_dim
-        if representative_array.rio.x_dim != merged_data.rio.x_dim:
-            rename_map[merged_data.rio.x_dim] = representative_array.rio.x_dim
-        if representative_array.rio.y_dim != merged_data.rio.y_dim:
-            rename_map[merged_data.rio.y_dim] = representative_array.rio.y_dim
-        if rename_map:
-            merged_data = merged_data.rename(rename_map)
-        merged_data.coords.update(_get_nonspatial_coords(representative_array))
-    return merged_data  # type: ignore
+            coords[representative_array.rio.x_dim] = IndexVariable(
+                representative_array.rio.x_dim, coords.pop("x")
+            )
+        if (
+            representative_array.rio.y_dim != "y"
+            and "y" in coords
+            and coords["y"].ndim == 1
+        ):
+            coords[representative_array.rio.y_dim] = IndexVariable(
+                representative_array.rio.y_dim, coords.pop("y")
+            )
+    else:
+        coords = _get_nonspatial_coords(representative_array)
+
+    # make sure the output merged data shape is 2D if the
+    # original data was 2D. this can happen if the
+    # xarray datasarray was squeezed.
+    if len(merged_data.shape) == 3 and len(representative_array.shape) == 2:
+        merged_data = merged_data.squeeze()
+
+    xda = DataArray(
+        name=representative_array.name,
+        data=merged_data,
+        coords=coords,
+        dims=tuple(representative_array.dims),
+        attrs=representative_array.attrs,
+    )
+    xda.encoding = representative_array.encoding.copy()
+    xda.rio.write_nodata(
+        nodata if nodata is not None else representative_array.rio.nodata, inplace=True
+    )
+    xda.rio.write_crs(
+        representative_array.rio.crs,
+        grid_mapping_name=representative_array.rio.grid_mapping,
+        inplace=True,
+    )
+    xda.rio.write_transform(
+        merged_transform,
+        grid_mapping_name=representative_array.rio.grid_mapping,
+        inplace=True,
+    )
+    return xda
 
 
 def merge_datasets(
@@ -218,7 +243,7 @@ def merge_datasets(
     Parameters
     ----------
     datasets: list[xarray.Dataset]
-        List of multiple xarray.Dataset with all geo attributes.
+        List of xarray.Dataset's with all geo attributes.
         The first one is assumed to have the same
         CRS, dtype, dimensions, and data_vars as the others in the array.
     bounds: tuple, optional
