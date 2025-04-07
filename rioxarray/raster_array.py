@@ -1139,7 +1139,7 @@ class RasterArray(XRasterBase):
 
         Returns
         -------
-        :obj:`dask.Delayed`:
+        :obj:`dask.Delayed` | :obj:`dask.Array` | None:
             If the data array is a dask array and compute
             is True. Otherwise None is returned.
 

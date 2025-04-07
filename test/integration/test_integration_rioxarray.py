@@ -1647,7 +1647,7 @@ def test_to_raster(
     if write_lock is None or not isinstance(xds.data, dask.array.Array) or compute:
         assert delayed is None
     else:
-        assert isinstance(delayed, Delayed)
+        assert isinstance(delayed, (Delayed, dask.array.Array))
         delayed.compute()
 
     with rasterio.open(str(tmp_raster)) as rds:
@@ -1701,7 +1701,7 @@ def test_to_raster_3d(open_method, windowed, write_lock, compute, tmpdir):
     if write_lock is None or not isinstance(xds.data, dask.array.Array) or compute:
         assert delayed is None
     else:
-        assert isinstance(delayed, Delayed)
+        assert isinstance(delayed, (Delayed, dask.array.Array))
         delayed.compute()
 
     with rasterio.open(str(tmp_raster)) as rds:
