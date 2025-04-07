@@ -184,7 +184,7 @@ jobs:
           init-shell: bash
           environment-name: test
           create-args: >-
-            python=3.10
+            python=3.11
             proj
             libgdal-core
             libgdal-netcdf
