@@ -1,7 +1,7 @@
 History
 =======
 
-Latest
+0.19.0
 ------
 - BUG:merge: Revert `rasterio.io.MemoryFile` code (#850)
 - DEP: pin rasterio >= 1.4.3 (#850)
