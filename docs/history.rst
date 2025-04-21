@@ -1,6 +1,10 @@
 History
 =======
 
+Latest
+------
+
+
 0.19.0
 ------
 - BUG:merge: Revert `rasterio.io.MemoryFile` code (#850)
