@@ -22,7 +22,7 @@ from numpy.typing import NDArray
 from packaging import version
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
-from xarray import Dataset, IndexVariable
+from xarray import Coordinates, Dataset, IndexVariable
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager, FileManager
 from xarray.backends.locks import SerializableLock
@@ -1212,6 +1212,7 @@ def open_rasterio(
 
     # Get geospatial coordinates
     if parse_coordinates:
+        coords = Coordinates(coords)
         coords.update(
             _generate_spatial_coords(
                 affine=riods.transform, width=riods.width, height=riods.height
