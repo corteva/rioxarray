@@ -39,6 +39,7 @@ from rioxarray.exceptions import (
 from rioxarray.raster_writer import RasterioWriter, _ensure_nodata_dtype
 from rioxarray.rioxarray import (
     XRasterBase,
+    _convert_str_to_resampling,
     _get_data_var_message,
     _make_coords,
     _order_bounds,
@@ -395,7 +396,7 @@ class RasterArray(XRasterBase):
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
-        resampling: Resampling = Resampling.nearest,
+        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
         nodata: Optional[float] = None,
         **kwargs,
     ) -> xarray.DataArray:
@@ -429,8 +430,9 @@ class RasterArray(XRasterBase):
             together with resolution.
         transform: Affine, optional
             The destination transform.
-        resampling: rasterio.enums.Resampling, optional
-            See :func:`rasterio.warp.reproject` for more details.
+        resampling: rasterio.enums.Resampling or str, optional
+            See :func:`rasterio.warp.reproject` for more details. Will accept a string
+            representation of the enum (e.g. "nearest" > Resampling.nearest).
         nodata: float, optional
             The nodata value used to initialize the destination;
             it will remain in all areas not covered by the reprojected source.
@@ -481,6 +483,8 @@ class RasterArray(XRasterBase):
                 dst_height, dst_width = shape
             else:
                 dst_height, dst_width = self.shape
+        if isinstance(resampling, str):
+            resampling = _convert_str_to_resampling(resampling)
 
         dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
 
@@ -551,7 +555,7 @@ class RasterArray(XRasterBase):
         self,
         match_data_array: Union[xarray.DataArray, xarray.Dataset],
         *,
-        resampling: Resampling = Resampling.nearest,
+        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
         **reproject_kwargs,
     ) -> xarray.DataArray:
         """
@@ -571,8 +575,9 @@ class RasterArray(XRasterBase):
         ----------
         match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             DataArray of the target resolution and projection.
-        resampling: rasterio.enums.Resampling, optional
-            See :func:`rasterio.warp.reproject` for more details.
+        resampling: rasterio.enums.Resampling or str, optional
+            See :func:`rasterio.warp.reproject` for more details. Will accept a string
+            representation of the enum (e.g. "nearest" > Resampling.nearest).
         **reproject_kwargs:
             Other options to pass to :meth:`rioxarray.raster_array.RasterArray.reproject`
 

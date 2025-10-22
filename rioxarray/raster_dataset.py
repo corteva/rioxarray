@@ -2,6 +2,7 @@
 This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets.
 """
+
 import os
 from collections.abc import Iterable, Mapping
 from typing import Any, Literal, Optional, Union
@@ -62,7 +63,7 @@ class RasterDataset(XRasterBase):
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
-        resampling: Resampling = Resampling.nearest,
+        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
         nodata: Optional[float] = None,
         **kwargs,
     ) -> xarray.Dataset:
@@ -95,8 +96,9 @@ class RasterDataset(XRasterBase):
             together with resolution.
         transform: Affine, optional
             The destination transform.
-        resampling: rasterio.enums.Resampling, optional
-            See :func:`rasterio.warp.reproject` for more details.
+        resampling: rasterio.enums.Resampling or str, optional
+            See :func:`rasterio.warp.reproject` for more details. Will accept a string
+            representation of the enum (e.g. "nearest" > Resampling.nearest).
         nodata: float, optional
             The nodata value used to initialize the destination;
             it will remain in all areas not covered by the reprojected source.
@@ -143,7 +145,7 @@ class RasterDataset(XRasterBase):
         self,
         match_data_array: Union[xarray.DataArray, xarray.Dataset],
         *,
-        resampling: Resampling = Resampling.nearest,
+        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
         **reproject_kwargs,
     ) -> xarray.Dataset:
         """
@@ -162,8 +164,9 @@ class RasterDataset(XRasterBase):
         ----------
         match_data_array: :obj:`xarray.DataArray` | :obj:`xarray.Dataset`
             Dataset with the target resolution and projection.
-        resampling: rasterio.enums.Resampling, optional
-            See :func:`rasterio.warp.reproject` for more details.
+        resampling: rasterio.enums.Resampling or str, optional
+            See :func:`rasterio.warp.reproject` for more details. Will accept a string
+            representation of the enum (e.g. "nearest" > Resampling.nearest).
         **reproject_kwargs:
             Other options to pass to :meth:`rioxarray.raster_dataset.RasterDataset.reproject`
 

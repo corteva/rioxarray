@@ -159,9 +159,11 @@ def modis_reproject_match(request):
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(
             TEST_COMPARE_DATA_DIR,
-            "MODIS_ARRAY_MATCH_UTM_GDAL361.nc"
-            if GDAL_GE_361
-            else "MODIS_ARRAY_MATCH_UTM.nc",
+            (
+                "MODIS_ARRAY_MATCH_UTM_GDAL361.nc"
+                if GDAL_GE_361
+                else "MODIS_ARRAY_MATCH_UTM.nc"
+            ),
         ),
         match=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY_MATCH.nc"),
         open=request.param,
@@ -181,9 +183,11 @@ def modis_reproject_match_coords(request):
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(
             TEST_COMPARE_DATA_DIR,
-            "MODIS_ARRAY_MATCH_UTM_GDAL361.nc"
-            if GDAL_GE_361
-            else "MODIS_ARRAY_MATCH_UTM.nc",
+            (
+                "MODIS_ARRAY_MATCH_UTM_GDAL361.nc"
+                if GDAL_GE_361
+                else "MODIS_ARRAY_MATCH_UTM.nc"
+            ),
         ),
         match=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY_MATCH.nc"),
         open=request.param,
@@ -204,9 +208,11 @@ def modis_reproject_match__passed_nodata(request):
         input=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY.nc"),
         compare=os.path.join(
             TEST_COMPARE_DATA_DIR,
-            "MODIS_ARRAY_MATCH_PASSED_NODATA_GDAL361.nc"
-            if GDAL_GE_361
-            else "MODIS_ARRAY_MATCH_PASSED_NODATA.nc",
+            (
+                "MODIS_ARRAY_MATCH_PASSED_NODATA_GDAL361.nc"
+                if GDAL_GE_361
+                else "MODIS_ARRAY_MATCH_PASSED_NODATA.nc"
+            ),
         ),
         match=os.path.join(TEST_INPUT_DATA_DIR, "MODIS_ARRAY_MATCH.nc"),
         open=request.param,
@@ -324,9 +330,10 @@ def test_pad_box(modis_clip):
 
 
 def test_clip_box(modis_clip):
-    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
-        modis_clip["compare"]
-    ) as xdc:
+    with (
+        modis_clip["open"](modis_clip["input"]) as xdi,
+        modis_clip["open"](modis_clip["compare"]) as xdc,
+    ):
         clipped_ds = xdi.rio.clip_box(
             minx=-7272967.195874103,  # xdi.x[4].values,
             miny=5048602.8438240355,  # xdi.y[6].values,
@@ -350,9 +357,10 @@ def test_clip_box(modis_clip):
 
 
 def test_clip_box__auto_expand(modis_clip):
-    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
-        modis_clip["compare_expand"]
-    ) as xdc:
+    with (
+        modis_clip["open"](modis_clip["input"]) as xdi,
+        modis_clip["open"](modis_clip["compare_expand"]) as xdc,
+    ):
         clipped_ds = xdi.rio.clip_box(
             minx=-7272735.53951584,  # xdi.x[5].values
             miny=5048834.500182299,  # xdi.y[5].values
@@ -518,9 +526,10 @@ def test_slice_xy(modis_clip):
     if isinstance(modis_clip["open"], partial):
         # SKIP: parse_coodinates=False is not supported
         return
-    with modis_clip["open"](modis_clip["input"]) as xdi, modis_clip["open"](
-        modis_clip["compare"]
-    ) as xdc:
+    with (
+        modis_clip["open"](modis_clip["input"]) as xdi,
+        modis_clip["open"](modis_clip["compare"]) as xdc,
+    ):
         clipped_ds = xdi.rio.slice_xy(
             minx=-7272967.195874103,  # xdi.x[4].values,
             miny=5048602.8438240355,  # xdi.y[6].values,
@@ -979,9 +988,10 @@ def test_reproject(modis_reproject):
         if "rasterio" in str(modis_reproject["open"])
         else dict(mask_and_scale=False)
     )
-    with modis_reproject["open"](
-        modis_reproject["input"], **mask_args
-    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"], **mask_args) as mda,
+        modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc,
+    ):
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
 
         # overwrite test dataset
@@ -1014,9 +1024,10 @@ def test_reproject(modis_reproject):
     ],
 )
 def test_reproject_3d(open_func, modis_reproject_3d):
-    with open_func(modis_reproject_3d["input"]) as mda, open_func(
-        modis_reproject_3d["compare"]
-    ) as mdc:
+    with (
+        open_func(modis_reproject_3d["input"]) as mda,
+        open_func(modis_reproject_3d["compare"]) as mdc,
+    ):
         mds_repr = mda.rio.reproject(modis_reproject_3d["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
@@ -1041,9 +1052,10 @@ def test_reproject__grid_mapping(modis_reproject):
         if "rasterio" in str(modis_reproject["open"])
         else dict(mask_and_scale=False)
     )
-    with modis_reproject["open"](
-        modis_reproject["input"], **mask_args
-    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"], **mask_args) as mda,
+        modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc,
+    ):
         # remove 'crs' attribute and add grid mapping
         # keep a copy of the crs before setting the spatial_ref to 0 as that will
         # set `rio.crs` to None.
@@ -1069,19 +1081,32 @@ def test_reproject__grid_mapping(modis_reproject):
 
 
 def test_reproject__masked(modis_reproject):
-    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
-        "open"
-    ](modis_reproject["compare"]) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"]) as mda,
+        modis_reproject["open"](modis_reproject["compare"]) as mdc,
+    ):
         # reproject
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
         # test
         _assert_xarrays_equal(mds_repr, mdc)
 
 
+def test_reproject__str_resample(modis_reproject):
+    with (
+        modis_reproject["open"](modis_reproject["input"]) as mda,
+        modis_reproject["open"](modis_reproject["compare"]) as mdc,
+    ):
+        # reproject
+        mds_repr = mda.rio.reproject(modis_reproject["to_proj"], resampling="nearest")
+        # test
+        _assert_xarrays_equal(mds_repr, mdc)
+
+
 def test_reproject__no_transform(modis_reproject):
-    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
-        "open"
-    ](modis_reproject["compare"]) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"]) as mda,
+        modis_reproject["open"](modis_reproject["compare"]) as mdc,
+    ):
         orig_trans = mda.rio.transform()
         _del_attr(mda, "transform")
         # reproject
@@ -1102,9 +1127,10 @@ def test_reproject__no_nodata(nodata, modis_reproject):
         if "rasterio" in str(modis_reproject["open"])
         else dict(mask_and_scale=False)
     )
-    with modis_reproject["open"](
-        modis_reproject["input"], **mask_args
-    ) as mda, modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"], **mask_args) as mda,
+        modis_reproject["open"](modis_reproject["compare"], **mask_args) as mdc,
+    ):
         orig_fill = _get_attr(mda, "_FillValue")
         _del_attr(mda, "_FillValue")
         _del_attr(mda, "nodata")
@@ -1133,9 +1159,10 @@ def test_reproject__scalar_coord(open_func):
 
 
 def test_reproject__no_nodata_masked(modis_reproject):
-    with modis_reproject["open"](modis_reproject["input"]) as mda, modis_reproject[
-        "open"
-    ](modis_reproject["compare"]) as mdc:
+    with (
+        modis_reproject["open"](modis_reproject["input"]) as mda,
+        modis_reproject["open"](modis_reproject["compare"]) as mdc,
+    ):
         _del_attr(mda, "nodata")
         # reproject
         mds_repr = mda.rio.reproject(modis_reproject["to_proj"])
@@ -1192,14 +1219,18 @@ def test_reproject_match(modis_reproject_match):
         if "rasterio" in str(modis_reproject_match["open"])
         else dict(mask_and_scale=False)
     )
-    with modis_reproject_match["open"](
-        modis_reproject_match["input"], **mask_args
-    ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], **mask_args
-    ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"],
-        decode_coords="all",
-    ) as mdm:
+    with (
+        modis_reproject_match["open"](
+            modis_reproject_match["input"], **mask_args
+        ) as mda,
+        modis_reproject_match["open"](
+            modis_reproject_match["compare"], **mask_args
+        ) as mdc,
+        xarray.open_dataarray(
+            modis_reproject_match["match"],
+            decode_coords="all",
+        ) as mdm,
+    ):
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
         # overwrite test dataset
@@ -1231,14 +1262,18 @@ def test_reproject_match__masked(modis_reproject_match):
         if "rasterio" in str(modis_reproject_match["open"])
         else dict(mask_and_scale=True)
     )
-    with modis_reproject_match["open"](
-        modis_reproject_match["input"], **mask_args
-    ) as mda, modis_reproject_match["open"](
-        modis_reproject_match["compare"], **mask_args
-    ) as mdc, xarray.open_dataarray(
-        modis_reproject_match["match"],
-        decode_coords="all",
-    ) as mdm:
+    with (
+        modis_reproject_match["open"](
+            modis_reproject_match["input"], **mask_args
+        ) as mda,
+        modis_reproject_match["open"](
+            modis_reproject_match["compare"], **mask_args
+        ) as mdc,
+        xarray.open_dataarray(
+            modis_reproject_match["match"],
+            decode_coords="all",
+        ) as mdm,
+    ):
         # reproject
         mds_repr = mda.rio.reproject_match(mdm)
         # test
@@ -1251,14 +1286,18 @@ def test_reproject_match__no_transform_nodata(modis_reproject_match_coords):
         if "rasterio" in str(modis_reproject_match_coords["open"])
         else dict(mask_and_scale=True)
     )
-    with modis_reproject_match_coords["open"](
-        modis_reproject_match_coords["input"], **mask_args
-    ) as mda, modis_reproject_match_coords["open"](
-        modis_reproject_match_coords["compare"], **mask_args
-    ) as mdc, xarray.open_dataarray(
-        modis_reproject_match_coords["match"],
-        decode_coords="all",
-    ) as mdm:
+    with (
+        modis_reproject_match_coords["open"](
+            modis_reproject_match_coords["input"], **mask_args
+        ) as mda,
+        modis_reproject_match_coords["open"](
+            modis_reproject_match_coords["compare"], **mask_args
+        ) as mdc,
+        xarray.open_dataarray(
+            modis_reproject_match_coords["match"],
+            decode_coords="all",
+        ) as mdm,
+    ):
         _del_attr(mda, "transform")
         _del_attr(mda, "nodata")
         # reproject
@@ -1273,14 +1312,18 @@ def test_reproject_match__pass_nodata(modis_reproject_match__passed_nodata):
         if "rasterio" in str(modis_reproject_match__passed_nodata["open"])
         else dict(mask_and_scale=False, decode_coords="all")
     )
-    with modis_reproject_match__passed_nodata["open"](
-        modis_reproject_match__passed_nodata["input"], **mask_args
-    ) as mda, modis_reproject_match__passed_nodata["open"](
-        modis_reproject_match__passed_nodata["compare"], **mask_args
-    ) as mdc, xarray.open_dataarray(
-        modis_reproject_match__passed_nodata["match"],
-        decode_coords="all",
-    ) as mdm:
+    with (
+        modis_reproject_match__passed_nodata["open"](
+            modis_reproject_match__passed_nodata["input"], **mask_args
+        ) as mda,
+        modis_reproject_match__passed_nodata["open"](
+            modis_reproject_match__passed_nodata["compare"], **mask_args
+        ) as mdc,
+        xarray.open_dataarray(
+            modis_reproject_match__passed_nodata["match"],
+            decode_coords="all",
+        ) as mdm,
+    ):
         # reproject
         mds_repr = mda.rio.reproject_match(mdm, nodata=-9999)
         # overwrite test dataset
@@ -1294,9 +1337,10 @@ def test_reproject_match__pass_nodata(modis_reproject_match__passed_nodata):
 
 @pytest.mark.parametrize("open_func", [rioxarray.open_rasterio, open_rasterio_engine])
 def test_make_src_affine(open_func, modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], decode_coords="all"
-    ) as xdi, open_func(modis_reproject["input"]) as xri:
+    with (
+        xarray.open_dataarray(modis_reproject["input"], decode_coords="all") as xdi,
+        open_func(modis_reproject["input"]) as xri,
+    ):
         # check the transform
         attribute_transform = tuple(xdi.attrs["transform"])
         attribute_transform_func = tuple(xdi.rio.transform())
@@ -1341,9 +1385,10 @@ def test_make_src_affine__single_point():
     ],
 )
 def test_make_coords__calc_trans(open_func, modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], decode_coords="all"
-    ) as xdi, open_func(modis_reproject["input"]) as xri:
+    with (
+        xarray.open_dataarray(modis_reproject["input"], decode_coords="all") as xdi,
+        open_func(modis_reproject["input"]) as xri,
+    ):
         # calculate coordinates from the calculated transform
         width, height = xdi.rio.shape
         calculated_transform = xdi.rio.transform(recalc=True)
@@ -1390,9 +1435,10 @@ def test_make_coords__calc_trans(open_func, modis_reproject):
     ],
 )
 def test_make_coords__attr_trans(open_func, modis_reproject):
-    with xarray.open_dataarray(
-        modis_reproject["input"], decode_coords="all"
-    ) as xdi, open_func(modis_reproject["input"]) as xri:
+    with (
+        xarray.open_dataarray(modis_reproject["input"], decode_coords="all") as xdi,
+        open_func(modis_reproject["input"]) as xri,
+    ):
         # calculate coordinates from the attribute transform
         width, height = xdi.rio.shape
         attr_transform = xdi.rio.transform()
@@ -1439,9 +1485,10 @@ def test_interpolate_na(interpolate_na):
         if "rasterio" in str(interpolate_na["open"])
         else dict(mask_and_scale=False)
     )
-    with interpolate_na["open"](
-        interpolate_na["input"], **mask_args
-    ) as mda, interpolate_na["open"](interpolate_na["compare"], **mask_args) as mdc:
+    with (
+        interpolate_na["open"](interpolate_na["input"], **mask_args) as mda,
+        interpolate_na["open"](interpolate_na["compare"], **mask_args) as mdc,
+    ):
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
@@ -1462,18 +1509,20 @@ def test_interpolate_na__missing_scipy():
 )
 def test_interpolate_na_veris(interpolate_na_veris):
     pytest.importorskip("scipy")
-    with xarray.open_dataset(interpolate_na_veris["input"]) as mda, xarray.open_dataset(
-        interpolate_na_veris["compare"]
-    ) as mdc:
+    with (
+        xarray.open_dataset(interpolate_na_veris["input"]) as mda,
+        xarray.open_dataset(interpolate_na_veris["compare"]) as mdc,
+    ):
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
 
 
 def test_interpolate_na_3d(interpolate_na_3d):
-    with xarray.open_dataset(interpolate_na_3d["input"]) as mda, xarray.open_dataset(
-        interpolate_na_3d["compare"]
-    ) as mdc:
+    with (
+        xarray.open_dataset(interpolate_na_3d["input"]) as mda,
+        xarray.open_dataset(interpolate_na_3d["compare"]) as mdc,
+    ):
         interpolated_ds = mda.rio.interpolate_na()
         # test
         _assert_xarrays_equal(interpolated_ds, mdc)
@@ -1485,11 +1534,14 @@ def test_interpolate_na__nodata_filled(interpolate_na_filled):
         if "rasterio" in str(interpolate_na_filled["open"])
         else dict(mask_and_scale=False)
     )
-    with interpolate_na_filled["open"](
-        interpolate_na_filled["input"], **mask_args
-    ) as mda, interpolate_na_filled["open"](
-        interpolate_na_filled["compare"], **mask_args
-    ) as mdc:
+    with (
+        interpolate_na_filled["open"](
+            interpolate_na_filled["input"], **mask_args
+        ) as mda,
+        interpolate_na_filled["open"](
+            interpolate_na_filled["compare"], **mask_args
+        ) as mdc,
+    ):
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
                 mda[var].values[mda[var].values == mda[var].rio.nodata] = 400
@@ -1503,11 +1555,14 @@ def test_interpolate_na__nodata_filled(interpolate_na_filled):
 
 def test_interpolate_na__all_nodata(interpolate_na_nan):
     rio_opened = "open_rasterio " in str(interpolate_na_nan["open"])
-    with interpolate_na_nan["open"](
-        interpolate_na_nan["input"], mask_and_scale=True
-    ) as mda, interpolate_na_nan["open"](
-        interpolate_na_nan["compare"], mask_and_scale=True
-    ) as mdc:
+    with (
+        interpolate_na_nan["open"](
+            interpolate_na_nan["input"], mask_and_scale=True
+        ) as mda,
+        interpolate_na_nan["open"](
+            interpolate_na_nan["compare"], mask_and_scale=True
+        ) as mdc,
+    ):
         if hasattr(mda, "variables"):
             for var in mda.rio.vars:
                 mda[var].values[~numpy.isnan(mda[var].values)] = numpy.nan
@@ -1539,9 +1594,10 @@ def test_geographic_reproject():
         TEST_INPUT_DATA_DIR, "sentinel_2_L1C_geographic.nc"
     )
     sentinel_2_utm = os.path.join(TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm.nc")
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
-        sentinel_2_utm
-    ) as mdc:
+    with (
+        xarray.open_dataset(sentinel_2_geographic) as mda,
+        xarray.open_dataset(sentinel_2_utm) as mdc,
+    ):
         mds_repr = mda.rio.reproject("epsg:32721")
         # mds_repr.to_netcdf(sentinel_2_utm)
         # test
@@ -1555,9 +1611,10 @@ def test_geographic_reproject__missing_nodata():
     sentinel_2_utm = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_utm__auto_nodata.nc"
     )
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
-        sentinel_2_utm
-    ) as mdc:
+    with (
+        xarray.open_dataset(sentinel_2_geographic) as mda,
+        xarray.open_dataset(sentinel_2_utm) as mdc,
+    ):
         mda.red.attrs.pop("nodata")
         mda.nir.attrs.pop("nodata")
         mds_repr = mda.rio.reproject("epsg:32721")
@@ -1575,9 +1632,10 @@ def test_geographic_resample_integer():
     sentinel_2_interp = os.path.join(
         TEST_COMPARE_DATA_DIR, "sentinel_2_L1C_interpolate_na.nc"
     )
-    with xarray.open_dataset(sentinel_2_geographic) as mda, xarray.open_dataset(
-        sentinel_2_interp
-    ) as mdc:
+    with (
+        xarray.open_dataset(sentinel_2_geographic) as mda,
+        xarray.open_dataset(sentinel_2_interp) as mdc,
+    ):
         mds_interp = mda.rio.interpolate_na()
         # mds_interp.to_netcdf(sentinel_2_interp)
         # test

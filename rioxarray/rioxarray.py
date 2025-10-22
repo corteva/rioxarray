@@ -136,7 +136,7 @@ def _generate_spatial_coords(
 
 
 def _get_nonspatial_coords(
-    src_data_array: Union[xarray.DataArray, xarray.Dataset]
+    src_data_array: Union[xarray.DataArray, xarray.Dataset],
 ) -> dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
     coords: dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
     for coord in set(src_data_array.coords) - {
@@ -1367,3 +1367,22 @@ def _convert_gcps_to_geojson(
         for gcp in gcps
     ]
     return {"type": "FeatureCollection", "features": features}
+
+
+def _convert_str_to_resampling(name: str) -> rasterio.warp.Resampling:
+    """
+    Convert from string to rasterio.warp.Resampling enum, raises ValueError on bad input.
+
+    Parameters
+    ----------
+    name: str
+        The string to convert.
+
+    Returns
+    -------
+    :obj:`rasterio.warp.Resampling`
+    """
+    try:
+        return getattr(rasterio.warp.Resampling, name.lower())
+    except AttributeError:
+        raise ValueError(f"Bad resampling parameter: {name}") from None
