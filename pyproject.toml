@@ -37,7 +37,7 @@ dependencies = [
     "rasterio>=1.4.3",
     "xarray>=2024.7.0",
     "pyproj>=3.3",
-    "numpy>=1.23",
+    "numpy>=2",
 ]
 
 [project.urls]

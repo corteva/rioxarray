@@ -291,7 +291,7 @@ class URIManager(FileManager):
 class RasterioArrayWrapper(BackendArray):
     """A wrapper around rasterio dataset objects"""
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,abstract-method
 
     def __init__(
         self,
@@ -1128,7 +1128,7 @@ def open_rasterio(
     with warnings.catch_warnings(record=True) as rio_warnings:
         if lock is not NO_LOCK and isinstance(filename, (str, os.PathLike)):
             manager: FileManager = CachingFileManager(
-                file_opener, filename, lock=lock, mode="r", kwargs=open_kwargs
+                file_opener, filename, lock=lock, mode="r", kwargs=open_kwargs  # type: ignore[arg-type]
             )
         else:
             manager = URIManager(file_opener, filename, mode="r", kwargs=open_kwargs)
