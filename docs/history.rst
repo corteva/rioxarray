@@ -1,6 +1,9 @@
 History
 =======
 
+Latest
+------
+
 0.20.0
 ------
 - DEP: Support Python 3.12-3.14 (#872)
