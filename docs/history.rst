@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- DEP: Support Python 3.12-3.14
 - ENH: Enable string resample parameter in rio.reproject and rio.reproject_match (#870)
 
 0.19.0

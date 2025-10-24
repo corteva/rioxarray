@@ -28,7 +28,7 @@ jobs:
           init-shell: bash
           environment-name: docs
           create-args: >-
-            python=3.10
+            python=3.12
             rasterio
             xarray
             scipy
