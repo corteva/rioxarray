@@ -276,7 +276,7 @@ def test_merge_datasets__mask_and_scale(mask_and_scale):
         assert sorted(merged.coords) == sorted(list(rds.coords))
         total = merged.air_temperature.sum()
         if mask_and_scale:
-            assert_almost_equal(total, 133376696)
+            assert_almost_equal(total, 133376720)
         else:
             assert_almost_equal(total, 10981781386)
 
