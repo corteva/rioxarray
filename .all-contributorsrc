@@ -436,6 +436,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "trchudley",
+      "name": "Tom Chudley",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24896931?v=4",
+      "profile": "https://github.com/trchudley",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
