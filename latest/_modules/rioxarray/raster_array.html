@@ -118,6 +118,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.raster_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterioWriter</span><span class="p">,</span> <span class="n">_ensure_nodata_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.rioxarray</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">XRasterBase</span><span class="p">,</span>
+    <span class="n">_convert_str_to_resampling</span><span class="p">,</span>
     <span class="n">_get_data_var_message</span><span class="p">,</span>
     <span class="n">_make_coords</span><span class="p">,</span>
     <span class="n">_order_bounds</span><span class="p">,</span>
@@ -484,7 +485,7 @@
         <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">resampling</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">resampling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Resampling</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
         <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
@@ -518,8 +519,9 @@
 <span class="sd">            together with resolution.</span>
 <span class="sd">        transform: Affine, optional</span>
 <span class="sd">            The destination transform.</span>
-<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
-<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling or str, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details. Will accept a string</span>
+<span class="sd">            representation of the enum (e.g. &quot;nearest&quot; &gt; Resampling.nearest).</span>
 <span class="sd">        nodata: float, optional</span>
 <span class="sd">            The nodata value used to initialize the destination;</span>
 <span class="sd">            it will remain in all areas not covered by the reprojected source.</span>
@@ -570,6 +572,8 @@
                 <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">shape</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resampling</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">resampling</span> <span class="o">=</span> <span class="n">_convert_str_to_resampling</span><span class="p">(</span><span class="n">resampling</span><span class="p">)</span>
 
         <span class="n">dst_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dst_data</span><span class="p">(</span><span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">)</span>
 
@@ -643,7 +647,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">match_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">resampling</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+        <span class="n">resampling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Resampling</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
         <span class="o">**</span><span class="n">reproject_kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -663,8 +667,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        match_data_array:  :obj:`xarray.DataArray` | :obj:`xarray.Dataset`</span>
 <span class="sd">            DataArray of the target resolution and projection.</span>
-<span class="sd">        resampling: rasterio.enums.Resampling, optional</span>
-<span class="sd">            See :func:`rasterio.warp.reproject` for more details.</span>
+<span class="sd">        resampling: rasterio.enums.Resampling or str, optional</span>
+<span class="sd">            See :func:`rasterio.warp.reproject` for more details. Will accept a string</span>
+<span class="sd">            representation of the enum (e.g. &quot;nearest&quot; &gt; Resampling.nearest).</span>
 <span class="sd">        **reproject_kwargs:</span>
 <span class="sd">            Other options to pass to :meth:`rioxarray.raster_array.RasterArray.reproject`</span>
 

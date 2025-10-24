@@ -3,7 +3,7 @@ History
 
 Latest
 ------
-
+- ENH: Enable string resample parameter in rio.reproject and rio.reproject_match (#870)
 
 0.19.0
 ------
