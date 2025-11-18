@@ -121,7 +121,7 @@
 <section id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
 <h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
-<li><p>Look in attributes (<code class="docutils literal notranslate"><span class="pre">attrs</span></code>) of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
+<li><p>Look in <code class="docutils literal notranslate"><span class="pre">encoding</span></code> of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
 <li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>, which is deprecated since version 0.20.0. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
@@ -146,7 +146,7 @@
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform"><span class="std std-ref">rio.transform()</span></a></p></li>
 </ul>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray  # activate the rio accessor
@@ -156,7 +156,7 @@ from affine import Affine
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds = xarray.open_dataset(&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;, decode_coords=&quot;all&quot;)
@@ -164,7 +164,7 @@ from affine import Affine
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.green.attrs
@@ -172,8 +172,7 @@ from affine import Affine
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
@@ -181,7 +180,7 @@ from affine import Affine
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.green.spatial_ref
@@ -189,8 +188,7 @@ from affine import Affine
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
 <div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
@@ -552,7 +550,7 @@ Attributes:
     spatial_ref:  PROJCS[&quot;WGS 84 / UTM zone 22S&quot;,GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1...</pre><div class='xr-wrap' hidden><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'spatial_ref'</div></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-ed98a4ac-15a8-4b42-a4d5-b41d08429b39' class='xr-array-in' type='checkbox' checked><label for='section-ed98a4ac-15a8-4b42-a4d5-b41d08429b39' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>0</span></div><div class='xr-array-data'><pre>array(0)</pre></div></div></li><li class='xr-section-item'><input id='section-13a73705-474f-4849-a2b6-31c4c1cc60d7' class='xr-section-summary-in' type='checkbox'  checked><label for='section-13a73705-474f-4849-a2b6-31c4c1cc60d7' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-ff9e3017-55fa-4eb5-af42-af1cc7f27bd4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ff9e3017-55fa-4eb5-af42-af1cc7f27bd4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7a4c305b-e31f-4faa-a83f-8aeec07cc0ee' class='xr-var-data-in' type='checkbox'><label for='data-7a4c305b-e31f-4faa-a83f-8aeec07cc0ee' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>spatial_ref :</span></dt><dd>PROJCS[&quot;WGS 84 / UTM zone 22S&quot;,GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],PROJECTION[&quot;Transverse_Mercator&quot;],PARAMETER[&quot;latitude_of_origin&quot;,0],PARAMETER[&quot;central_meridian&quot;,-51],PARAMETER[&quot;scale_factor&quot;,0.9996],PARAMETER[&quot;false_easting&quot;,500000],PARAMETER[&quot;false_northing&quot;,10000000],UNIT[&quot;metre&quot;,1,AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],AXIS[&quot;Easting&quot;,EAST],AXIS[&quot;Northing&quot;,NORTH],AUTHORITY[&quot;EPSG&quot;,&quot;32722&quot;]]</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6c56ca51-d50d-408e-8550-3fa40536ce7d' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6c56ca51-d50d-408e-8550-3fa40536ce7d' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>spatial_ref :</span></dt><dd>PROJCS[&quot;WGS 84 / UTM zone 22S&quot;,GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],PROJECTION[&quot;Transverse_Mercator&quot;],PARAMETER[&quot;latitude_of_origin&quot;,0],PARAMETER[&quot;central_meridian&quot;,-51],PARAMETER[&quot;scale_factor&quot;,0.9996],PARAMETER[&quot;false_easting&quot;,500000],PARAMETER[&quot;false_northing&quot;,10000000],UNIT[&quot;metre&quot;,1,AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],AXIS[&quot;Easting&quot;,EAST],AXIS[&quot;Northing&quot;,NORTH],AUTHORITY[&quot;EPSG&quot;,&quot;32722&quot;]]</dd></dl></div></li></ul></div></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.green.rio.crs
@@ -560,8 +558,7 @@ Attributes:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
