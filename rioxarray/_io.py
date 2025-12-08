@@ -931,6 +931,11 @@ def _prepare_dask(
             dtype=_rasterio_to_numpy_dtype(riods.dtypes),
             previous_chunks=block_shape,
         )
+
+    if isinstance(chunks, tuple):
+        # xarray wants chunks as a dict rather than a tuple
+        chunks = dict(zip(result.dims, chunks, strict=True))
+
     token_filename = filename
     if bidx is not None:
         token_filename = f"{filename}-{bidx}"
