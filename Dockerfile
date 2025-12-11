@@ -1,4 +1,4 @@
-ARG GDAL=ubuntu-full-3.8.2
+ARG GDAL=ubuntu-full-3.8.5
 FROM ghcr.io/osgeo/gdal:${GDAL}
 ARG PYTHON_VERSION="3.12"
 ENV LANG="C.UTF-8"
