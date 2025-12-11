@@ -35,7 +35,8 @@ requires-python = ">=3.12"
 dependencies = [
     "packaging",
     "rasterio>=1.4.3",
-    "xarray>=2024.7.0",
+    # https://github.com/pydata/xarray/issues/11000
+    "xarray>=2024.7.0,<2025.12",
     "pyproj>=3.3",
     "numpy>=2",
 ]
