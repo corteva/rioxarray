@@ -5,7 +5,6 @@ from typing import Any
 
 import rasterio
 import rasterio.crs
-from packaging import version
 from pyproj import CRS
 from rasterio.errors import CRSError
 
@@ -37,14 +36,7 @@ def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
 
     # Handle PROJJSON dict (Zarr proj:projjson convention)
     if isinstance(crs_input, dict):
-        try:
-            # Use pyproj to parse PROJJSON, then convert to rasterio CRS
-            crs = CRS.from_json_dict(crs_input)
-            if version.parse(rasterio.__gdal_version__) > version.parse("3.0.0"):
-                return rasterio.crs.CRS.from_wkt(crs.to_wkt())
-            return rasterio.crs.CRS.from_wkt(crs.to_wkt("WKT1_GDAL"))
-        except Exception:
-            pass
+        crs_input = CRS.from_json_dict(crs_input)
 
     try:
         # old versions of opendatacube CRS
@@ -57,6 +49,4 @@ def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
         pass
     # use pyproj for edge cases
     crs = CRS.from_user_input(crs_input)
-    if version.parse(rasterio.__gdal_version__) > version.parse("3.0.0"):
-        return rasterio.crs.CRS.from_wkt(crs.to_wkt())
-    return rasterio.crs.CRS.from_wkt(crs.to_wkt("WKT1_GDAL"))
+    return rasterio.crs.CRS.from_wkt(crs.to_wkt())
