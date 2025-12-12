@@ -281,48 +281,53 @@ class XRasterBase:
 
         self._x_dim: Optional[Hashable] = None
         self._y_dim: Optional[Hashable] = None
-        # Determine the spatial dimensions of the `xarray.DataArray`
-        if "x" in self._obj.dims and "y" in self._obj.dims:
-            self._x_dim = "x"
-            self._y_dim = "y"
-        elif "longitude" in self._obj.dims and "latitude" in self._obj.dims:
-            self._x_dim = "longitude"
-            self._y_dim = "latitude"
-        else:
-            # look for coordinates with CF attributes
-            for coord in self._obj.coords:
-                # make sure to only look in 1D coordinates
-                # that has the same dimension name as the coordinate
-                if self._obj.coords[coord].dims != (coord,):
-                    continue
-                if (self._obj.coords[coord].attrs.get("axis", "").upper() == "X") or (
-                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
-                    in ("longitude", "projection_x_coordinate")
-                ):
-                    self._x_dim = coord
-                elif (self._obj.coords[coord].attrs.get("axis", "").upper() == "Y") or (
-                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
-                    in ("latitude", "projection_y_coordinate")
-                ):
-                    self._y_dim = coord
 
-        # Check for Zarr spatial:dimensions convention as final fallback
+        # Check for Zarr spatial:dimensions convention FIRST (fast - direct attribute access)
+        try:
+            spatial_dims = self._obj.attrs.get("spatial:dimensions")
+            if (
+                spatial_dims
+                and isinstance(spatial_dims, (list, tuple))
+                and len(spatial_dims) == 2
+            ):
+                # spatial:dimensions is ["y", "x"] or similar
+                y_dim_name, x_dim_name = spatial_dims
+                # Validate that these dimensions exist
+                if y_dim_name in self._obj.dims and x_dim_name in self._obj.dims:
+                    self._y_dim = y_dim_name
+                    self._x_dim = x_dim_name
+        except (KeyError, Exception):
+            pass
+
+        # Fall back to standard dimension name patterns if spatial:dimensions not found
         if self._x_dim is None or self._y_dim is None:
-            try:
-                spatial_dims = self._obj.attrs.get("spatial:dimensions")
-                if (
-                    spatial_dims
-                    and isinstance(spatial_dims, (list, tuple))
-                    and len(spatial_dims) == 2
-                ):
-                    # spatial:dimensions is ["y", "x"] or similar
-                    y_dim_name, x_dim_name = spatial_dims
-                    # Validate that these dimensions exist
-                    if y_dim_name in self._obj.dims and x_dim_name in self._obj.dims:
-                        self._y_dim = y_dim_name
-                        self._x_dim = x_dim_name
-            except (KeyError, Exception):
-                pass
+            if "x" in self._obj.dims and "y" in self._obj.dims:
+                self._x_dim = "x"
+                self._y_dim = "y"
+            elif "longitude" in self._obj.dims and "latitude" in self._obj.dims:
+                self._x_dim = "longitude"
+                self._y_dim = "latitude"
+            else:
+                # look for coordinates with CF attributes
+                for coord in self._obj.coords:
+                    # make sure to only look in 1D coordinates
+                    # that has the same dimension name as the coordinate
+                    if self._obj.coords[coord].dims != (coord,):
+                        continue
+                    if (
+                        self._obj.coords[coord].attrs.get("axis", "").upper() == "X"
+                    ) or (
+                        self._obj.coords[coord].attrs.get("standard_name", "").lower()
+                        in ("longitude", "projection_x_coordinate")
+                    ):
+                        self._x_dim = coord
+                    elif (
+                        self._obj.coords[coord].attrs.get("axis", "").upper() == "Y"
+                    ) or (
+                        self._obj.coords[coord].attrs.get("standard_name", "").lower()
+                        in ("latitude", "projection_y_coordinate")
+                    ):
+                        self._y_dim = coord
 
         # properties
         self._count: Optional[int] = None

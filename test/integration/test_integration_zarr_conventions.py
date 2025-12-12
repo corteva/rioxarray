@@ -85,6 +85,30 @@ class TestZarrConventionsReading:
         assert da.rio.y_dim == "lat"
         assert da.rio.x_dim == "lon"
 
+    def test_spatial_dimensions_takes_precedence(self):
+        """Test that spatial:dimensions takes precedence over standard names."""
+        # Create a DataArray with both standard 'x'/'y' dims and spatial:dimensions
+        # spatial:dimensions should take precedence
+        da = xr.DataArray(
+            np.ones((5, 5)),
+            dims=("y", "x"),
+            attrs={"spatial:dimensions": ["y", "x"]},
+        )
+
+        # Should use spatial:dimensions (y, x) not inferred from dim names
+        assert da.rio.y_dim == "y"
+        assert da.rio.x_dim == "x"
+
+        # Test with non-standard names - spatial:dimensions should be used
+        da2 = xr.DataArray(
+            np.ones((5, 5)),
+            dims=("row", "col"),
+            attrs={"spatial:dimensions": ["row", "col"]},
+        )
+
+        assert da2.rio.y_dim == "row"
+        assert da2.rio.x_dim == "col"
+
     def test_zarr_conventions_priority_over_cf(self):
         """Test that Zarr conventions take priority over CF conventions."""
         # Create a DataArray with both Zarr and CF conventions
