@@ -35,11 +35,13 @@ from rioxarray.exceptions import (
     TooManyDimensions,
 )
 from rioxarray.zarr_conventions import (
+    add_convention_declaration,
     calculate_spatial_bbox,
     format_proj_code,
     format_proj_projjson,
     format_proj_wkt2,
     format_spatial_transform,
+    has_convention_declared,
     parse_proj_code,
     parse_proj_projjson,
     parse_proj_wkt2,
@@ -283,21 +285,23 @@ class XRasterBase:
         self._y_dim: Optional[Hashable] = None
 
         # Check for Zarr spatial:dimensions convention FIRST (fast - direct attribute access)
-        try:
-            spatial_dims = self._obj.attrs.get("spatial:dimensions")
-            if (
-                spatial_dims
-                and isinstance(spatial_dims, (list, tuple))
-                and len(spatial_dims) == 2
-            ):
-                # spatial:dimensions is ["y", "x"] or similar
-                y_dim_name, x_dim_name = spatial_dims
-                # Validate that these dimensions exist
-                if y_dim_name in self._obj.dims and x_dim_name in self._obj.dims:
-                    self._y_dim = y_dim_name
-                    self._x_dim = x_dim_name
-        except (KeyError, Exception):
-            pass
+        # Only interpret spatial:dimensions if convention is declared
+        if has_convention_declared(self._obj.attrs, "spatial:"):
+            try:
+                spatial_dims = self._obj.attrs.get("spatial:dimensions")
+                if (
+                    spatial_dims
+                    and isinstance(spatial_dims, (list, tuple))
+                    and len(spatial_dims) == 2
+                ):
+                    # spatial:dimensions is ["y", "x"] or similar
+                    y_dim_name, x_dim_name = spatial_dims
+                    # Validate that these dimensions exist
+                    if y_dim_name in self._obj.dims and x_dim_name in self._obj.dims:
+                        self._y_dim = y_dim_name
+                        self._x_dim = x_dim_name
+            except (KeyError, Exception):
+                pass
 
         # Fall back to standard dimension name patterns if spatial:dimensions not found
         if self._x_dim is None or self._y_dim is None:
@@ -345,25 +349,34 @@ class XRasterBase:
             return None if self._crs is False else self._crs
 
         # Check Zarr proj: convention first (fast - direct attribute access)
+        # Only interpret proj:* attributes if convention is declared
         # Priority: array-level attributes, then group-level for Datasets
-        for proj_attr, parser in [
-            ("proj:wkt2", parse_proj_wkt2),
-            ("proj:code", parse_proj_code),
-            ("proj:projjson", parse_proj_projjson),
-        ]:
-            # Try array-level attribute first
-            try:
-                proj_value = self._obj.attrs.get(proj_attr)
-                if proj_value is not None:
-                    parsed_crs = parser(proj_value)
-                    if parsed_crs is not None:
-                        self._set_crs(parsed_crs, inplace=True)
-                        return self._crs
-            except (KeyError, Exception):
-                pass
+        if has_convention_declared(self._obj.attrs, "proj:"):
+            for proj_attr, parser in [
+                ("proj:wkt2", parse_proj_wkt2),
+                ("proj:code", parse_proj_code),
+                ("proj:projjson", parse_proj_projjson),
+            ]:
+                # Try array-level attribute first
+                try:
+                    proj_value = self._obj.attrs.get(proj_attr)
+                    if proj_value is not None:
+                        parsed_crs = parser(proj_value)
+                        if parsed_crs is not None:
+                            self._set_crs(parsed_crs, inplace=True)
+                            return self._crs
+                except (KeyError, Exception):
+                    pass
 
-            # For Datasets, try group-level attribute (inheritance)
-            if hasattr(self._obj, "data_vars"):
+        # For Datasets, check group-level proj: convention (inheritance)
+        if hasattr(self._obj, "data_vars") and has_convention_declared(
+            self._obj.attrs, "proj:"
+        ):
+            for proj_attr, parser in [
+                ("proj:wkt2", parse_proj_wkt2),
+                ("proj:code", parse_proj_code),
+                ("proj:projjson", parse_proj_projjson),
+            ]:
                 try:
                     proj_value = self._obj.attrs.get(proj_attr)
                     if proj_value is not None:
@@ -683,17 +696,21 @@ class XRasterBase:
         3. The transform attribute.
         """
         # Check Zarr spatial:transform first (fast - direct attribute access)
-        try:
-            spatial_transform = self._obj.attrs.get("spatial:transform")
-            if spatial_transform is not None:
-                parsed_transform = parse_spatial_transform(spatial_transform)
-                if parsed_transform is not None:
-                    return parsed_transform
-        except (KeyError, Exception):
-            pass
+        # Only interpret spatial:transform if convention is declared
+        if has_convention_declared(self._obj.attrs, "spatial:"):
+            try:
+                spatial_transform = self._obj.attrs.get("spatial:transform")
+                if spatial_transform is not None:
+                    parsed_transform = parse_spatial_transform(spatial_transform)
+                    if parsed_transform is not None:
+                        return parsed_transform
+            except (KeyError, Exception):
+                pass
 
-        # For Datasets, check group-level spatial:transform
-        if hasattr(self._obj, "data_vars"):
+        # For Datasets, check group-level spatial:transform (inheritance)
+        if hasattr(self._obj, "data_vars") and has_convention_declared(
+            self._obj.attrs, "spatial:"
+        ):
             try:
                 spatial_transform = self._obj.attrs.get("spatial:transform")
                 if spatial_transform is not None:
@@ -839,6 +856,11 @@ class XRasterBase:
         # Remove old CF/GDAL transform attributes to avoid conflicts
         data_obj.attrs.pop("transform", None)
 
+        # Declare spatial: convention in zarr_conventions array
+        data_obj.attrs = add_convention_declaration(
+            data_obj.attrs, "spatial:", inplace=True
+        )
+
         # Write spatial:transform as numeric array
         data_obj.attrs["spatial:transform"] = format_spatial_transform(transform)
 
@@ -915,6 +937,11 @@ class XRasterBase:
         # Remove old CF grid_mapping attributes if they exist
         data_obj.attrs.pop("crs", None)
 
+        # Declare proj: convention in zarr_conventions array
+        data_obj.attrs = add_convention_declaration(
+            data_obj.attrs, "proj:", inplace=True
+        )
+
         # Write requested format(s)
         if format in ("code", "all"):
             proj_code = format_proj_code(crs)
@@ -988,6 +1015,11 @@ class XRasterBase:
                 "Spatial dimensions could not be determined. "
                 "Please set them using rio.set_spatial_dims()."
             )
+
+        # Declare spatial: convention in zarr_conventions array
+        data_obj.attrs = add_convention_declaration(
+            data_obj.attrs, "spatial:", inplace=True
+        )
 
         # Write spatial:dimensions [y, x]
         data_obj.attrs["spatial:dimensions"] = [self.y_dim, self.x_dim]

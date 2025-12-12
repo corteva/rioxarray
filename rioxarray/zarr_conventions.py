@@ -321,3 +321,149 @@ def validate_spatial_registration(registration: str) -> None:
         raise ValueError(
             f"spatial:registration must be 'pixel' or 'node', got '{registration}'"
         )
+
+
+# Convention declaration constants
+SPATIAL_CONVENTION = {
+    "schema_url": "https://raw.githubusercontent.com/zarr-conventions/spatial/refs/tags/v1/schema.json",
+    "spec_url": "https://github.com/zarr-conventions/spatial/blob/v1/README.md",
+    "uuid": "689b58e2-cf7b-45e0-9fff-9cfc0883d6b4",
+    "name": "spatial:",
+    "description": "Spatial coordinate information",
+}
+
+PROJ_CONVENTION = {
+    "schema_url": "https://raw.githubusercontent.com/zarr-experimental/geo-proj/refs/tags/v1/schema.json",
+    "spec_url": "https://github.com/zarr-experimental/geo-proj/blob/v1/README.md",
+    "uuid": "f17cb550-5864-4468-aeb7-f3180cfb622f",
+    "name": "proj:",
+    "description": "Coordinate reference system information for geospatial data",
+}
+
+
+def has_convention_declared(attrs: dict, convention_name: str) -> bool:
+    """
+    Check if a convention is declared in zarr_conventions array.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to check
+    convention_name : str
+        Convention name to look for (e.g., "spatial:", "proj:")
+
+    Returns
+    -------
+    bool
+        True if convention is declared, False otherwise
+
+    Examples
+    --------
+    >>> attrs = {"zarr_conventions": [{"name": "spatial:"}]}
+    >>> has_convention_declared(attrs, "spatial:")
+    True
+    >>> has_convention_declared(attrs, "proj:")
+    False
+    """
+    zarr_conventions = attrs.get("zarr_conventions", [])
+    if not isinstance(zarr_conventions, list):
+        return False
+
+    for convention in zarr_conventions:
+        if isinstance(convention, dict) and convention.get("name") == convention_name:
+            return True
+    return False
+
+
+def get_declared_conventions(attrs: dict) -> set:
+    """
+    Get set of declared convention names from zarr_conventions array.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to check
+
+    Returns
+    -------
+    set
+        Set of convention names (e.g., {"spatial:", "proj:"})
+
+    Examples
+    --------
+    >>> attrs = {"zarr_conventions": [{"name": "spatial:"}, {"name": "proj:"}]}
+    >>> get_declared_conventions(attrs)
+    {'spatial:', 'proj:'}
+    """
+    conventions = set()
+    zarr_conventions = attrs.get("zarr_conventions", [])
+    if not isinstance(zarr_conventions, list):
+        return conventions
+
+    for convention in zarr_conventions:
+        if isinstance(convention, dict) and "name" in convention:
+            conventions.add(convention["name"])
+    return conventions
+
+
+def add_convention_declaration(
+    attrs: dict, convention_name: str, inplace: bool = False
+) -> dict:
+    """
+    Add a convention declaration to zarr_conventions array.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to modify
+    convention_name : str
+        Convention name to add ("spatial:" or "proj:")
+    inplace : bool
+        If True, modify attrs in place; otherwise return a copy
+
+    Returns
+    -------
+    dict
+        Updated attributes dictionary
+
+    Raises
+    ------
+    ValueError
+        If convention_name is not recognized
+
+    Examples
+    --------
+    >>> attrs = {}
+    >>> attrs = add_convention_declaration(attrs, "spatial:")
+    >>> "zarr_conventions" in attrs
+    True
+    >>> attrs["zarr_conventions"][0]["name"]
+    'spatial:'
+    """
+    if convention_name == "spatial:":
+        convention = SPATIAL_CONVENTION.copy()
+    elif convention_name == "proj:":
+        convention = PROJ_CONVENTION.copy()
+    else:
+        raise ValueError(
+            f"Unknown convention name: {convention_name}. "
+            "Expected 'spatial:' or 'proj:'"
+        )
+
+    if not inplace:
+        attrs = attrs.copy()
+
+    # Get or create zarr_conventions array
+    zarr_conventions = attrs.get("zarr_conventions", [])
+    if not isinstance(zarr_conventions, list):
+        zarr_conventions = []
+
+    # Check if convention already declared
+    if not any(
+        isinstance(c, dict) and c.get("name") == convention_name
+        for c in zarr_conventions
+    ):
+        zarr_conventions.append(convention)
+        attrs["zarr_conventions"] = zarr_conventions
+
+    return attrs

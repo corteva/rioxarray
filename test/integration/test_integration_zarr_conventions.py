@@ -12,16 +12,36 @@ import rasterio.crs
 import xarray as xr
 from affine import Affine
 
+from rioxarray.zarr_conventions import PROJ_CONVENTION, SPATIAL_CONVENTION
+
+
+def add_proj_convention_declaration(attrs):
+    """Helper to add proj: convention declaration to attrs dict."""
+    if "zarr_conventions" not in attrs:
+        attrs["zarr_conventions"] = []
+    attrs["zarr_conventions"].append(PROJ_CONVENTION.copy())
+    return attrs
+
+
+def add_spatial_convention_declaration(attrs):
+    """Helper to add spatial: convention declaration to attrs dict."""
+    if "zarr_conventions" not in attrs:
+        attrs["zarr_conventions"] = []
+    attrs["zarr_conventions"].append(SPATIAL_CONVENTION.copy())
+    return attrs
+
 
 class TestZarrConventionsReading:
     """Test reading CRS and transform from Zarr conventions."""
 
     def test_read_crs_from_proj_code(self):
         """Test reading CRS from proj:code attribute."""
+        attrs = {"proj:code": "EPSG:4326"}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"proj:code": "EPSG:4326"},
+            attrs=attrs,
         )
 
         crs = da.rio.crs
@@ -31,10 +51,12 @@ class TestZarrConventionsReading:
     def test_read_crs_from_proj_wkt2(self):
         """Test reading CRS from proj:wkt2 attribute."""
         wkt2 = rasterio.crs.CRS.from_epsg(3857).to_wkt()
+        attrs = {"proj:wkt2": wkt2}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"proj:wkt2": wkt2},
+            attrs=attrs,
         )
 
         crs = da.rio.crs
@@ -50,10 +72,12 @@ class TestZarrConventionsReading:
         pyproj_crs = ProjCRS.from_epsg(4326)
         projjson = json.loads(pyproj_crs.to_json())
 
+        attrs = {"proj:projjson": projjson}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"proj:projjson": projjson},
+            attrs=attrs,
         )
 
         crs = da.rio.crs
@@ -63,10 +87,12 @@ class TestZarrConventionsReading:
     def test_read_transform_from_spatial_transform(self):
         """Test reading transform from spatial:transform attribute."""
         transform_array = [10.0, 0.0, 100.0, 0.0, -10.0, 200.0]
+        attrs = {"spatial:transform": transform_array}
+        add_spatial_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"spatial:transform": transform_array},
+            attrs=attrs,
         )
 
         transform = da.rio.transform()
@@ -75,10 +101,12 @@ class TestZarrConventionsReading:
 
     def test_read_spatial_dimensions(self):
         """Test reading dimensions from spatial:dimensions attribute."""
+        attrs = {"spatial:dimensions": ["lat", "lon"]}
+        add_spatial_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("lat", "lon"),
-            attrs={"spatial:dimensions": ["lat", "lon"]},
+            attrs=attrs,
         )
 
         # Should detect dimensions from spatial:dimensions
@@ -89,10 +117,12 @@ class TestZarrConventionsReading:
         """Test that spatial:dimensions takes precedence over standard names."""
         # Create a DataArray with both standard 'x'/'y' dims and spatial:dimensions
         # spatial:dimensions should take precedence
+        attrs = {"spatial:dimensions": ["y", "x"]}
+        add_spatial_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"spatial:dimensions": ["y", "x"]},
+            attrs=attrs,
         )
 
         # Should use spatial:dimensions (y, x) not inferred from dim names
@@ -100,10 +130,12 @@ class TestZarrConventionsReading:
         assert da.rio.x_dim == "x"
 
         # Test with non-standard names - spatial:dimensions should be used
+        attrs2 = {"spatial:dimensions": ["row", "col"]}
+        add_spatial_convention_declaration(attrs2)
         da2 = xr.DataArray(
             np.ones((5, 5)),
             dims=("row", "col"),
-            attrs={"spatial:dimensions": ["row", "col"]},
+            attrs=attrs2,
         )
 
         assert da2.rio.y_dim == "row"
@@ -113,6 +145,8 @@ class TestZarrConventionsReading:
         """Test that Zarr conventions take priority over CF conventions."""
         # Create a DataArray with both Zarr and CF conventions
         # Zarr has EPSG:4326, CF grid_mapping has EPSG:3857
+        attrs = {"proj:code": "EPSG:4326"}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
@@ -123,7 +157,7 @@ class TestZarrConventionsReading:
                     attrs={"spatial_ref": rasterio.crs.CRS.from_epsg(3857).to_wkt()},
                 )
             },
-            attrs={"proj:code": "EPSG:4326"},
+            attrs=attrs,
         )
 
         # Zarr convention should take priority
@@ -148,12 +182,14 @@ class TestZarrConventionsReading:
     def test_group_level_proj_inheritance_dataset(self):
         """Test reading proj attributes from group level in Datasets."""
         # Create a Dataset with group-level proj:code
+        attrs = {"proj:code": "EPSG:4326"}
+        add_proj_convention_declaration(attrs)
         ds = xr.Dataset(
             {
                 "var1": xr.DataArray(np.ones((5, 5)), dims=("y", "x")),
                 "var2": xr.DataArray(np.ones((5, 5)), dims=("y", "x")),
             },
-            attrs={"proj:code": "EPSG:4326"},
+            attrs=attrs,
         )
 
         # Dataset should inherit group-level CRS
@@ -169,6 +205,11 @@ class TestZarrConventionsWriting:
         """Test writing CRS as proj:code."""
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         da = da.rio.write_zarr_crs("EPSG:4326", format="code")
+
+        # Verify convention is declared
+        assert "zarr_conventions" in da.attrs
+        convention_names = [c["name"] for c in da.attrs["zarr_conventions"]]
+        assert "proj:" in convention_names
 
         assert "proj:code" in da.attrs
         assert da.attrs["proj:code"] == "EPSG:4326"
@@ -216,6 +257,11 @@ class TestZarrConventionsWriting:
         transform = Affine(10.0, 0.0, 100.0, 0.0, -10.0, 200.0)
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         da = da.rio.write_zarr_transform(transform)
+
+        # Verify convention is declared
+        assert "zarr_conventions" in da.attrs
+        convention_names = [c["name"] for c in da.attrs["zarr_conventions"]]
+        assert "spatial:" in convention_names
 
         assert "spatial:transform" in da.attrs
         assert da.attrs["spatial:transform"] == list(transform)[:6]
@@ -364,6 +410,8 @@ class TestZarrConventionsCoexistence:
         """Test Zarr conventions override CF when both have different values."""
         # This is an edge case: if someone has both conventions with
         # conflicting values, Zarr should win
+        attrs = {"proj:code": "EPSG:4326"}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
@@ -374,7 +422,7 @@ class TestZarrConventionsCoexistence:
                     attrs={"spatial_ref": rasterio.crs.CRS.from_epsg(3857).to_wkt()},
                 )
             },
-            attrs={"proj:code": "EPSG:4326"},
+            attrs=attrs,
         )
 
         # Zarr convention (EPSG:4326) should take priority over CF (EPSG:3857)
@@ -386,10 +434,12 @@ class TestZarrConventionsEdgeCases:
 
     def test_invalid_proj_code(self):
         """Test handling of invalid proj:code."""
+        attrs = {"proj:code": "INVALID:9999"}
+        add_proj_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"proj:code": "INVALID:9999"},
+            attrs=attrs,
         )
 
         # Should handle gracefully (return None or fall back)
@@ -401,10 +451,12 @@ class TestZarrConventionsEdgeCases:
     def test_invalid_spatial_transform_format(self):
         """Test handling of malformed spatial:transform."""
         # Wrong number of elements
+        attrs = {"spatial:transform": [1.0, 2.0, 3.0]}  # Only 3 elements
+        add_spatial_convention_declaration(attrs)
         da = xr.DataArray(
             np.ones((5, 5)),
             dims=("y", "x"),
-            attrs={"spatial:transform": [1.0, 2.0, 3.0]},  # Only 3 elements
+            attrs=attrs,
         )
 
         # Should handle gracefully
