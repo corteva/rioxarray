@@ -11,7 +11,6 @@ from collections.abc import Hashable, Iterable
 from typing import Any, Literal, Optional, Union
 
 import numpy
-import pyproj
 import rasterio.warp
 import rasterio.windows
 import xarray
@@ -21,8 +20,10 @@ from pyproj.database import query_utm_crs_info
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 
-from rioxarray._options import EXPORT_GRID_MAPPING, get_option
+from rioxarray._convention import cf, zarr
+from rioxarray._options import CONVENTION, get_option
 from rioxarray.crs import crs_from_user_input
+from rioxarray.enum import Convention
 from rioxarray.exceptions import (
     DimensionError,
     DimensionMissingCoordinateError,
@@ -33,19 +34,6 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
     TooManyDimensions,
-)
-from rioxarray.zarr_conventions import (
-    add_convention_declaration,
-    calculate_spatial_bbox,
-    format_proj_code,
-    format_proj_projjson,
-    format_proj_wkt2,
-    format_spatial_transform,
-    has_convention_declared,
-    parse_proj_code,
-    parse_proj_projjson,
-    parse_proj_wkt2,
-    parse_spatial_transform,
 )
 
 DEFAULT_GRID_MAP = "spatial_ref"
@@ -284,27 +272,15 @@ class XRasterBase:
         self._x_dim: Optional[Hashable] = None
         self._y_dim: Optional[Hashable] = None
 
-        # Check for Zarr spatial:dimensions convention FIRST (fast - direct attribute access)
-        # Only interpret spatial:dimensions if convention is declared
-        if has_convention_declared(self._obj.attrs, "spatial:"):
-            try:
-                spatial_dims = self._obj.attrs.get("spatial:dimensions")
-                if (
-                    spatial_dims
-                    and isinstance(spatial_dims, (list, tuple))
-                    and len(spatial_dims) == 2
-                ):
-                    # spatial:dimensions is ["y", "x"] or similar
-                    y_dim_name, x_dim_name = spatial_dims
-                    # Validate that these dimensions exist
-                    if y_dim_name in self._obj.dims and x_dim_name in self._obj.dims:
-                        self._y_dim = y_dim_name
-                        self._x_dim = x_dim_name
-            except (KeyError, Exception):
-                pass
+        # Read spatial dimensions using the global convention setting
+        convention = get_option(CONVENTION)
 
-        # Fall back to standard dimension name patterns if spatial:dimensions not found
-        if self._x_dim is None or self._y_dim is None:
+        if convention == Convention.Zarr:
+            spatial_dims = zarr.read_spatial_dimensions(self._obj)
+            if spatial_dims is not None:
+                self._y_dim, self._x_dim = spatial_dims
+        elif convention == Convention.CF:
+            # Use CF convention logic for dimension detection
             if "x" in self._obj.dims and "y" in self._obj.dims:
                 self._x_dim = "x"
                 self._y_dim = "y"
@@ -348,72 +324,22 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
-        # Check Zarr proj: convention first (fast - direct attribute access)
-        # Only interpret proj:* attributes if convention is declared
-        # Priority: array-level attributes, then group-level for Datasets
-        if has_convention_declared(self._obj.attrs, "proj:"):
-            for proj_attr, parser in [
-                ("proj:wkt2", parse_proj_wkt2),
-                ("proj:code", parse_proj_code),
-                ("proj:projjson", parse_proj_projjson),
-            ]:
-                # Try array-level attribute first
-                try:
-                    proj_value = self._obj.attrs.get(proj_attr)
-                    if proj_value is not None:
-                        parsed_crs = parser(proj_value)
-                        if parsed_crs is not None:
-                            self._set_crs(parsed_crs, inplace=True)
-                            return self._crs
-                except (KeyError, Exception):
-                    pass
+        # Read using the global convention setting
+        convention = get_option(CONVENTION)
+        parsed_crs = None
 
-        # For Datasets, check group-level proj: convention (inheritance)
-        if hasattr(self._obj, "data_vars") and has_convention_declared(
-            self._obj.attrs, "proj:"
-        ):
-            for proj_attr, parser in [
-                ("proj:wkt2", parse_proj_wkt2),
-                ("proj:code", parse_proj_code),
-                ("proj:projjson", parse_proj_projjson),
-            ]:
-                try:
-                    proj_value = self._obj.attrs.get(proj_attr)
-                    if proj_value is not None:
-                        parsed_crs = parser(proj_value)
-                        if parsed_crs is not None:
-                            self._set_crs(parsed_crs, inplace=True)
-                            return self._crs
-                except (KeyError, Exception):
-                    pass
+        if convention == Convention.Zarr:
+            parsed_crs = zarr.read_crs(self._obj)
+        elif convention == Convention.CF:
+            parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
 
-        # Fall back to CF conventions (slower - requires grid_mapping coordinate access)
-        # look in wkt attributes to avoid using
-        # pyproj CRS if possible for performance
-        for crs_attr in ("spatial_ref", "crs_wkt"):
-            try:
-                self._set_crs(
-                    self._obj.coords[self.grid_mapping].attrs[crs_attr],
-                    inplace=True,
-                )
-                return self._crs
-            except KeyError:
-                pass
+        if parsed_crs is not None:
+            self._set_crs(parsed_crs, inplace=True)
+            return self._crs
 
-        # look in grid_mapping
-        try:
-            self._set_crs(
-                pyproj.CRS.from_cf(self._obj.coords[self.grid_mapping].attrs),
-                inplace=True,
-            )
-        except (KeyError, pyproj.exceptions.CRSError):
-            try:
-                # look in attrs for 'crs'
-                self._set_crs(self._obj.attrs["crs"], inplace=True)
-            except KeyError:
-                self._crs = False
-                return None
-        return self._crs
+        # No CRS found
+        self._crs = False
+        return None
 
     def _get_obj(self, inplace: bool) -> Union[xarray.Dataset, xarray.DataArray]:
         """
@@ -569,12 +495,13 @@ class XRasterBase:
         self,
         input_crs: Optional[Any] = None,
         grid_mapping_name: Optional[str] = None,
+        convention: Optional[Convention] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Write the CRS to the dataset in a CF compliant manner.
+        Write the CRS to the dataset using the specified convention.
 
-        .. warning:: The grid_mapping attribute is written to the encoding.
+        .. warning:: When using CF convention, the grid_mapping attribute is written to the encoding.
 
         Parameters
         ----------
@@ -582,69 +509,62 @@ class XRasterBase:
             Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the CRS information in.
-            Default is the grid_mapping name of the dataset.
+            Only used with CF convention. Default is the grid_mapping name of the dataset.
+        convention: Convention, optional
+            Convention to use for writing CRS. If None, uses the global default
+            from set_options().
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
         Returns
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
-            Modified dataset with CF compliant CRS information.
+            Modified dataset with CRS information.
 
         Examples
         --------
-        Write the CRS of the current `xarray` object:
+        Write the CRS using the default convention:
 
         >>> raster.rio.write_crs("epsg:4326", inplace=True)
 
-        Write the CRS on a copy:
+        Write the CRS using CF convention:
 
-        >>> raster = raster.rio.write_crs("epsg:4326")
+        >>> raster = raster.rio.write_crs("epsg:4326", convention=Convention.CF)
+
+        Write the CRS using Zarr convention:
+
+        >>> raster = raster.rio.write_crs("epsg:4326", convention=Convention.Zarr)
         """
-        if input_crs is not None:
-            data_obj = self._set_crs(input_crs, inplace=inplace)
-        else:
-            data_obj = self._get_obj(inplace=inplace)
-
-        # get original transform
-        transform = self._cached_transform()
-        # remove old grid maping coordinate if exists
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-        try:
-            del data_obj.coords[grid_mapping_name]
-        except KeyError:
-            pass
-
-        if data_obj.rio.crs is None:
+        if input_crs is None and self.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
             )
-        # add grid mapping coordinate
-        data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
-        grid_map_attrs = {}
-        if get_option(EXPORT_GRID_MAPPING):
-            try:
-                grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
-            except KeyError:
-                pass
-        # spatial_ref is for compatibility with GDAL
-        crs_wkt = data_obj.rio.crs.to_wkt()
-        grid_map_attrs["spatial_ref"] = crs_wkt
-        grid_map_attrs["crs_wkt"] = crs_wkt
-        if transform is not None:
-            grid_map_attrs["GeoTransform"] = " ".join(
-                [str(item) for item in transform.to_gdal()]
+
+        # Get the object to modify
+        data_obj = self._get_obj(inplace=inplace)
+        if input_crs is not None:
+            data_obj.rio._set_crs(input_crs, inplace=True)
+
+        # Determine which convention to use
+        if convention is None:
+            convention = get_option(CONVENTION)
+
+        if convention == Convention.CF:
+            return cf.write_crs(
+                data_obj,
+                data_obj.rio.crs,
+                grid_mapping_name or self.grid_mapping,
+                inplace=True,
             )
-        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
-
-        # remove old crs if exists
-        data_obj.attrs.pop("crs", None)
-
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
-        )
+        elif convention == Convention.Zarr:
+            return zarr.write_crs(
+                data_obj,
+                data_obj.rio.crs,
+                format="code",  # Default to code format
+                inplace=True,
+            )
+        else:
+            raise ValueError(f"Unsupported convention: {convention}")
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
@@ -690,64 +610,29 @@ class XRasterBase:
 
     def _cached_transform(self) -> Optional[Affine]:
         """
-        Get the transform from:
-        1. Zarr spatial:transform attribute (fast - direct attribute access)
-        2. The GeoTransform metatada property in the grid mapping (slow)
-        3. The transform attribute.
+        Get the transform using the global convention setting.
         """
-        # Check Zarr spatial:transform first (fast - direct attribute access)
-        # Only interpret spatial:transform if convention is declared
-        if has_convention_declared(self._obj.attrs, "spatial:"):
-            try:
-                spatial_transform = self._obj.attrs.get("spatial:transform")
-                if spatial_transform is not None:
-                    parsed_transform = parse_spatial_transform(spatial_transform)
-                    if parsed_transform is not None:
-                        return parsed_transform
-            except (KeyError, Exception):
-                pass
+        # Read using the global convention setting
+        convention = get_option(CONVENTION)
 
-        # For Datasets, check group-level spatial:transform (inheritance)
-        if hasattr(self._obj, "data_vars") and has_convention_declared(
-            self._obj.attrs, "spatial:"
-        ):
-            try:
-                spatial_transform = self._obj.attrs.get("spatial:transform")
-                if spatial_transform is not None:
-                    parsed_transform = parse_spatial_transform(spatial_transform)
-                    if parsed_transform is not None:
-                        return parsed_transform
-            except (KeyError, Exception):
-                pass
+        if convention == Convention.Zarr:
+            return zarr.read_transform(self._obj)
+        elif convention == Convention.CF:
+            return cf.read_transform(self._obj, self.grid_mapping)
 
-        # Fall back to CF convention (slow - requires grid_mapping coordinate access)
-        try:
-            # look in grid_mapping
-            transform = numpy.fromstring(
-                self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
-            )
-            # Calling .tolist() to assure the arguments are Python float and JSON serializable
-            return Affine.from_gdal(*transform.tolist())
-
-        except KeyError:
-            try:
-                return Affine(*self._obj.attrs["transform"][:6])
-            except KeyError:
-                pass
         return None
 
     def write_transform(
         self,
         transform: Optional[Affine] = None,
         grid_mapping_name: Optional[str] = None,
+        convention: Optional[Convention] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         .. versionadded:: 0.0.30
 
-        Write the GeoTransform to the dataset where GDAL can read it in.
-
-        https://gdal.org/drivers/raster/netcdf.html#georeference
+        Write the transform to the dataset using the specified convention.
 
         Parameters
         ----------
@@ -755,34 +640,36 @@ class XRasterBase:
             The transform of the dataset. If not provided, it will be calculated.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the transform information in.
-            Default is the grid_mapping name of the dataset.
+            Only used with CF convention. Default is the grid_mapping name of the dataset.
+        convention: Convention, optional
+            Convention to use for writing transform. If None, uses the global default
+            from set_options().
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
         Returns
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
-            Modified dataset with Geo Transform written.
+            Modified dataset with transform written.
         """
         transform = transform or self.transform(recalc=True)
         data_obj = self._get_obj(inplace=inplace)
-        # delete the old attribute to prevent confusion
-        data_obj.attrs.pop("transform", None)
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-        try:
-            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
-        except KeyError:
-            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
-            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
-        grid_map_attrs["GeoTransform"] = " ".join(
-            [str(item) for item in transform.to_gdal()]
-        )
-        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
-        )
+
+        # Determine which convention to use
+        if convention is None:
+            convention = get_option(CONVENTION)
+
+        if convention == Convention.CF:
+            return cf.write_transform(
+                data_obj,
+                transform,
+                grid_mapping_name or self.grid_mapping,
+                inplace=True,
+            )
+        elif convention == Convention.Zarr:
+            return zarr.write_transform(data_obj, transform, inplace=True)
+        else:
+            raise ValueError(f"Unsupported convention: {convention}")
 
     def transform(self, recalc: bool = False) -> Affine:
         """
@@ -857,12 +744,12 @@ class XRasterBase:
         data_obj.attrs.pop("transform", None)
 
         # Declare spatial: convention in zarr_conventions array
-        data_obj.attrs = add_convention_declaration(
+        data_obj.attrs = zarr.add_convention_declaration(
             data_obj.attrs, "spatial:", inplace=True
         )
 
         # Write spatial:transform as numeric array
-        data_obj.attrs["spatial:transform"] = format_spatial_transform(transform)
+        data_obj.attrs["spatial:transform"] = zarr.format_spatial_transform(transform)
 
         return data_obj
 
@@ -938,21 +825,21 @@ class XRasterBase:
         data_obj.attrs.pop("crs", None)
 
         # Declare proj: convention in zarr_conventions array
-        data_obj.attrs = add_convention_declaration(
+        data_obj.attrs = zarr.add_convention_declaration(
             data_obj.attrs, "proj:", inplace=True
         )
 
         # Write requested format(s)
         if format in ("code", "all"):
-            proj_code = format_proj_code(crs)
+            proj_code = zarr.format_proj_code(crs)
             if proj_code:
                 data_obj.attrs["proj:code"] = proj_code
 
         if format in ("wkt2", "all"):
-            data_obj.attrs["proj:wkt2"] = format_proj_wkt2(crs)
+            data_obj.attrs["proj:wkt2"] = zarr.format_proj_wkt2(crs)
 
         if format in ("projjson", "all"):
-            data_obj.attrs["proj:projjson"] = format_proj_projjson(crs)
+            data_obj.attrs["proj:projjson"] = zarr.format_proj_projjson(crs)
 
         return data_obj
 
@@ -1017,7 +904,7 @@ class XRasterBase:
             )
 
         # Declare spatial: convention in zarr_conventions array
-        data_obj.attrs = add_convention_declaration(
+        data_obj.attrs = zarr.add_convention_declaration(
             data_obj.attrs, "spatial:", inplace=True
         )
 
@@ -1032,7 +919,7 @@ class XRasterBase:
             try:
                 transform = self.transform(recalc=True)
                 shape = (self.height, self.width)
-                bbox = calculate_spatial_bbox(transform, shape)
+                bbox = zarr.calculate_spatial_bbox(transform, shape)
                 data_obj.attrs["spatial:bbox"] = list(bbox)
             except Exception:
                 # If we can't calculate bbox, skip it

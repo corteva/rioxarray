@@ -8,17 +8,22 @@ Source file: https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db1450
 """
 from typing import Any
 
+from rioxarray.enum import Convention
+
 EXPORT_GRID_MAPPING = "export_grid_mapping"
 SKIP_MISSING_SPATIAL_DIMS = "skip_missing_spatial_dims"
+CONVENTION = "convention"
 
 OPTIONS = {
     EXPORT_GRID_MAPPING: True,
     SKIP_MISSING_SPATIAL_DIMS: False,
+    CONVENTION: Convention.CF,
 }
 OPTION_NAMES = set(OPTIONS)
 
 VALIDATORS = {
     EXPORT_GRID_MAPPING: lambda choice: isinstance(choice, bool),
+    CONVENTION: lambda choice: isinstance(choice, Convention),
 }
 
 
@@ -60,6 +65,10 @@ class set_options:  # pylint: disable=invalid-name
         If True, it will not perform spatial operations on variables
         within a :class:`xarray.Dataset` if the spatial dimensions
         are not found.
+    convention: Convention, default=Convention.CF
+        The default geospatial metadata convention to use for reading and writing.
+        Choose from Convention.CF (Climate and Forecasts) or Convention.Zarr
+        (Zarr spatial and proj conventions).
 
 
     Usage as a context manager::
@@ -70,6 +79,7 @@ class set_options:  # pylint: disable=invalid-name
     Usage for global settings::
 
         rioxarray.set_options(export_grid_mapping=False)
+        rioxarray.set_options(convention=Convention.Zarr)
 
     """
 

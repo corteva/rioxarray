@@ -7,6 +7,7 @@ import rioxarray.raster_dataset  # noqa
 from rioxarray._io import open_rasterio
 from rioxarray._options import set_options
 from rioxarray._show_versions import show_versions
+from rioxarray.enum import Convention
 
 __version__ = importlib.metadata.version(__package__)
 
@@ -14,6 +15,7 @@ __all__ = [
     "open_rasterio",
     "set_options",
     "show_versions",
+    "Convention",
     "__author__",
     "__version__",
 ]
