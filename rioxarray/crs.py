@@ -20,7 +20,12 @@ def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
     Parameters
     ----------
     crs_input: Any
-        Input to create a CRS.
+        Input to create a CRS. Can be:
+        - rasterio.crs.CRS object
+        - WKT string
+        - PROJ string
+        - EPSG code (int or string)
+        - PROJJSON dict (Zarr proj:projjson format)
 
     Returns
     -------
@@ -29,6 +34,18 @@ def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
     """
     if isinstance(crs_input, rasterio.crs.CRS):
         return crs_input
+
+    # Handle PROJJSON dict (Zarr proj:projjson convention)
+    if isinstance(crs_input, dict):
+        try:
+            # Use pyproj to parse PROJJSON, then convert to rasterio CRS
+            crs = CRS.from_json_dict(crs_input)
+            if version.parse(rasterio.__gdal_version__) > version.parse("3.0.0"):
+                return rasterio.crs.CRS.from_wkt(crs.to_wkt())
+            return rasterio.crs.CRS.from_wkt(crs.to_wkt("WKT1_GDAL"))
+        except Exception:
+            pass
+
     try:
         # old versions of opendatacube CRS
         crs_input = crs_input.wkt
