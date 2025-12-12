@@ -1010,6 +1010,9 @@
             <span class="n">dtype</span><span class="o">=</span><span class="n">_rasterio_to_numpy_dtype</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">dtypes</span><span class="p">),</span>
             <span class="n">previous_chunks</span><span class="o">=</span><span class="n">block_shape</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># xarray wants chunks as a dict rather than a tuple</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
     <span class="n">token_filename</span> <span class="o">=</span> <span class="n">filename</span>
     <span class="k">if</span> <span class="n">bidx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">token_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">bidx</span><span class="si">}</span><span class="s2">&quot;</span>
