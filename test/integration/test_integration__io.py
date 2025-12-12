@@ -753,6 +753,15 @@ def test_chunks():
             assert_allclose(ac, ex)
 
 
+@pytest.mark.filterwarnings("error::DeprecationWarning")
+@pytest.mark.parametrize("chunks", [True, "auto"])
+def test_auto_chunks_no_deprecation_warning(chunks):
+    with rioxarray.open_rasterio(
+        os.path.join(TEST_INPUT_DATA_DIR, "cog.tif"), chunks=chunks
+    ) as rds:
+        rds.mean().compute()
+
+
 def test_chunks_with_mask_and_scale():
     with create_tmp_geotiff(
         10, 10, 4, transform_args=[1, 2, 0.5, 2.0], crs="EPSG:4326"
