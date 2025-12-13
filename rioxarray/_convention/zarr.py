@@ -160,7 +160,7 @@ def read_spatial_dimensions(
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
     input_crs: Optional[object] = None,
-    format: str = "code",
+    format: str = "wkt2",
     inplace: bool = True,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """

@@ -324,14 +324,25 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
-        # Read using the global convention setting
-        convention = get_option(CONVENTION)
+        # Read using convention priority: declared conventions first,
+        # then global convention setting
         parsed_crs = None
 
-        if convention == Convention.Zarr:
+        # Check if Zarr conventions are explicitly declared
+        if zarr.has_convention_declared(self._obj.attrs, "proj:"):
             parsed_crs = zarr.read_crs(self._obj)
-        elif convention == Convention.CF:
+            if parsed_crs is not None:
+                self._set_crs(parsed_crs, inplace=True)
+                return self._crs
+
+        # Check global convention setting
+        convention = get_option(CONVENTION)
+        if convention == Convention.CF:
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+        elif convention == Convention.Zarr:
+            # If not already checked above due to explicit declaration
+            if not zarr.has_convention_declared(self._obj.attrs, "proj:"):
+                parsed_crs = zarr.read_crs(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -560,7 +571,7 @@ class XRasterBase:
             return zarr.write_crs(
                 data_obj,
                 data_obj.rio.crs,
-                format="code",  # Default to code format
+                format="wkt2",  # Default to wkt2 format for performance
                 inplace=True,
             )
         else:
@@ -756,7 +767,7 @@ class XRasterBase:
     def write_zarr_crs(
         self,
         input_crs: Optional[Any] = None,
-        format: Literal["code", "wkt2", "projjson", "all"] = "code",
+        format: Literal["code", "wkt2", "projjson", "all"] = "wkt2",
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
@@ -777,7 +788,7 @@ class XRasterBase:
             - "wkt2": Write proj:wkt2 (WKT2 string) - widely compatible
             - "projjson": Write proj:projjson (PROJJSON dict) - machine-readable
             - "all": Write all three formats for maximum compatibility
-            Default is "code".
+            Default is "wkt2".
         inplace : bool, optional
             If True, write to existing dataset. Default is False.
 
@@ -805,9 +816,9 @@ class XRasterBase:
         >>> import rioxarray
         >>> import xarray as xr
         >>> da = xr.DataArray([[1, 2], [3, 4]], dims=("y", "x"))
-        >>> da = da.rio.write_zarr_crs("EPSG:4326", format="code")
-        >>> da.attrs["proj:code"]
-        'EPSG:4326'
+        >>> da = da.rio.write_zarr_crs("EPSG:4326", format="wkt2")
+        >>> "proj:wkt2" in da.attrs
+        True
         """
         if input_crs is not None:
             data_obj = self._set_crs(input_crs, inplace=inplace)
@@ -935,7 +946,7 @@ class XRasterBase:
         self,
         input_crs: Optional[Any] = None,
         transform: Optional[Affine] = None,
-        crs_format: Literal["code", "wkt2", "projjson", "all"] = "code",
+        crs_format: Literal["code", "wkt2", "projjson", "all"] = "wkt2",
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
@@ -951,7 +962,7 @@ class XRasterBase:
         transform : affine.Affine, optional
             Transform to write. If not provided, it will be calculated.
         crs_format : {"code", "wkt2", "projjson", "all"}, optional
-            Which proj: format(s) to write. Default is "code".
+            Which proj: format(s) to write. Default is "wkt2".
         inplace : bool, optional
             If True, write to existing dataset. Default is False.
 

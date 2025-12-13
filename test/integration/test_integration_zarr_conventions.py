@@ -12,7 +12,7 @@ import rasterio.crs
 import xarray as xr
 from affine import Affine
 
-from rioxarray.zarr_conventions import PROJ_CONVENTION, SPATIAL_CONVENTION
+from rioxarray._convention.zarr import PROJ_CONVENTION, SPATIAL_CONVENTION
 
 
 def add_proj_convention_declaration(attrs):
