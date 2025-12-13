@@ -310,6 +310,16 @@ class XRasterBase:
                     ):
                         self._y_dim = coord
 
+            # If no dimensions found by CF when convention is None and Zarr conventions are declared, try Zarr as fallback
+            if (
+                (self._x_dim is None or self._y_dim is None)
+                and convention is None
+                and zarr.has_convention_declared(self._obj.attrs, "spatial:")
+            ):
+                spatial_dims = zarr.read_spatial_dimensions(self._obj)
+                if spatial_dims is not None:
+                    self._y_dim, self._x_dim = spatial_dims
+
         # properties
         self._count: Optional[int] = None
         self._height: Optional[int] = None
@@ -325,28 +335,23 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
-        # Read using convention priority: declared conventions first,
-        # then global convention setting
+        # Read using global convention setting
         parsed_crs = None
-
-        # Check if Zarr conventions are explicitly declared
-        if zarr.has_convention_declared(self._obj.attrs, "proj:"):
-            parsed_crs = zarr.read_crs(self._obj)
-            if parsed_crs is not None:
-                self._set_crs(parsed_crs, inplace=True)
-                return self._crs
 
         # Check global convention setting
         convention = get_option(CONVENTION)
         if convention == Convention.CF:
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
         elif convention == Convention.Zarr:
-            # If not already checked above due to explicit declaration
-            if not zarr.has_convention_declared(self._obj.attrs, "proj:"):
-                parsed_crs = zarr.read_crs(self._obj)
+            parsed_crs = zarr.read_crs(self._obj)
         elif convention is None:
             # Use CF as default when convention is None
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+            # If CF didn't find anything and Zarr conventions are declared, try Zarr as fallback
+            if parsed_crs is None and zarr.has_convention_declared(
+                self._obj.attrs, "proj:"
+            ):
+                parsed_crs = zarr.read_crs(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -636,7 +641,13 @@ class XRasterBase:
             return cf.read_transform(self._obj, self.grid_mapping)
         elif convention is None:
             # Use CF as default when convention is None
-            return cf.read_transform(self._obj, self.grid_mapping)
+            transform = cf.read_transform(self._obj, self.grid_mapping)
+            # If CF didn't find anything and Zarr conventions are declared, try Zarr
+            if transform is None and zarr.has_convention_declared(
+                self._obj.attrs, "spatial:"
+            ):
+                transform = zarr.read_transform(self._obj)
+            return transform
 
         return None
 
