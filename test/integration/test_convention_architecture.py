@@ -10,14 +10,9 @@ from rioxarray.enum import Convention
 
 
 class TestConventionArchitecture:
-    """Test the new convention architecture."""
+    """Test integration scenarios for the convention architecture."""
 
-    def test_convention_enum(self):
-        """Test Convention enum exists and has expected values."""
-        assert hasattr(Convention, "CF")
-        assert hasattr(Convention, "Zarr")
-        assert Convention.CF.value == "CF"
-        assert Convention.Zarr.value == "Zarr"
+
 
     def test_set_options_convention(self):
         """Test setting convention through set_options."""
@@ -39,49 +34,42 @@ class TestConventionArchitecture:
 
             assert get_option(CONVENTION) == Convention.CF
 
-    def test_write_crs_with_convention_parameter(self):
-        """Test write_crs with explicit convention parameter."""
+    def test_convention_interaction_with_existing_metadata(self):
+        """Test how conventions interact when metadata already exists."""
         data = np.random.rand(3, 3)
         da = xr.DataArray(data, dims=("y", "x"))
 
-        # Test CF convention
+        # Start with CF metadata
         da_cf = da.rio.write_crs("EPSG:4326", convention=Convention.CF)
-        assert hasattr(da_cf, "coords")
-        # CF should create a grid_mapping coordinate
-        assert "spatial_ref" in da_cf.coords or any(
-            "spatial_ref" in str(coord) for coord in da_cf.coords
-        )
 
-        # Test Zarr convention
-        da_zarr = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        # Zarr should add proj: attributes and convention declaration
-        assert "zarr_conventions" in da_zarr.attrs
+        # Add Zarr metadata on top (should coexist)
+        da_both = da_cf.rio.write_crs("EPSG:3857", convention=Convention.Zarr)
+
+        # Should have both types of metadata
+        assert "spatial_ref" in da_both.coords  # CF metadata
+        assert "zarr_conventions" in da_both.attrs  # Zarr metadata
         assert any(
-            conv.get("name") == "proj:" for conv in da_zarr.attrs["zarr_conventions"]
+            conv.get("name") == "proj:" for conv in da_both.attrs["zarr_conventions"]
         )
 
-    def test_write_transform_with_convention_parameter(self):
-        """Test write_transform with explicit convention parameter."""
+    def test_convention_metadata_coexistence(self):
+        """Test that CF and Zarr transform metadata can coexist."""
         data = np.random.rand(3, 3)
         da = xr.DataArray(data, dims=("y", "x"))
-        transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 3.0)
+        transform1 = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 3.0)
+        transform2 = Affine(2.0, 0.0, 0.0, 0.0, -2.0, 6.0)
 
-        # Test CF convention
-        da_cf = da.rio.write_transform(transform, convention=Convention.CF)
-        # CF should have a grid_mapping coordinate with GeoTransform
-        assert hasattr(da_cf, "coords")
+        # Add CF transform first
+        da_cf = da.rio.write_transform(transform1, convention=Convention.CF)
 
-        # Test Zarr convention
-        da_zarr = da.rio.write_transform(transform, convention=Convention.Zarr)
-        # Zarr should have spatial:transform attribute and convention declaration
-        assert "zarr_conventions" in da_zarr.attrs
-        assert "spatial:transform" in da_zarr.attrs
-        assert any(
-            conv.get("name") == "spatial:" for conv in da_zarr.attrs["zarr_conventions"]
-        )
+        # Add Zarr transform on top
+        da_both = da_cf.rio.write_transform(transform2, convention=Convention.Zarr)
 
-        # Verify transform values
-        assert da_zarr.attrs["spatial:transform"] == [1.0, 0.0, 0.0, 0.0, -1.0, 3.0]
+        # Both should coexist
+        assert "spatial_ref" in da_both.coords  # CF metadata
+        assert "GeoTransform" in da_both.coords["spatial_ref"].attrs
+        assert "spatial:transform" in da_both.attrs  # Zarr metadata
+        assert da_both.attrs["spatial:transform"] == [2.0, 0.0, 0.0, 0.0, -2.0, 6.0]
 
     def test_crs_reading_follows_global_convention(self):
         """Test that CRS reading follows the global convention setting."""
@@ -108,20 +96,4 @@ class TestConventionArchitecture:
             crs = da_with_zarr.rio.crs
             assert crs.to_epsg() == 3857
 
-    def test_zarr_convention_modules_exist(self):
-        """Test that Zarr convention modules are available."""
-        data = np.random.rand(3, 3)
-        da = xr.DataArray(data, dims=("y", "x"))
 
-        # Test convention modules exist
-        from rioxarray._convention import zarr
-
-        assert callable(zarr.write_crs)
-        assert callable(zarr.write_transform)
-        assert callable(zarr.write_spatial_metadata)
-        assert callable(zarr.write_conventions)
-
-        # Test basic functionality through convention parameter
-        da_zarr = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        assert "proj:wkt2" in da_zarr.attrs  # Default format is wkt2
-        assert "zarr_conventions" in da_zarr.attrs

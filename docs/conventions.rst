@@ -1,5 +1,5 @@
 Geospatial Metadata Conventions
-==============================
+===============================
 
 Overview
 --------
