@@ -343,6 +343,11 @@ class XRasterBase:
             # If not already checked above due to explicit declaration
             if not zarr.has_convention_declared(self._obj.attrs, "proj:"):
                 parsed_crs = zarr.read_crs(self._obj)
+        elif convention is None:
+            # Try both conventions, preferring CF
+            parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+            if parsed_crs is None and not zarr.has_convention_declared(self._obj.attrs, "proj:"):
+                parsed_crs = zarr.read_crs(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -558,7 +563,7 @@ class XRasterBase:
 
         # Determine which convention to use
         if convention is None:
-            convention = get_option(CONVENTION)
+            convention = get_option(CONVENTION) or Convention.CF
 
         if convention == Convention.CF:
             return cf.write_crs(
@@ -668,7 +673,7 @@ class XRasterBase:
 
         # Determine which convention to use
         if convention is None:
-            convention = get_option(CONVENTION)
+            convention = get_option(CONVENTION) or Convention.CF
 
         if convention == Convention.CF:
             return cf.write_transform(

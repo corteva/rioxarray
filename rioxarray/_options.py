@@ -17,13 +17,13 @@ CONVENTION = "convention"
 OPTIONS = {
     EXPORT_GRID_MAPPING: True,
     SKIP_MISSING_SPATIAL_DIMS: False,
-    CONVENTION: Convention.CF,
+    CONVENTION: None,
 }
 OPTION_NAMES = set(OPTIONS)
 
 VALIDATORS = {
     EXPORT_GRID_MAPPING: lambda choice: isinstance(choice, bool),
-    CONVENTION: lambda choice: isinstance(choice, Convention),
+    CONVENTION: lambda choice: choice is None or isinstance(choice, Convention),
 }
 
 
