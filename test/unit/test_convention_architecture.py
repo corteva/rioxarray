@@ -40,14 +40,14 @@ class TestConventionArchitecture:
         with rioxarray.set_options(convention=Convention.CF):
             from rioxarray._options import CONVENTION, get_option
 
-            assert get_option(CONVENTION) == Convention.CF
+            assert get_option(CONVENTION) is Convention.CF
 
     def test_zarr_convention_options(self):
         """Test that Zarr convention can be set."""
         with rioxarray.set_options(convention=Convention.Zarr):
             from rioxarray._options import CONVENTION, get_option
 
-            assert get_option(CONVENTION) == Convention.Zarr
+            assert get_option(CONVENTION) is Convention.Zarr
 
     def test_write_crs_cf_convention(self, sample_data):
         """Test writing CRS with CF convention."""

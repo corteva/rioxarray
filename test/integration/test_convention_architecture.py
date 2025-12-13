@@ -24,13 +24,13 @@ class TestConventionArchitecture:
         with rioxarray.set_options(convention=Convention.Zarr):
             from rioxarray._options import CONVENTION, get_option
 
-            assert get_option(CONVENTION) == Convention.Zarr
+            assert get_option(CONVENTION) is Convention.Zarr
 
         # Test setting CF convention explicitly
         with rioxarray.set_options(convention=Convention.CF):
             from rioxarray._options import CONVENTION, get_option
 
-            assert get_option(CONVENTION) == Convention.CF
+            assert get_option(CONVENTION) is Convention.CF
 
     def test_convention_interaction_with_existing_metadata(self):
         """Test how conventions interact when metadata already exists."""

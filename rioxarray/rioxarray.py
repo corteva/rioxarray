@@ -275,11 +275,11 @@ class XRasterBase:
         # Read spatial dimensions using the global convention setting
         convention = get_option(CONVENTION)
 
-        if convention == Convention.Zarr:
+        if convention is Convention.Zarr:
             spatial_dims = zarr.read_spatial_dimensions(self._obj)
             if spatial_dims is not None:
                 self._y_dim, self._x_dim = spatial_dims
-        elif convention == Convention.CF or convention is None:
+        elif convention is Convention.CF or convention is None:
             # Use CF convention logic for dimension detection
             # Also use this as fallback when convention is None
             if "x" in self._obj.dims and "y" in self._obj.dims:
@@ -340,9 +340,9 @@ class XRasterBase:
 
         # Check global convention setting
         convention = get_option(CONVENTION)
-        if convention == Convention.CF:
+        if convention is Convention.CF:
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
-        elif convention == Convention.Zarr:
+        elif convention is Convention.Zarr:
             parsed_crs = zarr.read_crs(self._obj)
         elif convention is None:
             # Use CF as default when convention is None
@@ -569,14 +569,14 @@ class XRasterBase:
         if convention is None:
             convention = get_option(CONVENTION) or Convention.CF
 
-        if convention == Convention.CF:
+        if convention is Convention.CF:
             return cf.write_crs(
                 data_obj,
                 data_obj.rio.crs,
                 grid_mapping_name or self.grid_mapping,
                 inplace=True,
             )
-        elif convention == Convention.Zarr:
+        elif convention is Convention.Zarr:
             return zarr.write_crs(
                 data_obj,
                 data_obj.rio.crs,
@@ -635,9 +635,9 @@ class XRasterBase:
         # Read using the global convention setting
         convention = get_option(CONVENTION)
 
-        if convention == Convention.Zarr:
+        if convention is Convention.Zarr:
             return zarr.read_transform(self._obj)
-        elif convention == Convention.CF:
+        elif convention is Convention.CF:
             return cf.read_transform(self._obj, self.grid_mapping)
         elif convention is None:
             # Use CF as default when convention is None
@@ -688,14 +688,14 @@ class XRasterBase:
         if convention is None:
             convention = get_option(CONVENTION) or Convention.CF
 
-        if convention == Convention.CF:
+        if convention is Convention.CF:
             return cf.write_transform(
                 data_obj,
                 transform,
                 grid_mapping_name or self.grid_mapping,
                 inplace=True,
             )
-        elif convention == Convention.Zarr:
+        elif convention is Convention.Zarr:
             return zarr.write_transform(data_obj, transform, inplace=True)
         else:
             raise ValueError(f"Unsupported convention: {convention}")
