@@ -293,8 +293,8 @@ def write_spatial_metadata(
     # Write spatial:bbox if transform is available
     if include_bbox and transform is not None:
         try:
-            height = obj.dims[y_dim] if y_dim in obj.dims else 1
-            width = obj.dims[x_dim] if x_dim in obj.dims else 1
+            height = obj.sizes[y_dim] if y_dim in obj.dims else 1
+            width = obj.sizes[x_dim] if x_dim in obj.dims else 1
             bbox = calculate_spatial_bbox(transform, (height, width))
             obj_out.attrs["spatial:bbox"] = list(bbox)
         except Exception:
