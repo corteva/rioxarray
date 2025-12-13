@@ -286,8 +286,8 @@ def write_spatial_metadata(
 
     # Write spatial:shape
     if y_dim in obj.dims and x_dim in obj.dims:
-        height = obj.dims[y_dim]
-        width = obj.dims[x_dim]
+        height = obj.sizes[y_dim]
+        width = obj.sizes[x_dim]
         obj_out.attrs["spatial:shape"] = [height, width]
 
     # Write spatial:bbox if transform is available
@@ -467,3 +467,67 @@ def add_convention_declaration(
     attrs_out["zarr_conventions"].append(convention)
 
     return attrs_out
+
+
+def write_conventions(
+    obj: Union[xarray.Dataset, xarray.DataArray],
+    input_crs: Optional[str] = None,
+    transform: Optional[Affine] = None,
+    crs_format: str = "wkt2",
+    inplace: bool = True,
+) -> Union[xarray.Dataset, xarray.DataArray]:
+    """
+    Write complete Zarr spatial and proj conventions.
+
+    Convenience method that writes both CRS (proj:) and spatial (spatial:)
+    convention metadata in a single call.
+
+    Parameters
+    ----------
+    obj : xarray.Dataset or xarray.DataArray
+        Object to write metadata to
+    input_crs : str, optional
+        CRS to write. If not provided, object must have existing CRS.
+    transform : affine.Affine, optional
+        Transform to write. If not provided, it will be calculated from obj.
+    crs_format : str, default "wkt2"
+        Which proj: format(s) to write: "code", "wkt2", "projjson", "all"
+    inplace : bool, default True
+        Whether to modify object in place
+
+    Returns
+    -------
+    xarray.Dataset or xarray.DataArray
+        Modified object with complete Zarr conventions
+    """
+    from rioxarray.raster_array import RasterArray
+
+    # Get CRS if provided
+    if input_crs:
+        crs = crs_from_user_input(input_crs)
+    else:
+        # Try to get CRS from object
+        rio = RasterArray(obj)
+        crs = rio.crs
+        if crs is None:
+            raise ValueError("No CRS available and input_crs not provided")
+
+    # Write CRS
+    obj_modified = write_crs(obj, crs, format=crs_format, inplace=inplace)
+
+    # Write transform
+    if transform is not None:
+        obj_modified = write_transform(obj_modified, transform, inplace=True)
+
+    # Write spatial metadata - need to get dimensions
+    rio = RasterArray(obj_modified)
+    if rio.x_dim and rio.y_dim:
+        obj_modified = write_spatial_metadata(
+            obj_modified,
+            rio.y_dim,
+            rio.x_dim,
+            transform=transform,
+            inplace=True
+        )
+
+    return obj_modified

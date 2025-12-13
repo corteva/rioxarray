@@ -279,8 +279,9 @@ class XRasterBase:
             spatial_dims = zarr.read_spatial_dimensions(self._obj)
             if spatial_dims is not None:
                 self._y_dim, self._x_dim = spatial_dims
-        elif convention == Convention.CF:
+        elif convention == Convention.CF or convention is None:
             # Use CF convention logic for dimension detection
+            # Also use this as fallback when convention is None
             if "x" in self._obj.dims and "y" in self._obj.dims:
                 self._x_dim = "x"
                 self._y_dim = "y"
@@ -344,10 +345,8 @@ class XRasterBase:
             if not zarr.has_convention_declared(self._obj.attrs, "proj:"):
                 parsed_crs = zarr.read_crs(self._obj)
         elif convention is None:
-            # Try both conventions, preferring CF
+            # Use CF as default when convention is None
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
-            if parsed_crs is None and not zarr.has_convention_declared(self._obj.attrs, "proj:"):
-                parsed_crs = zarr.read_crs(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -635,6 +634,9 @@ class XRasterBase:
             return zarr.read_transform(self._obj)
         elif convention == Convention.CF:
             return cf.read_transform(self._obj, self.grid_mapping)
+        elif convention is None:
+            # Use CF as default when convention is None
+            return cf.read_transform(self._obj, self.grid_mapping)
 
         return None
 
@@ -719,304 +721,6 @@ class XRasterBase:
         return Affine.translation(src_left, src_top) * Affine.scale(
             src_resolution_x, src_resolution_y
         )
-
-    def write_zarr_transform(
-        self,
-        transform: Optional[Affine] = None,
-        inplace: bool = False,
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write the transform using Zarr spatial:transform convention.
-
-        The spatial:transform attribute stores the affine transformation as a
-        numeric array [a, b, c, d, e, f] directly on the dataset/dataarray,
-        following the Zarr spatial convention specification.
-
-        Parameters
-        ----------
-        transform : affine.Affine, optional
-            The transform of the dataset. If not provided, it will be calculated.
-        inplace : bool, optional
-            If True, write to existing dataset. Default is False.
-
-        Returns
-        -------
-        xarray.Dataset | xarray.DataArray
-            Modified dataset with spatial:transform attribute.
-
-        See Also
-        --------
-        write_transform : Write transform in CF/GDAL format
-        write_zarr_conventions : Write complete Zarr conventions
-
-        References
-        ----------
-        https://github.com/zarr-conventions/spatial
-        """
-        transform = transform or self.transform(recalc=True)
-        data_obj = self._get_obj(inplace=inplace)
-
-        # Remove old CF/GDAL transform attributes to avoid conflicts
-        data_obj.attrs.pop("transform", None)
-
-        # Declare spatial: convention in zarr_conventions array
-        data_obj.attrs = zarr.add_convention_declaration(
-            data_obj.attrs, "spatial:", inplace=True
-        )
-
-        # Write spatial:transform as numeric array
-        data_obj.attrs["spatial:transform"] = zarr.format_spatial_transform(transform)
-
-        return data_obj
-
-    def write_zarr_crs(
-        self,
-        input_crs: Optional[Any] = None,
-        format: Literal["code", "wkt2", "projjson", "all"] = "wkt2",
-        inplace: bool = False,
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write CRS using Zarr proj: convention.
-
-        The proj: convention provides multiple formats for encoding CRS information
-        as direct attributes on the dataset/dataarray, following the Zarr geo-proj
-        convention specification.
-
-        Parameters
-        ----------
-        input_crs : Any, optional
-            Anything accepted by rasterio.crs.CRS.from_user_input.
-            If not provided, uses the existing CRS.
-        format : {"code", "wkt2", "projjson", "all"}, optional
-            Which proj: format(s) to write:
-            - "code": Write proj:code (e.g., "EPSG:4326") - most compact
-            - "wkt2": Write proj:wkt2 (WKT2 string) - widely compatible
-            - "projjson": Write proj:projjson (PROJJSON dict) - machine-readable
-            - "all": Write all three formats for maximum compatibility
-            Default is "wkt2".
-        inplace : bool, optional
-            If True, write to existing dataset. Default is False.
-
-        Returns
-        -------
-        xarray.Dataset | xarray.DataArray
-            Modified dataset with proj: CRS information.
-
-        Raises
-        ------
-        MissingCRS
-            If no CRS is available and input_crs is not provided.
-
-        See Also
-        --------
-        write_crs : Write CRS in CF format
-        write_zarr_conventions : Write complete Zarr conventions
-
-        References
-        ----------
-        https://github.com/zarr-experimental/geo-proj
-
-        Examples
-        --------
-        >>> import rioxarray
-        >>> import xarray as xr
-        >>> da = xr.DataArray([[1, 2], [3, 4]], dims=("y", "x"))
-        >>> da = da.rio.write_zarr_crs("EPSG:4326", format="wkt2")
-        >>> "proj:wkt2" in da.attrs
-        True
-        """
-        if input_crs is not None:
-            data_obj = self._set_crs(input_crs, inplace=inplace)
-        else:
-            data_obj = self._get_obj(inplace=inplace)
-
-        if data_obj.rio.crs is None:
-            raise MissingCRS(
-                "CRS is not set. Use 'rio.write_zarr_crs(input_crs=...)' to set it."
-            )
-
-        crs = data_obj.rio.crs
-
-        # Remove old CF grid_mapping attributes if they exist
-        data_obj.attrs.pop("crs", None)
-
-        # Declare proj: convention in zarr_conventions array
-        data_obj.attrs = zarr.add_convention_declaration(
-            data_obj.attrs, "proj:", inplace=True
-        )
-
-        # Write requested format(s)
-        if format in ("code", "all"):
-            proj_code = zarr.format_proj_code(crs)
-            if proj_code:
-                data_obj.attrs["proj:code"] = proj_code
-
-        if format in ("wkt2", "all"):
-            data_obj.attrs["proj:wkt2"] = zarr.format_proj_wkt2(crs)
-
-        if format in ("projjson", "all"):
-            data_obj.attrs["proj:projjson"] = zarr.format_proj_projjson(crs)
-
-        return data_obj
-
-    def write_zarr_spatial_metadata(
-        self,
-        inplace: bool = False,
-        include_bbox: bool = True,
-        include_registration: bool = True,
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write complete Zarr spatial: metadata.
-
-        Writes spatial:dimensions, spatial:shape, and optionally spatial:bbox
-        and spatial:registration according to the Zarr spatial convention.
-
-        Parameters
-        ----------
-        inplace : bool, optional
-            If True, write to existing dataset. Default is False.
-        include_bbox : bool, optional
-            Whether to include spatial:bbox. Default is True.
-        include_registration : bool, optional
-            Whether to include spatial:registration. Default is True.
-
-        Returns
-        -------
-        xarray.Dataset | xarray.DataArray
-            Modified dataset with spatial: metadata.
-
-        Raises
-        ------
-        MissingSpatialDimensionError
-            If spatial dimensions cannot be determined.
-
-        See Also
-        --------
-        write_zarr_transform : Write spatial:transform
-        write_zarr_conventions : Write complete Zarr conventions
-
-        References
-        ----------
-        https://github.com/zarr-conventions/spatial
-
-        Examples
-        --------
-        >>> import rioxarray
-        >>> import xarray as xr
-        >>> da = xr.DataArray([[1, 2], [3, 4]], dims=("y", "x"))
-        >>> da = da.rio.write_zarr_spatial_metadata()
-        >>> da.attrs["spatial:dimensions"]
-        ['y', 'x']
-        >>> da.attrs["spatial:shape"]
-        [2, 2]
-        """
-        data_obj = self._get_obj(inplace=inplace)
-
-        # Validate spatial dimensions exist
-        if self.x_dim is None or self.y_dim is None:
-            raise MissingSpatialDimensionError(
-                "Spatial dimensions could not be determined. "
-                "Please set them using rio.set_spatial_dims()."
-            )
-
-        # Declare spatial: convention in zarr_conventions array
-        data_obj.attrs = zarr.add_convention_declaration(
-            data_obj.attrs, "spatial:", inplace=True
-        )
-
-        # Write spatial:dimensions [y, x]
-        data_obj.attrs["spatial:dimensions"] = [self.y_dim, self.x_dim]
-
-        # Write spatial:shape [height, width]
-        data_obj.attrs["spatial:shape"] = [self.height, self.width]
-
-        # Optionally write spatial:bbox
-        if include_bbox:
-            try:
-                transform = self.transform(recalc=True)
-                shape = (self.height, self.width)
-                bbox = zarr.calculate_spatial_bbox(transform, shape)
-                data_obj.attrs["spatial:bbox"] = list(bbox)
-            except Exception:
-                # If we can't calculate bbox, skip it
-                pass
-
-        # Optionally write spatial:registration (default: pixel)
-        if include_registration:
-            data_obj.attrs["spatial:registration"] = "pixel"
-
-        return data_obj
-
-    def write_zarr_conventions(
-        self,
-        input_crs: Optional[Any] = None,
-        transform: Optional[Affine] = None,
-        crs_format: Literal["code", "wkt2", "projjson", "all"] = "wkt2",
-        inplace: bool = False,
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write complete Zarr spatial and proj conventions.
-
-        Convenience method that writes both CRS (proj:) and spatial (spatial:)
-        convention metadata in a single call.
-
-        Parameters
-        ----------
-        input_crs : Any, optional
-            CRS to write. If not provided, uses existing CRS.
-        transform : affine.Affine, optional
-            Transform to write. If not provided, it will be calculated.
-        crs_format : {"code", "wkt2", "projjson", "all"}, optional
-            Which proj: format(s) to write. Default is "wkt2".
-        inplace : bool, optional
-            If True, write to existing dataset. Default is False.
-
-        Returns
-        -------
-        xarray.Dataset | xarray.DataArray
-            Modified dataset with complete Zarr conventions.
-
-        Raises
-        ------
-        MissingCRS
-            If no CRS is available and input_crs is not provided.
-        MissingSpatialDimensionError
-            If spatial dimensions cannot be determined.
-
-        See Also
-        --------
-        write_zarr_crs : Write only CRS metadata
-        write_zarr_transform : Write only transform metadata
-        write_zarr_spatial_metadata : Write other spatial metadata
-
-        References
-        ----------
-        https://github.com/zarr-conventions/spatial
-        https://github.com/zarr-experimental/geo-proj
-
-        Examples
-        --------
-        >>> import rioxarray
-        >>> import xarray as xr
-        >>> da = xr.DataArray([[1, 2], [3, 4]], dims=("y", "x"))
-        >>> da = da.rio.write_zarr_conventions("EPSG:4326", crs_format="all")
-        >>> "proj:code" in da.attrs and "spatial:transform" in da.attrs
-        True
-        """
-        data_obj = self._get_obj(inplace=inplace)
-
-        # Write CRS
-        data_obj = data_obj.rio.write_zarr_crs(
-            input_crs=input_crs, format=crs_format, inplace=True
-        )
-
-        # Write transform
-        data_obj = data_obj.rio.write_zarr_transform(transform=transform, inplace=True)
-
-        # Write other spatial metadata
-        data_obj = data_obj.rio.write_zarr_spatial_metadata(inplace=True)
-
-        return data_obj
 
     def write_coordinate_system(
         self, inplace: bool = False
