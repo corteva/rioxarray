@@ -523,11 +523,7 @@ def write_conventions(
     rio = RasterArray(obj_modified)
     if rio.x_dim and rio.y_dim:
         obj_modified = write_spatial_metadata(
-            obj_modified,
-            rio.y_dim,
-            rio.x_dim,
-            transform=transform,
-            inplace=True
+            obj_modified, rio.y_dim, rio.x_dim, transform=transform, inplace=True
         )
 
     return obj_modified

@@ -208,6 +208,7 @@ class TestZarrConventionsWriting:
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         # Use zarr module directly for format-specific options
         from rioxarray._convention import zarr
+
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         # Use zarr module to write specific format
         da = zarr.write_crs(da, da.rio.crs, format="code")
@@ -238,12 +239,17 @@ class TestZarrConventionsWriting:
         """Test writing CRS as proj:projjson."""
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         from rioxarray._convention import zarr
+
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         da = zarr.write_crs(da, da.rio.crs, format="projjson")
 
         assert "proj:projjson" in da.attrs
         assert isinstance(da.attrs["proj:projjson"], dict)
-        assert da.attrs["proj:projjson"]["type"] in ("GeographicCRS", "GeodeticCRS", "CRS")
+        assert da.attrs["proj:projjson"]["type"] in (
+            "GeographicCRS",
+            "GeodeticCRS",
+            "CRS",
+        )
 
         # Verify it can be read back
         assert da.rio.crs.to_epsg() == 4326
@@ -252,6 +258,7 @@ class TestZarrConventionsWriting:
         """Test writing all three proj formats."""
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         from rioxarray._convention import zarr
+
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         da = zarr.write_crs(da, da.rio.crs, format="all")
 
@@ -282,6 +289,7 @@ class TestZarrConventionsWriting:
     def test_write_zarr_spatial_metadata(self):
         """Test writing complete spatial metadata."""
         from rioxarray._convention import zarr
+
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
         da = zarr.write_spatial_metadata(da, "y", "x")
 
@@ -297,10 +305,13 @@ class TestZarrConventionsWriting:
     def test_write_zarr_spatial_metadata_with_bbox(self):
         """Test writing spatial metadata with bbox."""
         from rioxarray._convention import zarr
+
         transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
         da = da.rio.write_transform(transform, convention=Convention.Zarr)
-        da = zarr.write_spatial_metadata(da, "y", "x", transform=transform, include_bbox=True)
+        da = zarr.write_spatial_metadata(
+            da, "y", "x", transform=transform, include_bbox=True
+        )
 
         assert "spatial:bbox" in da.attrs
         # bbox should be [xmin, ymin, xmax, ymax]
@@ -311,6 +322,7 @@ class TestZarrConventionsWriting:
     def test_write_zarr_conventions_all(self):
         """Test writing complete Zarr conventions."""
         from rioxarray._convention import zarr
+
         transform = Affine(10.0, 0.0, 100.0, 0.0, -10.0, 200.0)
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
         # Write components separately for simplicity
@@ -344,6 +356,7 @@ class TestZarrConventionsRoundTrip:
     def test_roundtrip_proj_code(self):
         """Test write then read of proj:code."""
         from rioxarray._convention import zarr
+
         original_da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
         original_da = original_da.rio.write_crs("EPSG:3857", convention=Convention.Zarr)
         # Use zarr module for specific format
@@ -362,7 +375,9 @@ class TestZarrConventionsRoundTrip:
         """Test write then read of spatial:transform."""
         transform = Affine(5.0, 0.0, -180.0, 0.0, -5.0, 90.0)
         original_da = xr.DataArray(np.ones((36, 72)), dims=("y", "x"))
-        original_da = original_da.rio.write_transform(transform, convention=Convention.Zarr)
+        original_da = original_da.rio.write_transform(
+            transform, convention=Convention.Zarr
+        )
 
         # Simulate saving and reloading
         reloaded_da = xr.DataArray(
@@ -376,13 +391,18 @@ class TestZarrConventionsRoundTrip:
     def test_roundtrip_complete_conventions(self):
         """Test write then read of complete Zarr conventions."""
         from rioxarray._convention import zarr
+
         transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 100.0)
         original_da = xr.DataArray(np.ones((100, 100)), dims=("y", "x"))
         # Write components separately for simplicity
         original_da = original_da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         original_da = zarr.write_crs(original_da, original_da.rio.crs, format="all")
-        original_da = original_da.rio.write_transform(transform, convention=Convention.Zarr)
-        original_da = zarr.write_spatial_metadata(original_da, "y", "x", transform=transform)
+        original_da = original_da.rio.write_transform(
+            transform, convention=Convention.Zarr
+        )
+        original_da = zarr.write_spatial_metadata(
+            original_da, "y", "x", transform=transform
+        )
 
         # Simulate saving and reloading
         reloaded_da = xr.DataArray(
@@ -415,6 +435,7 @@ class TestZarrConventionsCoexistence:
 
         # Add Zarr conventions
         from rioxarray._convention import zarr
+
         da = zarr.write_crs(da, da.rio.crs, format="code")
 
         # Both should be present
@@ -487,6 +508,7 @@ class TestZarrConventionsEdgeCases:
 
         # Should handle None gracefully by returning unchanged object
         from rioxarray._convention import zarr
+
         result = zarr.write_crs(da, None, format="code")
         # Should not have any proj: attributes
         assert not any(attr.startswith("proj:") for attr in result.attrs)
@@ -500,6 +522,7 @@ class TestZarrConventionsEdgeCases:
 
         # Should raise MissingSpatialDimensionError
         from rioxarray._convention import zarr
+
         with pytest.raises(Exception):  # MissingSpatialDimensionError
             zarr.write_spatial_metadata(da)
 

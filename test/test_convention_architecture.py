@@ -66,7 +66,10 @@ class TestConventionArchitecture:
 
         # Should have proj:wkt2 attribute (default format)
         assert "proj:wkt2" in da_with_crs.attrs
-        assert "GEOGCS" in da_with_crs.attrs["proj:wkt2"] or "GEOGCRS" in da_with_crs.attrs["proj:wkt2"]
+        assert (
+            "GEOGCS" in da_with_crs.attrs["proj:wkt2"]
+            or "GEOGCRS" in da_with_crs.attrs["proj:wkt2"]
+        )
         # Should have zarr_conventions declaration
         assert "zarr_conventions" in da_with_crs.attrs
         conventions = da_with_crs.attrs["zarr_conventions"]

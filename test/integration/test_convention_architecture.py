@@ -115,7 +115,7 @@ class TestConventionArchitecture:
 
         # Test convention modules exist
         from rioxarray._convention import zarr
-        
+
         assert callable(zarr.write_crs)
         assert callable(zarr.write_transform)
         assert callable(zarr.write_spatial_metadata)
