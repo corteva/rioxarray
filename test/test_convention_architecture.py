@@ -64,9 +64,9 @@ class TestConventionArchitecture:
         """Test writing CRS with Zarr convention."""
         da_with_crs = sample_data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
 
-        # Should have proj:code attribute
-        assert "proj:code" in da_with_crs.attrs
-        assert da_with_crs.attrs["proj:code"] == "EPSG:4326"
+        # Should have proj:wkt2 attribute (default format)
+        assert "proj:wkt2" in da_with_crs.attrs
+        assert "GEOGCS" in da_with_crs.attrs["proj:wkt2"] or "GEOGCRS" in da_with_crs.attrs["proj:wkt2"]
         # Should have zarr_conventions declaration
         assert "zarr_conventions" in da_with_crs.attrs
         conventions = da_with_crs.attrs["zarr_conventions"]

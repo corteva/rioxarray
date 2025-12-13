@@ -21,11 +21,11 @@ class TestConventionArchitecture:
 
     def test_set_options_convention(self):
         """Test setting convention through set_options."""
-        # Test default convention
+        # Test default convention (None for CF-first with Zarr fallback)
         with rioxarray.set_options():
             from rioxarray._options import CONVENTION, get_option
 
-            assert get_option(CONVENTION) == Convention.CF
+            assert get_option(CONVENTION) is None
 
         # Test setting Zarr convention
         with rioxarray.set_options(convention=Convention.Zarr):
@@ -96,6 +96,8 @@ class TestConventionArchitecture:
 
         # With CF convention setting, should read CF CRS (4326)
         with rioxarray.set_options(convention=Convention.CF):
+            # Reset cached CRS before reading
+            da_with_zarr.rio._crs = None
             crs = da_with_zarr.rio.crs
             assert crs.to_epsg() == 4326
 
@@ -106,18 +108,20 @@ class TestConventionArchitecture:
             crs = da_with_zarr.rio.crs
             assert crs.to_epsg() == 3857
 
-    def test_zarr_conventions_methods_exist(self):
-        """Test that new Zarr convention methods exist."""
+    def test_zarr_convention_modules_exist(self):
+        """Test that Zarr convention modules are available."""
         data = np.random.rand(3, 3)
         da = xr.DataArray(data, dims=("y", "x"))
 
-        # Test methods exist
-        assert hasattr(da.rio, "write_zarr_crs")
-        assert hasattr(da.rio, "write_zarr_transform")
-        assert hasattr(da.rio, "write_zarr_spatial_metadata")
-        assert hasattr(da.rio, "write_zarr_conventions")
+        # Test convention modules exist
+        from rioxarray._convention import zarr
+        
+        assert callable(zarr.write_crs)
+        assert callable(zarr.write_transform)
+        assert callable(zarr.write_spatial_metadata)
+        assert callable(zarr.write_conventions)
 
-        # Test basic functionality
-        da_zarr = da.rio.write_zarr_crs("EPSG:4326")
-        assert "proj:code" in da_zarr.attrs
-        assert da_zarr.attrs["proj:code"] == "EPSG:4326"
+        # Test basic functionality through convention parameter
+        da_zarr = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
+        assert "proj:wkt2" in da_zarr.attrs  # Default format is wkt2
+        assert "zarr_conventions" in da_zarr.attrs
