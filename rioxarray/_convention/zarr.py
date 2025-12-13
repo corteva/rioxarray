@@ -292,13 +292,12 @@ def write_spatial_metadata(
 
     # Write spatial:bbox if transform is available
     if include_bbox and transform is not None:
-        try:
-            height = obj.sizes[y_dim] if y_dim in obj.dims else 1
-            width = obj.sizes[x_dim] if x_dim in obj.dims else 1
+        # Write spatial:bbox if dimensions are available
+        if x_dim in obj.dims and y_dim in obj.dims:
+            height = obj.sizes[y_dim]
+            width = obj.sizes[x_dim]
             bbox = calculate_spatial_bbox(transform, (height, width))
             obj_out.attrs["spatial:bbox"] = list(bbox)
-        except Exception:
-            pass
 
     # Write spatial:registration (default to pixel)
     if include_registration:
@@ -329,21 +328,15 @@ def parse_proj_code(proj_code: str) -> Optional[rasterio.crs.CRS]:
     """Parse proj:code to CRS."""
     if not isinstance(proj_code, str):
         return None
-    try:
-        return rasterio.crs.CRS.from_user_input(proj_code)
-    except Exception:
-        return None
+    return rasterio.crs.CRS.from_user_input(proj_code)
 
 
 def format_proj_code(crs: rasterio.crs.CRS) -> Optional[str]:
     """Format CRS as proj:code if it has an authority code."""
-    try:
-        auth_code = crs.to_authority()
-        if auth_code:
-            authority, code = auth_code
-            return f"{authority}:{code}"
-    except Exception:
-        pass
+    auth_code = crs.to_authority()
+    if auth_code:
+        authority, code = auth_code
+        return f"{authority}:{code}"
     return None
 
 
@@ -351,10 +344,7 @@ def parse_proj_wkt2(proj_wkt2: str) -> Optional[rasterio.crs.CRS]:
     """Parse proj:wkt2 to CRS."""
     if not isinstance(proj_wkt2, str):
         return None
-    try:
-        return rasterio.crs.CRS.from_wkt(proj_wkt2)
-    except Exception:
-        return None
+    return rasterio.crs.CRS.from_wkt(proj_wkt2)
 
 
 def format_proj_wkt2(crs: rasterio.crs.CRS) -> str:
@@ -365,28 +355,18 @@ def format_proj_wkt2(crs: rasterio.crs.CRS) -> str:
 def parse_proj_projjson(proj_projjson: Union[dict, str]) -> Optional[rasterio.crs.CRS]:
     """Parse proj:projjson to CRS."""
     if isinstance(proj_projjson, str):
-        try:
-            proj_projjson = json.loads(proj_projjson)
-        except json.JSONDecodeError:
-            return None
+        proj_projjson = json.loads(proj_projjson)
 
     if not isinstance(proj_projjson, dict):
         return None
 
-    try:
-        return rasterio.crs.CRS.from_json(json.dumps(proj_projjson))
-    except Exception:
-        return None
+    return rasterio.crs.CRS.from_json(json.dumps(proj_projjson))
 
 
 def format_proj_projjson(crs: rasterio.crs.CRS) -> dict:
     """Format CRS as proj:projjson (PROJJSON object)."""
-    try:
-        projjson_str = crs.to_json()
-        return json.loads(projjson_str)
-    except Exception:
-        # Fallback - create minimal PROJJSON-like structure
-        return {"type": "CRS", "wkt": crs.to_wkt()}
+    projjson_str = crs.to_json()
+    return json.loads(projjson_str)
 
 
 def calculate_spatial_bbox(
