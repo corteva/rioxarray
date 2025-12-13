@@ -12,7 +12,7 @@ rioxarray supports two geospatial metadata conventions for storing coordinate re
 Convention Selection
 --------------------
 
-You can choose which convention to use in several ways:
+rioxarray uses CF conventions by default. When convention is set to ``None`` (the default), rioxarray uses CF conventions but will fallback to reading Zarr conventions if they are explicitly declared in the data.
 
 Global Setting
 ~~~~~~~~~~~~~~
@@ -24,10 +24,13 @@ Set the default convention globally using ``set_options``:
     import rioxarray
     from rioxarray import Convention
 
-    # Use CF convention (default)
+    # Use CF convention with Zarr fallback (default)
+    rioxarray.set_options(convention=None)
+
+    # Use CF conventions exclusively
     rioxarray.set_options(convention=Convention.CF)
 
-    # Use Zarr conventions
+    # Use Zarr conventions exclusively
     rioxarray.set_options(convention=Convention.Zarr)
 
 Per-Method Override
@@ -37,10 +40,13 @@ Override the global setting for individual method calls:
 
 .. code-block:: python
 
-    # Write CRS using CF convention regardless of global setting
-    data.rio.write_crs("EPSG:4326", convention=Convention.CF)
+    # Write CRS using CF convention (default)
+    data.rio.write_crs("EPSG:4326")
 
-    # Write transform using Zarr convention regardless of global setting
+    # Write CRS using Zarr convention
+    data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
+
+    # Write transform using Zarr convention
     data.rio.write_transform(transform, convention=Convention.Zarr)
 
 CF Convention
@@ -89,88 +95,44 @@ Example:
     data_zarr = data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
     data_zarr = data_zarr.rio.write_transform(transform, convention=Convention.Zarr)
 
-    # Or write all conventions at once
-    data_zarr = data.rio.write_zarr_conventions("EPSG:4326")
+    # Write both CRS and transform using Zarr conventions
+    data_zarr = data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
+    data_zarr = data_zarr.rio.write_transform(transform, convention=Convention.Zarr)
 
-Zarr-Specific Methods
----------------------
+Writing Zarr Conventions
+------------------------
 
-Additional methods are available specifically for Zarr conventions:
-
-write_zarr_crs()
-~~~~~~~~~~~~~~~~
-
-Write CRS information using the Zarr proj: convention:
-
-.. code-block:: python
-
-    # Write as WKT2 string (default)
-    data.rio.write_zarr_crs("EPSG:4326")
-
-    # Write as EPSG code
-    data.rio.write_zarr_crs("EPSG:4326", format="code")
-
-    # Write as PROJJSON object
-    data.rio.write_zarr_crs("EPSG:4326", format="projjson")
-
-    # Write all formats for maximum compatibility
-    data.rio.write_zarr_crs("EPSG:4326", format="all")
-
-write_zarr_transform()
-~~~~~~~~~~~~~~~~~~~~~~
-
-Write transform information using the Zarr spatial: convention:
+To write data using Zarr conventions, use the ``convention`` parameter:
 
 .. code-block:: python
 
     from affine import Affine
+    from rioxarray import Convention
 
+    # Write CRS using Zarr conventions
+    data = data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
+
+    # Write transform using Zarr conventions
     transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 100.0)
-    data.rio.write_zarr_transform(transform)
-
-    # Results in spatial:transform attribute: [1.0, 0.0, 0.0, 0.0, -1.0, 100.0]
-
-write_zarr_spatial_metadata()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Write complete spatial metadata using the Zarr spatial: convention:
-
-.. code-block:: python
-
-    data.rio.write_zarr_spatial_metadata(
-        include_bbox=True,      # Include spatial:bbox
-        include_registration=True  # Include spatial:registration
-    )
+    data = data.rio.write_transform(transform, convention=Convention.Zarr)
 
     # Results in:
+    # - proj:wkt2: CRS as WKT2 string
+    # - spatial:transform: [1.0, 0.0, 0.0, 0.0, -1.0, 100.0]
     # - spatial:dimensions: ["y", "x"]
     # - spatial:shape: [height, width]
-    # - spatial:bbox: [xmin, ymin, xmax, ymax]
-    # - spatial:registration: "pixel"
-
-write_zarr_conventions()
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Convenience method to write both CRS and spatial conventions:
-
-.. code-block:: python
-
-    # Write complete Zarr metadata in one call
-    data.rio.write_zarr_conventions(
-        input_crs="EPSG:4326",
-        crs_format="all",  # Write code, wkt2, and projjson
-        transform=my_transform
-    )
+    # - zarr_conventions: Convention declarations
 
 Reading Behavior
 ----------------
 
-When reading geospatial metadata, rioxarray follows the global convention setting:
+When reading geospatial metadata, rioxarray follows this priority order based on the global convention setting:
 
-- **Convention.CF**: Reads from grid_mapping coordinates and CF attributes
-- **Convention.Zarr**: Reads from Zarr spatial: and proj: attributes
+- **None (default)**: CF conventions first, with Zarr conventions as fallback if explicitly declared
+- **Convention.CF**: CF conventions only (grid_mapping coordinates and CF attributes)
+- **Convention.Zarr**: Zarr conventions only (spatial: and proj: attributes)
 
-The reading logic is strict - it only attempts to read from the specified convention, ensuring predictable behavior.
+The fallback behavior ensures that CF remains the primary convention while allowing Zarr conventions to be read when they are the only available metadata.
 
 Convention Declaration
 ----------------------
@@ -179,7 +141,7 @@ According to the `Zarr conventions specification <https://github.com/zarr-conven
 
 .. code-block:: python
 
-    data_zarr = data.rio.write_zarr_crs("EPSG:4326")
+    data_zarr = data.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
 
     # Automatically adds to zarr_conventions:
     print(data_zarr.attrs["zarr_conventions"])

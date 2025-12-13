@@ -313,7 +313,7 @@ class TestZarrConventionsWriting:
         from rioxarray._convention import zarr
         transform = Affine(10.0, 0.0, 100.0, 0.0, -10.0, 200.0)
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
-        # Write components separately for simplicity  
+        # Write components separately for simplicity
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         da = zarr.write_crs(da, da.rio.crs, format="all")
         da = da.rio.write_transform(transform, convention=Convention.Zarr)
