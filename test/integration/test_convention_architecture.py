@@ -12,8 +12,6 @@ from rioxarray.enum import Convention
 class TestConventionArchitecture:
     """Test integration scenarios for the convention architecture."""
 
-
-
     def test_set_options_convention(self):
         """Test setting convention through set_options."""
         # Test default convention (None for CF-first with Zarr fallback)
@@ -95,5 +93,3 @@ class TestConventionArchitecture:
             da_with_zarr.rio._crs = None
             crs = da_with_zarr.rio.crs
             assert crs.to_epsg() == 3857
-
-
