@@ -11,6 +11,7 @@ import rasterio.crs
 import xarray
 from affine import Affine
 
+from rioxarray._options import EXPORT_GRID_MAPPING, get_option
 from rioxarray.crs import crs_from_user_input
 
 
@@ -144,8 +145,6 @@ def write_crs(
     xarray.Dataset or xarray.DataArray
         Object with CRS written
     """
-    from rioxarray._options import EXPORT_GRID_MAPPING, get_option
-
     if input_crs is None:
         return obj
 
