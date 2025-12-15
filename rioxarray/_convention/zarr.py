@@ -32,6 +32,69 @@ SPATIAL_CONVENTION = {
 }
 
 
+def _parse_crs_from_attrs(attrs: dict, convention_check: bool = True) -> Optional[rasterio.crs.CRS]:
+    """
+    Parse CRS from proj: attributes with fallback priority.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to parse from
+    convention_check : bool, default True
+        Whether to check for convention declaration
+
+    Returns
+    -------
+    rasterio.crs.CRS or None
+        Parsed CRS object, or None if not found
+    """
+    if convention_check and not has_convention_declared(attrs, "proj:"):
+        return None
+
+    for proj_attr, parser in [
+        ("proj:wkt2", parse_proj_wkt2),
+        ("proj:code", parse_proj_code),
+        ("proj:projjson", parse_proj_projjson),
+    ]:
+        try:
+            proj_value = attrs.get(proj_attr)
+            if proj_value is not None:
+                parsed_crs = parser(proj_value)
+                if parsed_crs is not None:
+                    return parsed_crs
+        except (KeyError, Exception):
+            pass
+    return None
+
+
+def _parse_transform_from_attrs(attrs: dict, convention_check: bool = True) -> Optional[Affine]:
+    """
+    Parse transform from spatial: attributes.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to parse from
+    convention_check : bool, default True
+        Whether to check for convention declaration
+
+    Returns
+    -------
+    affine.Affine or None
+        Parsed transform object, or None if not found
+    """
+    if convention_check and not has_convention_declared(attrs, "spatial:"):
+        return None
+
+    try:
+        spatial_transform = attrs.get("spatial:transform")
+        if spatial_transform is not None:
+            return parse_spatial_transform(spatial_transform)
+    except (KeyError, Exception):
+        pass
+    return None
+
+
 def read_crs(
     obj: Union[xarray.Dataset, xarray.DataArray]
 ) -> Optional[rasterio.crs.CRS]:
@@ -48,42 +111,8 @@ def read_crs(
     rasterio.crs.CRS or None
         CRS object, or None if not found
     """
-    # Only interpret proj:* attributes if convention is declared
-    if not has_convention_declared(obj.attrs, "proj:"):
-        return None
-
-    # Try array-level attributes first
-    for proj_attr, parser in [
-        ("proj:wkt2", parse_proj_wkt2),
-        ("proj:code", parse_proj_code),
-        ("proj:projjson", parse_proj_projjson),
-    ]:
-        try:
-            proj_value = obj.attrs.get(proj_attr)
-            if proj_value is not None:
-                parsed_crs = parser(proj_value)
-                if parsed_crs is not None:
-                    return parsed_crs
-        except (KeyError, Exception):
-            pass
-
-    # For Datasets, check group-level proj: convention (inheritance)
-    if hasattr(obj, "data_vars") and has_convention_declared(obj.attrs, "proj:"):
-        for proj_attr, parser in [
-            ("proj:wkt2", parse_proj_wkt2),
-            ("proj:code", parse_proj_code),
-            ("proj:projjson", parse_proj_projjson),
-        ]:
-            try:
-                proj_value = obj.attrs.get(proj_attr)
-                if proj_value is not None:
-                    parsed_crs = parser(proj_value)
-                    if parsed_crs is not None:
-                        return parsed_crs
-            except (KeyError, Exception):
-                pass
-
-    return None
+    # Parse CRS from object attributes
+    return _parse_crs_from_attrs(obj.attrs)
 
 
 def read_transform(obj: Union[xarray.Dataset, xarray.DataArray]) -> Optional[Affine]:
@@ -100,28 +129,8 @@ def read_transform(obj: Union[xarray.Dataset, xarray.DataArray]) -> Optional[Aff
     affine.Affine or None
         Transform object, or None if not found
     """
-    # Only interpret spatial:* attributes if convention is declared
-    if not has_convention_declared(obj.attrs, "spatial:"):
-        return None
-
-    # Try array-level spatial:transform attribute
-    try:
-        spatial_transform = obj.attrs.get("spatial:transform")
-        if spatial_transform is not None:
-            return parse_spatial_transform(spatial_transform)
-    except (KeyError, Exception):
-        pass
-
-    # For Datasets, check group-level spatial:transform
-    if hasattr(obj, "data_vars"):
-        try:
-            spatial_transform = obj.attrs.get("spatial:transform")
-            if spatial_transform is not None:
-                return parse_spatial_transform(spatial_transform)
-        except (KeyError, Exception):
-            pass
-
-    return None
+    # Parse transform from object attributes
+    return _parse_transform_from_attrs(obj.attrs)
 
 
 def read_spatial_dimensions(
@@ -241,10 +250,19 @@ def write_transform(
     # Write spatial:transform as numeric array
     obj_out.attrs["spatial:transform"] = format_spatial_transform(transform)
 
+    from rioxarray.raster_array import RasterArray
+
+    rio = RasterArray(obj)
+
+    if rio.y_dim and rio.x_dim:
+        obj_out = _write_spatial_metadata(
+            obj_out, rio.y_dim, rio.x_dim, transform=transform, inplace=True
+        )
+
     return obj_out
 
 
-def write_spatial_metadata(
+def _write_spatial_metadata(
     obj: Union[xarray.Dataset, xarray.DataArray],
     y_dim: str,
     x_dim: str,
@@ -365,7 +383,8 @@ def parse_proj_projjson(proj_projjson: Union[dict, str]) -> Optional[rasterio.cr
 
 def format_proj_projjson(crs: rasterio.crs.CRS) -> dict:
     """Format CRS as proj:projjson (PROJJSON object)."""
-    projjson_str = crs.to_json()
+    # Use _projjson() method for proper PROJJSON format
+    projjson_str = crs._projjson()
     return json.loads(projjson_str)
 
 
@@ -495,15 +514,23 @@ def write_conventions(
     # Write CRS
     obj_modified = write_crs(obj, crs, format=crs_format, inplace=inplace)
 
-    # Write transform
+    # Write transform and spatial metadata
     if transform is not None:
-        obj_modified = write_transform(obj_modified, transform, inplace=True)
-
-    # Write spatial metadata - need to get dimensions
-    rio = RasterArray(obj_modified)
-    if rio.x_dim and rio.y_dim:
-        obj_modified = write_spatial_metadata(
-            obj_modified, rio.y_dim, rio.x_dim, transform=transform, inplace=True
+        # Get dimensions
+        rio = RasterArray(obj_modified)
+        obj_modified = write_transform(
+            obj_modified,
+            transform,
+            y_dim=rio.y_dim,
+            x_dim=rio.x_dim,
+            inplace=True
         )
+    else:
+        # Write just spatial metadata if no transform
+        rio = RasterArray(obj_modified)
+        if rio.x_dim and rio.y_dim:
+            obj_modified = _write_spatial_metadata(
+                obj_modified, rio.y_dim, rio.x_dim, transform=None, inplace=True
+            )
 
     return obj_modified

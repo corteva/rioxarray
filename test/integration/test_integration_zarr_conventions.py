@@ -291,7 +291,7 @@ class TestZarrConventionsWriting:
         from rioxarray._convention import zarr
 
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
-        da = zarr.write_spatial_metadata(da, "y", "x")
+        da = zarr._write_spatial_metadata(da, "y", "x")
 
         assert "spatial:dimensions" in da.attrs
         assert da.attrs["spatial:dimensions"] == ["y", "x"]
@@ -309,7 +309,7 @@ class TestZarrConventionsWriting:
         transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
         da = da.rio.write_transform(transform, convention=Convention.Zarr)
-        da = zarr.write_spatial_metadata(
+        da = zarr._write_spatial_metadata(
             da, "y", "x", transform=transform, include_bbox=True
         )
 
@@ -329,7 +329,7 @@ class TestZarrConventionsWriting:
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
         da = zarr.write_crs(da, da.rio.crs, format="all")
         da = da.rio.write_transform(transform, convention=Convention.Zarr)
-        da = zarr.write_spatial_metadata(da, "y", "x", transform=transform)
+        da = zarr._write_spatial_metadata(da, "y", "x", transform=transform)
 
         # Check CRS attributes
         assert "proj:code" in da.attrs
@@ -400,7 +400,7 @@ class TestZarrConventionsRoundTrip:
         original_da = original_da.rio.write_transform(
             transform, convention=Convention.Zarr
         )
-        original_da = zarr.write_spatial_metadata(
+        original_da = zarr._write_spatial_metadata(
             original_da, "y", "x", transform=transform
         )
 
@@ -524,7 +524,7 @@ class TestZarrConventionsEdgeCases:
         from rioxarray._convention import zarr
 
         with pytest.raises(Exception):  # MissingSpatialDimensionError
-            zarr.write_spatial_metadata(da)
+            zarr._write_spatial_metadata(da)
 
     def test_crs_from_projjson_dict(self):
         """Test crs_from_user_input with PROJJSON dict."""
