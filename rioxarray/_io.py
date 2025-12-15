@@ -932,7 +932,7 @@ def _prepare_dask(
             previous_chunks=block_shape,
         )
         # xarray wants chunks as a dict rather than a tuple
-        chunks = dict(zip(result.dims, chunks, strict=True))
+        chunks = dict(zip(result.dims, chunks, strict=True))  # type: ignore[arg-type]
 
     token_filename = filename
     if bidx is not None:
