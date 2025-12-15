@@ -30,6 +30,7 @@ from rioxarray.exceptions import (
 )
 from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
+    GDAL_GE_3_11,
     GDAL_GE_361,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -1170,7 +1171,26 @@ def test_reproject__no_nodata_masked(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_reproject__gcps_kwargs(tmp_path):
+@pytest.mark.parametrize(
+    "affine_c_param",
+    [
+        pytest.param(
+            115698.25,
+            marks=pytest.mark.skipif(
+                GDAL_GE_3_11,
+                reason="GDAL 3.10 and earlier used METHOD=GCP_POLYNOMIAL by default",
+            ),
+        ),
+        pytest.param(
+            115698.0,
+            marks=pytest.mark.skipif(
+                not GDAL_GE_3_11,
+                reason="GDAL 3.11+ uses METHOD=GCP_HOMOGRAPHY by default if 4 or 5 GCPs (https://github.com/OSGeo/gdal/pull/11949)",
+            ),
+        ),
+    ],
+)
+def test_reproject__gcps_kwargs(tmp_path, affine_c_param):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
         GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
@@ -1203,7 +1223,7 @@ def test_reproject__gcps_kwargs(tmp_path):
             Affine(
                 216.8587081056465,
                 0.0,
-                115698.25,
+                affine_c_param,
                 0.0,
                 -216.8587081056465,
                 2818720.0,
@@ -3222,7 +3242,26 @@ def test_rio_get_gcps(with_z):
         assert gcp.info == gdal_gcp.info
 
 
-def test_reproject__gcps_file(tmp_path):
+@pytest.mark.parametrize(
+    "affine_c_param",
+    [
+        pytest.param(
+            115698.25,
+            marks=pytest.mark.skipif(
+                GDAL_GE_3_11,
+                reason="GDAL 3.10 and earlier used METHOD=GCP_POLYNOMIAL by default",
+            ),
+        ),
+        pytest.param(
+            115698.0,
+            marks=pytest.mark.skipif(
+                not GDAL_GE_3_11,
+                reason="GDAL 3.11+ uses METHOD=GCP_HOMOGRAPHY by default if 4 or 5 GCPs (https://github.com/OSGeo/gdal/pull/11949)",
+            ),
+        ),
+    ],
+)
+def test_reproject__gcps_file(tmp_path, affine_c_param):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
         GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
@@ -3253,7 +3292,7 @@ def test_reproject__gcps_file(tmp_path):
             Affine(
                 216.8587081056465,
                 0.0,
-                115698.25,
+                affine_c_param,
                 0.0,
                 -216.8587081056465,
                 2818720.0,

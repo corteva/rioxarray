@@ -30,6 +30,7 @@ import rioxarray
 from rioxarray._io import build_subdataset_filter
 from rioxarray.rioxarray import DEFAULT_GRID_MAP
 from test.conftest import (
+    GDAL_GE_3_11,
     GDAL_GE_36,
     GDAL_GE_364,
     TEST_COMPARE_DATA_DIR,
@@ -976,7 +977,26 @@ def test_rasterio_vrt_with_src_crs():
                     assert rds.rio.crs == src_crs
 
 
-def test_rasterio_vrt_gcps(tmp_path):
+@pytest.mark.parametrize(
+    "affine_c_param",
+    [
+        pytest.param(
+            115698.25,
+            marks=pytest.mark.skipif(
+                GDAL_GE_3_11,
+                reason="GDAL 3.10 and earlier used METHOD=GCP_POLYNOMIAL by default",
+            ),
+        ),
+        pytest.param(
+            115698.0,
+            marks=pytest.mark.skipif(
+                not GDAL_GE_3_11,
+                reason="GDAL 3.11+ uses METHOD=GCP_HOMOGRAPHY by default if 4 or 5 GCPs (https://github.com/OSGeo/gdal/pull/11949)",
+            ),
+        ),
+    ],
+)
+def test_rasterio_vrt_gcps(tmp_path, affine_c_param):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
         GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
@@ -1008,7 +1028,7 @@ def test_rasterio_vrt_gcps(tmp_path):
                     Affine(
                         216.8587081056465,
                         0.0,
-                        115698.25,
+                        affine_c_param,
                         0.0,
                         -216.8587081056465,
                         2818720.0,
