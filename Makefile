@@ -89,8 +89,7 @@ dist: clean  ## builds source and wheel package
 report: install-dev coverage ## clean, install development version, run all tests, produce coverage report
 
 install: clean ## install the package to the active Python's site-packages
-	python -m pip install .[all]
+	python -m pip install .
 
 install-dev: clean ## install development version to active Python's site-packages
-	python -m pip install -e .[all]
-	python -m pip install -r requirements/dev.txt
+	python -m pip install -e . --group dev

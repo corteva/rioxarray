@@ -95,8 +95,7 @@ jobs:
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           python -m pip install $INSTALL_DEPS
-          python -m pip install -e .[all]
-          python -m pip install -r requirements/test.txt
+          python -m pip install -e . --group test
 
       - name: Check and Log Environment
         shell: bash
@@ -154,8 +153,7 @@ jobs:
         shell: bash
         run: |
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && micromamba install -n test scipy
-          micromamba run -n test python -m pip install -e .[all]
-          micromamba run -n test python -m pip install -r requirements/dev.txt
+          micromamba run -n test python -m pip install -e . --group dev
 
       - name: Check and Log Environment
         shell: bash
@@ -229,8 +227,7 @@ jobs:
             git+https://github.com/mapbox/rasterio.git@main \
             git+https://github.com/pyproj4/pyproj.git@main \
             git+https://github.com/pydata/xarray.git@main;
-          micromamba run -n test python -m pip install -e .[all]
-          micromamba run -n test python -m pip install -r requirements/test.txt
+          micromamba run -n test python -m pip install -e . --group dev
 
       - name: Check and Log Environment
         shell: bash

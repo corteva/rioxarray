@@ -38,8 +38,7 @@ jobs:
       - name: Install and Build
         shell: bash
         run: |
-          micromamba run -n docs python -m pip install -e .[all]
-          micromamba run -n docs python -m pip install -r requirements/doc.txt
+          micromamba run -n docs python -m pip install -e . --group doc
           micromamba run -n docs sphinx-build -b html docs/ docs/_build/
 
       - name: Deploy 🚀
