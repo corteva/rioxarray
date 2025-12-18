@@ -169,7 +169,6 @@ def read_spatial_dimensions(
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
     input_crs: Optional[object] = None,
-    format: str = "wkt2",
     inplace: bool = True,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
@@ -181,8 +180,6 @@ def write_crs(
         Object to write CRS to
     input_crs : object, optional
         CRS to write. Can be anything accepted by rasterio.crs.CRS.from_user_input
-    format : {"code", "wkt2", "projjson", "all"}
-        Which proj: format(s) to write
     inplace : bool, default True
         If True, modify object in place
 
@@ -203,16 +200,8 @@ def write_crs(
     # Ensure proj: convention is declared
     obj_out.attrs = add_convention_declaration(obj_out.attrs, "proj:", inplace=True)
 
-    if format in ("code", "all"):
-        proj_code = format_proj_code(crs)
-        if proj_code:
-            obj_out.attrs["proj:code"] = proj_code
-
-    if format in ("wkt2", "all"):
-        obj_out.attrs["proj:wkt2"] = format_proj_wkt2(crs)
-
-    if format in ("projjson", "all"):
-        obj_out.attrs["proj:projjson"] = format_proj_projjson(crs)
+    # Write as WKT2 format
+    obj_out.attrs["proj:wkt2"] = format_proj_wkt2(crs)
 
     return obj_out
 
@@ -472,7 +461,6 @@ def write_conventions(
     obj: Union[xarray.Dataset, xarray.DataArray],
     input_crs: Optional[str] = None,
     transform: Optional[Affine] = None,
-    crs_format: str = "wkt2",
     inplace: bool = True,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
@@ -489,8 +477,6 @@ def write_conventions(
         CRS to write. If not provided, object must have existing CRS.
     transform : affine.Affine, optional
         Transform to write. If not provided, it will be calculated from obj.
-    crs_format : str, default "wkt2"
-        Which proj: format(s) to write: "code", "wkt2", "projjson", "all"
     inplace : bool, default True
         Whether to modify object in place
 
@@ -511,8 +497,8 @@ def write_conventions(
         if crs is None:
             raise ValueError("No CRS available and input_crs not provided")
 
-    # Write CRS
-    obj_modified = write_crs(obj, crs, format=crs_format, inplace=inplace)
+    # Write CRS (WKT2 format only)
+    obj_modified = write_crs(obj, crs, inplace=inplace)
 
     # Write transform and spatial metadata
     if transform is not None:

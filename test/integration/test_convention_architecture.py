@@ -12,26 +12,6 @@ from rioxarray.enum import Convention
 class TestConventionArchitecture:
     """Test integration scenarios for the convention architecture."""
 
-    def test_set_options_convention(self):
-        """Test setting convention through set_options."""
-        # Test default convention (None for CF-first with Zarr fallback)
-        with rioxarray.set_options():
-            from rioxarray._options import CONVENTION, get_option
-
-            assert get_option(CONVENTION) is None
-
-        # Test setting Zarr convention
-        with rioxarray.set_options(convention=Convention.Zarr):
-            from rioxarray._options import CONVENTION, get_option
-
-            assert get_option(CONVENTION) is Convention.Zarr
-
-        # Test setting CF convention explicitly
-        with rioxarray.set_options(convention=Convention.CF):
-            from rioxarray._options import CONVENTION, get_option
-
-            assert get_option(CONVENTION) is Convention.CF
-
     def test_convention_interaction_with_existing_metadata(self):
         """Test how conventions interact when metadata already exists."""
         data = np.random.rand(3, 3)

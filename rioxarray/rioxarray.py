@@ -580,7 +580,6 @@ class XRasterBase:
             return zarr.write_crs(
                 data_obj,
                 data_obj.rio.crs,
-                format="wkt2",  # Default to wkt2 format for performance
                 inplace=True,
             )
         else:

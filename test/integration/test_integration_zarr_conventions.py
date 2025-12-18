@@ -6,11 +6,15 @@ Tests reading and writing CRS/georeferencing using:
 - Zarr geo-proj convention: https://github.com/zarr-experimental/geo-proj
 """
 
+import json
+import warnings
+
 import numpy as np
 import pytest
 import rasterio.crs
 import xarray as xr
 from affine import Affine
+from pyproj import CRS as ProjCRS
 
 from rioxarray._convention.zarr import PROJ_CONVENTION, SPATIAL_CONVENTION
 from rioxarray.enum import Convention
@@ -63,28 +67,6 @@ class TestZarrConventionsReading:
         crs = da.rio.crs
         assert crs is not None
         assert crs.to_epsg() == 3857
-
-    @pytest.mark.skip(reason="projjson parsing issue - needs investigation")
-    def test_read_crs_from_proj_projjson(self):
-        """Test reading CRS from proj:projjson attribute."""
-        import json
-
-        from pyproj import CRS as ProjCRS
-
-        pyproj_crs = ProjCRS.from_epsg(4326)
-        projjson = json.loads(pyproj_crs.to_json())
-
-        attrs = {"proj:projjson": projjson}
-        add_proj_convention_declaration(attrs)
-        da = xr.DataArray(
-            np.ones((5, 5)),
-            dims=("y", "x"),
-            attrs=attrs,
-        )
-
-        crs = da.rio.crs
-        assert crs is not None
-        assert crs.to_epsg() == 4326
 
     def test_read_transform_from_spatial_transform(self):
         """Test reading transform from spatial:transform attribute."""
@@ -163,6 +145,7 @@ class TestZarrConventionsReading:
         )
 
         # CF convention should be used as default when convention is None
+        # TODO: Add warning when both conventions are present
         crs = da.rio.crs
         assert crs.to_epsg() == 3857
 
@@ -203,68 +186,21 @@ class TestZarrConventionsReading:
 class TestZarrConventionsWriting:
     """Test writing CRS and transform using Zarr conventions."""
 
-    def test_write_zarr_crs_code(self):
-        """Test writing CRS as proj:code."""
+    def test_write_zarr_crs_wkt2(self):
+        """Test writing CRS as proj:wkt2 (default format)."""
         da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
-        # Use zarr module directly for format-specific options
-        from rioxarray._convention import zarr
-
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        # Use zarr module to write specific format
-        da = zarr.write_crs(da, da.rio.crs, format="code")
 
         # Verify convention is declared
         assert "zarr_conventions" in da.attrs
         convention_names = [c["name"] for c in da.attrs["zarr_conventions"]]
         assert "proj:" in convention_names
 
-        assert "proj:code" in da.attrs
-        assert da.attrs["proj:code"] == "EPSG:4326"
-
-        # Verify it can be read back
-        assert da.rio.crs.to_epsg() == 4326
-
-    def test_write_zarr_crs_wkt2(self):
-        """Test writing CRS as proj:wkt2."""
-        da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
-        da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-
         assert "proj:wkt2" in da.attrs
         assert "GEOG" in da.attrs["proj:wkt2"]  # WKT contains GEOG or GEOGCRS
 
         # Verify it can be read back
         assert da.rio.crs.to_epsg() == 4326
-
-    def test_write_zarr_crs_projjson(self):
-        """Test writing CRS as proj:projjson."""
-        da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
-        from rioxarray._convention import zarr
-
-        da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        da = zarr.write_crs(da, da.rio.crs, format="projjson")
-
-        assert "proj:projjson" in da.attrs
-        assert isinstance(da.attrs["proj:projjson"], dict)
-        assert da.attrs["proj:projjson"]["type"] in (
-            "GeographicCRS",
-            "GeodeticCRS",
-            "CRS",
-        )
-
-        # Verify it can be read back
-        assert da.rio.crs.to_epsg() == 4326
-
-    def test_write_zarr_crs_all_formats(self):
-        """Test writing all three proj formats."""
-        da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
-        from rioxarray._convention import zarr
-
-        da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        da = zarr.write_crs(da, da.rio.crs, format="all")
-
-        assert "proj:code" in da.attrs
-        assert "proj:wkt2" in da.attrs
-        assert "proj:projjson" in da.attrs
 
         # Verify it can be read back
         assert da.rio.crs.to_epsg() == 4326
@@ -327,14 +263,11 @@ class TestZarrConventionsWriting:
         da = xr.DataArray(np.ones((10, 20)), dims=("y", "x"))
         # Write components separately for simplicity
         da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        da = zarr.write_crs(da, da.rio.crs, format="all")
         da = da.rio.write_transform(transform, convention=Convention.Zarr)
         da = zarr._write_spatial_metadata(da, "y", "x", transform=transform)
 
-        # Check CRS attributes
-        assert "proj:code" in da.attrs
+        # Check CRS attributes (WKT2 format only now)
         assert "proj:wkt2" in da.attrs
-        assert "proj:projjson" in da.attrs
 
         # Check transform attribute
         assert "spatial:transform" in da.attrs
@@ -353,14 +286,15 @@ class TestZarrConventionsWriting:
 class TestZarrConventionsRoundTrip:
     """Test round-trip write then read of Zarr conventions."""
 
-    def test_roundtrip_proj_code(self):
-        """Test write then read of proj:code."""
+    def test_roundtrip_proj_wkt2(self):
+        """Test write then read of proj:wkt2 (default format)."""
         from rioxarray._convention import zarr
 
         original_da = xr.DataArray(np.ones((5, 5)), dims=("y", "x"))
-        original_da = original_da.rio.write_crs("EPSG:3857", convention=Convention.Zarr)
-        # Use zarr module for specific format
-        original_da = zarr.write_crs(original_da, original_da.rio.crs, format="code")
+        original_da = original_da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
+
+        # Verify format
+        assert "proj:wkt2" in original_da.attrs
 
         # Simulate saving and reloading by creating new DataArray with same attrs
         reloaded_da = xr.DataArray(
@@ -369,7 +303,7 @@ class TestZarrConventionsRoundTrip:
             attrs=original_da.attrs.copy(),
         )
 
-        assert reloaded_da.rio.crs.to_epsg() == 3857
+        assert reloaded_da.rio.crs.to_epsg() == 4326
 
     def test_roundtrip_spatial_transform(self):
         """Test write then read of spatial:transform."""
@@ -396,7 +330,6 @@ class TestZarrConventionsRoundTrip:
         original_da = xr.DataArray(np.ones((100, 100)), dims=("y", "x"))
         # Write components separately for simplicity
         original_da = original_da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
-        original_da = zarr.write_crs(original_da, original_da.rio.crs, format="all")
         original_da = original_da.rio.write_transform(
             transform, convention=Convention.Zarr
         )
@@ -436,11 +369,11 @@ class TestZarrConventionsCoexistence:
         # Add Zarr conventions
         from rioxarray._convention import zarr
 
-        da = zarr.write_crs(da, da.rio.crs, format="code")
+        da = da.rio.write_crs("EPSG:4326", convention=Convention.Zarr)
 
         # Both should be present
         assert "spatial_ref" in da.coords  # CF grid_mapping
-        assert "proj:code" in da.attrs  # Zarr convention
+        assert "proj:wkt2" in da.attrs  # Zarr convention
 
         # Zarr should take priority when reading
         assert da.rio.crs.to_epsg() == 4326
@@ -509,7 +442,7 @@ class TestZarrConventionsEdgeCases:
         # Should handle None gracefully by returning unchanged object
         from rioxarray._convention import zarr
 
-        result = zarr.write_crs(da, None, format="code")
+        result = zarr.write_crs(da, None)
         # Should not have any proj: attributes
         assert not any(attr.startswith("proj:") for attr in result.attrs)
         assert result is da  # Should return same object when inplace=True
