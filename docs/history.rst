@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- ENH: Add support for Zarr spatial and proj conventions with Convention enum, global settings, and Zarr-specific methods (#883)
 
 0.20.0
 ------
