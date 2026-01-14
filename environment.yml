@@ -6,7 +6,7 @@ name: rioxarray
 channels:
 - conda-forge
 dependencies:
-- python
+- python=3.12  # To align with pre-commit requirements
 - rasterio
 - libgdal-netcdf
 - libgdal-hdf4
