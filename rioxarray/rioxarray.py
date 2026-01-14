@@ -20,6 +20,7 @@ from pyproj.aoi import AreaOfInterest
 from pyproj.database import query_utm_crs_info
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
+from rasterio.rpc import RPC
 
 from rioxarray._options import EXPORT_GRID_MAPPING, get_option
 from rioxarray.crs import crs_from_user_input
@@ -301,6 +302,7 @@ class XRasterBase:
         self._width: Optional[int] = None
         self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
         self._gcps: Optional[list[GroundControlPoint]] = None
+        self._rpcs: Optional[RPC] = None
 
     @property
     def crs(self) -> Optional[rasterio.crs.CRS]:
@@ -360,6 +362,7 @@ class XRasterBase:
         obj_copy.rio._height = self._height
         obj_copy.rio._crs = self._crs
         obj_copy.rio._gcps = self._gcps
+        obj_copy.rio._rpcs = self._rpcs
         return obj_copy
 
     def set_crs(
@@ -1331,6 +1334,76 @@ class XRasterBase:
 
         self._gcps = [_parse_gcp(gcp) for gcp in geojson_gcps["features"]]
         return self._gcps
+
+    def write_rpcs(
+        self,
+        rpcs: RPC,
+        *,
+        grid_mapping_name: Optional[str] = None,
+        inplace: bool = False,
+    ) -> xarray.Dataset | xarray.DataArray:
+        """
+        Write the Rational Polynomial Coefficients to the dataset.
+
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients
+
+        Parameters
+        ----------
+        rpcs: list of :obj:`rasterio.rpc.RPC`
+            The Rational Polynomial Coefficients to integrate to the dataset.
+        grid_mapping_name: str, optional
+            Name of the grid_mapping coordinate to store the RPCs information in.
+            Default is the grid_mapping name of the dataset.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with Rational Polynomial Coefficients written.
+        """
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
+        data_obj = self._get_obj(inplace=True)
+
+        # RPC CRS is always 4326
+        data_obj = data_obj.rio.write_crs(
+            "epsg:4326", grid_mapping_name=grid_mapping_name, inplace=inplace
+        )
+        try:
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+        except KeyError:
+            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+
+        # Store the RPCCs
+        grid_map_attrs["rpcs"] = json.dumps(rpcs.to_dict())
+        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
+        self._rpcs = rpcs
+
+        return data_obj
+
+    def get_rpcs(self) -> Optional[RPC]:
+        """
+        Get the Rational Polynomial Coefficients from the dataset.
+
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients
+
+        Returns
+        -------
+        :obj:`rasterio.rpc.RPC` or None
+            The Rational Polynomial Coefficients from the dataset or None if not applicable
+        """
+        if self._rpcs is not None:
+            return self._rpcs
+        try:
+            json_rpcs = json.loads(self._obj.coords[self.grid_mapping].attrs["rpcs"])
+        except (KeyError, AttributeError):
+            return None
+
+        self._rpcs = RPC(**json_rpcs)
+        return self._rpcs
 
 
 def _convert_gcps_to_geojson(

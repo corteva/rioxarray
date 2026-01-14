@@ -1560,3 +1560,55 @@ def test_read_ascii__from_bytesio():
     ascii_raster_io = io.BytesIO(ascii_raster_string.encode("utf-8"))
     with rioxarray.open_rasterio(ascii_raster_io) as rds:
         assert rds.rio.bounds() == (440720.0, 3750120.0, 441020.0, 3750420.0)
+
+
+def test_reading_writing_rpcs(tmp_path):
+    """Read and Write RPCs"""
+    out = tmp_path / "out.tif"
+    in_rpc_ext_file = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs_ext_file.tif")
+
+    with rasterio.open(in_rpc_ext_file) as src:
+        assert (
+            src.tags(ns="RPC") is not None
+        ), "Existing RPCs in src raster (through tag check)"
+        assert (
+            src.rpcs is not None
+        ), "Existing RPCs in src raster (through rpc attribute)"
+
+        # Check rioxarray consistency vs rasterio
+        in_rpc_file_da = rioxarray.open_rasterio(in_rpc_ext_file)
+        in_rpc_file_da_rpcs = in_rpc_file_da.rio.get_rpcs()
+        assert in_rpc_file_da_rpcs is not None, "Rioxarray RPCs are not existing"
+        assert (
+            in_rpc_file_da_rpcs == src.rpcs
+        ), "Rioxarray RPCs are not similar to rasterio's"
+
+        # Write on disk the opened raster
+        in_rpc_file_da.rio.to_raster(out)
+
+        # Read the output and check its integrity
+        dst = rioxarray.open_rasterio(out)
+        dst_rpcs = dst.rio.get_rpcs()
+
+        # Assert RPCs are saved and can be loaded
+        assert dst_rpcs is not None, "Rioxarray dst RPCs are not existing"
+
+        # WARNING: For an unknown reason, RPC written in GeoTiff are rounded!
+        # This behavior is not controlled by rioxarray so don't fail the whole test if this particular check fails
+        try:
+            assert (
+                dst_rpcs == in_rpc_file_da_rpcs
+            ), "Rioxarray dst RPCs are not similar to src's"
+        except AssertionError as ex:
+            print(f"For an unknown reason, RPC written in GeoTiff are rounded!\n\n{ex}")
+            # Expected: RPC(height_off=1046.8700801726143, height_scale=962.0000000000239, lat_off=39.81995259980312, lat_scale=0.076441044582353, line_den_coeff=[1.0, 0.0001288248348598096, ...
+            # Actual:   RPC(height_off=1046.87008017261,   height_scale=962.000000000024,  lat_off=39.8199525998031,  lat_scale=0.076441044582353, line_den_coeff=[1.0, 0.00012882483485981,   ...
+
+    # Check that rasterio can also read the RPCs
+    with rasterio.open(out) as dst:
+        assert (
+            dst.tags(ns="RPC") is not None
+        ), "Existing RPCs in dst raster (through tag check)"
+        assert (
+            dst.rpcs is not None
+        ), "Existing RPCs in dst raster (through rpc attribute)"

@@ -10,6 +10,7 @@ Source file:
 """
 import numpy
 import rasterio
+from rasterio.rpc import RPC
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
@@ -283,10 +284,19 @@ class RasterioWriter:
                 original_nodata=kwargs["nodata"], new_dtype=numpy_dtype
             )
 
+        # Check RPC validity: RPCs should be either be a RPC object or a GDAL-compatible dict
+        rpcs = kwargs.get("rpcs")
+        if rpcs is not None:
+            assert isinstance(
+                rpcs, (RPC, dict)
+            ), "RPCs must be of type 'rasterio.rpc.RPC' or dict."
+
+        # RPCs and GCPs are propagated through **kwargs
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(
                 raster_handle=rds, xarray_dataset=xarray_dataarray, tags=tags
             )
+
             if not (lock and is_dask_collection(xarray_dataarray.data)):
                 # write data to raster immmediately if not dask array
                 if windowed:
