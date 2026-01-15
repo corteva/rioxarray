@@ -21,6 +21,15 @@ rioxarray.set_options
 .. autoclass:: rioxarray.set_options
 
 
+rioxarray.Convention
+--------------------
+
+.. autoclass:: rioxarray.Convention
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 rioxarray.show_versions
 -----------------------
 

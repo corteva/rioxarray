@@ -9,6 +9,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    :maxdepth: 1
    :caption: Notebooks:
 
+   conventions.ipynb
    resampling.ipynb
    convert_to_raster.ipynb
    clip_geom.ipynb
