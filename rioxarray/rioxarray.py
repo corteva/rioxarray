@@ -1349,7 +1349,7 @@ class XRasterBase:
 
         Parameters
         ----------
-        rpcs: list of :obj:`rasterio.rpc.RPC`
+        rpcs: :obj:`rasterio.rpc.RPC`
             The Rational Polynomial Coefficients to integrate to the dataset.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the RPCs information in.
