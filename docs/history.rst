@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- ENH: RPCs: Load and write RPCs (#837)
 
 0.20.0
 ------

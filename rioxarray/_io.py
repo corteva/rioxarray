@@ -1209,8 +1209,12 @@ def open_rasterio(
         coord_name = "band"
         coords[coord_name] = numpy.asarray(riods.indexes)
 
+    # Handle GCPs and RPCs
     has_gcps = riods.gcps[0]
-    if has_gcps:
+    has_rpcs = riods.rpcs
+
+    # Only parse coordinates in case the array is georeferenced
+    if has_gcps or has_rpcs:
         parse_coordinates = False
 
     # Get geospatial coordinates
@@ -1281,6 +1285,8 @@ def open_rasterio(
         result.rio.write_crs(rio_crs, inplace=True)
     if has_gcps:
         result.rio.write_gcps(*riods.gcps, inplace=True)
+    if has_rpcs:
+        result.rio.write_rpcs(riods.rpcs, inplace=True)
 
     if chunks is not None:
         result = _prepare_dask(

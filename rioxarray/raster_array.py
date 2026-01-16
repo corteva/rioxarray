@@ -462,6 +462,10 @@ class RasterArray(XRasterBase):
         if gcps:
             kwargs.setdefault("gcps", gcps)
 
+        rpcs = self.get_rpcs()
+        if rpcs:
+            kwargs.setdefault("rpcs", rpcs)
+
         use_affine = (
             "gcps" not in kwargs
             and "rpcs" not in kwargs
@@ -1194,6 +1198,7 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
             gcps=self.get_gcps(),
+            rpcs=self.get_rpcs(),
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,
