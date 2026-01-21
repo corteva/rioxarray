@@ -56,7 +56,7 @@ To install for local development:
 
     git clone git@github.com:corteva/rioxarray.git
     cd rioxarray
-    python -m pip install -e .[dev]
+    python -m pip install -e . --group dev
 
 
 .. _GitHub repo: https://github.com/corteva/rioxarray
