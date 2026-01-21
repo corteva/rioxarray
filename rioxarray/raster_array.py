@@ -498,6 +498,7 @@ class RasterArray(XRasterBase):
 
     def _reproj_convert_to_xarray(
         self,
+        *,
         dst_data: numpy.ndarray,
         dst_nodata: float,
         dst_affine: Affine,
@@ -563,6 +564,7 @@ class RasterArray(XRasterBase):
 
     def _reproj_get_dst(
         self,
+        *,
         dst_crs: Any,
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
