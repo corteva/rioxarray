@@ -21,5 +21,5 @@ WORKDIR /app
 ADD . /app
 RUN python${PYTHON_VERSION} -m venv /venv && \
     /venv/bin/python -m pip install -U pip && \
-    /venv/bin/python -m pip install -e .[dev,doc,test]
+    /venv/bin/python -m pip install -e . ---group dev
 ENTRYPOINT ["/bin/bash", "-c"]
