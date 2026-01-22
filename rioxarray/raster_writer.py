@@ -339,3 +339,18 @@ class RasterioWriter:
                 compute=compute,
             )
         return None
+
+    def as_rio_ds(self):
+        """
+        Return the xarray.Dataset as a rasterio.Dataset.
+
+        As rioxarray is able to ingest a rasterio.Dataset, this function is its counterpart.
+
+        To be used as a context manager.
+        """
+        from rasterio.io import MemoryFile
+
+        with MemoryFile() as memfile:
+            self.to_raster(memfile.name)
+            with memfile.open() as src_ds:
+                return src_ds
