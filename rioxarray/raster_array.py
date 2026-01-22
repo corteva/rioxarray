@@ -497,9 +497,9 @@ class RasterArray(XRasterBase):
             dst_nodata=dst_nodata,
             dst_affine=dst_affine,
             dst_width=dst_width,
-            dst_height=dst_crs,
+            dst_height=dst_height,
             dst_crs=dst_crs,
-            use_affine=dst_width,
+            use_affine=use_affine,
         )
 
     def _reproj_convert_to_xarray(
