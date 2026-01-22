@@ -469,11 +469,11 @@ class RasterArray(XRasterBase):
 
         # Get destination data from inputs
         dst_data, dst_height, dst_width, dst_affine, dst_nodata = self._reproj_get_dst(
-            dst_crs,
-            resolution,
-            shape,
-            transform,
-            nodata,
+            dst_crs=dst_crs,
+            resolution=resolution,
+            shape=shape,
+            transform=transform,
+            nodata=nodata,
             **kwargs,
         )
 
@@ -493,7 +493,13 @@ class RasterArray(XRasterBase):
 
         # Convert the ndarray to a xarray
         return self._reproj_convert_to_xarray(
-            dst_data, dst_nodata, dst_affine, dst_width, dst_height, dst_crs, use_affine
+            dst_data=dst_data,
+            dst_nodata=dst_nodata,
+            dst_affine=dst_affine,
+            dst_width=dst_width,
+            dst_height=dst_crs,
+            dst_crs=dst_crs,
+            use_affine=dst_width,
         )
 
     def _reproj_convert_to_xarray(
