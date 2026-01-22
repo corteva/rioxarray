@@ -399,6 +399,21 @@ Retrieve projection from <a class="reference external" href="https://docs.xarray
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.get_rpcs">
+<span class="sig-name descname"><span class="pre">get_rpcs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.rpc.html#rasterio.rpc.RPC" title="(in rasterio)"><span class="pre">RPC</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.get_rpcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.get_rpcs" title="Link to this definition"></a></dt>
+<dd><p>Get the Rational Polynomial Coefficients from the dataset.</p>
+<p><a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients">https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The Rational Polynomial Coefficients from the dataset or None if not applicable</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.rpc.html#rasterio.rpc.RPC" title="(in rasterio)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.rpc.RPC</span></code></a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.grid_mapping">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">grid_mapping</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.grid_mapping" title="Link to this definition"></a></dt>
@@ -784,6 +799,29 @@ Default is the grid_mapping name of the dataset.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Modified dataset with CF compliant CRS information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.12.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> | <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2025.12.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rioxarray.rioxarray.XRasterBase.write_rpcs">
+<span class="sig-name descname"><span class="pre">write_rpcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rpcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.rpc.html#rasterio.rpc.RPC" title="(in rasterio)"><span class="pre">RPC</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_mapping_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.12.0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2025.12.0)"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="_modules/rioxarray/rioxarray.html#XRasterBase.write_rpcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.rioxarray.XRasterBase.write_rpcs" title="Link to this definition"></a></dt>
+<dd><p>Write the Rational Polynomial Coefficients to the dataset.</p>
+<p><a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients">https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rpcs</strong> (<a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.rpc.html#rasterio.rpc.RPC" title="(in rasterio)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rasterio.rpc.RPC</span></code></a>) – The Rational Polynomial Coefficients to integrate to the dataset.</p></li>
+<li><p><strong>grid_mapping_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the grid_mapping coordinate to store the RPCs information in.
+Default is the grid_mapping name of the dataset.</p></li>
+<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it will write to the existing dataset. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified dataset with Rational Polynomial Coefficients written.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.12.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> | <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2025.12.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a></p>

@@ -1290,8 +1290,12 @@
         <span class="n">coord_name</span> <span class="o">=</span> <span class="s2">&quot;band&quot;</span>
         <span class="n">coords</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">indexes</span><span class="p">)</span>
 
+    <span class="c1"># Handle GCPs and RPCs</span>
     <span class="n">has_gcps</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">has_gcps</span><span class="p">:</span>
+    <span class="n">has_rpcs</span> <span class="o">=</span> <span class="n">riods</span><span class="o">.</span><span class="n">rpcs</span>
+
+    <span class="c1"># Only parse coordinates in case the array is georeferenced</span>
+    <span class="k">if</span> <span class="n">has_gcps</span> <span class="ow">or</span> <span class="n">has_rpcs</span><span class="p">:</span>
         <span class="n">parse_coordinates</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Get geospatial coordinates</span>
@@ -1362,6 +1366,8 @@
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">rio_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">has_gcps</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_gcps</span><span class="p">(</span><span class="o">*</span><span class="n">riods</span><span class="o">.</span><span class="n">gcps</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">has_rpcs</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_rpcs</span><span class="p">(</span><span class="n">riods</span><span class="o">.</span><span class="n">rpcs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">_prepare_dask</span><span class="p">(</span>

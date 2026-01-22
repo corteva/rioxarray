@@ -547,37 +547,26 @@
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;rio.write_crs()&#39;.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_get_data_var_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gcps</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">gcps</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;gcps&quot;</span><span class="p">,</span> <span class="n">gcps</span><span class="p">)</span>
 
-        <span class="n">use_affine</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;gcps&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
-            <span class="ow">and</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
-            <span class="ow">and</span> <span class="s2">&quot;src_geoloc_array&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
-        <span class="p">)</span>
-        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">use_affine</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
-                <span class="n">src_data_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
-                <span class="n">src_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-                <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
-                <span class="n">dst_resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-                <span class="n">dst_shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">transform</span>
-            <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">shape</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reproj_update_kwargs</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resampling</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">resampling</span> <span class="o">=</span> <span class="n">_convert_str_to_resampling</span><span class="p">(</span><span class="n">resampling</span><span class="p">)</span>
 
-        <span class="n">dst_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dst_data</span><span class="p">(</span><span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">)</span>
+        <span class="c1"># Get source data from inputs</span>
+        <span class="n">src_affine</span><span class="p">,</span> <span class="n">use_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reproj_get_src</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="n">dst_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dst_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
+        <span class="c1"># Get destination data from inputs</span>
+        <span class="n">dst_data</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reproj_get_dst</span><span class="p">(</span>
+            <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Do the reprojection using rasterio</span>
         <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
             <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">destination</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
@@ -590,8 +579,34 @@
             <span class="n">resampling</span><span class="o">=</span><span class="n">resampling</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="c1"># Convert the ndarray to a xarray</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reproj_convert_to_xarray</span><span class="p">(</span>
+            <span class="n">dst_data</span><span class="o">=</span><span class="n">dst_data</span><span class="p">,</span>
+            <span class="n">dst_nodata</span><span class="o">=</span><span class="n">dst_nodata</span><span class="p">,</span>
+            <span class="n">dst_affine</span><span class="o">=</span><span class="n">dst_affine</span><span class="p">,</span>
+            <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">,</span>
+            <span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span>
+            <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+            <span class="n">use_affine</span><span class="o">=</span><span class="n">use_affine</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reproj_convert_to_xarray</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">dst_data</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">dst_nodata</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">dst_affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span>
+        <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">use_affine</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function creating a proper xarray (with correct attributes, etc) from the reprojection output&quot;&quot;&quot;</span>
         <span class="c1"># add necessary attributes</span>
         <span class="n">new_attrs</span> <span class="o">=</span> <span class="n">_generate_attrs</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dst_nodata</span><span class="o">=</span><span class="n">dst_nodata</span><span class="p">)</span>
+
         <span class="c1"># make sure dimensions with coordinates renamed to x,y</span>
         <span class="n">dst_dims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
@@ -618,8 +633,62 @@
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">xda</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">xda</span></div>
 
+        <span class="k">return</span> <span class="n">xda</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reproj_update_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function updating kwargs from internal members&quot;&quot;&quot;</span>
+        <span class="n">gcps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gcps</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">gcps</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;gcps&quot;</span><span class="p">,</span> <span class="n">gcps</span><span class="p">)</span>
+
+        <span class="n">rpcs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rpcs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">rpcs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;rpcs&quot;</span><span class="p">,</span> <span class="n">rpcs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reproj_get_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function creating source data from inputs&quot;&quot;&quot;</span>
+        <span class="n">use_affine</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;gcps&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s2">&quot;rpcs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s2">&quot;src_geoloc_array&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="n">src_affine</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">use_affine</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">src_affine</span><span class="p">,</span> <span class="n">use_affine</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reproj_get_dst</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function creating destination data from inputs&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">_make_dst_affine</span><span class="p">(</span>
+                <span class="n">src_data_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="n">src_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+                <span class="n">dst_resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">dst_shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dst_affine</span> <span class="o">=</span> <span class="n">transform</span>
+            <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="n">shape</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">dst_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dst_data</span><span class="p">(</span><span class="n">dst_height</span><span class="o">=</span><span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">)</span>
+        <span class="n">dst_nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dst_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dst_data</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_affine</span><span class="p">,</span> <span class="n">dst_nodata</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_dst_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="n">default_nodata</span> <span class="o">=</span> <span class="p">(</span>
@@ -1304,6 +1373,7 @@
             <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="n">recalc_transform</span><span class="p">),</span>
             <span class="n">gcps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_gcps</span><span class="p">(),</span>
+            <span class="n">rpcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_rpcs</span><span class="p">(),</span>
             <span class="n">nodata</span><span class="o">=</span><span class="n">rio_nodata</span><span class="p">,</span>
             <span class="n">windowed</span><span class="o">=</span><span class="n">windowed</span><span class="p">,</span>
             <span class="n">lock</span><span class="o">=</span><span class="n">lock</span><span class="p">,</span>
