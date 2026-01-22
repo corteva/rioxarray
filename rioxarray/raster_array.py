@@ -458,37 +458,26 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        gcps = self.get_gcps()
-        if gcps:
-            kwargs.setdefault("gcps", gcps)
 
-        use_affine = (
-            "gcps" not in kwargs
-            and "rpcs" not in kwargs
-            and "src_geoloc_array" not in kwargs
-        )
-        src_affine = None if not use_affine else self.transform(recalc=True)
-        if transform is None:
-            dst_affine, dst_width, dst_height = _make_dst_affine(
-                src_data_array=self._obj,
-                src_crs=self.crs,
-                dst_crs=dst_crs,
-                dst_resolution=resolution,
-                dst_shape=shape,
-                **kwargs,
-            )
-        else:
-            dst_affine = transform
-            if shape is not None:
-                dst_height, dst_width = shape
-            else:
-                dst_height, dst_width = self.shape
+        kwargs = self._reproj_update_kwargs(**kwargs)
+
         if isinstance(resampling, str):
             resampling = _convert_str_to_resampling(resampling)
 
-        dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
+        # Get source data from inputs
+        src_affine, use_affine = self._reproj_get_src(**kwargs)
 
-        dst_nodata = self._get_dst_nodata(nodata)
+        # Get destination data from inputs
+        dst_data, dst_height, dst_width, dst_affine, dst_nodata = self._reproj_get_dst(
+            dst_crs=dst_crs,
+            resolution=resolution,
+            shape=shape,
+            transform=transform,
+            nodata=nodata,
+            **kwargs,
+        )
+
+        # Do the reprojection using rasterio
         rasterio.warp.reproject(
             source=self._obj.values,
             destination=dst_data,
@@ -501,8 +490,33 @@ class RasterArray(XRasterBase):
             resampling=resampling,
             **kwargs,
         )
+
+        # Convert the ndarray to a xarray
+        return self._reproj_convert_to_xarray(
+            dst_data=dst_data,
+            dst_nodata=dst_nodata,
+            dst_affine=dst_affine,
+            dst_width=dst_width,
+            dst_height=dst_height,
+            dst_crs=dst_crs,
+            use_affine=use_affine,
+        )
+
+    def _reproj_convert_to_xarray(
+        self,
+        *,
+        dst_data: numpy.ndarray,
+        dst_nodata: float,
+        dst_affine: Affine,
+        dst_width: int,
+        dst_height: int,
+        dst_crs: Any,
+        use_affine: bool,
+    ):
+        """Helper function creating a proper xarray (with correct attributes, etc) from the reprojection output"""
         # add necessary attributes
         new_attrs = _generate_attrs(src_data_array=self._obj, dst_nodata=dst_nodata)
+
         # make sure dimensions with coordinates renamed to x,y
         dst_dims: list[Hashable] = []
         for dim in self._obj.dims:
@@ -529,7 +543,62 @@ class RasterArray(XRasterBase):
         xda.rio.write_transform(dst_affine, inplace=True)
         xda.rio.write_crs(dst_crs, inplace=True)
         xda.rio.write_coordinate_system(inplace=True)
+
         return xda
+
+    def _reproj_update_kwargs(self, **kwargs):
+        """Helper function updating kwargs from internal members"""
+        gcps = self.get_gcps()
+        if gcps:
+            kwargs.setdefault("gcps", gcps)
+
+        rpcs = self.get_rpcs()
+        if rpcs:
+            kwargs.setdefault("rpcs", rpcs)
+
+        return kwargs
+
+    def _reproj_get_src(self, **kwargs):
+        """Helper function creating source data from inputs"""
+        use_affine = (
+            "gcps" not in kwargs
+            and "rpcs" not in kwargs
+            and "src_geoloc_array" not in kwargs
+        )
+        src_affine = None if not use_affine else self.transform(recalc=True)
+        return src_affine, use_affine
+
+    def _reproj_get_dst(
+        self,
+        *,
+        dst_crs: Any,
+        resolution: Optional[Union[float, tuple[float, float]]] = None,
+        shape: Optional[tuple[int, int]] = None,
+        transform: Optional[Affine] = None,
+        nodata: Optional[float] = None,
+        **kwargs,
+    ):
+        """Helper function creating destination data from inputs"""
+        if transform is None:
+            dst_affine, dst_width, dst_height = _make_dst_affine(
+                src_data_array=self._obj,
+                src_crs=self.crs,
+                dst_crs=dst_crs,
+                dst_resolution=resolution,
+                dst_shape=shape,
+                **kwargs,
+            )
+        else:
+            dst_affine = transform
+            if shape is not None:
+                dst_height, dst_width = shape
+            else:
+                dst_height, dst_width = self.shape
+
+        dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
+        dst_nodata = self._get_dst_nodata(nodata)
+
+        return dst_data, dst_height, dst_width, dst_affine, dst_nodata
 
     def _get_dst_nodata(self, nodata: Optional[float]) -> Optional[float]:
         default_nodata = (
@@ -1194,6 +1263,7 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
             gcps=self.get_gcps(),
+            rpcs=self.get_rpcs(),
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,
