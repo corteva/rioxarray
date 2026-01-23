@@ -13,6 +13,7 @@ datacube is licensed under the Apache License, Version 2.0:
 import copy
 import os
 from collections.abc import Hashable, Iterable, Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
 
@@ -25,6 +26,7 @@ from affine import Affine
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
+from rasterio.io import DatasetReader, MemoryFile
 from xarray.backends.file_manager import FileManager
 from xarray.core.dtypes import get_fill_value
 
@@ -1271,17 +1273,23 @@ class RasterArray(XRasterBase):
             **out_profile,
         )
 
-    def as_rio_ds(self):
+    @contextmanager
+    def to_dataset(self) -> DatasetReader:
         """
-        Return the xarray.Dataset as a rasterio.Dataset.
+        Return the xarray.Dataset or xarray.DataArray as a rasterio.Dataset.
 
         As rioxarray is able to ingest a rasterio.Dataset, this function is its counterpart.
 
         To be used as a context manager.
-        """
-        from rasterio.io import MemoryFile
 
+        Example
+        -------
+
+        >>> with xds.to_dataset() as rio_ds:
+        >>>    rio_ds.count
+
+        """
         with MemoryFile() as memfile:
             self.to_raster(memfile.name)
             with memfile.open() as src_ds:
-                return src_ds
+                yield src_ds
