@@ -4,6 +4,7 @@ History
 Latest
 ------
 - ENH: RPCs: Load and write RPCs (#837)
+- ENH: Convert xarray structure back to rasterio Dataset (#309, #777)
 
 0.20.0
 ------
