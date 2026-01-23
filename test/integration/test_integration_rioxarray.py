@@ -3358,6 +3358,21 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
 
 
 def test_to_rasterio_dataset():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as rio_ds:
+        # object type
+        assert isinstance(rio_ds, DatasetReader), "Error in object type"
+
+        # metadata
+        assert in_rpc.rio.crs == rio_ds.crs, "Error in CRS"
+        assert in_rpc.rio.shape == rio_ds.shape, "Error in shape"
+        assert in_rpc.dtype == rio_ds.meta["dtype"], "Error in dtype"
+        assert in_rpc.rio.transform() == rio_ds.transform, "Error in transform"
+        assert rio_ds.profile["driver"] == "GTiff", "Error in driver"
+
+
+def test_to_rasterio_dataset_rpcs():
     in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs.tif")
     in_rpc = rioxarray.open_rasterio(in_rpc_path)
     with in_rpc.rio.to_rasterio_dataset() as rio_ds:
@@ -3370,3 +3385,4 @@ def test_to_rasterio_dataset():
         assert in_rpc.rio.shape == rio_ds.shape, "Error in shape"
         assert in_rpc.dtype == rio_ds.meta["dtype"], "Error in dtype"
         assert in_rpc.rio.transform() == rio_ds.transform, "Error in transform"
+        assert rio_ds.profile["driver"] == "GTiff", "Error in driver"
