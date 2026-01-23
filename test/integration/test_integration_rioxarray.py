@@ -15,6 +15,7 @@ from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
+from rasterio import DatasetReader
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
@@ -3354,3 +3355,18 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
                 2818720.0,
             )
         )
+
+
+def test_to_rasterio_dataset():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as rio_ds:
+        # object type
+        assert isinstance(rio_ds, DatasetReader), "Error in object type"
+
+        # metadata
+        assert in_rpc.rio.get_rpcs() == rio_ds.rpcs, "Error in RPCs"
+        assert in_rpc.rio.crs == rio_ds.crs, "Error in CRS"
+        assert in_rpc.rio.shape == rio_ds.shape, "Error in shape"
+        assert in_rpc.dtype == rio_ds.meta["dtype"], "Error in dtype"
+        assert in_rpc.rio.transform() == rio_ds.transform, "Error in transform"
