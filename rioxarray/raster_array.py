@@ -1274,7 +1274,7 @@ class RasterArray(XRasterBase):
         )
 
     @contextmanager
-    def to_dataset(self) -> DatasetReader:
+    def to_rasterio_dataset(self) -> DatasetReader:
         """
         Return the xarray.Dataset or xarray.DataArray as a rasterio.Dataset.
 
@@ -1285,7 +1285,7 @@ class RasterArray(XRasterBase):
         Example
         -------
 
-        >>> with xds.to_dataset() as rio_ds:
+        >>> with xds.to_rasterio_dataset() as rio_ds:
         >>>    rio_ds.count
 
         """
