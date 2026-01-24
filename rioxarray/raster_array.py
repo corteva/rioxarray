@@ -1282,6 +1282,8 @@ class RasterArray(XRasterBase):
 
         To be used as a context manager.
 
+        .. versionadded:: 0.21
+
         Example
         -------
 
