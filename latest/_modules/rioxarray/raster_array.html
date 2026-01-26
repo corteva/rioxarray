@@ -92,6 +92,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -104,6 +105,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.dtypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype_rev</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resampling</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">geometry_mask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetReader</span><span class="p">,</span> <span class="n">MemoryFile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray.backends.file_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray.core.dtypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_fill_value</span>
 
@@ -1380,6 +1382,32 @@
             <span class="n">compute</span><span class="o">=</span><span class="n">compute</span><span class="p">,</span>
             <span class="o">**</span><span class="n">out_profile</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RasterArray.to_rasterio_dataset">
+<a class="viewcode-back" href="../../rioxarray.html#rioxarray.raster_array.RasterArray.to_rasterio_dataset">[docs]</a>
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_rasterio_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatasetReader</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the xarray.Dataset or xarray.DataArray as a rasterio.Dataset.</span>
+
+<span class="sd">        As rioxarray is able to ingest a rasterio.Dataset, this function is its counterpart.</span>
+
+<span class="sd">        To be used as a context manager.</span>
+
+<span class="sd">        .. versionadded:: 0.21</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &gt;&gt;&gt; with xds.to_rasterio_dataset() as rio_ds:</span>
+<span class="sd">        &gt;&gt;&gt;    rio_ds.count</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">MemoryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">memfile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="n">memfile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">memfile</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">src_ds</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">src_ds</span></div>
 </div>
 
 </pre></div>
