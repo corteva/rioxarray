@@ -23,11 +23,8 @@ UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 DEFAULT_GRID_MAP = "spatial_ref"
 
 # DTYPE TO NODATA MAP
-# Based on: https://github.com/OSGeo/gdal/blob/
-# dee861e7c91c2da7ef8ff849947713e4d9bd115c/
-# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61
-# And: https://github.com/rasterio/rasterio/blob/
-# 9e643c3f563a679aa5400d9b1a263df97b34f9e0/rasterio/dtypes.py#L99-L112
+# Based on: https://github.com/OSGeo/gdal/blob/v3.12.1/swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L49-L66
+# And: https://github.com/rasterio/rasterio/blob/1.5.0/rasterio/dtypes.py#L91-L103
 _NODATA_DTYPE_MAP = {
     1: 255,  # GDT_Byte
     2: 65535,  # GDT_UInt16
@@ -43,6 +40,8 @@ _NODATA_DTYPE_MAP = {
     12: 18446744073709551615,  # GDT_UInt64
     13: -9223372036854775808,  # GDT_Int64
     14: -128,  # GDT_Int8
+    15: numpy.nan,  # GDT_Float16
+    16: numpy.nan,  # GDT_CFloat16
 }
 
 
