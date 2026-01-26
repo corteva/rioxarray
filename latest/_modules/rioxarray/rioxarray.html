@@ -102,6 +102,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.rpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPC</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPORT_GRID_MAPPING</span><span class="p">,</span> <span class="n">get_option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._spatial_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401, pylint: disable=unused-import</span>
+    <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
+    <span class="n">_affine_has_rotation</span><span class="p">,</span>
+    <span class="n">_convert_gcps_to_geojson</span><span class="p">,</span>
+    <span class="n">_get_data_var_message</span><span class="p">,</span>
+    <span class="n">_get_spatial_dims</span><span class="p">,</span>
+    <span class="n">_has_spatial_dims</span><span class="p">,</span>
+    <span class="n">_order_bounds</span><span class="p">,</span>
+    <span class="n">_resolution</span><span class="p">,</span>
+    <span class="n">affine_to_coords</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_from_user_input</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DimensionError</span><span class="p">,</span>
@@ -114,231 +125,6 @@
     <span class="n">RioXarrayError</span><span class="p">,</span>
     <span class="n">TooManyDimensions</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">DEFAULT_GRID_MAP</span> <span class="o">=</span> <span class="s2">&quot;spatial_ref&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Determine if the affine has rotation.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    affine: :obj:`affine.Affine`</span>
-<span class="sd">        The affine of the grid.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    bool</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">affine</span><span class="o">.</span><span class="n">b</span> <span class="o">==</span> <span class="n">affine</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_resolution</span><span class="p">(</span><span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Determine if the resolution of the affine.</span>
-<span class="sd">    If it has rotation, the sign of the resolution is lost.</span>
-
-<span class="sd">    Based on: https://github.com/mapbox/rasterio/blob/6185a4e4ad72b5669066d2d5004bf46d94a6d298/rasterio/_base.pyx#L943-L951</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    affine: :obj:`affine.Affine`</span>
-<span class="sd">        The affine of the grid.</span>
-
-
-<span class="sd">    Returns</span>
-<span class="sd">    --------</span>
-<span class="sd">    x_resolution: float</span>
-<span class="sd">        The X resolution of the affine.</span>
-<span class="sd">    y_resolution: float</span>
-<span class="sd">        The Y resolution of the affine.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">affine</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">affine</span><span class="o">.</span><span class="n">e</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">affine</span><span class="o">.</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">affine</span><span class="o">.</span><span class="n">d</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">affine</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">affine</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">affine_to_coords</span><span class="p">(</span>
-    <span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 1d pixel centered coordinates from affine.</span>
-
-<span class="sd">    Based on code from the xarray rasterio backend.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    affine: :obj:`affine.Affine`</span>
-<span class="sd">        The affine of the grid.</span>
-<span class="sd">    width: int</span>
-<span class="sd">        The width of the grid.</span>
-<span class="sd">    height: int</span>
-<span class="sd">        The height of the grid.</span>
-<span class="sd">    x_dim: str, optional</span>
-<span class="sd">        The name of the X dimension. Default is &#39;x&#39;.</span>
-<span class="sd">    y_dim: str, optional</span>
-<span class="sd">        The name of the Y dimension. Default is &#39;y&#39;.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    dict: x and y coordinate arrays.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="n">affine</span> <span class="o">*</span> <span class="n">affine</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">affine</span><span class="o">.</span><span class="n">is_rectilinear</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_affine_has_rotation</span><span class="p">(</span><span class="n">affine</span><span class="p">):</span>
-        <span class="n">x_coords</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
-            <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
-            <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">),</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">y_dim</span><span class="p">:</span> <span class="n">y_coords</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">:</span> <span class="n">x_coords</span><span class="p">}</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_generate_spatial_coords</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;get spatial coords in new transform&quot;&quot;&quot;</span>
-    <span class="n">new_spatial_coords</span> <span class="o">=</span> <span class="n">affine_to_coords</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
-            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
-        <span class="p">}</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span>
-        <span class="s2">&quot;yc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">new_spatial_coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
-    <span class="p">}</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_nonspatial_coords</span><span class="p">(</span>
-    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">]]:</span>
-    <span class="n">coords</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span>
-        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span>
-        <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span>
-        <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
-    <span class="p">}:</span>
-        <span class="c1"># skip 2D spatial coords</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span>
-            <span class="ow">and</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span>
-        <span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-                <span class="n">src_data_array</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
-            <span class="p">)</span>
-    <span class="k">return</span> <span class="n">coords</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_make_coords</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">src_data_array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">dst_affine</span><span class="p">:</span> <span class="n">Affine</span><span class="p">,</span>
-    <span class="n">dst_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">dst_height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">force_generate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate the coordinates of the new projected `xarray.DataArray`&quot;&quot;&quot;</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">_get_nonspatial_coords</span><span class="p">(</span><span class="n">src_data_array</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">force_generate</span>
-        <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span>
-            <span class="ow">and</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span>
-        <span class="p">)</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;xc&quot;</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span> <span class="ow">and</span> <span class="s2">&quot;yc&quot;</span> <span class="ow">in</span> <span class="n">src_data_array</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-    <span class="p">):</span>
-        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">_generate_spatial_coords</span><span class="p">(</span>
-            <span class="n">affine</span><span class="o">=</span><span class="n">dst_affine</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">dst_width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">dst_height</span>
-        <span class="p">)</span>
-        <span class="n">new_coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new_coords</span>
-    <span class="k">return</span> <span class="n">coords</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_data_var_message</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get message for named data variables.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot; Data variable: </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_spatial_dims</span><span class="p">(</span>
-    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieve the spatial dimensions of the dataset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
-    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-                <span class="n">x_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">y_dim</span>
-        <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">err</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_has_spatial_dims</span><span class="p">(</span>
-    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check to see if the variable in the Dataset has spatial dimensions</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># pylint: disable=pointless-statement</span>
-        <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="kc">True</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_order_bounds</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">resolution_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">resolution_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Make sure that the bounds are in the correct order</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">resolution_y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">top</span> <span class="o">=</span> <span class="n">maxy</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="n">miny</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">top</span> <span class="o">=</span> <span class="n">miny</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="n">maxy</span>
-    <span class="k">if</span> <span class="n">resolution_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">left</span> <span class="o">=</span> <span class="n">maxx</span>
-        <span class="n">right</span> <span class="o">=</span> <span class="n">minx</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">left</span> <span class="o">=</span> <span class="n">minx</span>
-        <span class="n">right</span> <span class="o">=</span> <span class="n">maxx</span>
-
-    <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span>
 
 
 <div class="viewcode-block" id="XRasterBase">
@@ -1549,61 +1335,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rpcs</span></div>
 </div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_convert_gcps_to_geojson</span><span class="p">(</span>
-    <span class="n">gcps</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GroundControlPoint</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert GCPs to geojson.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    gcps: The list of GroundControlPoint instances.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    A FeatureCollection dict.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_gcp_coordinates</span><span class="p">(</span><span class="n">gcp</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">gcp</span><span class="o">.</span><span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">gcp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">gcp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gcp</span><span class="o">.</span><span class="n">z</span><span class="p">]</span>
-
-    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">gcp</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="n">gcp</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-                <span class="s2">&quot;row&quot;</span><span class="p">:</span> <span class="n">gcp</span><span class="o">.</span><span class="n">row</span><span class="p">,</span>
-                <span class="s2">&quot;col&quot;</span><span class="p">:</span> <span class="n">gcp</span><span class="o">.</span><span class="n">col</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Point&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">:</span> <span class="n">_gcp_coordinates</span><span class="p">(</span><span class="n">gcp</span><span class="p">)},</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">gcps</span>
-    <span class="p">]</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">features</span><span class="p">}</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_convert_str_to_resampling</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert from string to rasterio.warp.Resampling enum, raises ValueError on bad input.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    name: str</span>
-<span class="sd">        The string to convert.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    :obj:`rasterio.warp.Resampling`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad resampling parameter: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 </pre></div>
 
            </div>

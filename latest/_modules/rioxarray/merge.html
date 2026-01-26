@@ -90,7 +90,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.merge</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge</span> <span class="k">as</span> <span class="n">_rio_merge</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">IndexVariable</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.rioxarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_nonspatial_coords</span><span class="p">,</span> <span class="n">_make_coords</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._spatial_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_nonspatial_coords</span><span class="p">,</span> <span class="n">_make_coords</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RasterioDatasetDuck</span><span class="p">:</span>
