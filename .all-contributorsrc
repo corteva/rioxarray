@@ -454,6 +454,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "martijnvandermarel",
+      "name": "Martijn van der Marel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23376251?v=4",
+      "profile": "https://github.com/martijnvandermarel",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
