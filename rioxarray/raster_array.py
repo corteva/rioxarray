@@ -12,7 +12,7 @@ datacube is licensed under the Apache License, Version 2.0:
 
 import copy
 import os
-from collections.abc import Hashable, Iterable, Mapping
+from collections.abc import Generator, Hashable, Iterable, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
@@ -1078,7 +1078,7 @@ class RasterArray(XRasterBase):
         )
 
     @contextmanager
-    def to_rasterio_dataset(self) -> DatasetReader:
+    def to_rasterio_dataset(self) -> Generator[DatasetReader, None, None]:
         """
         Return the xarray.Dataset or xarray.DataArray as a rasterio.Dataset.
 
