@@ -33,11 +33,13 @@ from xarray.core.dtypes import maybe_promote
 from xarray.core.utils import is_scalar
 from xarray.core.variable import as_variable
 
+from rioxarray._spatial_utils import (
+    FILL_VALUE_NAMES,
+    UNWANTED_RIO_ATTRS,
+    _generate_spatial_coords,
+)
 from rioxarray.exceptions import RioXarrayError
-from rioxarray.rioxarray import _generate_spatial_coords
 
-FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
