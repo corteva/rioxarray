@@ -15,6 +15,7 @@ from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
+from rasterio import DatasetReader
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
@@ -3354,3 +3355,61 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
                 2818720.0,
             )
         )
+
+
+def test_to_rasterio_dataset():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
+        in_rpc_path
+    ) as rio_ds:
+        # object type
+        assert isinstance(riox_ds, DatasetReader), "Error in object type"
+
+        # metadata vs rioxarray
+        assert in_rpc.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
+        assert in_rpc.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
+        assert in_rpc.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
+        assert (
+            in_rpc.rio.transform() == riox_ds.transform
+        ), "Error in transform vs rio accessor"
+        assert riox_ds.profile["driver"] == "GTiff", "Error in driver vs rio accessor"
+
+        # metadata vs rioxarray
+        assert rio_ds.crs == riox_ds.crs, "Error in CRS vs rasterio"
+        assert rio_ds.shape == riox_ds.shape, "Error in shape vs rasterio"
+        assert (
+            rio_ds.meta["dtype"] == riox_ds.meta["dtype"]
+        ), "Error in dtype vs rasterio"
+        assert rio_ds.transform == riox_ds.transform, "Error in transform vs rasterio"
+        assert rio_ds.profile == riox_ds.profile, "Error in driver vs rasterio"
+
+
+def test_to_rasterio_dataset_rpcs():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
+        in_rpc_path
+    ) as rio_ds:
+        # object type
+        assert isinstance(riox_ds, DatasetReader), "Error in object type"
+
+        # metadata vs rioxarray
+        assert in_rpc.rio.get_rpcs() == riox_ds.rpcs, "Error in RPCs vs rio accessor"
+        assert in_rpc.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
+        assert in_rpc.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
+        assert in_rpc.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
+        assert (
+            in_rpc.rio.transform() == riox_ds.transform
+        ), "Error in transform vs rio accessor"
+        assert riox_ds.profile["driver"] == "GTiff", "Error in driver vs rio accessor"
+
+        # metadata vs rioxarray
+        assert rio_ds.rpcs == riox_ds.rpcs, "Error in RPCs vs rasterio"
+        assert rio_ds.crs == riox_ds.crs, "Error in CRS vs rasterio"
+        assert rio_ds.shape == riox_ds.shape, "Error in shape vs rasterio"
+        assert (
+            rio_ds.meta["dtype"] == riox_ds.meta["dtype"]
+        ), "Error in dtype vs rasterio"
+        assert rio_ds.transform == riox_ds.transform, "Error in transform vs rasterio"
+        assert rio_ds.profile == riox_ds.profile, "Error in driver vs rasterio"
