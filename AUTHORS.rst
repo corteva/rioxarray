@@ -10,7 +10,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
     <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
     <!-- prettier-ignore-start -->
     <!-- markdownlint-disable -->
-    <table>
+        <table>
       <tbody>
         <tr>
           <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/alan-snow-55bb8726/"><img src="https://avatars3.githubusercontent.com/u/8699967?v=4?s=100" width="100px;" alt="Alan D. Snow"/><br /><sub><b>Alan D. Snow</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=snowman2" title="Code">💻</a> <a href="#ideas-snowman2" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-snowman2" title="Answering Questions">💬</a> <a href="https://github.com/corteva/rioxarray/issues?q=author%3Asnowman2" title="Bug reports">🐛</a> <a href="https://github.com/corteva/rioxarray/commits?author=snowman2" title="Documentation">📖</a> <a href="#example-snowman2" title="Examples">💡</a> <a href="#maintenance-snowman2" title="Maintenance">🚧</a> <a href="https://github.com/corteva/rioxarray/pulls?q=is%3Apr+reviewed-by%3Asnowman2" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/corteva/rioxarray/commits?author=snowman2" title="Tests">⚠️</a></td>
@@ -68,6 +68,7 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
         </tr>
         <tr>
           <td align="center" valign="top" width="14.28%"><a href="https://github.com/trchudley"><img src="https://avatars.githubusercontent.com/u/24896931?v=4?s=100" width="100px;" alt="Tom Chudley"/><br /><sub><b>Tom Chudley</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=trchudley" title="Code">💻</a></td>
+          <td align="center" valign="top" width="14.28%"><a href="https://github.com/acoque"><img src="https://avatars.githubusercontent.com/u/35691279?v=4?s=100" width="100px;" alt="acoque"/><br /><sub><b>acoque</b></sub></a><br /><a href="https://github.com/corteva/rioxarray/commits?author=acoque" title="Documentation">📖</a></td>
         </tr>
       </tbody>
     </table>
