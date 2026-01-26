@@ -21,6 +21,7 @@ from rasterio.crs import CRS
 from rasterio.windows import Window
 
 import rioxarray
+from rioxarray._spatial_utils import _generate_spatial_coords, _make_coords
 from rioxarray.exceptions import (
     DimensionMissingCoordinateError,
     MissingCRS,
@@ -29,7 +30,6 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
     GDAL_GE_3_11,
     GDAL_GE_361,

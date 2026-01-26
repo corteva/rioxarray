@@ -8,7 +8,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 
 import rioxarray
-from rioxarray.raster_array import UNWANTED_RIO_ATTRS
+from rioxarray._spatial_utils import UNWANTED_RIO_ATTRS
 
 xarray.set_options(warn_for_unclosed_files=True)
 
