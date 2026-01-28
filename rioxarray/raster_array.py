@@ -1091,7 +1091,7 @@ class RasterArray(XRasterBase):
         Example
         -------
 
-        >>> with xds.to_rasterio_dataset() as rio_ds:
+        >>> with xds.rio.to_rasterio_dataset() as rio_ds:
         >>>    rio_ds.count
 
         """
@@ -1099,3 +1099,55 @@ class RasterArray(XRasterBase):
             self.to_raster(memfile.name)
             with memfile.open() as src_ds:
                 yield src_ds
+
+    def profile(self) -> dict:
+        """
+        Return the profile (in rasterio's definition) of the current raster.
+
+        .. versionadded:: 0.2x
+
+        Example
+        -------
+
+        >>> xds.rio.profile()
+        {'blockxsize': 256,
+         'blockysize': 256,
+         'compress': 'deflate',
+         'count': 1,
+         'crs': CRS.from_wkt(...),
+         'driver': 'GTiff',
+         'dtype': 'int16',
+         'height': 500,
+         'interleave': 'band',
+         'nodata': -9999.0,
+         'tiled': True,
+         'transform': Affine(300.0, 0.0, 1634415.0,
+               0.0, -300.0, 2714805.0),
+         'width': 500}
+
+        """
+        with self.to_rasterio_dataset() as rio_ds:
+            return rio_ds.profile
+
+    def meta(self) -> dict:
+        """
+        Return the metadata (in rasterio's definition) of the current raster.
+
+        .. versionadded:: 0.2x
+
+        Example
+        -------
+
+        >>> xds.rio.meta()
+        {'count': 1,
+         'crs': CRS.from_wkt(...),
+         'driver': 'GTiff',
+         'dtype': 'int16',
+         'height': 500,
+         'nodata': -9999.0,
+         'transform': Affine(300.0, 0.0, 1634415.0,
+               0.0, -300.0, 2714805.0),
+         'width': 500}
+        """
+        with self.to_rasterio_dataset() as rio_ds:
+            return rio_ds.meta
