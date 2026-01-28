@@ -3,6 +3,8 @@ History
 
 Latest
 ------
+- ENH: Add `convention` option to `set_options()` for future multi-convention support (pull #XXX)
+- REF: Extract CF convention logic to `_convention/cf.py` module (pull #XXX)
 
 0.20.0
 ------
