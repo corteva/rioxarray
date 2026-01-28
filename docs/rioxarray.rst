@@ -27,6 +27,15 @@ rioxarray.show_versions
 .. autofunction:: rioxarray.show_versions
 
 
+rioxarray.enum module
+---------------------
+
+.. automodule:: rioxarray.enum
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 rioxarray `rio` accessors
 --------------------------
 
