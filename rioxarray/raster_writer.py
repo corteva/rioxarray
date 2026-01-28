@@ -10,6 +10,8 @@ Source file:
 """
 import numpy
 import rasterio
+import xarray
+from rasterio.rpc import RPC
 from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
@@ -184,6 +186,41 @@ def _get_dtypes(*, rasterio_dtype, encoded_rasterio_dtype, dataarray_dtype):
     return rasterio_dtype, numpy_dtype
 
 
+def _to_raster_dtypes(xarray_dataarray: xarray.DataArray, **kwargs):
+    """Helper function managing dtypes in to_raster, managing '_Unsigned' scenario"""
+    kwargs["dtype"], numpy_dtype = _get_dtypes(
+        rasterio_dtype=kwargs["dtype"],
+        encoded_rasterio_dtype=xarray_dataarray.encoding.get("rasterio_dtype"),
+        dataarray_dtype=xarray_dataarray.encoding.get(
+            "dtype", str(xarray_dataarray.dtype)
+        ),
+    )
+    # there is no equivalent for netCDF _Unsigned
+    # across output GDAL formats. It is safest to convert beforehand.
+    # https://github.com/OSGeo/gdal/issues/6352#issuecomment-1245981837
+    if "_Unsigned" in xarray_dataarray.encoding:
+        unsigned_dtype = _get_unsigned_dtype(
+            unsigned=xarray_dataarray.encoding["_Unsigned"] == "true",
+            dtype=numpy_dtype,
+        )
+        if unsigned_dtype is not None:
+            numpy_dtype = unsigned_dtype
+            kwargs["dtype"] = unsigned_dtype
+            xarray_dataarray.encoding["rasterio_dtype"] = str(unsigned_dtype)
+            xarray_dataarray.encoding["dtype"] = str(unsigned_dtype)
+
+    return xarray_dataarray, numpy_dtype, kwargs
+
+
+def _to_raster_validate_rpcs(**kwargs):
+    """Helper function validating RPCs in to_raster: RPCs should be either be a RPC object or a GDAL-compatible dict"""
+    rpcs = kwargs.get("rpcs")
+    if rpcs is not None:
+        assert isinstance(
+            rpcs, (RPC, dict)
+        ), "RPCs must be of type 'rasterio.rpc.RPC' or dict."
+
+
 class RasterioWriter:
     """
 
@@ -254,26 +291,9 @@ class RasterioWriter:
             Keyword arguments to pass into writing the raster.
         """
         xarray_dataarray = xarray_dataarray.copy()
-        kwargs["dtype"], numpy_dtype = _get_dtypes(
-            rasterio_dtype=kwargs["dtype"],
-            encoded_rasterio_dtype=xarray_dataarray.encoding.get("rasterio_dtype"),
-            dataarray_dtype=xarray_dataarray.encoding.get(
-                "dtype", str(xarray_dataarray.dtype)
-            ),
+        xarray_dataarray, numpy_dtype, kwargs = _to_raster_dtypes(
+            xarray_dataarray, **kwargs
         )
-        # there is no equivalent for netCDF _Unsigned
-        # across output GDAL formats. It is safest to convert beforehand.
-        # https://github.com/OSGeo/gdal/issues/6352#issuecomment-1245981837
-        if "_Unsigned" in xarray_dataarray.encoding:
-            unsigned_dtype = _get_unsigned_dtype(
-                unsigned=xarray_dataarray.encoding["_Unsigned"] == "true",
-                dtype=numpy_dtype,
-            )
-            if unsigned_dtype is not None:
-                numpy_dtype = unsigned_dtype
-                kwargs["dtype"] = unsigned_dtype
-                xarray_dataarray.encoding["rasterio_dtype"] = str(unsigned_dtype)
-                xarray_dataarray.encoding["dtype"] = str(unsigned_dtype)
 
         if kwargs["nodata"] is not None:
             # Ensure dtype of output data matches the expected dtype.
@@ -283,12 +303,17 @@ class RasterioWriter:
                 original_nodata=kwargs["nodata"], new_dtype=numpy_dtype
             )
 
+        # Check RPC validity: RPCs should be either be a RPC object or a GDAL-compatible dict
+        _to_raster_validate_rpcs(**kwargs)
+
+        # RPCs and GCPs are propagated through **kwargs
         with rasterio.open(self.raster_path, "w", **kwargs) as rds:
             _write_metatata_to_raster(
                 raster_handle=rds, xarray_dataset=xarray_dataarray, tags=tags
             )
+
             if not (lock and is_dask_collection(xarray_dataarray.data)):
-                # write data to raster immmediately if not dask array
+                # write data to raster immediately if not dask array
                 if windowed:
                     window_iter = rds.block_windows(1)
                 else:

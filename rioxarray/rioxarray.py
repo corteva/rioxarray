@@ -19,9 +19,21 @@ from pyproj.aoi import AreaOfInterest
 from pyproj.database import query_utm_crs_info
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
+from rasterio.rpc import RPC
 
 from rioxarray._convention import cf, zarr
 from rioxarray._options import CONVENTION, get_option
+from rioxarray._spatial_utils import (  # noqa: F401, pylint: disable=unused-import
+    DEFAULT_GRID_MAP,
+    _affine_has_rotation,
+    _convert_gcps_to_geojson,
+    _get_data_var_message,
+    _get_spatial_dims,
+    _has_spatial_dims,
+    _order_bounds,
+    _resolution,
+    affine_to_coords,
+)
 from rioxarray.crs import crs_from_user_input
 from rioxarray.enum import Convention
 from rioxarray.exceptions import (
@@ -35,231 +47,6 @@ from rioxarray.exceptions import (
     RioXarrayError,
     TooManyDimensions,
 )
-
-DEFAULT_GRID_MAP = "spatial_ref"
-
-
-def _affine_has_rotation(affine: Affine) -> bool:
-    """
-    Determine if the affine has rotation.
-
-    Parameters
-    ----------
-    affine: :obj:`affine.Affine`
-        The affine of the grid.
-
-    Returns
-    -------
-    bool
-    """
-    return affine.b == affine.d != 0
-
-
-def _resolution(affine: Affine) -> tuple[float, float]:
-    """
-    Determine if the resolution of the affine.
-    If it has rotation, the sign of the resolution is lost.
-
-    Based on: https://github.com/mapbox/rasterio/blob/6185a4e4ad72b5669066d2d5004bf46d94a6d298/rasterio/_base.pyx#L943-L951
-
-    Parameters
-    ----------
-    affine: :obj:`affine.Affine`
-        The affine of the grid.
-
-
-    Returns
-    --------
-    x_resolution: float
-        The X resolution of the affine.
-    y_resolution: float
-        The Y resolution of the affine.
-    """
-    if not _affine_has_rotation(affine):
-        return affine.a, affine.e
-    return (
-        math.sqrt(affine.a**2 + affine.d**2),
-        math.sqrt(affine.b**2 + affine.e**2),
-    )
-
-
-def affine_to_coords(
-    affine: Affine, width: int, height: int, *, x_dim: str = "x", y_dim: str = "y"
-) -> dict[str, numpy.ndarray]:
-    """Generate 1d pixel centered coordinates from affine.
-
-    Based on code from the xarray rasterio backend.
-
-    Parameters
-    ----------
-    affine: :obj:`affine.Affine`
-        The affine of the grid.
-    width: int
-        The width of the grid.
-    height: int
-        The height of the grid.
-    x_dim: str, optional
-        The name of the X dimension. Default is 'x'.
-    y_dim: str, optional
-        The name of the Y dimension. Default is 'y'.
-
-    Returns
-    -------
-    dict: x and y coordinate arrays.
-
-    """
-    transform = affine * affine.translation(0.5, 0.5)
-    if affine.is_rectilinear and not _affine_has_rotation(affine):
-        x_coords, _ = transform * (numpy.arange(width), numpy.zeros(width))
-        _, y_coords = transform * (numpy.zeros(height), numpy.arange(height))
-    else:
-        x_coords, y_coords = transform * numpy.meshgrid(
-            numpy.arange(width),
-            numpy.arange(height),
-        )
-    return {y_dim: y_coords, x_dim: x_coords}
-
-
-def _generate_spatial_coords(
-    *, affine: Affine, width: int, height: int
-) -> dict[Hashable, Any]:
-    """get spatial coords in new transform"""
-    new_spatial_coords = affine_to_coords(affine, width, height)
-    if new_spatial_coords["x"].ndim == 1:
-        return {
-            "x": xarray.IndexVariable("x", new_spatial_coords["x"]),
-            "y": xarray.IndexVariable("y", new_spatial_coords["y"]),
-        }
-    return {
-        "xc": (("y", "x"), new_spatial_coords["x"]),
-        "yc": (("y", "x"), new_spatial_coords["y"]),
-    }
-
-
-def _get_nonspatial_coords(
-    src_data_array: Union[xarray.DataArray, xarray.Dataset],
-) -> dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]]:
-    coords: dict[Hashable, Union[xarray.Variable, xarray.IndexVariable]] = {}
-    for coord in set(src_data_array.coords) - {
-        src_data_array.rio.x_dim,
-        src_data_array.rio.y_dim,
-        DEFAULT_GRID_MAP,
-    }:
-        # skip 2D spatial coords
-        if (
-            src_data_array.rio.x_dim in src_data_array[coord].dims
-            and src_data_array.rio.y_dim in src_data_array[coord].dims
-        ):
-            continue
-        if src_data_array[coord].ndim == 1:
-            coords[coord] = xarray.IndexVariable(
-                src_data_array[coord].dims,
-                src_data_array[coord].values,
-                src_data_array[coord].attrs,
-            )
-        else:
-            coords[coord] = xarray.Variable(
-                src_data_array[coord].dims,
-                src_data_array[coord].values,
-                src_data_array[coord].attrs,
-            )
-    return coords
-
-
-def _make_coords(
-    *,
-    src_data_array: Union[xarray.DataArray, xarray.Dataset],
-    dst_affine: Affine,
-    dst_width: int,
-    dst_height: int,
-    force_generate: bool = False,
-) -> dict[Hashable, Any]:
-    """Generate the coordinates of the new projected `xarray.DataArray`"""
-    coords = _get_nonspatial_coords(src_data_array)
-    if (
-        force_generate
-        or (
-            src_data_array.rio.x_dim in src_data_array.coords
-            and src_data_array.rio.y_dim in src_data_array.coords
-        )
-        or ("xc" in src_data_array.coords and "yc" in src_data_array.coords)
-    ):
-        new_coords = _generate_spatial_coords(
-            affine=dst_affine, width=dst_width, height=dst_height
-        )
-        new_coords.update(coords)
-        return new_coords
-    return coords
-
-
-def _get_data_var_message(obj: Union[xarray.DataArray, xarray.Dataset]) -> str:
-    """
-    Get message for named data variables.
-    """
-    try:
-        return f" Data variable: {obj.name}" if obj.name else ""
-    except AttributeError:
-        return ""
-
-
-def _get_spatial_dims(
-    obj: Union[xarray.Dataset, xarray.DataArray], *, var: Union[Any, Hashable]
-) -> tuple[str, str]:
-    """
-    Retrieve the spatial dimensions of the dataset
-    """
-    try:
-        return obj[var].rio.x_dim, obj[var].rio.y_dim
-    except MissingSpatialDimensionError as err:
-        try:
-            obj[var].rio.set_spatial_dims(
-                x_dim=obj.rio.x_dim, y_dim=obj.rio.y_dim, inplace=True
-            )
-            return obj.rio.x_dim, obj.rio.y_dim
-        except MissingSpatialDimensionError:
-            raise err from None
-
-
-def _has_spatial_dims(
-    obj: Union[xarray.Dataset, xarray.DataArray], *, var: Union[Any, Hashable]
-) -> bool:
-    """
-    Check to see if the variable in the Dataset has spatial dimensions
-    """
-    try:
-        # pylint: disable=pointless-statement
-        _get_spatial_dims(obj, var=var)
-    except MissingSpatialDimensionError:
-        return False
-    return True
-
-
-def _order_bounds(
-    *,
-    minx: float,
-    miny: float,
-    maxx: float,
-    maxy: float,
-    resolution_x: float,
-    resolution_y: float,
-) -> tuple[float, float, float, float]:
-    """
-    Make sure that the bounds are in the correct order
-    """
-    if resolution_y < 0:
-        top = maxy
-        bottom = miny
-    else:
-        top = miny
-        bottom = maxy
-    if resolution_x < 0:
-        left = maxx
-        right = minx
-    else:
-        left = minx
-        right = maxx
-
-    return left, bottom, right, top
 
 
 class XRasterBase:
@@ -326,6 +113,7 @@ class XRasterBase:
         self._width: Optional[int] = None
         self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
         self._gcps: Optional[list[GroundControlPoint]] = None
+        self._rpcs: Optional[RPC] = None
 
     @property
     def crs(self) -> Optional[rasterio.crs.CRS]:
@@ -384,6 +172,7 @@ class XRasterBase:
         obj_copy.rio._height = self._height
         obj_copy.rio._crs = self._crs
         obj_copy.rio._gcps = self._gcps
+        obj_copy.rio._rpcs = self._rpcs
         return obj_copy
 
     def set_crs(
@@ -1352,57 +1141,72 @@ class XRasterBase:
         self._gcps = [_parse_gcp(gcp) for gcp in geojson_gcps["features"]]
         return self._gcps
 
+    def write_rpcs(
+        self,
+        rpcs: RPC,
+        *,
+        grid_mapping_name: Optional[str] = None,
+        inplace: bool = False,
+    ) -> xarray.Dataset | xarray.DataArray:
+        """
+        Write the Rational Polynomial Coefficients to the dataset.
 
-def _convert_gcps_to_geojson(
-    gcps: Iterable[GroundControlPoint],
-) -> dict:
-    """
-    Convert GCPs to geojson.
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients
 
-    Parameters
-    ----------
-    gcps: The list of GroundControlPoint instances.
+        Parameters
+        ----------
+        rpcs: :obj:`rasterio.rpc.RPC`
+            The Rational Polynomial Coefficients to integrate to the dataset.
+        grid_mapping_name: str, optional
+            Name of the grid_mapping coordinate to store the RPCs information in.
+            Default is the grid_mapping name of the dataset.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
 
-    Returns
-    -------
-    A FeatureCollection dict.
-    """
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with Rational Polynomial Coefficients written.
+        """
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
+        data_obj = self._get_obj(inplace=True)
 
-    def _gcp_coordinates(gcp):
-        if gcp.z is None:
-            return [gcp.x, gcp.y]
-        return [gcp.x, gcp.y, gcp.z]
+        # RPC CRS is always 4326
+        data_obj = data_obj.rio.write_crs(
+            "epsg:4326", grid_mapping_name=grid_mapping_name, inplace=inplace
+        )
+        try:
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
+        except KeyError:
+            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
 
-    features = [
-        {
-            "type": "Feature",
-            "properties": {
-                "id": gcp.id,
-                "info": gcp.info,
-                "row": gcp.row,
-                "col": gcp.col,
-            },
-            "geometry": {"type": "Point", "coordinates": _gcp_coordinates(gcp)},
-        }
-        for gcp in gcps
-    ]
-    return {"type": "FeatureCollection", "features": features}
+        # Store the RPCCs
+        grid_map_attrs["rpcs"] = json.dumps(rpcs.to_dict())
+        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
+        self._rpcs = rpcs
 
+        return data_obj
 
-def _convert_str_to_resampling(name: str) -> rasterio.warp.Resampling:
-    """
-    Convert from string to rasterio.warp.Resampling enum, raises ValueError on bad input.
+    def get_rpcs(self) -> Optional[RPC]:
+        """
+        Get the Rational Polynomial Coefficients from the dataset.
 
-    Parameters
-    ----------
-    name: str
-        The string to convert.
+        https://rasterio.readthedocs.io/en/latest/topics/georeferencing.html#rational-polynomial-coefficients
 
-    Returns
-    -------
-    :obj:`rasterio.warp.Resampling`
-    """
-    try:
-        return getattr(rasterio.warp.Resampling, name.lower())
-    except AttributeError:
-        raise ValueError(f"Bad resampling parameter: {name}") from None
+        Returns
+        -------
+        :obj:`rasterio.rpc.RPC` or None
+            The Rational Polynomial Coefficients from the dataset or None if not applicable
+        """
+        if self._rpcs is not None:
+            return self._rpcs
+        try:
+            json_rpcs = json.loads(self._obj.coords[self.grid_mapping].attrs["rpcs"])
+        except (KeyError, AttributeError):
+            return None
+
+        self._rpcs = RPC(**json_rpcs)
+        return self._rpcs
