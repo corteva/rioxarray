@@ -11,7 +11,6 @@ from collections.abc import Hashable, Iterable
 from typing import Any, Literal, Optional, Union
 
 import numpy
-import pyproj
 import rasterio.warp
 import rasterio.windows
 import xarray
