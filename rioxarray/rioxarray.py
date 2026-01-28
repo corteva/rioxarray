@@ -21,8 +21,10 @@ from pyproj.database import query_utm_crs_info
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 
-from rioxarray._options import EXPORT_GRID_MAPPING, get_option
+from rioxarray._convention import cf
+from rioxarray._options import CONVENTION, EXPORT_GRID_MAPPING, get_option
 from rioxarray.crs import crs_from_user_input
+from rioxarray.enum import Convention
 from rioxarray.exceptions import (
     DimensionError,
     DimensionMissingCoordinateError,
@@ -36,7 +38,6 @@ from rioxarray.exceptions import (
 )
 
 DEFAULT_GRID_MAP = "spatial_ref"
-
 
 def _affine_has_rotation(affine: Affine) -> bool:
     """
@@ -270,30 +271,15 @@ class XRasterBase:
 
         self._x_dim: Optional[Hashable] = None
         self._y_dim: Optional[Hashable] = None
-        # Determine the spatial dimensions of the `xarray.DataArray`
-        if "x" in self._obj.dims and "y" in self._obj.dims:
-            self._x_dim = "x"
-            self._y_dim = "y"
-        elif "longitude" in self._obj.dims and "latitude" in self._obj.dims:
-            self._x_dim = "longitude"
-            self._y_dim = "latitude"
-        else:
-            # look for coordinates with CF attributes
-            for coord in self._obj.coords:
-                # make sure to only look in 1D coordinates
-                # that has the same dimension name as the coordinate
-                if self._obj.coords[coord].dims != (coord,):
-                    continue
-                if (self._obj.coords[coord].attrs.get("axis", "").upper() == "X") or (
-                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
-                    in ("longitude", "projection_x_coordinate")
-                ):
-                    self._x_dim = coord
-                elif (self._obj.coords[coord].attrs.get("axis", "").upper() == "Y") or (
-                    self._obj.coords[coord].attrs.get("standard_name", "").lower()
-                    in ("latitude", "projection_y_coordinate")
-                ):
-                    self._y_dim = coord
+
+        # Read spatial dimensions using the global convention setting
+        convention = get_option(CONVENTION)
+
+        if convention is Convention.CF or convention is None:
+            # Use CF convention logic for dimension detection
+            spatial_dims = cf.read_spatial_dimensions(self._obj)
+            if spatial_dims is not None:
+                self._y_dim, self._x_dim = spatial_dims
 
         # properties
         self._count: Optional[int] = None
@@ -310,32 +296,21 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
-        # look in wkt attributes to avoid using
-        # pyproj CRS if possible for performance
-        for crs_attr in ("spatial_ref", "crs_wkt"):
-            try:
-                self._set_crs(
-                    self._obj.coords[self.grid_mapping].attrs[crs_attr],
-                    inplace=True,
-                )
-                return self._crs
-            except KeyError:
-                pass
+        # Read using global convention setting
+        convention = get_option(CONVENTION)
 
-        # look in grid_mapping
-        try:
-            self._set_crs(
-                pyproj.CRS.from_cf(self._obj.coords[self.grid_mapping].attrs),
-                inplace=True,
-            )
-        except (KeyError, pyproj.exceptions.CRSError):
-            try:
-                # look in attrs for 'crs'
-                self._set_crs(self._obj.attrs["crs"], inplace=True)
-            except KeyError:
-                self._crs = False
-                return None
-        return self._crs
+        parsed_crs = None
+        if convention is Convention.CF or convention is None:
+            # Use CF convention for CRS reading
+            parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+
+        if parsed_crs is not None:
+            self._set_crs(parsed_crs, inplace=True)
+            return self._crs
+
+        # No CRS found
+        self._crs = False
+        return None
 
     def _get_obj(self, inplace: bool) -> Union[xarray.Dataset, xarray.DataArray]:
         """
@@ -491,12 +466,13 @@ class XRasterBase:
         self,
         input_crs: Optional[Any] = None,
         grid_mapping_name: Optional[str] = None,
+        convention: Optional[Convention] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Write the CRS to the dataset in a CF compliant manner.
+        Write the CRS to the dataset using the specified convention.
 
-        .. warning:: The grid_mapping attribute is written to the encoding.
+        .. warning:: When using CF convention, the grid_mapping attribute is written to the encoding.
 
         Parameters
         ----------
@@ -504,14 +480,17 @@ class XRasterBase:
             Anything accepted by `rasterio.crs.CRS.from_user_input`.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the CRS information in.
-            Default is the grid_mapping name of the dataset.
+            Only used with CF convention. Default is the grid_mapping name of the dataset.
+        convention: Convention, optional
+            Convention to use for writing CRS. If None, uses the global default
+            from set_options(). Currently only CF convention is supported.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
         Returns
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
-            Modified dataset with CF compliant CRS information.
+            Modified dataset with CRS information.
 
         Examples
         --------
@@ -528,45 +507,30 @@ class XRasterBase:
         else:
             data_obj = self._get_obj(inplace=inplace)
 
-        # get original transform
-        transform = self._cached_transform()
-        # remove old grid maping coordinate if exists
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-        try:
-            del data_obj.coords[grid_mapping_name]
-        except KeyError:
-            pass
-
         if data_obj.rio.crs is None:
             raise MissingCRS(
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
             )
-        # add grid mapping coordinate
-        data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
-        grid_map_attrs = {}
-        if get_option(EXPORT_GRID_MAPPING):
-            try:
-                grid_map_attrs = pyproj.CRS.from_user_input(data_obj.rio.crs).to_cf()
-            except KeyError:
-                pass
-        # spatial_ref is for compatibility with GDAL
-        crs_wkt = data_obj.rio.crs.to_wkt()
-        grid_map_attrs["spatial_ref"] = crs_wkt
-        grid_map_attrs["crs_wkt"] = crs_wkt
-        if transform is not None:
-            grid_map_attrs["GeoTransform"] = " ".join(
-                [str(item) for item in transform.to_gdal()]
+
+        # Determine which convention to use
+        if convention is None:
+            convention = get_option(CONVENTION) or Convention.CF
+
+        if convention is Convention.CF:
+            grid_mapping_name = (
+                self.grid_mapping if grid_mapping_name is None else grid_mapping_name
             )
-        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
-
-        # remove old crs if exists
-        data_obj.attrs.pop("crs", None)
-
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
-        )
+            data_obj = cf.write_crs(
+                data_obj,
+                data_obj.rio.crs,
+                grid_mapping_name,
+                inplace=True,
+            )
+            return data_obj.rio.write_grid_mapping(
+                grid_mapping_name=grid_mapping_name, inplace=True
+            )
+        else:
+            raise ValueError(f"Unsupported convention: {convention}")
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
@@ -612,36 +576,29 @@ class XRasterBase:
 
     def _cached_transform(self) -> Optional[Affine]:
         """
-        Get the transform from:
-        1. The GeoTransform metatada property in the grid mapping
-        2. The transform attribute.
+        Get the transform using the global convention setting.
         """
-        try:
-            # look in grid_mapping
-            transform = numpy.fromstring(
-                self._obj.coords[self.grid_mapping].attrs["GeoTransform"], sep=" "
-            )
-            # Calling .tolist() to assure the arguments are Python float and JSON serializable
-            return Affine.from_gdal(*transform.tolist())
+        # Read using the global convention setting
+        convention = get_option(CONVENTION)
 
-        except KeyError:
-            try:
-                return Affine(*self._obj.attrs["transform"][:6])
-            except KeyError:
-                pass
+        if convention is Convention.CF or convention is None:
+            return cf.read_transform(self._obj, self.grid_mapping)
+
         return None
 
     def write_transform(
         self,
         transform: Optional[Affine] = None,
         grid_mapping_name: Optional[str] = None,
+        convention: Optional[Convention] = None,
         inplace: bool = False,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         .. versionadded:: 0.0.30
 
-        Write the GeoTransform to the dataset where GDAL can read it in.
+        Write the transform to the dataset using the specified convention.
 
+        For CF convention, this writes the GeoTransform to the dataset where GDAL can read it in.
         https://gdal.org/drivers/raster/netcdf.html#georeference
 
         Parameters
@@ -650,34 +607,40 @@ class XRasterBase:
             The transform of the dataset. If not provided, it will be calculated.
         grid_mapping_name: str, optional
             Name of the grid_mapping coordinate to store the transform information in.
-            Default is the grid_mapping name of the dataset.
+            Only used with CF convention. Default is the grid_mapping name of the dataset.
+        convention: Convention, optional
+            Convention to use for writing transform. If None, uses the global default
+            from set_options(). Currently only CF convention is supported.
         inplace: bool, optional
             If True, it will write to the existing dataset. Default is False.
 
         Returns
         -------
         :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
-            Modified dataset with Geo Transform written.
+            Modified dataset with transform written.
         """
         transform = transform or self.transform(recalc=True)
         data_obj = self._get_obj(inplace=inplace)
-        # delete the old attribute to prevent confusion
-        data_obj.attrs.pop("transform", None)
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-        try:
-            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
-        except KeyError:
-            data_obj.coords[grid_mapping_name] = xarray.Variable((), 0)
-            grid_map_attrs = data_obj.coords[grid_mapping_name].attrs.copy()
-        grid_map_attrs["GeoTransform"] = " ".join(
-            [str(item) for item in transform.to_gdal()]
-        )
-        data_obj.coords[grid_mapping_name].rio.set_attrs(grid_map_attrs, inplace=True)
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
-        )
+
+        # Determine which convention to use
+        if convention is None:
+            convention = get_option(CONVENTION) or Convention.CF
+
+        if convention is Convention.CF:
+            grid_mapping_name = (
+                self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+            )
+            data_obj = cf.write_transform(
+                data_obj,
+                transform,
+                grid_mapping_name,
+                inplace=True,
+            )
+            return data_obj.rio.write_grid_mapping(
+                grid_mapping_name=grid_mapping_name, inplace=True
+            )
+        else:
+            raise ValueError(f"Unsupported convention: {convention}")
 
     def transform(self, recalc: bool = False) -> Affine:
         """
