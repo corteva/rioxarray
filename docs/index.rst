@@ -11,6 +11,7 @@ GitHub: http://github.com/corteva/rioxarray
    installation
    getting_started/getting_started
    examples/examples
+   conventions
    modules
    contributing
    authors

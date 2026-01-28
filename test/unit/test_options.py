@@ -1,7 +1,9 @@
 import pytest
 
+import rioxarray
 from rioxarray import set_options
-from rioxarray._options import EXPORT_GRID_MAPPING, get_option
+from rioxarray._options import CONVENTION, EXPORT_GRID_MAPPING, get_option
+from rioxarray.enum import Convention
 
 
 def test_set_options__contextmanager():
@@ -37,3 +39,18 @@ def test_set_options__invalid_value():
     ):
         with set_options(export_grid_mapping=12345):
             pass
+
+
+def test_set_options_convention():
+    """Test setting convention through set_options."""
+    # Test default convention (None for CF-first with Zarr fallback)
+    with rioxarray.set_options():
+        assert get_option(CONVENTION) is None
+
+    # Test setting Zarr convention
+    with rioxarray.set_options(convention=Convention.Zarr):
+        assert get_option(CONVENTION) is Convention.Zarr
+
+    # Test setting CF convention explicitly
+    with rioxarray.set_options(convention=Convention.CF):
+        assert get_option(CONVENTION) is Convention.CF
