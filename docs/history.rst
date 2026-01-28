@@ -4,6 +4,8 @@ History
 Latest
 ------
 
+- ENH: Propagate rasterio's meta and profile (#901)
+
 
 0.21.0
 ------
