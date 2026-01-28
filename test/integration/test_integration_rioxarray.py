@@ -7,6 +7,7 @@ from functools import partial
 
 import dask.array
 import numpy
+import numpy as np
 import pytest
 import rasterio
 import xarray
@@ -3358,20 +3359,18 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
 
 
 def test_to_rasterio_dataset():
-    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
-    in_rpc = rioxarray.open_rasterio(in_rpc_path)
-    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
-        in_rpc_path
-    ) as rio_ds:
+    in_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    in_ds = rioxarray.open_rasterio(in_path)
+    with in_ds.rio.to_rasterio_dataset() as riox_ds, rasterio.open(in_path) as rio_ds:
         # object type
         assert isinstance(riox_ds, DatasetReader), "Error in object type"
 
         # metadata vs rioxarray
-        assert in_rpc.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
-        assert in_rpc.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
-        assert in_rpc.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
+        assert in_ds.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
+        assert in_ds.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
+        assert in_ds.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
         assert (
-            in_rpc.rio.transform() == riox_ds.transform
+            in_ds.rio.transform() == riox_ds.transform
         ), "Error in transform vs rio accessor"
         assert riox_ds.profile["driver"] == "GTiff", "Error in driver vs rio accessor"
 
@@ -3413,3 +3412,21 @@ def test_to_rasterio_dataset_rpcs():
         ), "Error in dtype vs rasterio"
         assert rio_ds.transform == riox_ds.transform, "Error in transform vs rasterio"
         assert rio_ds.profile == riox_ds.profile, "Error in driver vs rasterio"
+
+
+def test_meta_profile():
+    in_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    with rasterio.open(in_path) as rio_ds:
+        riox_ds = rioxarray.open_rasterio(in_path)
+        riox_ds_masked = rioxarray.open_rasterio(in_path, mask_and_scale=True)
+
+        # Ensure the nodata is really masked
+        assert riox_ds.dtype == np.int16
+        assert riox_ds_masked.dtype == np.float32
+
+        assert riox_ds.rio.meta() == rio_ds.meta
+        assert riox_ds.rio.profile() == rio_ds.profile
+
+        # Meta should be invariant even if we mask the nodata
+        assert riox_ds_masked.rio.meta() == rio_ds.meta
+        assert riox_ds_masked.rio.profile() == rio_ds.profile
