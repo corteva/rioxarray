@@ -15,11 +15,13 @@ from dask.delayed import Delayed
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from pyproj import CRS as pCRS
+from rasterio import DatasetReader
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.windows import Window
 
 import rioxarray
+from rioxarray._spatial_utils import _generate_spatial_coords, _make_coords
 from rioxarray.exceptions import (
     DimensionMissingCoordinateError,
     MissingCRS,
@@ -28,8 +30,8 @@ from rioxarray.exceptions import (
     OneDimensionalRaster,
     RioXarrayError,
 )
-from rioxarray.rioxarray import _generate_spatial_coords, _make_coords
 from test.conftest import (
+    GDAL_GE_3_11,
     GDAL_GE_361,
     TEST_COMPARE_DATA_DIR,
     TEST_INPUT_DATA_DIR,
@@ -1170,7 +1172,26 @@ def test_reproject__no_nodata_masked(modis_reproject):
         _assert_xarrays_equal(mds_repr, mdc)
 
 
-def test_reproject__gcps_kwargs(tmp_path):
+@pytest.mark.parametrize(
+    "affine_c_param",
+    [
+        pytest.param(
+            115698.25,
+            marks=pytest.mark.skipif(
+                GDAL_GE_3_11,
+                reason="GDAL 3.10 and earlier used METHOD=GCP_POLYNOMIAL by default",
+            ),
+        ),
+        pytest.param(
+            115698.0,
+            marks=pytest.mark.skipif(
+                not GDAL_GE_3_11,
+                reason="GDAL 3.11+ uses METHOD=GCP_HOMOGRAPHY by default if 4 or 5 GCPs (https://github.com/OSGeo/gdal/pull/11949)",
+            ),
+        ),
+    ],
+)
+def test_reproject__gcps_kwargs(tmp_path, affine_c_param):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
         GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
@@ -1203,7 +1224,7 @@ def test_reproject__gcps_kwargs(tmp_path):
             Affine(
                 216.8587081056465,
                 0.0,
-                115698.25,
+                affine_c_param,
                 0.0,
                 -216.8587081056465,
                 2818720.0,
@@ -3222,7 +3243,26 @@ def test_rio_get_gcps(with_z):
         assert gcp.info == gdal_gcp.info
 
 
-def test_reproject__gcps_file(tmp_path):
+@pytest.mark.parametrize(
+    "affine_c_param",
+    [
+        pytest.param(
+            115698.25,
+            marks=pytest.mark.skipif(
+                GDAL_GE_3_11,
+                reason="GDAL 3.10 and earlier used METHOD=GCP_POLYNOMIAL by default",
+            ),
+        ),
+        pytest.param(
+            115698.0,
+            marks=pytest.mark.skipif(
+                not GDAL_GE_3_11,
+                reason="GDAL 3.11+ uses METHOD=GCP_HOMOGRAPHY by default if 4 or 5 GCPs (https://github.com/OSGeo/gdal/pull/11949)",
+            ),
+        ),
+    ],
+)
+def test_reproject__gcps_file(tmp_path, affine_c_param):
     tiffname = tmp_path / "test.tif"
     src_gcps = [
         GroundControlPoint(row=0, col=0, x=156113, y=2818720, z=0),
@@ -3253,7 +3293,7 @@ def test_reproject__gcps_file(tmp_path):
             Affine(
                 216.8587081056465,
                 0.0,
-                115698.25,
+                affine_c_param,
                 0.0,
                 -216.8587081056465,
                 2818720.0,
@@ -3315,3 +3355,61 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
                 2818720.0,
             )
         )
+
+
+def test_to_rasterio_dataset():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
+        in_rpc_path
+    ) as rio_ds:
+        # object type
+        assert isinstance(riox_ds, DatasetReader), "Error in object type"
+
+        # metadata vs rioxarray
+        assert in_rpc.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
+        assert in_rpc.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
+        assert in_rpc.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
+        assert (
+            in_rpc.rio.transform() == riox_ds.transform
+        ), "Error in transform vs rio accessor"
+        assert riox_ds.profile["driver"] == "GTiff", "Error in driver vs rio accessor"
+
+        # metadata vs rioxarray
+        assert rio_ds.crs == riox_ds.crs, "Error in CRS vs rasterio"
+        assert rio_ds.shape == riox_ds.shape, "Error in shape vs rasterio"
+        assert (
+            rio_ds.meta["dtype"] == riox_ds.meta["dtype"]
+        ), "Error in dtype vs rasterio"
+        assert rio_ds.transform == riox_ds.transform, "Error in transform vs rasterio"
+        assert rio_ds.profile == riox_ds.profile, "Error in driver vs rasterio"
+
+
+def test_to_rasterio_dataset_rpcs():
+    in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs.tif")
+    in_rpc = rioxarray.open_rasterio(in_rpc_path)
+    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
+        in_rpc_path
+    ) as rio_ds:
+        # object type
+        assert isinstance(riox_ds, DatasetReader), "Error in object type"
+
+        # metadata vs rioxarray
+        assert in_rpc.rio.get_rpcs() == riox_ds.rpcs, "Error in RPCs vs rio accessor"
+        assert in_rpc.rio.crs == riox_ds.crs, "Error in CRS vs rio accessor"
+        assert in_rpc.rio.shape == riox_ds.shape, "Error in shape vs rio accessor"
+        assert in_rpc.dtype == riox_ds.meta["dtype"], "Error in dtype vs rio accessor"
+        assert (
+            in_rpc.rio.transform() == riox_ds.transform
+        ), "Error in transform vs rio accessor"
+        assert riox_ds.profile["driver"] == "GTiff", "Error in driver vs rio accessor"
+
+        # metadata vs rioxarray
+        assert rio_ds.rpcs == riox_ds.rpcs, "Error in RPCs vs rasterio"
+        assert rio_ds.crs == riox_ds.crs, "Error in CRS vs rasterio"
+        assert rio_ds.shape == riox_ds.shape, "Error in shape vs rasterio"
+        assert (
+            rio_ds.meta["dtype"] == riox_ds.meta["dtype"]
+        ), "Error in dtype vs rasterio"
+        assert rio_ds.transform == riox_ds.transform, "Error in transform vs rasterio"
+        assert rio_ds.profile == riox_ds.profile, "Error in driver vs rasterio"

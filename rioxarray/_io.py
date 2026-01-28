@@ -33,11 +33,13 @@ from xarray.core.dtypes import maybe_promote
 from xarray.core.utils import is_scalar
 from xarray.core.variable import as_variable
 
+from rioxarray._spatial_utils import (
+    FILL_VALUE_NAMES,
+    UNWANTED_RIO_ATTRS,
+    _generate_spatial_coords,
+)
 from rioxarray.exceptions import RioXarrayError
-from rioxarray.rioxarray import _generate_spatial_coords
 
-FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
-UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
@@ -932,7 +934,7 @@ def _prepare_dask(
             previous_chunks=block_shape,
         )
         # xarray wants chunks as a dict rather than a tuple
-        chunks = dict(zip(result.dims, chunks, strict=True))
+        chunks = dict(zip(result.dims, chunks, strict=True))  # type: ignore[arg-type]
 
     token_filename = filename
     if bidx is not None:
@@ -1209,8 +1211,12 @@ def open_rasterio(
         coord_name = "band"
         coords[coord_name] = numpy.asarray(riods.indexes)
 
+    # Handle GCPs and RPCs
     has_gcps = riods.gcps[0]
-    if has_gcps:
+    has_rpcs = riods.rpcs
+
+    # Only parse coordinates in case the array is georeferenced
+    if has_gcps or has_rpcs:
         parse_coordinates = False
 
     # Get geospatial coordinates
@@ -1281,6 +1287,8 @@ def open_rasterio(
         result.rio.write_crs(rio_crs, inplace=True)
     if has_gcps:
         result.rio.write_gcps(*riods.gcps, inplace=True)
+    if has_rpcs:
+        result.rio.write_rpcs(riods.rpcs, inplace=True)
 
     if chunks is not None:
         result = _prepare_dask(

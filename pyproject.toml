@@ -4,7 +4,7 @@ requires = ["setuptools", "wheel"]
 
 [project]
 name = "rioxarray"
-version = "0.20.1.dev0"
+version = "0.21.1.dev0"
 description = "geospatial xarray extension powered by rasterio"
 maintainers = [
     {name = "rioxarray Contributors"},
@@ -39,6 +39,33 @@ dependencies = [
     "xarray>=2024.7.0,<2025.12",
     "pyproj>=3.3",
     "numpy>=2",
+]
+
+[dependency-groups]
+doc = [
+    "sphinx-click",
+    "nbsphinx",
+    "sphinx_rtd_theme",
+]
+test = [
+    "pytest>=3.6",
+    "pytest-cov",
+    "pytest-timeout",
+    "dask",
+    "netcdf4",
+]
+type = [
+    "mypy",
+]
+lint = [
+    "pylint"
+]
+dev = [
+    "pre-commit",
+    {include-group = "doc"},
+    {include-group = "test"},
+    {include-group = "type"},
+    {include-group = "lint"}
 ]
 
 [project.urls]

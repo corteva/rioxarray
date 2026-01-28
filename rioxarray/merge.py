@@ -11,7 +11,7 @@ from rasterio.crs import CRS
 from rasterio.merge import merge as _rio_merge
 from xarray import DataArray, Dataset, IndexVariable
 
-from rioxarray.rioxarray import _get_nonspatial_coords, _make_coords
+from rioxarray._spatial_utils import _get_nonspatial_coords, _make_coords
 
 
 class RasterioDatasetDuck:

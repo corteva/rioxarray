@@ -168,7 +168,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/67311115?v=4",
       "profile": "https://github.com/remi-braun",
       "contributions": [
-        "doc"
+        "doc",
+        "code"
       ]
     },
     {
@@ -444,6 +445,24 @@
       "profile": "https://github.com/trchudley",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "acoque",
+      "name": "acoque",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35691279?v=4",
+      "profile": "https://github.com/acoque",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "martijnvandermarel",
+      "name": "Martijn van der Marel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23376251?v=4",
+      "profile": "https://github.com/martijnvandermarel",
+      "contributions": [
+        "bug"
       ]
     }
   ],

@@ -6,6 +6,18 @@ Latest
 - ENH: Add `convention` option to `set_options()` for future multi-convention support (pull #XXX)
 - REF: Extract CF convention logic to `_convention/cf.py` module (pull #XXX)
 
+
+0.21.0
+------
+- ENH: RPCs: Load and write RPCs (#890)
+- ENH: Add `rio.to_rasterio_dataset` (#894)
+- ENH: Add float16 default nodata (#896)
+- BUG: Convert tuple chunks to dict in `_prepare_dask` to avoid DeprecationWarning (#879)
+- DEP: pin xarray due to GH-xarray-11000 (#881)
+- DOC: Fix grid_mapping location (#876)
+- MNT: Align conda Python version with pre-commit's (#891)
+- MNT: Use dependency_groups (#889, (#893)
+
 0.20.0
 ------
 - DEP: Support Python 3.12-3.14 (#872)

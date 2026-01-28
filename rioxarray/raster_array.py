@@ -12,23 +12,34 @@ datacube is licensed under the Apache License, Version 2.0:
 
 import copy
 import os
-from collections.abc import Hashable, Iterable, Mapping
+from collections.abc import Generator, Hashable, Iterable, Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
 
 import numpy
 import rasterio
-import rasterio.mask
 import rasterio.warp
 import xarray
 from affine import Affine
 from rasterio.dtypes import dtype_rev
 from rasterio.enums import Resampling
-from rasterio.features import geometry_mask
+from rasterio.io import DatasetReader, MemoryFile
 from xarray.backends.file_manager import FileManager
 from xarray.core.dtypes import get_fill_value
 
-from rioxarray._io import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS
+from rioxarray._spatial_utils import (
+    _NODATA_DTYPE_MAP,
+    _add_attrs_proj,
+    _clip_from_disk,
+    _clip_xarray,
+    _convert_str_to_resampling,
+    _generate_attrs,
+    _get_data_var_message,
+    _make_coords,
+    _make_dst_affine,
+    _order_bounds,
+)
 from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import (
     MissingCRS,
@@ -37,212 +48,7 @@ from rioxarray.exceptions import (
     RioXarrayError,
 )
 from rioxarray.raster_writer import RasterioWriter, _ensure_nodata_dtype
-from rioxarray.rioxarray import (
-    XRasterBase,
-    _convert_str_to_resampling,
-    _get_data_var_message,
-    _make_coords,
-    _order_bounds,
-)
-
-# DTYPE TO NODATA MAP
-# Based on: https://github.com/OSGeo/gdal/blob/
-# dee861e7c91c2da7ef8ff849947713e4d9bd115c/
-# swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L61
-# And: https://github.com/rasterio/rasterio/blob/
-# 9e643c3f563a679aa5400d9b1a263df97b34f9e0/rasterio/dtypes.py#L99-L112
-_NODATA_DTYPE_MAP = {
-    1: 255,  # GDT_Byte
-    2: 65535,  # GDT_UInt16
-    3: -32768,  # GDT_Int16
-    4: 4294967295,  # GDT_UInt32
-    5: -2147483648,  # GDT_Int32
-    6: numpy.nan,  # GDT_Float32
-    7: numpy.nan,  # GDT_Float64
-    8: None,  # GDT_CInt16
-    9: None,  # GDT_CInt32
-    10: numpy.nan,  # GDT_CFloat32
-    11: numpy.nan,  # GDT_CFloat64
-    12: 18446744073709551615,  # GDT_UInt64
-    13: -9223372036854775808,  # GDT_Int64
-    14: -128,  # GDT_Int8
-}
-
-
-def _generate_attrs(
-    *, src_data_array: xarray.DataArray, dst_nodata: Optional[float]
-) -> dict[str, Any]:
-    # add original attributes
-    new_attrs = copy.deepcopy(src_data_array.attrs)
-    # remove all nodata information
-    for unwanted_attr in FILL_VALUE_NAMES + UNWANTED_RIO_ATTRS:
-        new_attrs.pop(unwanted_attr, None)
-
-    # add nodata information
-    fill_value = (
-        src_data_array.rio.nodata
-        if src_data_array.rio.nodata is not None
-        else dst_nodata
-    )
-    if src_data_array.rio.encoded_nodata is None and fill_value is not None:
-        new_attrs["_FillValue"] = fill_value
-
-    return new_attrs
-
-
-def _add_attrs_proj(
-    *, new_data_array: xarray.DataArray, src_data_array: xarray.DataArray
-) -> xarray.DataArray:
-    """Make sure attributes and projection correct"""
-    # make sure dimension information is preserved
-    if new_data_array.rio._x_dim is None:
-        new_data_array.rio._x_dim = src_data_array.rio.x_dim
-    if new_data_array.rio._y_dim is None:
-        new_data_array.rio._y_dim = src_data_array.rio.y_dim
-
-    # make sure attributes preserved
-    new_attrs = _generate_attrs(src_data_array=src_data_array, dst_nodata=None)
-    # remove fill value if it already exists in the encoding
-    # this is for data arrays pulling the encoding from a
-    # source data array instead of being generated anew.
-    if "_FillValue" in new_data_array.encoding:
-        new_attrs.pop("_FillValue", None)
-
-    new_data_array.rio.set_attrs(new_attrs, inplace=True)
-
-    # make sure projection added
-    new_data_array.rio.write_grid_mapping(src_data_array.rio.grid_mapping, inplace=True)
-    new_data_array.rio.write_crs(src_data_array.rio.crs, inplace=True)
-    new_data_array.rio.write_coordinate_system(inplace=True)
-    new_data_array.rio.write_transform(inplace=True)
-    # make sure encoding added
-    new_data_array.encoding = src_data_array.encoding.copy()
-    return new_data_array
-
-
-def _make_dst_affine(
-    *,
-    src_data_array: xarray.DataArray,
-    src_crs: rasterio.crs.CRS,
-    dst_crs: rasterio.crs.CRS,
-    dst_resolution: Optional[Union[float, tuple[float, float]]] = None,
-    dst_shape: Optional[tuple[float, float]] = None,
-    **kwargs,
-):
-    """Determine the affine of the new projected `xarray.DataArray`"""
-    src_bounds = ()
-    if (
-        "gcps" not in kwargs
-        and "rpcs" not in kwargs
-        and "src_geoloc_array" not in kwargs
-    ):
-        src_bounds = src_data_array.rio.bounds()
-    src_height, src_width = src_data_array.rio.shape
-    dst_height, dst_width = dst_shape if dst_shape is not None else (None, None)
-    # pylint: disable=isinstance-second-argument-not-valid-type
-    if isinstance(dst_resolution, Iterable):
-        dst_resolution = tuple(abs(res_val) for res_val in dst_resolution)  # type: ignore
-    elif dst_resolution is not None:
-        dst_resolution = abs(dst_resolution)  # type: ignore
-
-    for key, value in (
-        ("resolution", dst_resolution),
-        ("dst_height", dst_height),
-        ("dst_width", dst_width),
-    ):
-        if value is not None:
-            kwargs[key] = value
-    dst_affine, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-        src_crs,
-        dst_crs,
-        src_width,
-        src_height,
-        *src_bounds,
-        **kwargs,
-    )
-    return dst_affine, dst_width, dst_height
-
-
-def _clip_from_disk(
-    xds: xarray.DataArray,
-    *,
-    geometries: Iterable,
-    all_touched: bool,
-    drop: bool,
-    invert: bool,
-) -> Optional[xarray.DataArray]:
-    """
-    clip from disk if the file object is available
-    """
-    try:
-        out_image, out_transform = rasterio.mask.mask(
-            xds.rio._manager.acquire(),
-            geometries,
-            all_touched=all_touched,
-            invert=invert,
-            crop=drop,
-        )
-        if xds.rio.encoded_nodata is not None and not numpy.isnan(
-            xds.rio.encoded_nodata
-        ):
-            out_image = out_image.astype(numpy.float64)
-            out_image[out_image == xds.rio.encoded_nodata] = numpy.nan
-
-        height, width = out_image.shape[-2:]
-        cropped_ds = xarray.DataArray(
-            name=xds.name,
-            data=out_image,
-            coords=_make_coords(
-                src_data_array=xds,
-                dst_affine=out_transform,
-                dst_width=width,
-                dst_height=height,
-            ),
-            dims=xds.dims,
-            attrs=xds.attrs,
-        )
-        cropped_ds.encoding = xds.encoding
-        return cropped_ds
-    except AttributeError:
-        return None
-
-
-def _clip_xarray(
-    xds: xarray.DataArray,
-    *,
-    geometries: Iterable,
-    all_touched: bool,
-    drop: bool,
-    invert: bool,
-) -> xarray.DataArray:
-    """
-    clip the xarray DataArray
-    """
-    clip_mask_arr = geometry_mask(
-        geometries=geometries,
-        out_shape=(int(xds.rio.height), int(xds.rio.width)),
-        transform=xds.rio.transform(recalc=True),
-        invert=not invert,
-        all_touched=all_touched,
-    )
-    clip_mask_xray = xarray.DataArray(
-        clip_mask_arr,
-        dims=(xds.rio.y_dim, xds.rio.x_dim),
-    )
-    cropped_ds = xds.where(clip_mask_xray)
-    if drop:
-        cropped_ds.rio.set_spatial_dims(
-            x_dim=xds.rio.x_dim, y_dim=xds.rio.y_dim, inplace=True
-        )
-        cropped_ds = cropped_ds.rio.isel_window(
-            rasterio.windows.get_data_window(
-                numpy.ma.masked_array(clip_mask_arr, ~clip_mask_arr)
-            )
-        )
-    if xds.rio.nodata is not None and not numpy.isnan(xds.rio.nodata):
-        cropped_ds = cropped_ds.fillna(xds.rio.nodata)
-
-    return cropped_ds.astype(xds.dtype)
+from rioxarray.rioxarray import XRasterBase
 
 
 @xarray.register_dataarray_accessor("rio")
@@ -458,37 +264,26 @@ class RasterArray(XRasterBase):
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
                 f"{_get_data_var_message(self._obj)}"
             )
-        gcps = self.get_gcps()
-        if gcps:
-            kwargs.setdefault("gcps", gcps)
 
-        use_affine = (
-            "gcps" not in kwargs
-            and "rpcs" not in kwargs
-            and "src_geoloc_array" not in kwargs
-        )
-        src_affine = None if not use_affine else self.transform(recalc=True)
-        if transform is None:
-            dst_affine, dst_width, dst_height = _make_dst_affine(
-                src_data_array=self._obj,
-                src_crs=self.crs,
-                dst_crs=dst_crs,
-                dst_resolution=resolution,
-                dst_shape=shape,
-                **kwargs,
-            )
-        else:
-            dst_affine = transform
-            if shape is not None:
-                dst_height, dst_width = shape
-            else:
-                dst_height, dst_width = self.shape
+        kwargs = self._reproj_update_kwargs(**kwargs)
+
         if isinstance(resampling, str):
             resampling = _convert_str_to_resampling(resampling)
 
-        dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
+        # Get source data from inputs
+        src_affine, use_affine = self._reproj_get_src(**kwargs)
 
-        dst_nodata = self._get_dst_nodata(nodata)
+        # Get destination data from inputs
+        dst_data, dst_height, dst_width, dst_affine, dst_nodata = self._reproj_get_dst(
+            dst_crs=dst_crs,
+            resolution=resolution,
+            shape=shape,
+            transform=transform,
+            nodata=nodata,
+            **kwargs,
+        )
+
+        # Do the reprojection using rasterio
         rasterio.warp.reproject(
             source=self._obj.values,
             destination=dst_data,
@@ -501,8 +296,33 @@ class RasterArray(XRasterBase):
             resampling=resampling,
             **kwargs,
         )
+
+        # Convert the ndarray to a xarray
+        return self._reproj_convert_to_xarray(
+            dst_data=dst_data,
+            dst_nodata=dst_nodata,
+            dst_affine=dst_affine,
+            dst_width=dst_width,
+            dst_height=dst_height,
+            dst_crs=dst_crs,
+            use_affine=use_affine,
+        )
+
+    def _reproj_convert_to_xarray(
+        self,
+        *,
+        dst_data: numpy.ndarray,
+        dst_nodata: float,
+        dst_affine: Affine,
+        dst_width: int,
+        dst_height: int,
+        dst_crs: Any,
+        use_affine: bool,
+    ):
+        """Helper function creating a proper xarray (with correct attributes, etc) from the reprojection output"""
         # add necessary attributes
         new_attrs = _generate_attrs(src_data_array=self._obj, dst_nodata=dst_nodata)
+
         # make sure dimensions with coordinates renamed to x,y
         dst_dims: list[Hashable] = []
         for dim in self._obj.dims:
@@ -529,7 +349,62 @@ class RasterArray(XRasterBase):
         xda.rio.write_transform(dst_affine, inplace=True)
         xda.rio.write_crs(dst_crs, inplace=True)
         xda.rio.write_coordinate_system(inplace=True)
+
         return xda
+
+    def _reproj_update_kwargs(self, **kwargs):
+        """Helper function updating kwargs from internal members"""
+        gcps = self.get_gcps()
+        if gcps:
+            kwargs.setdefault("gcps", gcps)
+
+        rpcs = self.get_rpcs()
+        if rpcs:
+            kwargs.setdefault("rpcs", rpcs)
+
+        return kwargs
+
+    def _reproj_get_src(self, **kwargs):
+        """Helper function creating source data from inputs"""
+        use_affine = (
+            "gcps" not in kwargs
+            and "rpcs" not in kwargs
+            and "src_geoloc_array" not in kwargs
+        )
+        src_affine = None if not use_affine else self.transform(recalc=True)
+        return src_affine, use_affine
+
+    def _reproj_get_dst(
+        self,
+        *,
+        dst_crs: Any,
+        resolution: Optional[Union[float, tuple[float, float]]] = None,
+        shape: Optional[tuple[int, int]] = None,
+        transform: Optional[Affine] = None,
+        nodata: Optional[float] = None,
+        **kwargs,
+    ):
+        """Helper function creating destination data from inputs"""
+        if transform is None:
+            dst_affine, dst_width, dst_height = _make_dst_affine(
+                src_data_array=self._obj,
+                src_crs=self.crs,
+                dst_crs=dst_crs,
+                dst_resolution=resolution,
+                dst_shape=shape,
+                **kwargs,
+            )
+        else:
+            dst_affine = transform
+            if shape is not None:
+                dst_height, dst_width = shape
+            else:
+                dst_height, dst_width = self.shape
+
+        dst_data = self._create_dst_data(dst_height=dst_height, dst_width=dst_width)
+        dst_nodata = self._get_dst_nodata(nodata)
+
+        return dst_data, dst_height, dst_width, dst_affine, dst_nodata
 
     def _get_dst_nodata(self, nodata: Optional[float]) -> Optional[float]:
         default_nodata = (
@@ -1194,9 +1069,33 @@ class RasterArray(XRasterBase):
             crs=self.crs,
             transform=self.transform(recalc=recalc_transform),
             gcps=self.get_gcps(),
+            rpcs=self.get_rpcs(),
             nodata=rio_nodata,
             windowed=windowed,
             lock=lock,
             compute=compute,
             **out_profile,
         )
+
+    @contextmanager
+    def to_rasterio_dataset(self) -> Generator[DatasetReader, None, None]:
+        """
+        Return the xarray.Dataset or xarray.DataArray as a rasterio.Dataset.
+
+        As rioxarray is able to ingest a rasterio.Dataset, this function is its counterpart.
+
+        To be used as a context manager.
+
+        .. versionadded:: 0.21
+
+        Example
+        -------
+
+        >>> with xds.to_rasterio_dataset() as rio_ds:
+        >>>    rio_ds.count
+
+        """
+        with MemoryFile() as memfile:
+            self.to_raster(memfile.name)
+            with memfile.open() as src_ds:
+                yield src_ds

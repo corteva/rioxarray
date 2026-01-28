@@ -8,7 +8,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 
 import rioxarray
-from rioxarray.raster_array import UNWANTED_RIO_ATTRS
+from rioxarray._spatial_utils import UNWANTED_RIO_ATTRS
 
 xarray.set_options(warn_for_unclosed_files=True)
 
@@ -18,6 +18,7 @@ TEST_COMPARE_DATA_DIR = os.path.join(TEST_DATA_DIR, "compare")
 GDAL_GE_36 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.0")
 GDAL_GE_361 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.1")
 GDAL_GE_364 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.4")
+GDAL_GE_3_11 = version.parse(rasterio.__gdal_version__) >= version.parse("3.11.0")
 
 
 # xarray.testing.assert_equal(input_xarray, compare_xarray)
