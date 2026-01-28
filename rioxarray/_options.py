@@ -57,7 +57,7 @@ class set_options:  # pylint: disable=invalid-name
 
     .. versionadded:: 0.3.0
     .. versionadded:: 0.7.0 skip_missing_spatial_dims
-    .. versionadded:: 0.18.0 convention
+    .. versionadded:: 0.22.0 convention
 
     Parameters
     ----------
