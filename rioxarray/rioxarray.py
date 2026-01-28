@@ -11,7 +11,6 @@ from collections.abc import Hashable, Iterable
 from typing import Any, Literal, Optional, Union
 
 import numpy
-import pyproj
 import rasterio.warp
 import rasterio.windows
 import xarray
@@ -22,8 +21,8 @@ from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.rpc import RPC
 
-from rioxarray._convention import cf
-from rioxarray._options import CONVENTION, EXPORT_GRID_MAPPING, get_option
+from rioxarray._convention import cf, zarr
+from rioxarray._options import CONVENTION, get_option
 from rioxarray._spatial_utils import (  # noqa: F401, pylint: disable=unused-import
     DEFAULT_GRID_MAP,
     _affine_has_rotation,
@@ -49,6 +48,7 @@ from rioxarray.exceptions import (
     TooManyDimensions,
 )
 
+
 class XRasterBase:
     """This is the base class for the GIS extensions for xarray"""
 
@@ -60,13 +60,23 @@ class XRasterBase:
         self._y_dim: Optional[Hashable] = None
 
         # Read spatial dimensions using the global convention setting
+        # Both conventions are tried regardless of setting (priority changes only)
         convention = get_option(CONVENTION)
 
-        if convention is Convention.CF or convention is None:
-            # Use CF convention logic for dimension detection
+        spatial_dims = None
+        if convention is Convention.Zarr:
+            # Try Zarr first, then CF
+            spatial_dims = zarr.read_spatial_dimensions(self._obj)
+            if spatial_dims is None:
+                spatial_dims = cf.read_spatial_dimensions(self._obj)
+        else:
+            # Default: Try CF first, then Zarr
             spatial_dims = cf.read_spatial_dimensions(self._obj)
-            if spatial_dims is not None:
-                self._y_dim, self._x_dim = spatial_dims
+            if spatial_dims is None:
+                spatial_dims = zarr.read_spatial_dimensions(self._obj)
+
+        if spatial_dims is not None:
+            self._y_dim, self._x_dim = spatial_dims
 
         # properties
         self._count: Optional[int] = None
@@ -85,12 +95,20 @@ class XRasterBase:
             return None if self._crs is False else self._crs
 
         # Read using global convention setting
+        # Both conventions are tried regardless of setting (priority changes only)
         convention = get_option(CONVENTION)
 
         parsed_crs = None
-        if convention is Convention.CF or convention is None:
-            # Use CF convention for CRS reading
+        if convention is Convention.Zarr:
+            # Try Zarr first, then CF
+            parsed_crs = zarr.read_crs(self._obj)
+            if parsed_crs is None:
+                parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+        else:
+            # Default: Try CF first, then Zarr
             parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+            if parsed_crs is None:
+                parsed_crs = zarr.read_crs(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -366,14 +384,22 @@ class XRasterBase:
     def _cached_transform(self) -> Optional[Affine]:
         """
         Get the transform using the global convention setting.
+        Both conventions are tried regardless of setting (priority changes only).
         """
-        # Read using the global convention setting
         convention = get_option(CONVENTION)
 
-        if convention is Convention.CF or convention is None:
-            return cf.read_transform(self._obj, self.grid_mapping)
-
-        return None
+        if convention is Convention.Zarr:
+            # Try Zarr first, then CF
+            transform = zarr.read_transform(self._obj)
+            if transform is None:
+                transform = cf.read_transform(self._obj, self.grid_mapping)
+            return transform
+        else:
+            # Default: Try CF first, then Zarr
+            transform = cf.read_transform(self._obj, self.grid_mapping)
+            if transform is None:
+                transform = zarr.read_transform(self._obj)
+            return transform
 
     def write_transform(
         self,

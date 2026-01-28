@@ -3,8 +3,9 @@ History
 
 Latest
 ------
-- ENH: Add `convention` option to `set_options()` for future multi-convention support (pull #XXX)
-- REF: Extract CF convention logic to `_convention/cf.py` module (pull #XXX)
+- ENH: Add `convention` option to `set_options()` for future multi-convention support (pull #899)
+- ENH: Add read support for Zarr spatial and proj conventions (pull #XXX)
+- REF: Extract CF convention logic to `_convention/cf.py` module (pull #899)
 
 
 0.21.0
