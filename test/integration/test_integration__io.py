@@ -281,8 +281,12 @@ def test_open_group_load_attrs(open_rasterio):
 
 
 def test_open_rasterio_mask_chunk_clip():
+    path = os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
+    with rasterio.open(path) as src:
+        profile = src.profiile
+
     with rioxarray.open_rasterio(
-        os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif"),
+        path,
         masked=True,
         chunks=True,
         default_name="dem",
@@ -302,6 +306,7 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
+            "profile": profile,
         }
         attrs = dict(xdi.attrs)
         assert_almost_equal(
@@ -345,6 +350,7 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
+            "profile": profile,
         }
 
         # test dataset
@@ -360,6 +366,7 @@ def test_open_rasterio_mask_chunk_clip():
             "grid_mapping": "spatial_ref",
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
+            "profile": profile,
         }
 
 
@@ -1132,6 +1139,9 @@ def test_open_cog(lock):
 
 def test_mask_and_scale(open_rasterio):
     test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    with rasterio.open(test_file) as src:
+        profile = src.profile
+
     with open_rasterio(test_file, mask_and_scale=True) as rds:
         rds = _ensure_dataset(rds)
         assert numpy.nanmin(rds.air_temperature.values) == numpy.float32(248.7)
@@ -1147,6 +1157,7 @@ def test_mask_and_scale(open_rasterio):
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
             "preferred_chunks": dict(band=1, x=1386, y=585),
+            "profile": profile,
         }
         attrs = rds.air_temperature.attrs
         assert "_Unsigned" not in attrs
@@ -1156,8 +1167,12 @@ def test_mask_and_scale(open_rasterio):
 
 
 def test_no_mask_and_scale(open_rasterio):
+    test_file = os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")
+    with rasterio.open(test_file) as src:
+        profile = src.profile
+
     with open_rasterio(
-        os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc"),
+        test_file,
         mask_and_scale=False,
         masked=True,
     ) as rds:
@@ -1173,6 +1188,7 @@ def test_no_mask_and_scale(open_rasterio):
             "dtype": "uint16",
             "rasterio_dtype": "uint16",
             "preferred_chunks": {"band": 1, "x": 1386, "y": 585},
+            "profile": profile,
         }
         attrs = rds.air_temperature.attrs
         assert attrs["_Unsigned"] == "true"

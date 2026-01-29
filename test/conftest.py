@@ -21,9 +21,8 @@ GDAL_GE_364 = version.parse(rasterio.__gdal_version__) >= version.parse("3.6.4")
 GDAL_GE_3_11 = version.parse(rasterio.__gdal_version__) >= version.parse("3.11.0")
 
 
-# xarray.testing.assert_equal(input_xarray, compare_xarray)
 def _assert_attrs_equal(input_xr, compare_xr, decimal_precision):
-    """check attrubutes that matter"""
+    """check attributes that matter"""
     for attr in compare_xr.attrs:
         if attr == "transform":
             assert_almost_equal(
