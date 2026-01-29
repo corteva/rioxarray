@@ -283,7 +283,7 @@ def test_open_group_load_attrs(open_rasterio):
 def test_open_rasterio_mask_chunk_clip():
     path = os.path.join(TEST_COMPARE_DATA_DIR, "small_dem_3m_merged.tif")
     with rasterio.open(path) as src:
-        profile = src.profiile
+        profile = src.profile
 
     with rioxarray.open_rasterio(
         path,
