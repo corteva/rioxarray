@@ -1,6 +1,5 @@
 """Unit tests for the CF convention module."""
 import numpy as np
-import pytest
 import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
@@ -174,4 +173,7 @@ def test_write_transform():
 
     assert "spatial_ref" in result.coords
     assert "GeoTransform" in result.coords["spatial_ref"].attrs
-    assert result.coords["spatial_ref"].attrs["GeoTransform"] == "0.0 1.0 0.0 10.0 0.0 -1.0"
+    assert (
+        result.coords["spatial_ref"].attrs["GeoTransform"]
+        == "0.0 1.0 0.0 10.0 0.0 -1.0"
+    )

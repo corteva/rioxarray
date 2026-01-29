@@ -21,8 +21,13 @@ from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.rpc import RPC
 
-from rioxarray._convention import cf
-from rioxarray._options import CONVENTION, EXPORT_GRID_MAPPING, get_option
+from rioxarray._convention import (
+    cf,
+    read_crs_auto,
+    read_spatial_dimensions_auto,
+    read_transform_auto,
+)
+from rioxarray._options import CONVENTION, get_option
 from rioxarray._spatial_utils import (  # noqa: F401, pylint: disable=unused-import
     DEFAULT_GRID_MAP,
     _affine_has_rotation,
@@ -48,6 +53,7 @@ from rioxarray.exceptions import (
     TooManyDimensions,
 )
 
+
 class XRasterBase:
     """This is the base class for the GIS extensions for xarray"""
 
@@ -58,14 +64,10 @@ class XRasterBase:
         self._x_dim: Optional[Hashable] = None
         self._y_dim: Optional[Hashable] = None
 
-        # Read spatial dimensions using the global convention setting
-        convention = get_option(CONVENTION)
-
-        if convention is Convention.CF or convention is None:
-            # Use CF convention logic for dimension detection
-            spatial_dims = cf.read_spatial_dimensions(self._obj)
-            if spatial_dims is not None:
-                self._y_dim, self._x_dim = spatial_dims
+        # Auto-detect spatial dimensions from any supported convention
+        spatial_dims = read_spatial_dimensions_auto(self._obj)
+        if spatial_dims is not None:
+            self._y_dim, self._x_dim = spatial_dims
 
         # properties
         self._count: Optional[int] = None
@@ -83,13 +85,8 @@ class XRasterBase:
         if self._crs is not None:
             return None if self._crs is False else self._crs
 
-        # Read using global convention setting
-        convention = get_option(CONVENTION)
-
-        parsed_crs = None
-        if convention is Convention.CF or convention is None:
-            # Use CF convention for CRS reading
-            parsed_crs = cf.read_crs(self._obj, self.grid_mapping)
+        # Auto-detect CRS from any supported convention
+        parsed_crs = read_crs_auto(self._obj, grid_mapping=self.grid_mapping)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -364,15 +361,9 @@ class XRasterBase:
 
     def _cached_transform(self) -> Optional[Affine]:
         """
-        Get the transform using the global convention setting.
+        Get the transform by auto-detecting from any supported convention.
         """
-        # Read using the global convention setting
-        convention = get_option(CONVENTION)
-
-        if convention is Convention.CF or convention is None:
-            return cf.read_transform(self._obj, self.grid_mapping)
-
-        return None
+        return read_transform_auto(self._obj, grid_mapping=self.grid_mapping)
 
     def write_transform(
         self,
