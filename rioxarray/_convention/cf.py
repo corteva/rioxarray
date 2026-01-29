@@ -92,14 +92,10 @@ def read_crs(
             except (KeyError, pyproj.exceptions.CRSError):
                 pass
         except KeyError:
-            # grid_mapping coordinate doesn't exist, fall through to attrs check
+            # grid_mapping coordinate doesn't exist
             pass
 
-    # Fallback: look in attrs for 'crs'
-    try:
-        return crs_from_user_input(obj.attrs["crs"])
-    except KeyError:
-        return None
+    return None
 
 
 def read_transform(
@@ -131,12 +127,6 @@ def read_transform(
             return Affine.from_gdal(*transform.tolist())
         except KeyError:
             pass
-
-    # Fallback: look in attrs for 'transform'
-    try:
-        return Affine(*obj.attrs["transform"][:6])
-    except KeyError:
-        pass
 
     return None
 
@@ -248,9 +238,6 @@ def write_crs(
         )
     obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
 
-    # Remove old crs if exists
-    obj_out.attrs.pop("crs", None)
-
     return obj_out
 
 
@@ -280,9 +267,6 @@ def write_transform(
         Object with transform written
     """
     obj_out = obj if inplace else obj.copy(deep=True)
-
-    # Delete the old attribute to prevent confusion
-    obj_out.attrs.pop("transform", None)
 
     try:
         grid_map_attrs = obj_out.coords[grid_mapping_name].attrs.copy()

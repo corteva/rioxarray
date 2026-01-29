@@ -11,10 +11,11 @@ import xarray
 from affine import Affine
 
 from rioxarray._convention import cf
+from rioxarray.crs import crs_from_user_input
 
 
 class Convention(Protocol):
-    """Protocol defining the interface for reading geospatial metadata from conventions."""
+    """Protocol defining the interface for convention modules."""
 
     @staticmethod
     def read_crs(
@@ -37,10 +38,51 @@ class Convention(Protocol):
         """Read spatial dimensions (y_dim, x_dim) from the object using this convention."""
         ...
 
+    @staticmethod
+    def write_crs(
+        obj: Union[xarray.Dataset, xarray.DataArray],
+        crs: rasterio.crs.CRS,
+        grid_mapping_name: str,
+        inplace: bool = True,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
+        """Write CRS to the object using this convention."""
+        ...
+
+    @staticmethod
+    def write_transform(
+        obj: Union[xarray.Dataset, xarray.DataArray],
+        transform: Affine,
+        grid_mapping_name: str,
+        inplace: bool = True,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
+        """Write transform to the object using this convention."""
+        ...
+
 
 # List of convention modules in order of priority for reading
-# CF convention is tried first
-_READER_MODULES: List[ConventionReader] = [cf]
+# CF convention is tried first as it's the most common
+_CONVENTION_MODULES: List[Convention] = [cf]
+
+
+def _get_convention(convention) -> Convention:
+    """
+    Get the convention module for writing.
+
+    Parameters
+    ----------
+    convention : Convention enum value
+        The convention to use
+
+    Returns
+    -------
+    Convention module
+        The module implementing the convention
+    """
+    from rioxarray.enum import Convention as ConventionEnum
+
+    if convention is ConventionEnum.CF:
+        return cf
+    raise ValueError(f"Unsupported convention: {convention}")
 
 
 def read_crs_auto(
@@ -62,10 +104,17 @@ def read_crs_auto(
     rasterio.crs.CRS or None
         CRS object, or None if not found in any convention
     """
-    for reader in _READER_MODULES:
+    for reader in _CONVENTION_MODULES:
         result = reader.read_crs(obj, grid_mapping=grid_mapping)
         if result is not None:
             return result
+
+    # Legacy fallback: look in attrs for 'crs' (not part of any convention)
+    try:
+        return crs_from_user_input(obj.attrs["crs"])
+    except KeyError:
+        pass
+
     return None
 
 
@@ -88,10 +137,17 @@ def read_transform_auto(
     affine.Affine or None
         Transform object, or None if not found in any convention
     """
-    for reader in _READER_MODULES:
+    for reader in _CONVENTION_MODULES:
         result = reader.read_transform(obj, grid_mapping=grid_mapping)
         if result is not None:
             return result
+
+    # Legacy fallback: look in attrs for 'transform' (not part of any convention)
+    try:
+        return Affine(*obj.attrs["transform"][:6])
+    except KeyError:
+        pass
+
     return None
 
 
@@ -111,7 +167,7 @@ def read_spatial_dimensions_auto(
     tuple of (y_dim, x_dim) or None
         Tuple of dimension names, or None if not found in any convention
     """
-    for reader in _READER_MODULES:
+    for reader in _CONVENTION_MODULES:
         result = reader.read_spatial_dimensions(obj)
         if result is not None:
             return result

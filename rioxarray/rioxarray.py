@@ -22,7 +22,7 @@ from rasterio.crs import CRS
 from rasterio.rpc import RPC
 
 from rioxarray._convention import (
-    cf,
+    _get_convention,
     read_crs_auto,
     read_spatial_dimensions_auto,
     read_transform_auto,
@@ -301,21 +301,24 @@ class XRasterBase:
         if convention is None:
             convention = get_option(CONVENTION) or Convention.CF
 
-        if convention is Convention.CF:
-            grid_mapping_name = (
-                self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-            )
-            data_obj = cf.write_crs(
-                data_obj,
-                data_obj.rio.crs,
-                grid_mapping_name,
-                inplace=True,
-            )
-            return data_obj.rio.write_grid_mapping(
-                grid_mapping_name=grid_mapping_name, inplace=True
-            )
-        else:
-            raise ValueError(f"Unsupported convention: {convention}")
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
+
+        # Remove legacy crs attr (not part of any convention)
+        data_obj.attrs.pop("crs", None)
+
+        # Use the convention module to write CRS
+        convention_module = _get_convention(convention)
+        data_obj = convention_module.write_crs(
+            data_obj,
+            data_obj.rio.crs,
+            grid_mapping_name,
+            inplace=True,
+        )
+        return data_obj.rio.write_grid_mapping(
+            grid_mapping_name=grid_mapping_name, inplace=True
+        )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
@@ -405,21 +408,24 @@ class XRasterBase:
         if convention is None:
             convention = get_option(CONVENTION) or Convention.CF
 
-        if convention is Convention.CF:
-            grid_mapping_name = (
-                self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-            )
-            data_obj = cf.write_transform(
-                data_obj,
-                transform,
-                grid_mapping_name,
-                inplace=True,
-            )
-            return data_obj.rio.write_grid_mapping(
-                grid_mapping_name=grid_mapping_name, inplace=True
-            )
-        else:
-            raise ValueError(f"Unsupported convention: {convention}")
+        grid_mapping_name = (
+            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
+        )
+
+        # Remove legacy transform attr (not part of any convention)
+        data_obj.attrs.pop("transform", None)
+
+        # Use the convention module to write transform
+        convention_module = _get_convention(convention)
+        data_obj = convention_module.write_transform(
+            data_obj,
+            transform,
+            grid_mapping_name,
+            inplace=True,
+        )
+        return data_obj.rio.write_grid_mapping(
+            grid_mapping_name=grid_mapping_name, inplace=True
+        )
 
     def transform(self, recalc: bool = False) -> Affine:
         """

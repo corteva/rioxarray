@@ -4,7 +4,7 @@ import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
 
-from rioxarray._convention import cf
+from rioxarray._convention import cf, read_crs_auto, read_transform_auto
 
 
 def test_read_crs__from_grid_mapping_spatial_ref():
@@ -29,28 +29,41 @@ def test_read_crs__from_grid_mapping_crs_wkt():
     assert crs == CRS.from_epsg(4326)
 
 
-def test_read_crs__from_attrs():
-    """Test reading CRS from object's attrs."""
-    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
-    data.attrs["crs"] = "EPSG:4326"
+def test_read_crs__from_legacy_attrs():
+    """Test reading CRS from object's attrs (legacy, not CF convention).
 
-    crs = cf.read_crs(data)
-    assert crs is not None
-    assert crs == CRS.from_epsg(4326)
-
-
-def test_read_crs__from_attrs_with_missing_grid_mapping():
-    """Test reading CRS from attrs when grid_mapping is specified but doesn't exist.
-
-    This tests a common case where rioxarray's grid_mapping property returns
-    "spatial_ref" as a default, but the coordinate doesn't actually exist.
-    The CRS should still be found in the object's attrs.
+    The 'crs' attribute is not part of CF convention but is supported
+    for backwards compatibility via the auto-detect method.
     """
     data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
     data.attrs["crs"] = "EPSG:4326"
 
-    # Pass grid_mapping that doesn't exist as a coordinate
+    # CF convention should NOT find this
+    crs = cf.read_crs(data)
+    assert crs is None
+
+    # Auto-detect should find it
+    crs = read_crs_auto(data)
+    assert crs is not None
+    assert crs == CRS.from_epsg(4326)
+
+
+def test_read_crs__from_legacy_attrs_with_missing_grid_mapping():
+    """Test reading CRS from attrs when grid_mapping doesn't exist.
+
+    This tests a common case where rioxarray's grid_mapping property returns
+    "spatial_ref" as a default, but the coordinate doesn't actually exist.
+    The CRS should still be found via auto-detect.
+    """
+    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
+    data.attrs["crs"] = "EPSG:4326"
+
+    # CF convention should NOT find this
     crs = cf.read_crs(data, "spatial_ref")
+    assert crs is None
+
+    # Auto-detect should find it
+    crs = read_crs_auto(data, "spatial_ref")
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
 
@@ -75,13 +88,22 @@ def test_read_transform__from_geotransform():
     assert transform == Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
 
-def test_read_transform__from_attrs():
-    """Test reading transform from object's attrs."""
+def test_read_transform__from_legacy_attrs():
+    """Test reading transform from object's attrs (legacy, not CF convention).
+
+    The 'transform' attribute is not part of CF convention but is supported
+    for backwards compatibility via the auto-detect method.
+    """
     data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
     # Transform stored as list in attrs
     data.attrs["transform"] = [1.0, 0.0, 0.0, 0.0, -1.0, 10.0]
 
+    # CF convention should NOT find this
     transform = cf.read_transform(data)
+    assert transform is None
+
+    # Auto-detect should find it
+    transform = read_transform_auto(data)
     assert transform is not None
     assert transform == Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
