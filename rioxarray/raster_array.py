@@ -1130,13 +1130,11 @@ class RasterArray(XRasterBase):
 
         """
         profile = self._obj.encoding.get("profile")
-        if profile:
-            return profile
-        else:
+        if not profile:
             source = self._obj.encoding.get("source")
             if source:
                 with rasterio.open(source) as src:
-                    return src.profile
+                    profile = src.profile
             else:
                 try:
                     pref_chunks = self._obj.encoding["preferred_chunks"]
@@ -1146,24 +1144,24 @@ class RasterArray(XRasterBase):
                     blockxsize = None
                     blockysize = None
 
-            profile = {
-                "count": self.count,
-                "crs": self.crs,
-                "dtype": self._obj.encoding.get("rasterio_dtype"),
-                "height": self.height,
-                "nodata": self.encoded_nodata
-                if self.encoded_nodata is not None
-                else self.nodata,
-                "transform": self.transform(),
-                "width": self.width,
-                "blockxsize": blockxsize,
-                "blockysize": blockysize,
-                "driver": None,  # cannot be recuperated
-                "compress": None,  # cannot be recuperated
-                "interleave": None,  # cannot be recuperated
-                "tiled": None,  # cannot be recuperated
-            }
-            return profile
+                profile = {
+                    "count": self.count,
+                    "crs": self.crs,
+                    "dtype": self._obj.encoding.get("rasterio_dtype"),
+                    "height": self.height,
+                    "nodata": self.encoded_nodata
+                    if self.encoded_nodata is not None
+                    else self.nodata,
+                    "transform": self.transform(),
+                    "width": self.width,
+                    "blockxsize": blockxsize,
+                    "blockysize": blockysize,
+                    "driver": None,  # cannot be recuperated
+                    "compress": None,  # cannot be recuperated
+                    "interleave": None,  # cannot be recuperated
+                    "tiled": None,  # cannot be recuperated
+                }
+        return profile
 
     def meta(self) -> dict:
         """
