@@ -699,6 +699,10 @@ def _get_rasterio_attrs(riods: RasterioReader):
         else:
             attrs["units"] = riods.units
 
+    # Store these dicts for compatibility with rasterio
+    attrs["meta"] = riods.meta
+    attrs["profile"] = riods.profile
+
     return attrs
 
 

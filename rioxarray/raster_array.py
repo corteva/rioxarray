@@ -1126,8 +1126,7 @@ class RasterArray(XRasterBase):
          'width': 500}
 
         """
-        with self.to_rasterio_dataset() as rio_ds:
-            return rio_ds.profile
+        return self._obj.attrs.get("profile")
 
     def meta(self) -> dict:
         """
@@ -1149,5 +1148,4 @@ class RasterArray(XRasterBase):
                0.0, -300.0, 2714805.0),
          'width': 500}
         """
-        with self.to_rasterio_dataset() as rio_ds:
-            return rio_ds.meta
+        return self._obj.attrs.get("meta")
