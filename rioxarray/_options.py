@@ -75,7 +75,6 @@ class set_options:  # pylint: disable=invalid-name
     convention: Convention, default=None
         The convention to use for reading and writing geospatial metadata.
         If None, CF convention is used as the default.
-        when Zarr conventions are explicitly declared in the data.
         See :class:`rioxarray.enum.Convention` for available options.
 
 
