@@ -13,7 +13,7 @@ from affine import Affine
 from rioxarray._convention import cf
 
 
-class ConventionReader(Protocol):
+class Convention(Protocol):
     """Protocol defining the interface for reading geospatial metadata from conventions."""
 
     @staticmethod
