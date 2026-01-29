@@ -699,10 +699,6 @@ def _get_rasterio_attrs(riods: RasterioReader):
         else:
             attrs["units"] = riods.units
 
-    # Store these dicts for compatibility with rasterio
-    attrs["meta"] = riods.meta
-    attrs["profile"] = riods.profile
-
     return attrs
 
 
@@ -1311,7 +1307,11 @@ def open_rasterio(
 
     # add file path to encoding
     result.encoding["source"] = riods.name
+
+    # Add rasterio data in encoding
     result.encoding["rasterio_dtype"] = str(riods.dtypes[0])
+    result.encoding["profile"] = riods.profile
+
     # remove duplicate coordinate information
     for coord in result.coords:
         result.attrs = {

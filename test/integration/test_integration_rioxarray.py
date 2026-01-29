@@ -3415,6 +3415,28 @@ def test_to_rasterio_dataset_rpcs():
 
 
 def test_meta_profile():
+    def __test_meta_profile(ds, ds_masked, degraded=False):
+        meta = rio_ds.meta
+        profile = rio_ds.profile
+
+        if degraded:
+            profile["driver"] = None
+            profile["blockxsize"] = None
+            profile["blockysize"] = None
+            profile["tiled"] = None
+            profile["compress"] = None
+            profile["interleave"] = None
+            profile["dtype"] = None
+            meta["driver"] = None
+            meta["dtype"] = None
+
+        assert ds.rio.meta() == meta
+        assert ds.rio.profile() == profile
+
+        # Meta should be invariant even if we mask the nodata
+        assert ds_masked.rio.meta() == meta
+        assert ds_masked.rio.profile() == profile
+
     in_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
     with rasterio.open(in_path) as rio_ds:
         riox_ds = rioxarray.open_rasterio(in_path)
@@ -3424,9 +3446,15 @@ def test_meta_profile():
         assert riox_ds.dtype == np.int16
         assert riox_ds_masked.dtype == np.float32
 
-        assert riox_ds.rio.meta() == rio_ds.meta
-        assert riox_ds.rio.profile() == rio_ds.profile
+        # Test meta and profile
+        __test_meta_profile(riox_ds, riox_ds_masked)
 
-        # Meta should be invariant even if we mask the nodata
-        assert riox_ds_masked.rio.meta() == rio_ds.meta
-        assert riox_ds_masked.rio.profile() == rio_ds.profile
+        # Test in degraded conditions
+        riox_ds.encoding["profile"] = None
+        riox_ds_masked.encoding["profile"] = None
+        __test_meta_profile(riox_ds, riox_ds_masked)
+
+        # Test in degraded conditions
+        riox_ds.encoding = {}
+        riox_ds_masked.encoding = {}
+        __test_meta_profile(riox_ds, riox_ds_masked, degraded=True)

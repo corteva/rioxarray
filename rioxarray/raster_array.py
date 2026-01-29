@@ -1104,6 +1104,9 @@ class RasterArray(XRasterBase):
         """
         Return the profile (in rasterio's definition) of the current raster.
 
+        If 'encoding' dictionnary is empty, 'driver', 'blockxsize', 'blockysize', 'compress', 'interleave', 'tiled' will be None.
+        In this case you can use 'to_rasterio_dataset' and derive the 'profile' from there.
+
         .. versionadded:: 0.2x
 
         Example
@@ -1126,11 +1129,48 @@ class RasterArray(XRasterBase):
          'width': 500}
 
         """
-        return self._obj.attrs.get("profile")
+        profile = self._obj.encoding.get("profile")
+        if profile:
+            return profile
+        else:
+            source = self._obj.encoding.get("source")
+            if source:
+                with rasterio.open(source) as src:
+                    return src.profile
+            else:
+                try:
+                    pref_chunks = self._obj.encoding["preferred_chunks"]
+                    blockxsize = pref_chunks["x"]
+                    blockysize = pref_chunks["y"]
+                except KeyError:
+                    blockxsize = None
+                    blockysize = None
+
+            profile = {
+                "count": self.count,
+                "crs": self.crs,
+                "dtype": self._obj.encoding.get("rasterio_dtype"),
+                "height": self.height,
+                "nodata": self.encoded_nodata
+                if self.encoded_nodata is not None
+                else self.nodata,
+                "transform": self.transform(),
+                "width": self.width,
+                "blockxsize": blockxsize,
+                "blockysize": blockysize,
+                "driver": None,  # cannot be recuperated
+                "compress": None,  # cannot be recuperated
+                "interleave": None,  # cannot be recuperated
+                "tiled": None,  # cannot be recuperated
+            }
+            return profile
 
     def meta(self) -> dict:
         """
         Return the metadata (in rasterio's definition) of the current raster.
+
+        If 'encoding' dictionnary is empty, 'driver' will be None.
+        In this case you can use 'to_rasterio_dataset' and derive the 'meta' from there.
 
         .. versionadded:: 0.2x
 
@@ -1148,4 +1188,9 @@ class RasterArray(XRasterBase):
                0.0, -300.0, 2714805.0),
          'width': 500}
         """
-        return self._obj.attrs.get("meta")
+        keys_to_remove = ["blockxsize", "blockysize", "compress", "interleave", "tiled"]
+        return {
+            key: value
+            for key, value in self.profile().items()
+            if key not in keys_to_remove
+        }
