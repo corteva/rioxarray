@@ -192,6 +192,7 @@ def read_spatial_dimensions(
 
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
+    *,
     crs: rasterio.crs.CRS,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
@@ -302,6 +303,7 @@ def _write_grid_mapping(
 
 def write_transform(
     obj: Union[xarray.Dataset, xarray.DataArray],
+    *,
     transform: Affine,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
