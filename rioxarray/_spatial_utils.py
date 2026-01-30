@@ -365,7 +365,11 @@ def _add_attrs_proj(
     new_data_array.rio.set_attrs(new_attrs, inplace=True)
 
     # make sure projection added
-    new_data_array.rio.write_crs(src_data_array.rio.crs, inplace=True)
+    new_data_array.rio.write_crs(
+        src_data_array.rio.crs,
+        grid_mapping_name=src_data_array.rio.grid_mapping,
+        inplace=True,
+    )
     new_data_array.rio.write_coordinate_system(inplace=True)
     new_data_array.rio.write_transform(inplace=True)
     # make sure encoding added

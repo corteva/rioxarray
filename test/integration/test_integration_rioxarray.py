@@ -3073,20 +3073,18 @@ def test_grid_mapping__pre_existing(open_func):
     [partial(xarray.open_dataset, mask_and_scale=False), rioxarray.open_rasterio],
 )
 def test_grid_mapping__change(open_func):
-    from rioxarray._convention import cf
-
     with open_func(os.path.join(TEST_INPUT_DATA_DIR, "tmmx_20190121.nc")) as xdi:
         xdi = _ensure_dataset(xdi)
         # part 1: check changing the data var grid mapping
         xdi["dummy"] = xdi.air_temperature.copy()
-        cf._write_grid_mapping(xdi.dummy, "different_crs")
+        xdi.dummy.rio.write_grid_mapping("different_crs", inplace=True)
         assert xdi.air_temperature.rio.grid_mapping == "crs"
         assert xdi.dummy.rio.grid_mapping == "different_crs"
         # part 2: ensure error raised when multiple exist
         with pytest.raises(RioXarrayError, match="Multiple grid mappings exist."):
             xdi.rio.grid_mapping
         # part 3: ensure that writing the grid mapping on the dataset fixes it
-        cf._write_grid_mapping(xdi, "final_crs")
+        xdi.rio.write_grid_mapping("final_crs", inplace=True)
         assert xdi.air_temperature.rio.grid_mapping == "final_crs"
         assert xdi.dummy.rio.grid_mapping == "final_crs"
         assert xdi.rio.grid_mapping == "final_crs"
@@ -3094,10 +3092,8 @@ def test_grid_mapping__change(open_func):
 
 @pytest.mark.parametrize("dataset", [xarray.Dataset, xarray.DataArray])
 def test_grid_mapping__attrs_to_encoding(dataset):
-    from rioxarray._convention import cf
-
     xds = dataset(attrs={"grid_mapping": "wrong_spot"})
-    cf._write_grid_mapping(xds, "correct_spot")
+    xds.rio.write_grid_mapping("correct_spot", inplace=True)
     assert xds.encoding["grid_mapping"] == "correct_spot"
     assert "grid_mapping" not in xds.attrs
 

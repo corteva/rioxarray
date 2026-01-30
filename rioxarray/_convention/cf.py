@@ -20,6 +20,7 @@ from rioxarray.exceptions import MissingSpatialDimensionError
 
 def _find_grid_mapping(
     obj: Union[xarray.Dataset, xarray.DataArray],
+    *,
     grid_mapping: Optional[str] = None,
 ) -> Optional[str]:
     """
@@ -58,7 +59,7 @@ def _find_grid_mapping(
 
 
 def read_crs(
-    obj: Union[xarray.Dataset, xarray.DataArray], grid_mapping: Optional[str] = None
+    obj: Union[xarray.Dataset, xarray.DataArray], *, grid_mapping: Optional[str] = None
 ) -> Optional[rasterio.crs.CRS]:
     """
     Read CRS from CF conventions.
@@ -75,7 +76,7 @@ def read_crs(
     rasterio.crs.CRS or None
         CRS object, or None if not found
     """
-    grid_mapping = _find_grid_mapping(obj, grid_mapping)
+    grid_mapping = _find_grid_mapping(obj, grid_mapping=grid_mapping)
 
     if grid_mapping is not None:
         try:
@@ -101,7 +102,7 @@ def read_crs(
 
 
 def read_transform(
-    obj: Union[xarray.Dataset, xarray.DataArray], grid_mapping: Optional[str] = None
+    obj: Union[xarray.Dataset, xarray.DataArray], *, grid_mapping: Optional[str] = None
 ) -> Optional[Affine]:
     """
     Read transform from CF conventions (GeoTransform attribute).
@@ -118,7 +119,7 @@ def read_transform(
     affine.Affine or None
         Transform object, or None if not found
     """
-    grid_mapping = _find_grid_mapping(obj, grid_mapping)
+    grid_mapping = _find_grid_mapping(obj, grid_mapping=grid_mapping)
 
     if grid_mapping is not None:
         try:
@@ -188,6 +189,7 @@ def read_spatial_dimensions(
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
     crs: rasterio.crs.CRS,
+    *,
     inplace: bool = True,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
@@ -248,13 +250,14 @@ def write_crs(
     obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
 
     # Write grid_mapping to encoding (CF specific)
-    obj_out = _write_grid_mapping(obj_out, grid_mapping_name)
+    obj_out = _write_grid_mapping(obj_out, grid_mapping_name=grid_mapping_name)
 
     return obj_out
 
 
 def _write_grid_mapping(
     obj: Union[xarray.Dataset, xarray.DataArray],
+    *,
     grid_mapping_name: str,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
@@ -301,6 +304,7 @@ def _write_grid_mapping(
 def write_transform(
     obj: Union[xarray.Dataset, xarray.DataArray],
     transform: Affine,
+    *,
     inplace: bool = True,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
@@ -344,6 +348,6 @@ def write_transform(
     obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
 
     # Write grid_mapping to encoding (CF specific)
-    obj_out = _write_grid_mapping(obj_out, grid_mapping_name)
+    obj_out = _write_grid_mapping(obj_out, grid_mapping_name=grid_mapping_name)
 
     return obj_out

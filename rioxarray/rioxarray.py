@@ -23,6 +23,7 @@ from rasterio.rpc import RPC
 
 from rioxarray._convention import (
     _get_convention,
+    cf,
     read_crs_auto,
     read_spatial_dimensions_auto,
     read_transform_auto,
@@ -203,6 +204,33 @@ class XRasterBase:
             if len(grid_mappings) > 1:
                 raise RioXarrayError("Multiple grid mappings exist.")
         return grid_mapping
+
+    def write_grid_mapping(
+        self,
+        grid_mapping_name: str = DEFAULT_GRID_MAP,
+        inplace: bool = False,
+    ) -> Union[xarray.Dataset, xarray.DataArray]:
+        """
+        Write the grid_mapping attribute to the encoding.
+
+        Parameters
+        ----------
+        grid_mapping_name: str
+            Name of the grid_mapping coordinate.
+        inplace: bool, optional
+            If True, it will write to the existing dataset. Default is False.
+
+        Returns
+        -------
+        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
+            Modified dataset with grid_mapping written.
+
+        See Also
+        --------
+        :meth:`rioxarray.rioxarray.XRasterBase.write_crs`
+        """
+        data_obj = self._get_obj(inplace=inplace)
+        return cf._write_grid_mapping(data_obj, grid_mapping_name=grid_mapping_name)
 
     def write_crs(
         self,
