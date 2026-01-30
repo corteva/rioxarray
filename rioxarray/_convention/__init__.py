@@ -90,7 +90,11 @@ def read_crs_auto(
     **kwargs,
 ) -> Optional[rasterio.crs.CRS]:
     """
-    Auto-detect and read CRS by trying all convention readers.
+    Auto-detect and read CRS by trying convention readers.
+
+    If a convention is set globally via set_options(), that convention
+    is tried first for better performance. Then other conventions are
+    tried as fallback.
 
     Parameters
     ----------
@@ -104,7 +108,17 @@ def read_crs_auto(
     rasterio.crs.CRS or None
         CRS object, or None if not found in any convention
     """
-    for convention in _CONVENTION_MODULES.values():
+    # Try the configured convention first (if set)
+    configured_convention = get_option(CONVENTION)
+    if configured_convention is not None:
+        result = _CONVENTION_MODULES[configured_convention].read_crs(obj, **kwargs)
+        if result is not None:
+            return result
+
+    # Try all other conventions
+    for conv_enum, convention in _CONVENTION_MODULES.items():
+        if conv_enum == configured_convention:
+            continue  # Already tried this one
         result = convention.read_crs(obj, **kwargs)
         if result is not None:
             return result
@@ -123,7 +137,11 @@ def read_transform_auto(
     **kwargs,
 ) -> Optional[Affine]:
     """
-    Auto-detect and read transform by trying all convention readers.
+    Auto-detect and read transform by trying convention readers.
+
+    If a convention is set globally via set_options(), that convention
+    is tried first for better performance. Then other conventions are
+    tried as fallback.
 
     Parameters
     ----------
@@ -137,7 +155,19 @@ def read_transform_auto(
     affine.Affine or None
         Transform object, or None if not found in any convention
     """
-    for convention in _CONVENTION_MODULES.values():
+    # Try the configured convention first (if set)
+    configured_convention = get_option(CONVENTION)
+    if configured_convention is not None:
+        result = _CONVENTION_MODULES[configured_convention].read_transform(
+            obj, **kwargs
+        )
+        if result is not None:
+            return result
+
+    # Try all other conventions
+    for conv_enum, convention in _CONVENTION_MODULES.items():
+        if conv_enum == configured_convention:
+            continue  # Already tried this one
         result = convention.read_transform(obj, **kwargs)
         if result is not None:
             return result
@@ -155,7 +185,11 @@ def read_spatial_dimensions_auto(
     obj: Union[xarray.Dataset, xarray.DataArray],
 ) -> Optional[Tuple[str, str]]:
     """
-    Auto-detect and read spatial dimensions by trying all convention readers.
+    Auto-detect and read spatial dimensions by trying convention readers.
+
+    If a convention is set globally via set_options(), that convention
+    is tried first for better performance. Then other conventions are
+    tried as fallback.
 
     Parameters
     ----------
@@ -167,8 +201,19 @@ def read_spatial_dimensions_auto(
     tuple of (y_dim, x_dim) or None
         Tuple of dimension names, or None if not found in any convention
     """
-    for convention in _CONVENTION_MODULES.values():
+    # Try the configured convention first (if set)
+    configured_convention = get_option(CONVENTION)
+    if configured_convention is not None:
+        result = _CONVENTION_MODULES[configured_convention].read_spatial_dimensions(obj)
+        if result is not None:
+            return result
+
+    # Try all other conventions
+    for conv_enum, convention in _CONVENTION_MODULES.items():
+        if conv_enum == configured_convention:
+            continue  # Already tried this one
         result = convention.read_spatial_dimensions(obj)
         if result is not None:
             return result
+
     return None
