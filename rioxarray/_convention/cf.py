@@ -221,8 +221,8 @@ def write_crs(
 
     obj_out = obj if inplace else obj.copy(deep=True)
 
-    # Get original transform before modifying
-    transform = read_transform(obj)
+    # Get original transform before modifying (pass grid_mapping_name to find it)
+    transform = read_transform(obj, grid_mapping=grid_mapping_name)
 
     # Remove old grid mapping coordinate if exists
     try:
