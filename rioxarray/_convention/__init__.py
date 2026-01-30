@@ -44,7 +44,6 @@ class ConventionProtocol(Protocol):
     def write_crs(
         obj: Union[xarray.Dataset, xarray.DataArray],
         crs: rasterio.crs.CRS,
-        inplace: bool = True,
         **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write CRS to the object using this convention."""
@@ -54,7 +53,6 @@ class ConventionProtocol(Protocol):
     def write_transform(
         obj: Union[xarray.Dataset, xarray.DataArray],
         transform: Affine,
-        inplace: bool = True,
         **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write transform to the object using this convention."""

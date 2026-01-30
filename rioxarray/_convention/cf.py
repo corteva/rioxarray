@@ -193,8 +193,6 @@ def read_spatial_dimensions(
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
     crs: rasterio.crs.CRS,
-    *,
-    inplace: bool = True,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
@@ -208,8 +206,6 @@ def write_crs(
         Object to write CRS to
     crs : rasterio.crs.CRS
         CRS to write
-    inplace : bool, default True
-        If True, modify object in place
     **kwargs
         grid_mapping_name : str
             Name of the grid_mapping coordinate (required for CF)
@@ -224,19 +220,17 @@ def write_crs(
         # Get grid_mapping from encoding/attrs or use default
         grid_mapping_name = _find_grid_mapping(obj) or DEFAULT_GRID_MAP
 
-    obj_out = obj if inplace else obj.copy(deep=True)
-
     # Get original transform before modifying (pass grid_mapping_name to find it)
     transform = read_transform(obj, grid_mapping=grid_mapping_name)
 
     # Remove old grid mapping coordinate if exists
     try:
-        del obj_out.coords[grid_mapping_name]
+        del obj.coords[grid_mapping_name]
     except KeyError:
         pass
 
     # Add grid mapping coordinate
-    obj_out.coords[grid_mapping_name] = xarray.Variable((), 0)
+    obj.coords[grid_mapping_name] = xarray.Variable((), 0)
     grid_map_attrs = {}
     if get_option(EXPORT_GRID_MAPPING):
         try:
@@ -252,12 +246,12 @@ def write_crs(
         grid_map_attrs["GeoTransform"] = " ".join(
             [str(item) for item in transform.to_gdal()]
         )
-    obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
+    obj.coords[grid_mapping_name].attrs = grid_map_attrs
 
     # Write grid_mapping to encoding (CF specific)
-    obj_out = _write_grid_mapping(obj_out, grid_mapping_name=grid_mapping_name)
+    obj = _write_grid_mapping(obj, grid_mapping_name=grid_mapping_name)
 
-    return obj_out
+    return obj
 
 
 def _write_grid_mapping(
@@ -309,8 +303,6 @@ def _write_grid_mapping(
 def write_transform(
     obj: Union[xarray.Dataset, xarray.DataArray],
     transform: Affine,
-    *,
-    inplace: bool = True,
     **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
@@ -324,8 +316,6 @@ def write_transform(
         Object to write transform to
     transform : affine.Affine
         Transform to write
-    inplace : bool, default True
-        If True, modify object in place
     **kwargs
         grid_mapping_name : str
             Name of the grid_mapping coordinate (required for CF)
@@ -340,20 +330,18 @@ def write_transform(
         # Get grid_mapping from encoding/attrs or use default
         grid_mapping_name = _find_grid_mapping(obj) or DEFAULT_GRID_MAP
 
-    obj_out = obj if inplace else obj.copy(deep=True)
-
     try:
-        grid_map_attrs = obj_out.coords[grid_mapping_name].attrs.copy()
+        grid_map_attrs = obj.coords[grid_mapping_name].attrs.copy()
     except KeyError:
-        obj_out.coords[grid_mapping_name] = xarray.Variable((), 0)
-        grid_map_attrs = obj_out.coords[grid_mapping_name].attrs.copy()
+        obj.coords[grid_mapping_name] = xarray.Variable((), 0)
+        grid_map_attrs = obj.coords[grid_mapping_name].attrs.copy()
 
     grid_map_attrs["GeoTransform"] = " ".join(
         [str(item) for item in transform.to_gdal()]
     )
-    obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
+    obj.coords[grid_mapping_name].attrs = grid_map_attrs
 
     # Write grid_mapping to encoding (CF specific)
-    obj_out = _write_grid_mapping(obj_out, grid_mapping_name=grid_mapping_name)
+    obj = _write_grid_mapping(obj, grid_mapping_name=grid_mapping_name)
 
-    return obj_out
+    return obj
