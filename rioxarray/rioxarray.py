@@ -387,7 +387,6 @@ class XRasterBase:
         return convention_module.write_transform(
             data_obj,
             transform=transform,
-            inplace=True,
             grid_mapping_name=grid_mapping_name,
         )
 
