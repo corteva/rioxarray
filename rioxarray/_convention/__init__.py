@@ -4,17 +4,19 @@ This module defines the common interface for convention implementations
 and provides helpers for selecting conventions.
 """
 
-from typing import List, Optional, Protocol, Tuple, Union
+from typing import Dict, Optional, Protocol, Tuple, Union
 
 import rasterio.crs
 import xarray
 from affine import Affine
 
 from rioxarray._convention import cf
+from rioxarray._options import CONVENTION, get_option
 from rioxarray.crs import crs_from_user_input
+from rioxarray.enum import Convention
 
 
-class Convention(Protocol):
+class ConventionProtocol(Protocol):
     """Protocol defining the interface for convention modules."""
 
     @staticmethod
@@ -59,30 +61,28 @@ class Convention(Protocol):
         ...
 
 
-# List of convention modules in order of priority for reading
-# CF convention is tried first as it's the most common
-_CONVENTION_MODULES: List[Convention] = [cf]
+# Convention modules mapped by Convention enum
+_CONVENTION_MODULES: Dict[Convention, ConventionProtocol] = {Convention.CF: cf}
 
 
-def _get_convention(convention) -> Convention:
+def _get_convention(convention: Convention | None) -> ConventionProtocol:
     """
     Get the convention module for writing.
 
     Parameters
     ----------
-    convention : Convention enum value
-        The convention to use
+    convention : Convention enum value or None
+        The convention to use. If None, uses the global default.
 
     Returns
     -------
-    Convention module
+    ConventionProtocol
         The module implementing the convention
     """
-    from rioxarray.enum import Convention as ConventionEnum
-
-    if convention is ConventionEnum.CF:
-        return cf
-    raise ValueError(f"Unsupported convention: {convention}")
+    if convention is None:
+        convention = get_option(CONVENTION) or Convention.CF
+    convention = Convention(convention)
+    return _CONVENTION_MODULES[convention]
 
 
 def read_crs_auto(
@@ -104,8 +104,8 @@ def read_crs_auto(
     rasterio.crs.CRS or None
         CRS object, or None if not found in any convention
     """
-    for reader in _CONVENTION_MODULES:
-        result = reader.read_crs(obj, grid_mapping=grid_mapping)
+    for convention in _CONVENTION_MODULES.values():
+        result = convention.read_crs(obj, grid_mapping=grid_mapping)
         if result is not None:
             return result
 
@@ -137,8 +137,8 @@ def read_transform_auto(
     affine.Affine or None
         Transform object, or None if not found in any convention
     """
-    for reader in _CONVENTION_MODULES:
-        result = reader.read_transform(obj, grid_mapping=grid_mapping)
+    for convention in _CONVENTION_MODULES.values():
+        result = convention.read_transform(obj, grid_mapping=grid_mapping)
         if result is not None:
             return result
 
@@ -167,8 +167,8 @@ def read_spatial_dimensions_auto(
     tuple of (y_dim, x_dim) or None
         Tuple of dimension names, or None if not found in any convention
     """
-    for reader in _CONVENTION_MODULES:
-        result = reader.read_spatial_dimensions(obj)
+    for convention in _CONVENTION_MODULES.values():
+        result = convention.read_spatial_dimensions(obj)
         if result is not None:
             return result
     return None

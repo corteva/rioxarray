@@ -27,7 +27,6 @@ from rioxarray._convention import (
     read_spatial_dimensions_auto,
     read_transform_auto,
 )
-from rioxarray._options import CONVENTION, get_option
 from rioxarray._spatial_utils import (  # noqa: F401, pylint: disable=unused-import
     DEFAULT_GRID_MAP,
     _affine_has_rotation,
@@ -205,48 +204,6 @@ class XRasterBase:
                 raise RioXarrayError("Multiple grid mappings exist.")
         return grid_mapping
 
-    def write_grid_mapping(
-        self, grid_mapping_name: str = DEFAULT_GRID_MAP, inplace: bool = False
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write the CF grid_mapping attribute to the encoding.
-
-        Parameters
-        ----------
-        grid_mapping_name: str, optional
-            Name of the grid_mapping coordinate.
-        inplace: bool, optional
-            If True, it will write to the existing dataset. Default is False.
-
-        Returns
-        -------
-        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:
-            Modified dataset with CF compliant CRS information.
-        """
-        data_obj = self._get_obj(inplace=inplace)
-        if hasattr(data_obj, "data_vars"):
-            for var in data_obj.data_vars:
-                try:
-                    x_dim, y_dim = _get_spatial_dims(data_obj, var=var)
-                except MissingSpatialDimensionError:
-                    continue
-                # remove grid_mapping from attributes if it exists
-                # and update the grid_mapping in encoding
-                new_attrs = dict(data_obj[var].attrs)
-                new_attrs.pop("grid_mapping", None)
-                data_obj[var].rio.update_encoding(
-                    {"grid_mapping": grid_mapping_name}, inplace=True
-                ).rio.set_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
-                    x_dim=x_dim, y_dim=y_dim, inplace=True
-                )
-        # remove grid_mapping from attributes if it exists
-        # and update the grid_mapping in encoding
-        new_attrs = dict(data_obj.attrs)
-        new_attrs.pop("grid_mapping", None)
-        return data_obj.rio.update_encoding(
-            {"grid_mapping": grid_mapping_name}, inplace=True
-        ).rio.set_attrs(new_attrs, inplace=True)
-
     def write_crs(
         self,
         input_crs: Optional[Any] = None,
@@ -297,10 +254,6 @@ class XRasterBase:
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
             )
 
-        # Determine which convention to use
-        if convention is None:
-            convention = get_option(CONVENTION) or Convention.CF
-
         grid_mapping_name = (
             self.grid_mapping if grid_mapping_name is None else grid_mapping_name
         )
@@ -310,14 +263,11 @@ class XRasterBase:
 
         # Use the convention module to write CRS
         convention_module = _get_convention(convention)
-        data_obj = convention_module.write_crs(
+        return convention_module.write_crs(
             data_obj,
             data_obj.rio.crs,
             grid_mapping_name,
             inplace=True,
-        )
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
         )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
@@ -404,10 +354,6 @@ class XRasterBase:
         transform = transform or self.transform(recalc=True)
         data_obj = self._get_obj(inplace=inplace)
 
-        # Determine which convention to use
-        if convention is None:
-            convention = get_option(CONVENTION) or Convention.CF
-
         grid_mapping_name = (
             self.grid_mapping if grid_mapping_name is None else grid_mapping_name
         )
@@ -417,14 +363,11 @@ class XRasterBase:
 
         # Use the convention module to write transform
         convention_module = _get_convention(convention)
-        data_obj = convention_module.write_transform(
+        return convention_module.write_transform(
             data_obj,
             transform,
             grid_mapping_name,
             inplace=True,
-        )
-        return data_obj.rio.write_grid_mapping(
-            grid_mapping_name=grid_mapping_name, inplace=True
         )
 
     def transform(self, recalc: bool = False) -> Affine:

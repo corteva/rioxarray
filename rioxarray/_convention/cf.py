@@ -13,7 +13,9 @@ import xarray
 from affine import Affine
 
 from rioxarray._options import EXPORT_GRID_MAPPING, get_option
+from rioxarray._spatial_utils import _get_spatial_dims, _has_spatial_dims
 from rioxarray.crs import crs_from_user_input
+from rioxarray.exceptions import MissingSpatialDimensionError
 
 
 def _find_grid_mapping(
@@ -192,6 +194,8 @@ def write_crs(
     """
     Write CRS using CF conventions.
 
+    This also writes the grid_mapping attribute to encoding for CF compliance.
+
     Parameters
     ----------
     obj : xarray.Dataset or xarray.DataArray
@@ -238,7 +242,55 @@ def write_crs(
         )
     obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
 
+    # Write grid_mapping to encoding (CF specific)
+    obj_out = _write_grid_mapping(obj_out, grid_mapping_name)
+
     return obj_out
+
+
+def _write_grid_mapping(
+    obj: Union[xarray.Dataset, xarray.DataArray],
+    grid_mapping_name: str,
+) -> Union[xarray.Dataset, xarray.DataArray]:
+    """
+    Write the CF grid_mapping attribute to the encoding.
+
+    Parameters
+    ----------
+    obj : xarray.Dataset or xarray.DataArray
+        Object to write grid_mapping to
+    grid_mapping_name : str
+        Name of the grid_mapping coordinate
+
+    Returns
+    -------
+    xarray.Dataset or xarray.DataArray
+        Object with grid_mapping written to encoding
+    """
+    if hasattr(obj, "data_vars"):
+        for var in obj.data_vars:
+            if not _has_spatial_dims(obj, var=var):
+                continue
+            try:
+                x_dim, y_dim = _get_spatial_dims(obj, var=var)
+            except MissingSpatialDimensionError:
+                continue
+            # remove grid_mapping from attributes if it exists
+            # and update the grid_mapping in encoding
+            new_attrs = dict(obj[var].attrs)
+            new_attrs.pop("grid_mapping", None)
+            obj[var].attrs = new_attrs
+            obj[var].encoding["grid_mapping"] = grid_mapping_name
+            obj[var].rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim, inplace=True)
+
+    # remove grid_mapping from attributes if it exists
+    # and update the grid_mapping in encoding
+    new_attrs = dict(obj.attrs)
+    new_attrs.pop("grid_mapping", None)
+    obj.attrs = new_attrs
+    obj.encoding["grid_mapping"] = grid_mapping_name
+
+    return obj
 
 
 def write_transform(
@@ -249,6 +301,8 @@ def write_transform(
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
     Write transform using CF conventions (GeoTransform attribute).
+
+    This also writes the grid_mapping attribute to encoding for CF compliance.
 
     Parameters
     ----------
@@ -278,5 +332,8 @@ def write_transform(
         [str(item) for item in transform.to_gdal()]
     )
     obj_out.coords[grid_mapping_name].attrs = grid_map_attrs
+
+    # Write grid_mapping to encoding (CF specific)
+    obj_out = _write_grid_mapping(obj_out, grid_mapping_name)
 
     return obj_out
