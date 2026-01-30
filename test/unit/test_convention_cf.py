@@ -179,7 +179,7 @@ def test_write_crs():
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
     crs = CRS.from_epsg(4326)
 
-    result = cf.write_crs(data, crs, inplace=False, grid_mapping_name="spatial_ref")
+    result = cf.write_crs(data, crs=crs, grid_mapping_name="spatial_ref")
 
     assert "spatial_ref" in result.coords
     assert result.coords["spatial_ref"].attrs["spatial_ref"] == crs.to_wkt()
@@ -192,7 +192,7 @@ def test_write_transform():
     transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
     result = cf.write_transform(
-        data, transform, inplace=False, grid_mapping_name="spatial_ref"
+        data, transform=transform, grid_mapping_name="spatial_ref"
     )
 
     assert "spatial_ref" in result.coords
