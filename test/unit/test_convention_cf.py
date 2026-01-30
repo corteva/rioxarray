@@ -59,11 +59,11 @@ def test_read_crs__from_legacy_attrs_with_missing_grid_mapping():
     data.attrs["crs"] = "EPSG:4326"
 
     # CF convention should NOT find this
-    crs = cf.read_crs(data, "spatial_ref")
+    crs = cf.read_crs(data, grid_mapping="spatial_ref")
     assert crs is None
 
     # Auto-detect should find it
-    crs = read_crs_auto(data, "spatial_ref")
+    crs = read_crs_auto(data, grid_mapping="spatial_ref")
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
 
@@ -179,7 +179,7 @@ def test_write_crs():
     data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
     crs = CRS.from_epsg(4326)
 
-    result = cf.write_crs(data, crs, "spatial_ref", inplace=False)
+    result = cf.write_crs(data, crs, inplace=False, grid_mapping_name="spatial_ref")
 
     assert "spatial_ref" in result.coords
     assert result.coords["spatial_ref"].attrs["spatial_ref"] == crs.to_wkt()
@@ -191,7 +191,7 @@ def test_write_transform():
     data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
     transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
-    result = cf.write_transform(data, transform, "spatial_ref", inplace=False)
+    result = cf.write_transform(data, transform, inplace=False, grid_mapping_name="spatial_ref")
 
     assert "spatial_ref" in result.coords
     assert "GeoTransform" in result.coords["spatial_ref"].attrs

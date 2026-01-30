@@ -188,8 +188,8 @@ def read_spatial_dimensions(
 def write_crs(
     obj: Union[xarray.Dataset, xarray.DataArray],
     crs: rasterio.crs.CRS,
-    grid_mapping_name: str,
     inplace: bool = True,
+    **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
     Write CRS using CF conventions.
@@ -202,16 +202,21 @@ def write_crs(
         Object to write CRS to
     crs : rasterio.crs.CRS
         CRS to write
-    grid_mapping_name : str
-        Name of the grid_mapping coordinate
     inplace : bool, default True
         If True, modify object in place
+    **kwargs
+        grid_mapping_name : str
+            Name of the grid_mapping coordinate (required for CF)
 
     Returns
     -------
     xarray.Dataset or xarray.DataArray
         Object with CRS written
     """
+    grid_mapping_name = kwargs.get("grid_mapping_name")
+    if grid_mapping_name is None:
+        raise ValueError("grid_mapping_name is required for CF convention")
+
     obj_out = obj if inplace else obj.copy(deep=True)
 
     # Get original transform before modifying
@@ -296,8 +301,8 @@ def _write_grid_mapping(
 def write_transform(
     obj: Union[xarray.Dataset, xarray.DataArray],
     transform: Affine,
-    grid_mapping_name: str,
     inplace: bool = True,
+    **kwargs,
 ) -> Union[xarray.Dataset, xarray.DataArray]:
     """
     Write transform using CF conventions (GeoTransform attribute).
@@ -310,16 +315,21 @@ def write_transform(
         Object to write transform to
     transform : affine.Affine
         Transform to write
-    grid_mapping_name : str
-        Name of the grid_mapping coordinate
     inplace : bool, default True
         If True, modify object in place
+    **kwargs
+        grid_mapping_name : str
+            Name of the grid_mapping coordinate (required for CF)
 
     Returns
     -------
     xarray.Dataset or xarray.DataArray
         Object with transform written
     """
+    grid_mapping_name = kwargs.get("grid_mapping_name")
+    if grid_mapping_name is None:
+        raise ValueError("grid_mapping_name is required for CF convention")
+
     obj_out = obj if inplace else obj.copy(deep=True)
 
     try:

@@ -266,8 +266,8 @@ class XRasterBase:
         return convention_module.write_crs(
             data_obj,
             data_obj.rio.crs,
-            grid_mapping_name,
             inplace=True,
+            grid_mapping_name=grid_mapping_name,
         )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> rasterio.crs.CRS:
@@ -366,8 +366,8 @@ class XRasterBase:
         return convention_module.write_transform(
             data_obj,
             transform,
-            grid_mapping_name,
             inplace=True,
+            grid_mapping_name=grid_mapping_name,
         )
 
     def transform(self, recalc: bool = False) -> Affine:

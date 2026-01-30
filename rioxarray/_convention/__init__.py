@@ -44,8 +44,8 @@ class ConventionProtocol(Protocol):
     def write_crs(
         obj: Union[xarray.Dataset, xarray.DataArray],
         crs: rasterio.crs.CRS,
-        grid_mapping_name: str,
         inplace: bool = True,
+        **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write CRS to the object using this convention."""
         ...
@@ -54,8 +54,8 @@ class ConventionProtocol(Protocol):
     def write_transform(
         obj: Union[xarray.Dataset, xarray.DataArray],
         transform: Affine,
-        grid_mapping_name: str,
         inplace: bool = True,
+        **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write transform to the object using this convention."""
         ...
@@ -87,7 +87,7 @@ def _get_convention(convention: Convention | None) -> ConventionProtocol:
 
 def read_crs_auto(
     obj: Union[xarray.Dataset, xarray.DataArray],
-    grid_mapping: Optional[str] = None,
+    **kwargs,
 ) -> Optional[rasterio.crs.CRS]:
     """
     Auto-detect and read CRS by trying all convention readers.
@@ -96,8 +96,8 @@ def read_crs_auto(
     ----------
     obj : xarray.Dataset or xarray.DataArray
         Object to read CRS from
-    grid_mapping : str, optional
-        Name of the grid_mapping coordinate (passed to CF reader)
+    **kwargs
+        Convention-specific parameters (e.g., grid_mapping for CF)
 
     Returns
     -------
@@ -105,7 +105,7 @@ def read_crs_auto(
         CRS object, or None if not found in any convention
     """
     for convention in _CONVENTION_MODULES.values():
-        result = convention.read_crs(obj, grid_mapping=grid_mapping)
+        result = convention.read_crs(obj, **kwargs)
         if result is not None:
             return result
 
@@ -120,7 +120,7 @@ def read_crs_auto(
 
 def read_transform_auto(
     obj: Union[xarray.Dataset, xarray.DataArray],
-    grid_mapping: Optional[str] = None,
+    **kwargs,
 ) -> Optional[Affine]:
     """
     Auto-detect and read transform by trying all convention readers.
@@ -129,8 +129,8 @@ def read_transform_auto(
     ----------
     obj : xarray.Dataset or xarray.DataArray
         Object to read transform from
-    grid_mapping : str, optional
-        Name of the grid_mapping coordinate (passed to CF reader)
+    **kwargs
+        Convention-specific parameters (e.g., grid_mapping for CF)
 
     Returns
     -------
@@ -138,7 +138,7 @@ def read_transform_auto(
         Transform object, or None if not found in any convention
     """
     for convention in _CONVENTION_MODULES.values():
-        result = convention.read_transform(obj, grid_mapping=grid_mapping)
+        result = convention.read_transform(obj, **kwargs)
         if result is not None:
             return result
 
