@@ -291,7 +291,6 @@ class XRasterBase:
         return convention_module.write_crs(
             data_obj,
             data_obj.rio.crs,
-            inplace=True,
             grid_mapping_name=grid_mapping_name,
         )
 
