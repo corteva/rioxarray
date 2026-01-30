@@ -164,7 +164,7 @@ def read_spatial_dimensions(
     # Check standard dimension names
     if "x" in obj.dims and "y" in obj.dims:
         return "y", "x"
-    elif "longitude" in obj.dims and "latitude" in obj.dims:
+    if "longitude" in obj.dims and "latitude" in obj.dims:
         return "latitude", "longitude"
 
     # Look for coordinates with CF attributes

@@ -24,21 +24,18 @@ class ConventionProtocol(Protocol):
         obj: Union[xarray.Dataset, xarray.DataArray], **kwargs
     ) -> Optional[rasterio.crs.CRS]:
         """Read CRS from the object using this convention."""
-        ...
 
     @staticmethod
     def read_transform(
         obj: Union[xarray.Dataset, xarray.DataArray], **kwargs
     ) -> Optional[Affine]:
         """Read transform from the object using this convention."""
-        ...
 
     @staticmethod
     def read_spatial_dimensions(
         obj: Union[xarray.Dataset, xarray.DataArray],
     ) -> Optional[Tuple[str, str]]:
         """Read spatial dimensions (y_dim, x_dim) from the object using this convention."""
-        ...
 
     @staticmethod
     def write_crs(
@@ -47,7 +44,6 @@ class ConventionProtocol(Protocol):
         **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write CRS to the object using this convention."""
-        ...
 
     @staticmethod
     def write_transform(
@@ -56,7 +52,6 @@ class ConventionProtocol(Protocol):
         **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """Write transform to the object using this convention."""
-        ...
 
 
 # Convention modules mapped by Convention enum
