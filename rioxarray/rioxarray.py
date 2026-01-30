@@ -282,14 +282,11 @@ class XRasterBase:
                 "CRS not found. Please set the CRS with 'rio.write_crs()'."
             )
 
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-
         # Remove legacy crs attr (not part of any convention)
         data_obj.attrs.pop("crs", None)
 
         # Use the convention module to write CRS
+        # Pass user input grid_mapping_name (may be None, convention handles default)
         convention_module = _get_convention(convention)
         return convention_module.write_crs(
             data_obj,
@@ -382,14 +379,11 @@ class XRasterBase:
         transform = transform or self.transform(recalc=True)
         data_obj = self._get_obj(inplace=inplace)
 
-        grid_mapping_name = (
-            self.grid_mapping if grid_mapping_name is None else grid_mapping_name
-        )
-
         # Remove legacy transform attr (not part of any convention)
         data_obj.attrs.pop("transform", None)
 
         # Use the convention module to write transform
+        # Pass user input grid_mapping_name (may be None, convention handles default)
         convention_module = _get_convention(convention)
         return convention_module.write_transform(
             data_obj,

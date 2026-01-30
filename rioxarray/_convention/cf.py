@@ -13,7 +13,11 @@ import xarray
 from affine import Affine
 
 from rioxarray._options import EXPORT_GRID_MAPPING, get_option
-from rioxarray._spatial_utils import _get_spatial_dims, _has_spatial_dims
+from rioxarray._spatial_utils import (
+    DEFAULT_GRID_MAP,
+    _get_spatial_dims,
+    _has_spatial_dims,
+)
 from rioxarray.crs import crs_from_user_input
 from rioxarray.exceptions import MissingSpatialDimensionError
 
@@ -217,7 +221,8 @@ def write_crs(
     """
     grid_mapping_name = kwargs.get("grid_mapping_name")
     if grid_mapping_name is None:
-        raise ValueError("grid_mapping_name is required for CF convention")
+        # Get grid_mapping from encoding/attrs or use default
+        grid_mapping_name = _find_grid_mapping(obj) or DEFAULT_GRID_MAP
 
     obj_out = obj if inplace else obj.copy(deep=True)
 
@@ -332,7 +337,8 @@ def write_transform(
     """
     grid_mapping_name = kwargs.get("grid_mapping_name")
     if grid_mapping_name is None:
-        raise ValueError("grid_mapping_name is required for CF convention")
+        # Get grid_mapping from encoding/attrs or use default
+        grid_mapping_name = _find_grid_mapping(obj) or DEFAULT_GRID_MAP
 
     obj_out = obj if inplace else obj.copy(deep=True)
 
