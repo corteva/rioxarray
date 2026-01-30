@@ -290,7 +290,7 @@ class XRasterBase:
         convention_module = _get_convention(convention)
         return convention_module.write_crs(
             data_obj,
-            data_obj.rio.crs,
+            crs=data_obj.rio.crs,
             grid_mapping_name=grid_mapping_name,
         )
 
