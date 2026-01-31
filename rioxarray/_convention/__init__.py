@@ -10,7 +10,7 @@ import rasterio.crs
 import xarray
 from affine import Affine
 
-from rioxarray._convention import cf
+from rioxarray._convention.cf import CFConvention
 from rioxarray._options import CONVENTION, get_option
 from rioxarray.crs import crs_from_user_input
 from rioxarray.enum import Convention
@@ -54,8 +54,10 @@ class ConventionProtocol(Protocol):
         """Write transform to the object using this convention."""
 
 
-# Convention modules mapped by Convention enum
-_CONVENTION_MODULES: Dict[Convention, ConventionProtocol] = {Convention.CF: cf}
+# Convention classes mapped by Convention enum
+_CONVENTION_MODULES: Dict[Convention, ConventionProtocol] = {
+    Convention.CF: CFConvention  # type: ignore[dict-item]
+}
 
 
 def _get_convention(convention: Convention | None) -> ConventionProtocol:

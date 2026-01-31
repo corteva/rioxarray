@@ -185,7 +185,7 @@ def read_spatial_dimensions(
             y_dim = coord
 
     if x_dim is not None and y_dim is not None:
-        return y_dim, x_dim
+        return str(y_dim), str(x_dim)
 
     return None
 
@@ -347,3 +347,13 @@ def write_transform(
     obj = _write_grid_mapping(obj, grid_mapping_name=grid_mapping_name)
 
     return obj
+
+
+class CFConvention:
+    """CF convention class implementing ConventionProtocol."""
+
+    read_crs = staticmethod(read_crs)
+    read_transform = staticmethod(read_transform)
+    read_spatial_dimensions = staticmethod(read_spatial_dimensions)
+    write_crs = staticmethod(write_crs)
+    write_transform = staticmethod(write_transform)
