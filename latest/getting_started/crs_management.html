@@ -55,6 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#reading-files">Reading Files</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="getting_started.html#introductory-information">Introductory Information</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Coordinate Reference System Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Conventions">Conventions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Accessing-the-CRS-object">Accessing the CRS object</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Setting-the-CRS">Setting the CRS</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Spatial-dimensions">Spatial dimensions</a></li>
@@ -115,27 +116,64 @@
 <li><p>pyproj: <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/build_crs_cf.html">https://pyproj4.github.io/pyproj/stable/build_crs_cf.html</a></p></li>
 </ul>
 <p>Operations on xarray objects can cause data loss. Due to this, rioxarray writes and expects the spatial reference information to exist in the coordinates.</p>
+<section id="Conventions">
+<h2>Conventions<a class="headerlink" href="#Conventions" title="Link to this heading"></a></h2>
+<p>rioxarray supports multiple conventions for storing geospatial metadata. The convention system provides a flexible way to read and write CRS and transform information.</p>
+<section id="Supported-Conventions">
+<h3>Supported Conventions<a class="headerlink" href="#Supported-Conventions" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>CF (Climate and Forecasts)</strong>: The default convention, using <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinates with attributes like <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code>, <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code>, and <code class="docutils literal notranslate"><span class="pre">GeoTransform</span></code>. This is the standard for netCDF files in the geospatial community.</p></li>
+</ul>
+</section>
+<section id="How-Conventions-Work">
+<h3>How Conventions Work<a class="headerlink" href="#How-Conventions-Work" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Reading</strong>: If a convention is set globally, that convention is tried <strong>first</strong> for better performance. If not found, other conventions are tried as fallback. This allows you to optimize reads when you know the data format.</p></li>
+<li><p><strong>Writing</strong>: Uses the global <code class="docutils literal notranslate"><span class="pre">convention</span></code> setting (default: CF) or a per-method <code class="docutils literal notranslate"><span class="pre">convention</span></code> parameter.</p></li>
+</ul>
+</section>
+<section id="Setting-the-Convention">
+<h3>Setting the Convention<a class="headerlink" href="#Setting-the-Convention" title="Link to this heading"></a></h3>
+<p>You can set the convention globally using <code class="docutils literal notranslate"><span class="pre">set_options()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_options</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
+
+<span class="c1"># Set globally - reads will try CF first, writes will use CF</span>
+<span class="n">set_options</span><span class="p">(</span><span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">)</span>
+
+<span class="c1"># Or use as a context manager</span>
+<span class="k">with</span> <span class="n">set_options</span><span class="p">(</span><span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">):</span>
+    <span class="c1"># CF convention is tried first when reading</span>
+    <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
+    <span class="c1"># CF convention is used for writing</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or specify the convention per-method (for writing only):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
+
+<span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="API-Documentation">
+<h4>API Documentation<a class="headerlink" href="#API-Documentation" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.set_options"><span class="std std-ref">rioxarray.set_options</span></a></p></li>
+<li><p><a class="reference internal" href="../rioxarray.html#rioxarray.enum.Convention"><span class="std std-ref">rioxarray.enum.Convention</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
 <section id="Accessing-the-CRS-object">
 <h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Link to this heading"></a></h2>
 <p>If you have opened a dataset and the Coordinate Reference System (CRS) can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.crs</span></code> accessor.</p>
-<section id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
-<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Look in <code class="docutils literal notranslate"><span class="pre">encoding</span></code> of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
 <li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>, which is deprecated since version 0.20.0. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
-</section>
-<section id="Search-order-for-the-CRS-for-Dataset:">
-<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Link to this heading"></a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
-</section>
-<section id="decode_coords=%22all%22">
-<h3>decode_coords=”all”<a class="headerlink" href="#decode_coords=%22all%22" title="Link to this heading"></a></h3>
 <p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files with the default engine, it is recommended to use <code class="docutils literal notranslate"><span class="pre">decode_coords=&quot;all&quot;</span></code>. This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
-</section>
-<section id="API-Documentation">
-<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
@@ -566,15 +604,14 @@ CRS.from_epsg(32722)
 </pre></div></div>
 </div>
 </section>
-</section>
 <section id="Setting-the-CRS">
 <h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Link to this heading"></a></h2>
-<p>Use the <code class="docutils literal notranslate"><span class="pre">rio.write_crs</span></code> method to set the CRS on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>. This modifies the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> and sets the CRS in a CF compliant manner.</p>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">rio.write_crs</span></code> method to set the CRS on your <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>. This modifies the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> and sets the CRS using the configured convention (default: CF).</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
 </ul>
-<p><strong>Note:</strong> It is recommended to use <code class="docutils literal notranslate"><span class="pre">rio.write_crs()</span></code> if you want the CRS to persist on the Dataset/DataArray and to write the CRS CF compliant metadata. Calling only <code class="docutils literal notranslate"><span class="pre">rio.set_crs()</span></code> CRS storage method is lossy and will not modify the Dataset/DataArray metadata.</p>
+<p><strong>Note:</strong> It is recommended to use <code class="docutils literal notranslate"><span class="pre">rio.write_crs()</span></code> if you want the CRS to persist on the Dataset/DataArray and to write convention-compliant metadata. Calling only <code class="docutils literal notranslate"><span class="pre">rio.set_crs()</span></code> is lossy and will not modify the Dataset/DataArray metadata.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>

@@ -90,7 +90,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio.warp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio.windows</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
@@ -101,7 +100,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.rpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPC</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPORT_GRID_MAPPING</span><span class="p">,</span> <span class="n">get_option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._convention</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_get_convention</span><span class="p">,</span>
+    <span class="n">cf</span><span class="p">,</span>
+    <span class="n">read_crs_auto</span><span class="p">,</span>
+    <span class="n">read_spatial_dimensions_auto</span><span class="p">,</span>
+    <span class="n">read_transform_auto</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._spatial_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401, pylint: disable=unused-import</span>
     <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
     <span class="n">_affine_has_rotation</span><span class="p">,</span>
@@ -114,6 +119,7 @@
     <span class="n">affine_to_coords</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_from_user_input</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DimensionError</span><span class="p">,</span>
     <span class="n">DimensionMissingCoordinateError</span><span class="p">,</span>
@@ -138,30 +144,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># Determine the spatial dimensions of the `xarray.DataArray`</span>
-        <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;y&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
-        <span class="k">elif</span> <span class="s2">&quot;longitude&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;latitude&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="s2">&quot;latitude&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># look for coordinates with CF attributes</span>
-            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-                <span class="c1"># make sure to only look in 1D coordinates</span>
-                <span class="c1"># that has the same dimension name as the coordinate</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="o">!=</span> <span class="p">(</span><span class="n">coord</span><span class="p">,):</span>
-                    <span class="k">continue</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;projection_x_coordinate&quot;</span><span class="p">)</span>
-                <span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">coord</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;projection_y_coordinate&quot;</span><span class="p">)</span>
-                <span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span> <span class="o">=</span> <span class="n">coord</span>
+
+        <span class="c1"># Auto-detect spatial dimensions from any supported convention</span>
+        <span class="n">spatial_dims</span> <span class="o">=</span> <span class="n">read_spatial_dimensions_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spatial_dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_dim</span> <span class="o">=</span> <span class="n">spatial_dims</span>
 
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -179,32 +166,16 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
-        <span class="c1"># look in wkt attributes to avoid using</span>
-        <span class="c1"># pyproj CRS if possible for performance</span>
-        <span class="k">for</span> <span class="n">crs_attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;crs_wkt&quot;</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">crs_attr</span><span class="p">],</span>
-                    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span>
+        <span class="c1"># Auto-detect CRS from any supported convention</span>
+        <span class="n">parsed_crs</span> <span class="o">=</span> <span class="n">read_crs_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">grid_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">)</span>
 
-        <span class="c1"># look in grid_mapping</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span>
-                <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
-                <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">CRSError</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># look in attrs for &#39;crs&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="k">if</span> <span class="n">parsed_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">parsed_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+        <span class="c1"># No CRS found</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -321,14 +292,16 @@
 <div class="viewcode-block" id="XRasterBase.write_grid_mapping">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_grid_mapping">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_grid_mapping</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_GRID_MAP</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write the CF grid_mapping attribute to the encoding.</span>
+<span class="sd">        Write the grid_mapping attribute to the encoding.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        grid_mapping_name: str, optional</span>
+<span class="sd">        grid_mapping_name: str</span>
 <span class="sd">            Name of the grid_mapping coordinate.</span>
 <span class="sd">        inplace: bool, optional</span>
 <span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
@@ -336,31 +309,14 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
-<span class="sd">            Modified dataset with CF compliant CRS information.</span>
+<span class="sd">            Modified dataset with grid_mapping written.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        :meth:`rioxarray.rioxarray.XRasterBase.write_crs`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
-                <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="c1"># remove grid_mapping from attributes if it exists</span>
-                <span class="c1"># and update the grid_mapping in encoding</span>
-                <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
-                <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">:</span> <span class="n">grid_mapping_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-                    <span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-                <span class="p">)</span>
-        <span class="c1"># remove grid_mapping from attributes if it exists</span>
-        <span class="c1"># and update the grid_mapping in encoding</span>
-        <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
-        <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">:</span> <span class="n">grid_mapping_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">cf</span><span class="o">.</span><span class="n">_write_grid_mapping</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="XRasterBase.write_crs">
@@ -369,12 +325,13 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">convention</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Convention</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write the CRS to the dataset in a CF compliant manner.</span>
+<span class="sd">        Write the CRS to the dataset using the specified convention.</span>
 
-<span class="sd">        .. warning:: The grid_mapping attribute is written to the encoding.</span>
+<span class="sd">        .. warning:: When using CF convention, the grid_mapping attribute is written to the encoding.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -382,14 +339,17 @@
 <span class="sd">            Anything accepted by `rasterio.crs.CRS.from_user_input`.</span>
 <span class="sd">        grid_mapping_name: str, optional</span>
 <span class="sd">            Name of the grid_mapping coordinate to store the CRS information in.</span>
-<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">            Only used with CF convention. Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        convention: Convention, optional</span>
+<span class="sd">            Convention to use for writing CRS. If None, uses the global default</span>
+<span class="sd">            from set_options(). Currently only CF convention is supported.</span>
 <span class="sd">        inplace: bool, optional</span>
 <span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
-<span class="sd">            Modified dataset with CF compliant CRS information.</span>
+<span class="sd">            Modified dataset with CRS information.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -406,44 +366,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
 
-        <span class="c1"># get original transform</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_transform</span><span class="p">()</span>
-        <span class="c1"># remove old grid maping coordinate if exists</span>
-        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
-        <span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
         <span class="k">if</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingCRS</span><span class="p">(</span>
                 <span class="s2">&quot;CRS not found. Please set the CRS with &#39;rio.write_crs()&#39;.&quot;</span>
             <span class="p">)</span>
-        <span class="c1"># add grid mapping coordinate</span>
-        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">get_option</span><span class="p">(</span><span class="n">EXPORT_GRID_MAPPING</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_cf</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span>
-        <span class="c1"># spatial_ref is for compatibility with GDAL</span>
-        <span class="n">crs_wkt</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
-        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;spatial_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
-        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;crs_wkt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs_wkt</span>
-        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
-            <span class="p">)</span>
-        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># remove old crs if exists</span>
+        <span class="c1"># Remove legacy crs attr (not part of any convention)</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_grid_mapping</span><span class="p">(</span>
-            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="c1"># Use the convention module to write CRS</span>
+        <span class="c1"># Pass user input grid_mapping_name (may be None, convention handles default)</span>
+        <span class="n">convention_module</span> <span class="o">=</span> <span class="n">_get_convention</span><span class="p">(</span><span class="n">convention</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">convention_module</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span>
+            <span class="n">data_obj</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -494,24 +431,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_cached_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the transform from:</span>
-<span class="sd">        1. The GeoTransform metatada property in the grid mapping</span>
-<span class="sd">        2. The transform attribute.</span>
+<span class="sd">        Get the transform by auto-detecting from any supported convention.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># look in grid_mapping</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span>
-            <span class="p">)</span>
-            <span class="c1"># Calling .tolist() to assure the arguments are Python float and JSON serializable</span>
-            <span class="k">return</span> <span class="n">Affine</span><span class="o">.</span><span class="n">from_gdal</span><span class="p">(</span><span class="o">*</span><span class="n">transform</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">][:</span><span class="mi">6</span><span class="p">])</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span>
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">read_transform_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">grid_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">)</span>
 
 <div class="viewcode-block" id="XRasterBase.write_transform">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>
@@ -519,13 +441,15 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grid_mapping_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">convention</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Convention</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded:: 0.0.30</span>
 
-<span class="sd">        Write the GeoTransform to the dataset where GDAL can read it in.</span>
+<span class="sd">        Write the transform to the dataset using the specified convention.</span>
 
+<span class="sd">        For CF convention, this writes the GeoTransform to the dataset where GDAL can read it in.</span>
 <span class="sd">        https://gdal.org/drivers/raster/netcdf.html#georeference</span>
 
 <span class="sd">        Parameters</span>
@@ -534,33 +458,31 @@
 <span class="sd">            The transform of the dataset. If not provided, it will be calculated.</span>
 <span class="sd">        grid_mapping_name: str, optional</span>
 <span class="sd">            Name of the grid_mapping coordinate to store the transform information in.</span>
-<span class="sd">            Default is the grid_mapping name of the dataset.</span>
+<span class="sd">            Only used with CF convention. Default is the grid_mapping name of the dataset.</span>
+<span class="sd">        convention: Convention, optional</span>
+<span class="sd">            Convention to use for writing transform. If None, uses the global default</span>
+<span class="sd">            from set_options(). Currently only CF convention is supported.</span>
 <span class="sd">        inplace: bool, optional</span>
 <span class="sd">            If True, it will write to the existing dataset. Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        :obj:`xarray.Dataset` | :obj:`xarray.DataArray`:</span>
-<span class="sd">            Modified dataset with Geo Transform written.</span>
+<span class="sd">            Modified dataset with transform written.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
-        <span class="c1"># delete the old attribute to prevent confusion</span>
+
+        <span class="c1"># Remove legacy transform attr (not part of any convention)</span>
         <span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="k">if</span> <span class="n">grid_mapping_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">grid_mapping_name</span>
-        <span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">grid_map_attrs</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">grid_map_attrs</span><span class="p">[</span><span class="s2">&quot;GeoTransform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()]</span>
-        <span class="p">)</span>
-        <span class="n">data_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">grid_mapping_name</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">grid_map_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_grid_mapping</span><span class="p">(</span>
-            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+
+        <span class="c1"># Use the convention module to write transform</span>
+        <span class="c1"># Pass user input grid_mapping_name (may be None, convention handles default)</span>
+        <span class="n">convention_module</span> <span class="o">=</span> <span class="n">_get_convention</span><span class="p">(</span><span class="n">convention</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">convention_module</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span>
+            <span class="n">data_obj</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

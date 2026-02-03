@@ -85,19 +85,30 @@
 <span class="sd">This file was adopted from: https://github.com/pydata/xarray # noqa</span>
 <span class="sd">Source file: https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db14500c427f8804e/xarray/core/options.py  # noqa</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
 
 <span class="n">EXPORT_GRID_MAPPING</span> <span class="o">=</span> <span class="s2">&quot;export_grid_mapping&quot;</span>
 <span class="n">SKIP_MISSING_SPATIAL_DIMS</span> <span class="o">=</span> <span class="s2">&quot;skip_missing_spatial_dims&quot;</span>
+<span class="n">CONVENTION</span> <span class="o">=</span> <span class="s2">&quot;convention&quot;</span>
 
-<span class="n">OPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">OPTIONS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">EXPORT_GRID_MAPPING</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">SKIP_MISSING_SPATIAL_DIMS</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">CONVENTION</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">OPTION_NAMES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">OPTIONS</span><span class="p">)</span>
 
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_convention</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Convention</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate the convention option.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Convention</span><span class="p">)</span>
+
+
 <span class="n">VALIDATORS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">EXPORT_GRID_MAPPING</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">choice</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span>
+    <span class="n">CONVENTION</span><span class="p">:</span> <span class="n">_validate_convention</span><span class="p">,</span>
 <span class="p">}</span>
 
 
@@ -127,6 +138,7 @@
 
 <span class="sd">    .. versionadded:: 0.3.0</span>
 <span class="sd">    .. versionadded:: 0.7.0 skip_missing_spatial_dims</span>
+<span class="sd">    .. versionadded:: 0.22.0 convention</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -141,6 +153,10 @@
 <span class="sd">        If True, it will not perform spatial operations on variables</span>
 <span class="sd">        within a :class:`xarray.Dataset` if the spatial dimensions</span>
 <span class="sd">        are not found.</span>
+<span class="sd">    convention: Convention, default=None</span>
+<span class="sd">        The convention to use for reading and writing geospatial metadata.</span>
+<span class="sd">        If None, CF convention is used as the default.</span>
+<span class="sd">        See :class:`rioxarray.enum.Convention` for available options.</span>
 
 
 <span class="sd">    Usage as a context manager::</span>
