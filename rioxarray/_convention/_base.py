@@ -14,13 +14,13 @@ class ConventionProtocol(Protocol):
 
     @classmethod
     def read_crs(
-        cls, obj: Union[xarray.Dataset, xarray.DataArray], **kwargs
+        cls, obj: Union[xarray.Dataset, xarray.DataArray]
     ) -> Optional[rasterio.crs.CRS]:
         """Read CRS from the object using this convention."""
 
     @classmethod
     def read_transform(
-        cls, obj: Union[xarray.Dataset, xarray.DataArray], **kwargs
+        cls, obj: Union[xarray.Dataset, xarray.DataArray]
     ) -> Optional[Affine]:
         """Read transform from the object using this convention."""
 

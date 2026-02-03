@@ -30,8 +30,6 @@ class CFConvention:
         ----------
         obj : xarray.Dataset or xarray.DataArray
             Object to read CRS from
-        grid_mapping_name : str, optional
-            Name of the grid_mapping coordinate variable
 
         Returns
         -------
