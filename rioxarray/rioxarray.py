@@ -21,9 +21,8 @@ from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
 from rasterio.rpc import RPC
 
-from rioxarray._convention import (
+from rioxarray._convention._core import (
     _get_convention,
-    cf,
     read_crs_auto,
     read_spatial_dimensions_auto,
     read_transform_auto,
@@ -86,7 +85,7 @@ class XRasterBase:
             return None if self._crs is False else self._crs
 
         # Auto-detect CRS from any supported convention
-        parsed_crs = read_crs_auto(self._obj, grid_mapping=self.grid_mapping)
+        parsed_crs = read_crs_auto(self._obj)
 
         if parsed_crs is not None:
             self._set_crs(parsed_crs, inplace=True)
@@ -230,7 +229,28 @@ class XRasterBase:
         :meth:`rioxarray.rioxarray.XRasterBase.write_crs`
         """
         data_obj = self._get_obj(inplace=inplace)
-        return cf._write_grid_mapping(data_obj, grid_mapping_name=grid_mapping_name)
+        if hasattr(data_obj, "data_vars"):
+            for var in data_obj.data_vars:
+                try:
+                    x_dim, y_dim = _get_spatial_dims(data_obj, var=var)
+                except MissingSpatialDimensionError:
+                    continue
+                # remove grid_mapping from attributes if it exists
+                # and update the grid_mapping in encoding
+                new_attrs = dict(data_obj[var].attrs)
+                new_attrs.pop("grid_mapping", None)
+                data_obj[var].rio.update_encoding(
+                    {"grid_mapping": grid_mapping_name}, inplace=True
+                ).rio.set_attrs(new_attrs, inplace=True).rio.set_spatial_dims(
+                    x_dim=x_dim, y_dim=y_dim, inplace=True
+                )
+        # remove grid_mapping from attributes if it exists
+        # and update the grid_mapping in encoding
+        new_attrs = dict(data_obj.attrs)
+        new_attrs.pop("grid_mapping", None)
+        return data_obj.rio.update_encoding(
+            {"grid_mapping": grid_mapping_name}, inplace=True
+        ).rio.set_attrs(new_attrs, inplace=True)
 
     def write_crs(
         self,
@@ -340,7 +360,7 @@ class XRasterBase:
         """
         Get the transform by auto-detecting from any supported convention.
         """
-        return read_transform_auto(self._obj, grid_mapping=self.grid_mapping)
+        return read_transform_auto(self._obj)
 
     def write_transform(
         self,
