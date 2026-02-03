@@ -100,9 +100,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.rpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPC</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._convention</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray._convention._core</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_convention</span><span class="p">,</span>
-    <span class="n">cf</span><span class="p">,</span>
     <span class="n">read_crs_auto</span><span class="p">,</span>
     <span class="n">read_spatial_dimensions_auto</span><span class="p">,</span>
     <span class="n">read_transform_auto</span><span class="p">,</span>
@@ -167,7 +166,7 @@
             <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
         <span class="c1"># Auto-detect CRS from any supported convention</span>
-        <span class="n">parsed_crs</span> <span class="o">=</span> <span class="n">read_crs_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">grid_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">)</span>
+        <span class="n">parsed_crs</span> <span class="o">=</span> <span class="n">read_crs_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parsed_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">parsed_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -316,7 +315,28 @@
 <span class="sd">        :meth:`rioxarray.rioxarray.XRasterBase.write_crs`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cf</span><span class="o">.</span><span class="n">_write_grid_mapping</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">grid_mapping_name</span><span class="o">=</span><span class="n">grid_mapping_name</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">_get_spatial_dims</span><span class="p">(</span><span class="n">data_obj</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">MissingSpatialDimensionError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># remove grid_mapping from attributes if it exists</span>
+                <span class="c1"># and update the grid_mapping in encoding</span>
+                <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">data_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">:</span> <span class="n">grid_mapping_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
+                    <span class="n">x_dim</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+        <span class="c1"># remove grid_mapping from attributes if it exists</span>
+        <span class="c1"># and update the grid_mapping in encoding</span>
+        <span class="n">new_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">new_attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">update_encoding</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">:</span> <span class="n">grid_mapping_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">new_attrs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="XRasterBase.write_crs">
@@ -433,7 +453,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the transform by auto-detecting from any supported convention.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">read_transform_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">grid_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_mapping</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">read_transform_auto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
 
 <div class="viewcode-block" id="XRasterBase.write_transform">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_transform">[docs]</a>
