@@ -6,19 +6,30 @@ Credits:
 This file was adopted from: https://github.com/pydata/xarray # noqa
 Source file: https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db14500c427f8804e/xarray/core/options.py  # noqa
 """
-from typing import Any
+from typing import Any, Optional
+
+from rioxarray.enum import Convention
 
 EXPORT_GRID_MAPPING = "export_grid_mapping"
 SKIP_MISSING_SPATIAL_DIMS = "skip_missing_spatial_dims"
+CONVENTION = "convention"
 
-OPTIONS = {
+OPTIONS: dict[str, Any] = {
     EXPORT_GRID_MAPPING: True,
     SKIP_MISSING_SPATIAL_DIMS: False,
+    CONVENTION: None,
 }
 OPTION_NAMES = set(OPTIONS)
 
+
+def _validate_convention(value: Optional[Convention]) -> bool:
+    """Validate the convention option."""
+    return value is None or isinstance(value, Convention)
+
+
 VALIDATORS = {
     EXPORT_GRID_MAPPING: lambda choice: isinstance(choice, bool),
+    CONVENTION: _validate_convention,
 }
 
 
@@ -46,6 +57,7 @@ class set_options:  # pylint: disable=invalid-name
 
     .. versionadded:: 0.3.0
     .. versionadded:: 0.7.0 skip_missing_spatial_dims
+    .. versionadded:: 0.22.0 convention
 
     Parameters
     ----------
@@ -60,6 +72,10 @@ class set_options:  # pylint: disable=invalid-name
         If True, it will not perform spatial operations on variables
         within a :class:`xarray.Dataset` if the spatial dimensions
         are not found.
+    convention: Convention, default=None
+        The convention to use for reading and writing geospatial metadata.
+        If None, CF convention is used as the default.
+        See :class:`rioxarray.enum.Convention` for available options.
 
 
     Usage as a context manager::

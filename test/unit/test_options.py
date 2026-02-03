@@ -1,7 +1,8 @@
 import pytest
 
 from rioxarray import set_options
-from rioxarray._options import EXPORT_GRID_MAPPING, get_option
+from rioxarray._options import CONVENTION, EXPORT_GRID_MAPPING, get_option
+from rioxarray.enum import Convention
 
 
 def test_set_options__contextmanager():
@@ -36,4 +37,36 @@ def test_set_options__invalid_value():
         match="option 'export_grid_mapping' gave an invalid value: 12345.",
     ):
         with set_options(export_grid_mapping=12345):
+            pass
+
+
+def test_set_options__convention_default():
+    """Test that convention defaults to None."""
+    assert get_option(CONVENTION) is None
+
+
+def test_set_options__convention_cf():
+    """Test setting convention to CF."""
+    assert get_option(CONVENTION) is None
+    with set_options(convention=Convention.CF):
+        assert get_option(CONVENTION) is Convention.CF
+    assert get_option(CONVENTION) is None
+
+
+def test_set_options__convention_none():
+    """Test setting convention back to None."""
+    with set_options(convention=Convention.CF):
+        assert get_option(CONVENTION) is Convention.CF
+        with set_options(convention=None):
+            assert get_option(CONVENTION) is None
+        assert get_option(CONVENTION) is Convention.CF
+
+
+def test_set_options__convention_invalid():
+    """Test that invalid convention values raise error."""
+    with pytest.raises(
+        ValueError,
+        match="option 'convention' gave an invalid value: 'invalid'.",
+    ):
+        with set_options(convention="invalid"):
             pass
