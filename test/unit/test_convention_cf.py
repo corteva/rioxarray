@@ -4,7 +4,8 @@ import xarray
 from affine import Affine
 from rasterio.crs import CRS
 
-from rioxarray._convention import cf, read_crs_auto, read_transform_auto
+from rioxarray._convention._core import read_crs_auto, read_transform_auto
+from rioxarray._convention.cf import CFConvention
 
 
 def test_read_crs__from_grid_mapping_spatial_ref():
@@ -13,7 +14,7 @@ def test_read_crs__from_grid_mapping_spatial_ref():
     data.coords["spatial_ref"] = xarray.Variable((), 0)
     data.coords["spatial_ref"].attrs["spatial_ref"] = "EPSG:4326"
 
-    crs = cf.read_crs(data, grid_mapping="spatial_ref")
+    crs = CFConvention.read_crs(data)
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
 
@@ -24,7 +25,7 @@ def test_read_crs__from_grid_mapping_crs_wkt():
     data.coords["spatial_ref"] = xarray.Variable((), 0)
     data.coords["spatial_ref"].attrs["crs_wkt"] = CRS.from_epsg(4326).to_wkt()
 
-    crs = cf.read_crs(data, grid_mapping="spatial_ref")
+    crs = CFConvention.read_crs(data)
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
 
@@ -39,7 +40,7 @@ def test_read_crs__from_legacy_attrs():
     data.attrs["crs"] = "EPSG:4326"
 
     # CF convention should NOT find this
-    crs = cf.read_crs(data)
+    crs = CFConvention.read_crs(data)
     assert crs is None
 
     # Auto-detect should find it
@@ -59,11 +60,11 @@ def test_read_crs__from_legacy_attrs_with_missing_grid_mapping():
     data.attrs["crs"] = "EPSG:4326"
 
     # CF convention should NOT find this
-    crs = cf.read_crs(data, grid_mapping="spatial_ref")
+    crs = CFConvention.read_crs(data)
     assert crs is None
 
     # Auto-detect should find it
-    crs = read_crs_auto(data, grid_mapping="spatial_ref")
+    crs = read_crs_auto(data)
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
 
@@ -72,7 +73,7 @@ def test_read_crs__not_found():
     """Test that None is returned when no CRS is found."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
 
-    crs = cf.read_crs(data)
+    crs = CFConvention.read_crs(data)
     assert crs is None
 
 
@@ -83,7 +84,7 @@ def test_read_transform__from_geotransform():
     # GeoTransform format: [c, a, b, f, d, e] (GDAL format)
     data.coords["spatial_ref"].attrs["GeoTransform"] = "0.0 1.0 0.0 10.0 0.0 -1.0"
 
-    transform = cf.read_transform(data, grid_mapping="spatial_ref")
+    transform = CFConvention.read_transform(data)
     assert transform is not None
     assert transform == Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
@@ -99,7 +100,7 @@ def test_read_transform__from_legacy_attrs():
     data.attrs["transform"] = [1.0, 0.0, 0.0, 0.0, -1.0, 10.0]
 
     # CF convention should NOT find this
-    transform = cf.read_transform(data)
+    transform = CFConvention.read_transform(data)
     assert transform is None
 
     # Auto-detect should find it
@@ -112,7 +113,7 @@ def test_read_transform__not_found():
     """Test that None is returned when no transform is found."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
 
-    transform = cf.read_transform(data)
+    transform = CFConvention.read_transform(data)
     assert transform is None
 
 
@@ -120,7 +121,7 @@ def test_read_spatial_dimensions__xy():
     """Test detecting x/y dimension names."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
 
-    dims = cf.read_spatial_dimensions(data)
+    dims = CFConvention.read_spatial_dimensions(data)
     assert dims == ("y", "x")
 
 
@@ -128,7 +129,7 @@ def test_read_spatial_dimensions__lonlat():
     """Test detecting longitude/latitude dimension names."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["latitude", "longitude"])
 
-    dims = cf.read_spatial_dimensions(data)
+    dims = CFConvention.read_spatial_dimensions(data)
     assert dims == ("latitude", "longitude")
 
 
@@ -145,7 +146,7 @@ def test_read_spatial_dimensions__cf_axis():
     data.coords["row"].attrs["axis"] = "Y"
     data.coords["col"].attrs["axis"] = "X"
 
-    dims = cf.read_spatial_dimensions(data)
+    dims = CFConvention.read_spatial_dimensions(data)
     assert dims == ("row", "col")
 
 
@@ -162,7 +163,7 @@ def test_read_spatial_dimensions__cf_standard_name():
     data.coords["lat"].attrs["standard_name"] = "latitude"
     data.coords["lon"].attrs["standard_name"] = "longitude"
 
-    dims = cf.read_spatial_dimensions(data)
+    dims = CFConvention.read_spatial_dimensions(data)
     assert dims == ("lat", "lon")
 
 
@@ -170,7 +171,7 @@ def test_read_spatial_dimensions__not_found():
     """Test that None is returned when spatial dimensions are not found."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["a", "b"])
 
-    dims = cf.read_spatial_dimensions(data)
+    dims = CFConvention.read_spatial_dimensions(data)
     assert dims is None
 
 
@@ -178,8 +179,7 @@ def test_write_crs():
     """Test writing CRS to a DataArray."""
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
     crs = CRS.from_epsg(4326)
-
-    result = cf.write_crs(data, crs=crs, grid_mapping_name="spatial_ref")
+    result = CFConvention.write_crs(data, crs=crs, grid_mapping_name="spatial_ref")
 
     assert "spatial_ref" in result.coords
     assert result.coords["spatial_ref"].attrs["spatial_ref"] == crs.to_wkt()
@@ -191,7 +191,7 @@ def test_write_transform():
     data = xarray.DataArray(numpy.random.rand(10, 10), dims=["y", "x"])
     transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
 
-    result = cf.write_transform(
+    result = CFConvention.write_transform(
         data, transform=transform, grid_mapping_name="spatial_ref"
     )
 
