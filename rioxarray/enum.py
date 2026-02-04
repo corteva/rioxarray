@@ -10,6 +10,7 @@ class Convention(Enum):
     Currently supported:
 
     - CF: Climate and Forecasts convention using grid_mapping coordinates
+    - Zarr: Zarr spatial and proj conventions for cloud-native formats
 
     The convention can be set globally using set_options() or per-method
     using the convention parameter.
@@ -34,8 +35,15 @@ class Convention(Enum):
     References
     ----------
     .. [1] CF Conventions: https://github.com/cf-convention/cf-conventions
+    .. [2] Zarr spatial convention: https://github.com/zarr-conventions/spatial
+    .. [3] Zarr geo-proj convention: https://github.com/zarr-experimental/geo-proj
     """
 
     #: Climate and Forecasts convention (default)
     #: https://github.com/cf-convention/cf-conventions
     CF = "CF"
+
+    #: Zarr spatial and proj conventions
+    #: https://github.com/zarr-conventions/spatial
+    #: https://github.com/zarr-experimental/geo-proj
+    Zarr = "Zarr"

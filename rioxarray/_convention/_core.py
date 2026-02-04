@@ -10,13 +10,15 @@ from affine import Affine
 
 from rioxarray._convention._base import ConventionProtocol
 from rioxarray._convention.cf import CFConvention
+from rioxarray._convention.zarr import ZarrConvention
 from rioxarray._options import CONVENTION, get_option
 from rioxarray.crs import crs_from_user_input
 from rioxarray.enum import Convention
 
 # Convention classes mapped by Convention enum
 _CONVENTION_MODULES: dict[Convention, ConventionProtocol] = {
-    Convention.CF: CFConvention  # type: ignore[dict-item]
+    Convention.CF: CFConvention,  # type: ignore[dict-item]
+    Convention.Zarr: ZarrConvention,  # type: ignore[dict-item]
 }
 
 
