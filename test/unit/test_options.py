@@ -53,6 +53,14 @@ def test_set_options__convention_cf():
     assert get_option(CONVENTION) is None
 
 
+def test_set_options__convention_zarr():
+    """Test setting convention to Zarr."""
+    assert get_option(CONVENTION) is None
+    with set_options(convention=Convention.ZARR):
+        assert get_option(CONVENTION) is Convention.ZARR
+    assert get_option(CONVENTION) is None
+
+
 def test_set_options__convention_none():
     """Test setting convention back to None."""
     with set_options(convention=Convention.CF):
