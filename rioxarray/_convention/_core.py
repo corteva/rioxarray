@@ -18,7 +18,7 @@ from rioxarray.enum import Convention
 # Convention classes mapped by Convention enum
 _CONVENTION_MODULES: dict[Convention, ConventionProtocol] = {
     Convention.CF: CFConvention,  # type: ignore[dict-item]
-    Convention.Zarr: ZarrConvention,  # type: ignore[dict-item]
+    Convention.ZARR: ZarrConvention,  # type: ignore[dict-item]
 }
 
 

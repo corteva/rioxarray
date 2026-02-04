@@ -46,4 +46,4 @@ class Convention(Enum):
     #: Zarr spatial and proj conventions
     #: https://github.com/zarr-conventions/spatial
     #: https://github.com/zarr-experimental/geo-proj
-    Zarr = "Zarr"
+    ZARR = "ZARR"

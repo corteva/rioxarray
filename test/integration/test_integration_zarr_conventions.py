@@ -69,10 +69,10 @@ def test_read_crs_from_zarr_convention():
 
 
 def test_read_crs_from_zarr_convention__with_setting():
-    """Test reading CRS with Convention.Zarr setting."""
+    """Test reading CRS with Convention.ZARR setting."""
     data = _create_zarr_array_with_proj()
 
-    with set_options(convention=Convention.Zarr):
+    with set_options(convention=Convention.ZARR):
         crs = data.rio.crs
         assert crs is not None
         assert crs == CRS.from_epsg(4326)
@@ -131,7 +131,7 @@ def test_fallback_zarr_to_cf():
     data.coords["spatial_ref"].attrs["spatial_ref"] = "EPSG:4326"
 
     # Even with Zarr preference, should fall back to CF
-    with set_options(convention=Convention.Zarr):
+    with set_options(convention=Convention.ZARR):
         crs = data.rio.crs
         assert crs is not None
         assert crs == CRS.from_epsg(4326)
@@ -168,7 +168,7 @@ def test_priority_zarr_over_cf():
     data.attrs["proj:wkt2"] = CRS.from_epsg(32618).to_wkt()
 
     # With Zarr setting, should prefer Zarr CRS
-    with set_options(convention=Convention.Zarr):
+    with set_options(convention=Convention.ZARR):
         crs = data.rio.crs
         assert crs is not None
         assert crs == CRS.from_epsg(32618)

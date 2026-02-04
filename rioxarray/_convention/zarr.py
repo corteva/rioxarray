@@ -215,7 +215,7 @@ def _parse_crs_from_attrs(
                 parsed_crs = parser(proj_value)
                 if parsed_crs is not None:
                     return parsed_crs
-        except (KeyError, Exception):
+        except (KeyError, TypeError, ValueError):
             pass
     return None
 
@@ -245,7 +245,7 @@ def _parse_transform_from_attrs(
         spatial_transform = attrs.get("spatial:transform")
         if spatial_transform is not None:
             return parse_spatial_transform(spatial_transform)
-    except (KeyError, Exception):
+    except (KeyError, TypeError, ValueError):
         pass
     return None
 
@@ -324,7 +324,7 @@ class ZarrConvention:
                 y_dim_name, x_dim_name = spatial_dims[-2:]  # Take last two
                 if y_dim_name in obj.dims and x_dim_name in obj.dims:
                     return y_dim_name, x_dim_name
-        except (KeyError, Exception):
+        except (KeyError, TypeError, ValueError):
             pass
 
         return None
