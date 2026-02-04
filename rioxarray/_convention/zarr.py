@@ -115,69 +115,6 @@ def parse_spatial_transform(
         return None
 
 
-def parse_proj_code(proj_code: str) -> Optional[rasterio.crs.CRS]:
-    """
-    Parse proj:code to CRS.
-
-    Parameters
-    ----------
-    proj_code : str
-        Authority code string (e.g., "EPSG:4326")
-
-    Returns
-    -------
-    rasterio.crs.CRS or None
-        CRS object, or None if invalid
-    """
-    if not isinstance(proj_code, str):
-        return None
-    return crs_from_user_input(proj_code)
-
-
-def parse_proj_wkt2(proj_wkt2: str) -> Optional[rasterio.crs.CRS]:
-    """
-    Parse proj:wkt2 to CRS.
-
-    Parameters
-    ----------
-    proj_wkt2 : str
-        WKT2 string representation of CRS
-
-    Returns
-    -------
-    rasterio.crs.CRS or None
-        CRS object, or None if invalid
-    """
-    if not isinstance(proj_wkt2, str):
-        return None
-    return rasterio.crs.CRS.from_wkt(proj_wkt2)
-
-
-def parse_proj_projjson(
-    proj_projjson: Union[dict, str],
-) -> Optional[rasterio.crs.CRS]:
-    """
-    Parse proj:projjson to CRS.
-
-    Parameters
-    ----------
-    proj_projjson : dict or str
-        PROJJSON object or JSON string
-
-    Returns
-    -------
-    rasterio.crs.CRS or None
-        CRS object, or None if invalid
-    """
-    if isinstance(proj_projjson, str):
-        proj_projjson = json.loads(proj_projjson)
-
-    if not isinstance(proj_projjson, dict):
-        return None
-
-    return crs_from_user_input(json.dumps(proj_projjson))
-
-
 # ============================================================================
 # Internal parsing helpers
 # ============================================================================
@@ -204,15 +141,15 @@ def _parse_crs_from_attrs(
     if convention_check and not has_convention_declared(attrs, "proj:"):
         return None
 
-    for proj_attr, parser in [
-        ("proj:wkt2", parse_proj_wkt2),
-        ("proj:code", parse_proj_code),
-        ("proj:projjson", parse_proj_projjson),
-    ]:
+    # Try proj attributes in priority order: wkt2, code, projjson
+    for proj_attr in ("proj:wkt2", "proj:code", "proj:projjson"):
         try:
             proj_value = attrs.get(proj_attr)
             if proj_value is not None:
-                parsed_crs = parser(proj_value)
+                # Handle projjson dict by converting to JSON string
+                if isinstance(proj_value, dict):
+                    proj_value = json.dumps(proj_value)
+                parsed_crs = crs_from_user_input(proj_value)
                 if parsed_crs is not None:
                     return parsed_crs
         except (KeyError, TypeError, ValueError):

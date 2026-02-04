@@ -1,6 +1,5 @@
 """Unit tests for the Zarr convention module."""
 import numpy as np
-import pyproj
 import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
@@ -67,37 +66,6 @@ def test_parse_spatial_transform__invalid():
     """Test parsing invalid spatial:transform."""
     assert zarr.parse_spatial_transform([1, 2, 3]) is None
     assert zarr.parse_spatial_transform("invalid") is None
-
-
-def test_parse_proj_code():
-    """Test parsing proj:code."""
-    result = zarr.parse_proj_code("EPSG:4326")
-    assert result is not None
-    assert result == CRS.from_epsg(4326)
-
-
-def test_parse_proj_wkt2():
-    """Test parsing proj:wkt2."""
-    wkt = CRS.from_epsg(4326).to_wkt()
-    result = zarr.parse_proj_wkt2(wkt)
-    assert result is not None
-    assert result == CRS.from_epsg(4326)
-
-
-def test_parse_proj_projjson__dict():
-    """Test parsing proj:projjson from dict."""
-    projjson = pyproj.CRS.from_epsg(4326).to_json_dict()
-    result = zarr.parse_proj_projjson(projjson)
-    assert result is not None
-    assert result == CRS.from_epsg(4326)
-
-
-def test_parse_proj_projjson__string():
-    """Test parsing proj:projjson from JSON string."""
-    projjson_str = pyproj.CRS.from_epsg(4326).to_json()
-    result = zarr.parse_proj_projjson(projjson_str)
-    assert result is not None
-    assert result == CRS.from_epsg(4326)
 
 
 def test_read_crs__from_wkt2():
