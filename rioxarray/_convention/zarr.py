@@ -5,7 +5,6 @@ This module provides functions for reading geospatial metadata according to:
 - Zarr spatial convention: https://github.com/zarr-conventions/spatial
 - Zarr geo-proj convention: https://github.com/zarr-experimental/geo-proj
 """
-import json
 from typing import Optional, Union
 
 import rasterio.crs
@@ -146,9 +145,6 @@ def _parse_crs_from_attrs(
         try:
             proj_value = attrs.get(proj_attr)
             if proj_value is not None:
-                # Handle projjson dict by converting to JSON string
-                if isinstance(proj_value, dict):
-                    proj_value = json.dumps(proj_value)
                 parsed_crs = crs_from_user_input(proj_value)
                 if parsed_crs is not None:
                     return parsed_crs
