@@ -338,6 +338,7 @@ See <a class="reference internal" href="#rioxarray.enum.Convention" title="rioxa
 Currently supported:</p>
 <ul class="simple">
 <li><p>CF: Climate and Forecasts convention using grid_mapping coordinates</p></li>
+<li><p>Zarr: Zarr spatial and proj conventions for cloud-native formats</p></li>
 </ul>
 <p>The convention can be set globally using set_options() or per-method
 using the convention parameter.</p>
@@ -366,12 +367,28 @@ using the convention parameter.</p>
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>CF Conventions: <a class="reference external" href="https://github.com/cf-convention/cf-conventions">https://github.com/cf-convention/cf-conventions</a></p>
 </aside>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Zarr spatial convention: <a class="reference external" href="https://github.com/zarr-conventions/spatial">https://github.com/zarr-conventions/spatial</a></p>
+</aside>
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
+<p>Zarr geo-proj convention: <a class="reference external" href="https://github.com/zarr-conventions/geo-proj">https://github.com/zarr-conventions/geo-proj</a></p>
+</aside>
 </aside>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rioxarray.enum.Convention.CF">
 <span class="sig-name descname"><span class="pre">CF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CF'</span></span><a class="headerlink" href="#rioxarray.enum.Convention.CF" title="Link to this definition"></a></dt>
 <dd><p>Climate and Forecasts convention (default)
 <a class="reference external" href="https://github.com/cf-convention/cf-conventions">https://github.com/cf-convention/cf-conventions</a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rioxarray.enum.Convention.ZARR">
+<span class="sig-name descname"><span class="pre">ZARR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ZARR'</span></span><a class="headerlink" href="#rioxarray.enum.Convention.ZARR" title="Link to this definition"></a></dt>
+<dd><p>Zarr spatial and proj conventions
+<a class="reference external" href="https://github.com/zarr-conventions/spatial">https://github.com/zarr-conventions/spatial</a>
+<a class="reference external" href="https://github.com/zarr-conventions/geo-proj">https://github.com/zarr-conventions/geo-proj</a></p>
 </dd></dl>
 
 </dd></dl>
