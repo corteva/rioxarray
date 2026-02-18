@@ -36,7 +36,7 @@ class Convention(Enum):
     ----------
     .. [1] CF Conventions: https://github.com/cf-convention/cf-conventions
     .. [2] Zarr spatial convention: https://github.com/zarr-conventions/spatial
-    .. [3] Zarr geo-proj convention: https://github.com/zarr-experimental/geo-proj
+    .. [3] Zarr geo-proj convention: https://github.com/zarr-conventions/geo-proj
     """
 
     #: Climate and Forecasts convention (default)
@@ -45,5 +45,5 @@ class Convention(Enum):
 
     #: Zarr spatial and proj conventions
     #: https://github.com/zarr-conventions/spatial
-    #: https://github.com/zarr-experimental/geo-proj
+    #: https://github.com/zarr-conventions/geo-proj
     ZARR = "ZARR"
