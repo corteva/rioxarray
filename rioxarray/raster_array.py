@@ -1099,3 +1099,53 @@ class RasterArray(XRasterBase):
             self.to_raster(memfile.name)
             with memfile.open() as src_ds:
                 yield src_ds
+
+    def _to_repr(self) -> list[str]:
+        """Function representing the DataArray. Not set directly in __repr__ as it is used also in Datasets."""
+        # Manage chunks
+        try:
+            pref_chunks = self._obj.encoding["preferred_chunks"]
+            blockxsize = pref_chunks["x"]
+            blockysize = pref_chunks["y"]
+        except KeyError:
+            blockxsize = None
+            blockysize = None
+
+        # Never leave CRS empty
+        crs = self.crs
+        if crs is None:
+            crs = "Unprojected"
+        else:
+            crs = crs.to_epsg()
+
+        # Never leave nodata empty
+        nodata = self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+
+        if nodata is None:
+            nodata = "Unset"
+
+        # Create representation dict
+        repr_dict = {
+            "count": self.count,
+            "crs": crs,
+            "rasterio_dtype": self._obj.encoding.get("rasterio_dtype"),
+            "nodata": nodata,
+            "transform": self.transform(),
+            "height": self.height,
+            "width": self.width,
+            "blockxsize": blockxsize,
+            "blockysize": blockysize,
+            "gcps": self.get_gcps(),
+            "rpcs": self.get_rpcs(),
+            "bounds": self.bounds(),
+        }
+
+        return [f"{key}: {val}" for key, val in repr_dict.items() if val is not None]
+
+    def __repr__(self) -> str:
+        repr_list = [
+            f"rioxarray accessor (.rio) | {self.__class__.__name__}",
+            "Attributes:",
+        ] + [f"\t{val}" for val in self._to_repr()]
+
+        return "\n".join(repr_list)
