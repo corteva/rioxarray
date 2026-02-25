@@ -36,3 +36,10 @@ This page contains links to a collection of examples of how to use rioxarray.
    How to mask NetCDF time series data from a shapefile in Python? <https://gis.stackexchange.com/a/354798/144357>
    Extract data from raster at a point <https://gis.stackexchange.com/a/358058/144357>
    Convert raster to CSV with lat, lon, and value columns <https://gis.stackexchange.com/a/358057/144357>
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: External courses:
+
+   Carpentries incubator courses <https://carpentries-incubator.github.io/geospatial-python/06-raster-intro.html>
