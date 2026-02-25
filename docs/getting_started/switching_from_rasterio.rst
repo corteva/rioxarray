@@ -61,6 +61,19 @@ Here is the parameters that you can derive from ``rasterio``'s Dataset profile:
 
 The values not used in ``rioxarray`` comes from the abstraction of the dataset in ``xarray``: a dataset no longer belongs to a file on disk even if read from it. The driver and other file-related notions are meaningless in this context.
 
+Other dataset parameters
+-------
+
++----------------------------------+--------------------------------------------------+
+| ``rasterio`` from ``ds``         | ``rioxarray`` from DataArray                     |
++==================================+==================================================+
+| gcps                             | ``xda.rio.get_gcps()``                           |
++----------------------------------+--------------------------------------------------+
+| rpcs                             | ``xda.rio.get_rpcs()``                           |
++----------------------------------+--------------------------------------------------+
+| bounds                           | ``xda.rio.bounds()``                             |
++----------------------------------+--------------------------------------------------+
+
 Functions
 -------
 
