@@ -1,4 +1,5 @@
 import contextlib
+import glob
 import io
 import itertools
 import logging
@@ -1612,3 +1613,28 @@ def test_reading_writing_rpcs(tmp_path):
         assert (
             dst.rpcs is not None
         ), "Existing RPCs in dst raster (through rpc attribute)"
+
+
+def test_repr_nc():
+    """Simple test of __repr__ just testing the function doesn't fail"""
+    input_datasets = list(glob.glob(os.path.join(TEST_INPUT_DATA_DIR, "*.nc")))
+    assert len(input_datasets) > 0
+    for input_ds in input_datasets:
+        print(input_ds)
+        ds = rioxarray.open_rasterio(input_ds)
+        if isinstance(ds, xarray.DataArray):
+            ds = ds.to_dataset(name="nc_ds")
+        str_arr = str(ds.rio)
+        print(str_arr)
+        assert "rioxarray accessor (.rio) | RasterDataset" in str_arr
+
+
+def test_repr_tifs():
+    """Simple test of __repr__ just testing the function doesn't fail"""
+    input_arrays = list(glob.glob(os.path.join(TEST_INPUT_DATA_DIR, "*.tif")))
+    assert len(input_arrays) > 0
+    for input_array in input_arrays:
+        print(input_array)
+        str_arr = str(rioxarray.open_rasterio(input_array).rio)
+        print(str_arr)
+        assert "rioxarray accessor (.rio) | RasterArray" in str_arr
