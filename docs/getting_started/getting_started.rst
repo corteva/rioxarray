@@ -83,3 +83,4 @@ Introductory Information
    crs_management.ipynb
    nodata_management.ipynb
    manage_information_loss.ipynb
+   gdal_env

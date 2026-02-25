@@ -1,10 +1,10 @@
 .. _switching_from_rasterio:
 
 Switching from ``rasterio``
-================
+===========================
 
 Reasons to switch from ``rasterio`` to ``rioxarray``
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Usually, switching from ``rasterio`` to ``rioxarray`` means you are working with rasters and you have to adapt your code to ``xarray``.
 
@@ -20,7 +20,7 @@ Beware, ``xarray`` comes also with gotchas! You can see some of them in `the ded
     ``rasterio`` Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.
 
 Equivalences between ``rasterio`` and ``rioxarray``
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To ease the switch from ``rasterio`` and ``rioxarray``, here is a table of the usual parameters or functions used.
 
@@ -62,7 +62,7 @@ Here is the parameters that you can derive from ``rasterio``'s Dataset profile:
 The values not used in ``rioxarray`` comes from the abstraction of the dataset in ``xarray``: a dataset no longer belongs to a file on disk even if read from it. The driver and other file-related notions are meaningless in this context.
 
 Other dataset parameters
--------
+------------------------
 
 +----------------------------------+--------------------------------------------------+
 | ``rasterio`` from ``ds``         | ``rioxarray`` from DataArray                     |
@@ -75,7 +75,7 @@ Other dataset parameters
 +----------------------------------+--------------------------------------------------+
 
 Functions
--------
+---------
 
 +---------------------------------+----------------------------------------------+
 | ``rasterio``                    | ``rioxarray``                                |
@@ -104,7 +104,7 @@ By default, ``xarray`` is lazy and therefore not loaded into memory, hence the `
 
 
 Going back to ``rasterio``
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``rioxarray`` 0.21+ enables recreating a ``rasterio`` Dataset from ``rioxarray``.
 This is useful when translating your code from ``rasterio`` to ``rioxarray``, even if it is sub-optimal, because the array will be loaded and written in memory behind the hood.
