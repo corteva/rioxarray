@@ -14,7 +14,10 @@ Usually, switching from ``rasterio`` to ``rioxarray`` means you are working with
 
 Beware, ``xarray`` comes also with gotchas! You can see some of them in `the dedicated section <https://corteva.github.io/rioxarray/html/getting_started/manage_information_loss.html>`__.
 
-Note: ``rasterio`` Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.
+
+  .. note::
+
+    ``rasterio`` Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.
 
 Equivalences between ``rasterio`` and ``rioxarray``
 ~~~~~~~~~~
