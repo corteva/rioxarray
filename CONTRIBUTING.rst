@@ -131,12 +131,13 @@ Build documentation
 
 This assumes you have cloned the rioxarray repository, installed rioxarray conda environment and are in the base folder.
 
-1. Install pandoc
+1. Install documentation libraries
 
 .. code-block:: bash
 
     conda activate rioxarray
     conda install -c conda-forge pandoc
+    pip install -e . --group doc
 
 2. Build the documentation
 
