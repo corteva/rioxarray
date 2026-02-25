@@ -42,4 +42,4 @@ This page contains links to a collection of examples of how to use rioxarray.
    :maxdepth: 1
    :caption: External courses:
 
-   Carpentries incubator courses <https://carpentries-incubator.github.io/geospatial-python/06-raster-intro.html>
+   Geospatial-python courses by The Carpentries <https://carpentries-incubator.github.io/geospatial-python/06-raster-intro.html>
