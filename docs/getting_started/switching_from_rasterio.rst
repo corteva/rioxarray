@@ -10,9 +10,9 @@ Usually, switching from `rasterio` to `rioxarray` means you are working with ras
 
 `xarray` is a powerful abstraction of both the raster dataset and the raster array. There is a lot of advantages to unite these two notions under the same object, as it simplifies the use of the functions, using attributes stored in the object rather than passing arguments to the functions.
 
-`xarray` comes also with a lot of very interesting built-in functions and can leverage several backends to replace `numpy` in cases where it is limiting (out-of-memory computation, running the code on clusters, on GPU...). Dask is one of the most well-knwown. `rioxarray` handles some basic `dask` features in I/O (see ../examples/dask_read_write.ipynb) but is not designed to support `dask` in more evolved functions such as reproject.
+`xarray` comes also with a lot of very interesting built-in functions and can leverage several backends to replace `numpy` in cases where it is limiting (out-of-memory computation, running the code on clusters, on GPU...). Dask is one of the most well-knwown. `rioxarray` handles some basic `dask` features in I/O (see `Dask I/O example <https://corteva.github.io/rioxarray/html/examples/dask_read_write.html>`__) but is not designed to support `dask` in more evolved functions such as reproject.
 
-Beware, `xarray` comes also with gotchas! You can see some of them in `manage_information_loss.ipynb`.
+Beware, `xarray` comes also with gotchas! You can see some of them in `the dedicated section <https://corteva.github.io/rioxarray/html/getting_started/manage_information_loss.html>`__.
 
 Note: `rasterio` Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.
 
