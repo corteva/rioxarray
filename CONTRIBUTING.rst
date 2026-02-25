@@ -126,6 +126,25 @@ This assumes you have cloned the rioxarray repository and are in the base folder
         'source /venv/bin/activate && python -m pytest'
 
 
+Build documentation
+-------------------
+
+This assumes you have cloned the rioxarray repository, installed rioxarray conda environment and are in the base folder.
+
+1. Install pandoc
+
+.. code-block:: bash
+
+    conda activate rioxarray
+    conda install -c conda-forge pandoc
+
+2. Build the documentation
+
+.. code-block:: bash
+
+    sphinx-build -b html docs/ docs/_build/
+
+
 Pull Request Guidelines
 -----------------------
 
