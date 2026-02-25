@@ -79,6 +79,7 @@ Introductory Information
 .. toctree::
    :maxdepth: 1
 
+   switching_from_rasterio
    crs_management.ipynb
    nodata_management.ipynb
    manage_information_loss.ipynb
