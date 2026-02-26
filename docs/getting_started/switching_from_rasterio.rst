@@ -84,21 +84,21 @@ Functions
 +====================================+===================================================================================================================================+
 | :func:`rasterio.open()`            | :func:`rioxarray.open_rasterio` or :attr:`xarray.open_dataset(..., engine="rasterio", decode_coords="all") <xarray.open_dataset>` |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`ds.read()`                  | :func:`compute() <xarray.DataArray.compute>` (load data into memory)                                                              |
+| :attr:`ds.read()`                  | :func:`compute() <xarray.DataArray.compute>` (load data into memory)                                                              |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`ds.read(... window=)`       | :func:`rio.isel_window() <rioxarray.rioxarray.XRasterBase.isel_window>`                                                           |
+| :attr:`ds.read(... window=)`       | :func:`rio.isel_window() <rioxarray.rioxarray.XRasterBase.isel_window>`                                                           |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`ds.write()``                | :func:`rio.to_raster() <rioxarray.raster_array.RasterArray.to_raster>`                                                            |
+| :attr:`ds.write()``                | :func:`rio.to_raster() <rioxarray.raster_array.RasterArray.to_raster>`                                                            |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`mask.mask(..., crop=False)` | :func:`rio clip(..., drop=False) <rioxarray.raster_array.RasterArray.clip>`                                                       |
+| :attr:`mask.mask(..., crop=False)` | :func:`rio clip(..., drop=False) <rioxarray.raster_array.RasterArray.clip>`                                                       |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`mask.mask(..., crop=True)`  | :func:`rio clip(..., drop=True) <rioxarray.raster_array.RasterArray.clip>`                                                        |
+| :attr:`mask.mask(..., crop=True)`  | :func:`rio clip(..., drop=True) <rioxarray.raster_array.RasterArray.clip>`                                                        |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`warp.reproject()`           | :func:`rio.reproject() <rioxarray.raster_array.RasterArray.reproject>`                                                            |
+| :attr:`warp.reproject()`           | :func:`rio.reproject() <rioxarray.raster_array.RasterArray.reproject>`                                                            |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`merge.merge()`              | :func:`rioxarray.merge.merge_arrays`                                                                                              |
+| :attr:`merge.merge()`              | :func:`rioxarray.merge.merge_arrays`                                                                                              |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :func:`fill.fillnodata()`          | :func:`rio.interpolate_na() <rioxarray.raster_array.RasterArray.interpolate_na>`                                                  |
+| :attr:`fill.fillnodata()`          | :func:`rio.interpolate_na() <rioxarray.raster_array.RasterArray.interpolate_na>`                                                  |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 
 
