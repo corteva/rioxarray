@@ -1,0 +1,175 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Switching from rasterio &mdash; rioxarray 0.21.1.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=d369cbac"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Coordinate Reference System Management" href="crs_management.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rioxarray
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">rioxarray README</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#rio-accessor">rio accessor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#reading-files">Reading Files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="getting_started.html#introductory-information">Introductory Information</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Switching from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reasons-to-switch-from-rasterio-to-rioxarray">Reasons to switch from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#equivalences-between-rasterio-and-rioxarray">Equivalences between <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#going-back-to-rasterio">Going back to <code class="docutils literal notranslate"><span class="pre">rasterio</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="crs_management.html">Coordinate Reference System Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nodata_management.html">Nodata Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="manage_information_loss.html">Managing Information Loss with xarray operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gdal_env.html">Configure GDAL environment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Contributors ✨</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rioxarray</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="getting_started.html">Getting Started</a></li>
+      <li class="breadcrumb-item active">Switching from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/switching_from_rasterio.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="switching-from-rasterio">
+<span id="id1"></span><h1>Switching from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code><a class="headerlink" href="#switching-from-rasterio" title="Link to this heading"></a></h1>
+<section id="reasons-to-switch-from-rasterio-to-rioxarray">
+<h2>Reasons to switch from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code><a class="headerlink" href="#reasons-to-switch-from-rasterio-to-rioxarray" title="Link to this heading"></a></h2>
+<p>Usually, switching from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> means you are working with rasters and you have to adapt your code to <code class="docutils literal notranslate"><span class="pre">xarray</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">xarray</span></code> is a powerful abstraction of both the raster dataset and the raster array. There is a lot of advantages to unite these two notions under the same object, as it simplifies the use of the functions, using attributes stored in the object rather than passing arguments to the functions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with a lot of very interesting built-in functions and can leverage several backends to replace <code class="docutils literal notranslate"><span class="pre">numpy</span></code> in cases where it is limiting (out-of-memory computation, running the code on clusters, on GPU…). Dask is one of the most well-knwown. <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> handles some basic <code class="docutils literal notranslate"><span class="pre">dask</span></code> features in I/O (see <a class="reference external" href="https://corteva.github.io/rioxarray/html/examples/dask_read_write.html">Dask I/O example</a>) but is not designed to support <code class="docutils literal notranslate"><span class="pre">dask</span></code> in more evolved functions such as reproject.</p>
+<p>Beware, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with gotchas! You can see some of them in <a class="reference external" href="https://corteva.github.io/rioxarray/html/getting_started/manage_information_loss.html">the dedicated section</a>.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">rasterio</span></code> Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.</p>
+</div>
+</div></blockquote>
+</section>
+<section id="equivalences-between-rasterio-and-rioxarray">
+<h2>Equivalences between <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code><a class="headerlink" href="#equivalences-between-rasterio-and-rioxarray" title="Link to this heading"></a></h2>
+<p>To ease the switch from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> and <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code>, here is a table of the usual parameters or functions used.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ds</span></code> stands for <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> Dataset</p>
+<section id="profile">
+<h3>Profile<a class="headerlink" href="#profile" title="Link to this heading"></a></h3>
+<p>Here is the parameters that you can derive from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>’s Dataset profile:</p>
+<p>The values not used in <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> comes from the abstraction of the dataset in <code class="docutils literal notranslate"><span class="pre">xarray</span></code>: a dataset no longer belongs to a file on disk even if read from it. The driver and other file-related notions are meaningless in this context.</p>
+</section>
+<section id="other-dataset-parameters">
+<h3>Other dataset parameters<a class="headerlink" href="#other-dataset-parameters" title="Link to this heading"></a></h3>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> is lazy and therefore not loaded into memory, hence the <code class="docutils literal notranslate"><span class="pre">compute</span></code> equivalent to <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
+</section>
+</section>
+<section id="going-back-to-rasterio">
+<h2>Going back to <code class="docutils literal notranslate"><span class="pre">rasterio</span></code><a class="headerlink" href="#going-back-to-rasterio" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> 0.21+ enables recreating a <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> Dataset from <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code>.
+This is useful when translating your code from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code>, even if it is sub-optimal, because the array will be loaded and written in memory behind the hood.
+It is always better to look for <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code>’s native functions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">dataarray</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_rasterio_dataset</span><span class="p">()</span> <span class="k">as</span> <span class="n">rio_ds</span><span class="p">:</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="crs_management.html" class="btn btn-neutral float-right" title="Coordinate Reference System Management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

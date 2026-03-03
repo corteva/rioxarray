@@ -60,6 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Change-the-compression-of-the-raster-and-explicitly-make-it-a-Geotiff">Change the compression of the raster and explicitly make it a Geotiff</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Change-the-basic-datatype-of-the-raster-(in-this-example,-also-saving-space-going-to-32-bit)">Change the basic datatype of the raster (in this example, also saving space going to 32 bit)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Memory-efficient-raster-writing">Memory efficient raster writing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Write-your-raster-in-BytesIO-object">Write your raster in <code class="docutils literal notranslate"><span class="pre">BytesIO</span></code> object</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="clip_geom.html">Example - Clip</a></li>
@@ -81,6 +82,8 @@
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/354798/144357">How to mask NetCDF time series data from a shapefile in Python?</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/358058/144357">Extract data from raster at a point</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/358057/144357">Convert raster to CSV with lat, lon, and value columns</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://carpentries-incubator.github.io/geospatial-python/06-raster-intro.html">Geospatial Python courses by The Carpentries</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://earthdatascience.org/courses/use-data-open-source-python/intro-raster-data-python/">Geospatial Python courses by Earth Lab at University of Colorado, Boulder</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">rioxarray</a></li>
@@ -690,6 +693,22 @@ rds.green.rio.to_raster(
 </pre></div></div>
 </div>
 </section>
+<section id="Write-your-raster-in-BytesIO-object">
+<h2>Write your raster in <code class="docutils literal notranslate"><span class="pre">BytesIO</span></code> object<a class="headerlink" href="#Write-your-raster-in-BytesIO-object" title="Link to this heading"></a></h2>
+<p>As recommended in the <a class="reference external" href="https://planetarycomputer.microsoft.com/docs/quickstarts/storage/#Write-to-Azure-Blob-Storage">planetary computer documentation</a>, your raster can be directly written into a <code class="docutils literal notranslate"><span class="pre">BytesIO</span></code> object. Then, it can be uploaded into your favorite cloud storage.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import io
+
+with io.BytesIO() as buffer:
+    rds.rio.to_raster(buffer, driver=&quot;COG&quot;)
+    buffer.seek(0)
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 
 
@@ -703,7 +722,7 @@ rds.green.rio.to_raster(
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

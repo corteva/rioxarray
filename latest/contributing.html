@@ -61,6 +61,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#get-started">Get Started!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-tests-with-docker">Running tests with docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-documentation">Build documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pull-request-guidelines">Pull Request Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tips">Tips</a></li>
 </ul>
@@ -213,6 +214,28 @@ $<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>
 </pre></div>
 </div>
 </section>
+<section id="build-documentation">
+<h2>Build documentation<a class="headerlink" href="#build-documentation" title="Link to this heading"></a></h2>
+<p>This assumes you have cloned the rioxarray repository, installed rioxarray conda environment and are in the base folder.</p>
+<ol class="arabic simple">
+<li><p>Install documentation libraries</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>rioxarray
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>pandoc
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w"> </span>--group<span class="w"> </span>doc
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Build the documentation</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>docs
+</pre></div>
+</div>
+<p>If you are on Windows or don’t have <code class="docutils literal notranslate"><span class="pre">make</span></code> installed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>docs/<span class="w"> </span>docs/_build/
+</pre></div>
+</div>
+</section>
 <section id="pull-request-guidelines">
 <h2>Pull Request Guidelines<a class="headerlink" href="#pull-request-guidelines" title="Link to this heading"></a></h2>
 <p>Before you submit a pull request, check that it meets these guidelines:</p>
@@ -244,7 +267,7 @@ feature to the list in README.rst.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
