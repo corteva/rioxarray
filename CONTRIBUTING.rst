@@ -144,7 +144,7 @@ This assumes you have cloned the rioxarray repository, installed rioxarray conda
 .. code-block:: bash
 
     make docs
-   
+
 If you are on Windows or don't have ``make`` installed:
 
 .. code-block:: bash
