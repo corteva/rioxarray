@@ -119,13 +119,115 @@
 <section id="profile">
 <h3>Profile<a class="headerlink" href="#profile" title="Link to this heading"></a></h3>
 <p>Here is the parameters that you can derive from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>’s Dataset profile:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">rasterio</span></code> from <code class="docutils literal notranslate"><span class="pre">ds.profile</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> from DataArray</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">blockxsize</span></code></p></td>
+<td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">encoding[&quot;preferred_chunks&quot;][&quot;x&quot;]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">blockysize</span></code></p></td>
+<td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">encoding[&quot;preferred_chunks&quot;][&quot;y&quot;]</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">compress</span></code></p></td>
+<td><p><em>Unused in rioxarray</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.count" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">count</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.count" title="rioxarray.rioxarray.XRasterBase.count"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rio.count</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.crs" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">crs</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs" title="rioxarray.rioxarray.XRasterBase.crs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rio.crs</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.driver" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">driver</span></code></a></p></td>
+<td><p>Unused in rioxarray</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">dtype</span></code></p></td>
+<td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">encoding[&quot;rasterio_dtype&quot;]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.height" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">height</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.height" title="rioxarray.rioxarray.XRasterBase.height"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rio.height</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">interleave</span></code></p></td>
+<td><p>Unused in rioxarray</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.nodata" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">nodata</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.nodata" title="rioxarray.raster_array.RasterArray.nodata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rio.nodata</span></code></a> (or <a class="reference external" href="nodata_management.html">encoded_nodata</a> )</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">tiled</span></code></p></td>
+<td><p>Unused in rioxarray</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.transform" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.transform" title="rioxarray.rioxarray.XRasterBase.transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.transform()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.width" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">width</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.width" title="rioxarray.rioxarray.XRasterBase.width"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rio.width</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
 <p>The values not used in <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> comes from the abstraction of the dataset in <code class="docutils literal notranslate"><span class="pre">xarray</span></code>: a dataset no longer belongs to a file on disk even if read from it. The driver and other file-related notions are meaningless in this context.</p>
 </section>
 <section id="other-dataset-parameters">
 <h3>Other dataset parameters<a class="headerlink" href="#other-dataset-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">rasterio</span></code> from <code class="docutils literal notranslate"><span class="pre">ds</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> from DataArray</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.gcps" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">gcps</span></code></a> or <code class="xref py py-func docutils literal notranslate"><span class="pre">get_gcps()</span></code></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_gcps" title="rioxarray.rioxarray.XRasterBase.get_gcps"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.get_gcps()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.rpcs" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rpcs</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.get_rpcs" title="rioxarray.rioxarray.XRasterBase.get_rpcs"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.get_rpcs()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.io.html#rasterio.io.DatasetReader.bounds" title="(in rasterio)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bounds</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.bounds" title="rioxarray.rioxarray.XRasterBase.bounds"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.bounds()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="functions">
 <h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">rasterio</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">rioxarray</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.html#rasterio.open" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.open()</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.open_rasterio" title="rioxarray.open_rasterio"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.open_rasterio()</span></code></a> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">xarray.open_dataset(...,</span> <span class="pre">engine=&quot;rasterio&quot;,</span> <span class="pre">decode_coords=&quot;all&quot;)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></p></td>
+<td><p><code class="xref py py-func docutils literal notranslate"><span class="pre">compute()</span></code> (load data into memory)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-func docutils literal notranslate"><span class="pre">ds.read(...</span> <span class="pre">window=)</span></code></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.isel_window" title="rioxarray.rioxarray.XRasterBase.isel_window"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.isel_window()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.to_raster" title="rioxarray.raster_array.RasterArray.to_raster"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.to_raster()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.mask.html#rasterio.mask.mask" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">mask(...,</span> <span class="pre">crop=False)</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.clip" title="rioxarray.raster_array.RasterArray.clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.clip(...,</span> <span class="pre">drop=False)</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.mask.html#rasterio.mask.mask" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">mask(...,</span> <span class="pre">crop=True)</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.clip" title="rioxarray.raster_array.RasterArray.clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio</span> <span class="pre">clip(...,</span> <span class="pre">drop=True)</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.warp.html#rasterio.warp.reproject" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">reproject()</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.reproject" title="rioxarray.raster_array.RasterArray.reproject"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.reproject()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.merge.html#rasterio.merge.merge" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge()</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.merge.merge_arrays" title="rioxarray.merge.merge_arrays"><code class="xref py py-func docutils literal notranslate"><span class="pre">rioxarray.merge.merge_arrays()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.fill.html#rasterio.fill.fillnodata" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">fillnodata()</span></code></a></p></td>
+<td><p><a class="reference internal" href="../rioxarray.html#rioxarray.raster_array.RasterArray.interpolate_na" title="rioxarray.raster_array.RasterArray.interpolate_na"><code class="xref py py-func docutils literal notranslate"><span class="pre">rio.interpolate_na()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> is lazy and therefore not loaded into memory, hence the <code class="docutils literal notranslate"><span class="pre">compute</span></code> equivalent to <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
 </section>
 </section>
