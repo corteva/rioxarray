@@ -40,25 +40,25 @@ Here is the parameters that you can derive from ``rasterio``'s Dataset profile:
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
 | :attr:`compress`                 | *Unused in rioxarray*                                                                                                 |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`count`                    | :attr:`rio.count <rioxarray.rioxarray.XRasterBase.count>`                                                             |
+| :attr:`~rasterio.io.DatasetReader.count` | :attr:`rio.count <rioxarray.rioxarray.XRasterBase.count>`                                                             |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`crs`                      | :attr:`rio.crs <rioxarray.rioxarray.XRasterBase.crs>`                                                                 |
+| :attr:`~rasterio.io.DatasetReader.crs` | :attr:`rio.crs <rioxarray.rioxarray.XRasterBase.crs>`                                                                 |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`driver`                   | Unused in rioxarray                                                                                                   |
+| :attr:`~rasterio.io.DatasetReader.driver` | Unused in rioxarray                                                                                                   |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`dtype`                    | :attr:`.encoding["rasterio_dtype"]`                                                                                   |
+| :attr:`~rasterio.io.DatasetReader.dtype` | :attr:`.encoding["rasterio_dtype"]`                                                                                   |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`height`                   | :attr:`rio.height <rioxarray.rioxarray.XRasterBase.height>`                                                           |
+| :attr:`~rasterio.io.DatasetReader.height` | :attr:`rio.height <rioxarray.rioxarray.XRasterBase.height>`                                                           |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
 | :attr:`interleave`               | Unused in rioxarray                                                                                                   |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`nodata`                   | :attr:`rio.nodata <rioxarray.raster_array.RasterArray.nodata>` (or `encoded_nodata <nodata_management.html>`_ )       |
+| :attr:`~rasterio.io.DatasetReader.nodata` | :attr:`rio.nodata <rioxarray.raster_array.RasterArray.nodata>` (or `encoded_nodata <nodata_management.html>`_ )       |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
 | :attr:`tiled`                    | Unused in rioxarray                                                                                                   |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`transform`                | :func:`rio.transform() <rioxarray.rioxarray.XRasterBase.transform>`                                                   |
+| :attr:~rasterio.io.DatasetReader.transform` | :func:`rio.transform() <rioxarray.rioxarray.XRasterBase.transform>`                                                   |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
-| :attr:`width`                    | :attr:`rio.width <rioxarray.rioxarray.XRasterBase.width>`                                                             |
+| :attr:`~rasterio.io.DatasetReader.width` | :attr:`rio.width <rioxarray.rioxarray.XRasterBase.width>`                                                             |
 +----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
 
 The values not used in ``rioxarray`` comes from the abstraction of the dataset in ``xarray``: a dataset no longer belongs to a file on disk even if read from it. The driver and other file-related notions are meaningless in this context.
@@ -69,11 +69,11 @@ Other dataset parameters
 +----------------------------------+-------------------------------------------------------------------+
 | ``rasterio`` from ``ds``         | ``rioxarray`` from DataArray                                      |
 +==================================+===================================================================+
-| :attr:`gcps`                     | :func:`rio.get_gcps()<rioxarray.rioxarray.XRasterBase.get_gcps>`  |
+| :attr:`~rasterio.io.DatasetReader.gcps` or  :func:`~rasterio.io.DatasetReader.get_gcps` | :func:`rio.get_gcps() <rioxarray.rioxarray.XRasterBase.get_gcps>`  |
 +----------------------------------+-------------------------------------------------------------------+
-| :attr:`rpcs`                     | :func:`rio.get_rpcs() <rioxarray.rioxarray.XRasterBase.get_rpcs>` |
+| :attr:`~rasterio.io.DatasetReader.rpcs`  | :func:`rio.get_rpcs() <rioxarray.rioxarray.XRasterBase.get_rpcs>` |
 +----------------------------------+-------------------------------------------------------------------+
-| :attr:`bounds`                   | :func:`rio.bounds() <rioxarray.rioxarray.XRasterBase.bounds>`     |
+| :attr:`~rasterio.io.DatasetReader.bounds` | :func:`rio.bounds() <rioxarray.rioxarray.XRasterBase.bounds>`     |
 +----------------------------------+-------------------------------------------------------------------+
 
 Functions
@@ -82,23 +82,23 @@ Functions
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | ``rasterio``                       | ``rioxarray``                                                                                                                     |
 +====================================+===================================================================================================================================+
-| :func:`rasterio.open()`            | :func:`rioxarray.open_rasterio` or :attr:`xarray.open_dataset(..., engine="rasterio", decode_coords="all") <xarray.open_dataset>` |
+| :func:`rasterio.open`            | :func:`rioxarray.open_rasterio` or :attr:`xarray.open_dataset(..., engine="rasterio", decode_coords="all") <xarray.open_dataset>` |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`ds.read()`                  | :func:`compute() <xarray.DataArray.compute>` (load data into memory)                                                              |
+| :func:`~rasterio.io.DatasetReader.read`                  | :func:`compute() <xarray.DataArray.compute>` (load data into memory)                                                              |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`ds.read(... window=)`       | :func:`rio.isel_window() <rioxarray.rioxarray.XRasterBase.isel_window>`                                                           |
+| :func:`ds.read(... window=)  <rasterio.io.DatasetReader.read>` | :func:`rio.isel_window() <rioxarray.rioxarray.XRasterBase.isel_window>`                                                           |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`ds.write()``                | :func:`rio.to_raster() <rioxarray.raster_array.RasterArray.to_raster>`                                                            |
+| :func:`~rasterio.io.DatasetWriter.write` | :func:`rio.to_raster() <rioxarray.raster_array.RasterArray.to_raster>`                                                            |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`mask.mask(..., crop=False)` | :func:`rio clip(..., drop=False) <rioxarray.raster_array.RasterArray.clip>`                                                       |
+| :func:`mask(..., crop=False) <rasterio.mask.mask>` | :func:`rio.clip(..., drop=False) <rioxarray.raster_array.RasterArray.clip>`                                                       |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`mask.mask(..., crop=True)`  | :func:`rio clip(..., drop=True) <rioxarray.raster_array.RasterArray.clip>`                                                        |
+| :func:`mask(..., crop=True) <rasterio.mask.mask>`  | :func:`rio clip(..., drop=True) <rioxarray.raster_array.RasterArray.clip>`                                                        |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`warp.reproject()`           | :func:`rio.reproject() <rioxarray.raster_array.RasterArray.reproject>`                                                            |
+| :func:`~rasterio.warp.reproject`           | :func:`rio.reproject() <rioxarray.raster_array.RasterArray.reproject>`                                                            |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`merge.merge()`              | :func:`rioxarray.merge.merge_arrays`                                                                                              |
+| :func:`~rasterio.merge.merge`              | :func:`rioxarray.merge.merge_arrays`                                                                                              |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| :attr:`fill.fillnodata()`          | :func:`rio.interpolate_na() <rioxarray.raster_array.RasterArray.interpolate_na>`                                                  |
+| :func:`~rasterio.fill.fillnodata`          | :func:`rio.interpolate_na() <rioxarray.raster_array.RasterArray.interpolate_na>`                                                  |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 
 
