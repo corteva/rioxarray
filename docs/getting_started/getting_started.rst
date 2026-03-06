@@ -72,6 +72,37 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 6. It loads raster metadata into the attributes.
 7. `xarray.open_rasterio` is deprecated (since v0.20.0)
 
+rio string representation
+--------------------------
+
+The rio accessor has a string representation, this can help you check quickly the more relevant attributes of your raster:
+
+.. code-block:: python
+
+    import rioxarray
+
+    xds = rioxarray.open_rasterio("my.tif")
+    xds.rio
+
+Wich gives:
+
+.. code-block::
+
+    rioxarray accessor (.rio) | RasterArray
+    Attributes:
+            count: 1
+            crs: 32611
+            rasterio_dtype: float64
+            nodata: Unset
+            transform: | 14.26, 9.26, 305827.93|
+    | 9.26,-14.26, 5223236.60|
+    | 0.00, 0.00, 1.00|
+            height: 10
+            width: 10
+            blockxsize: 10
+            blockysize: 10
+            bounds: (305827.93, 5223236.6, 305997.93, 5223406.6)
+
 
 Introductory Information
 --------------------------

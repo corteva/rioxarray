@@ -583,3 +583,15 @@ class RasterDataset(XRasterBase):
             compute=compute,
             **profile_kwargs,
         )
+
+    def __repr__(self) -> str:
+        repr_list = [
+            f"rioxarray accessor (.rio) | {self.__class__.__name__}",
+            "Variables:",
+        ]
+
+        for var in self.vars:
+            repr_list += [f"\tName: '{var}'", f"\t'{var}' attributes:"]
+            repr_list += [f"\t\t{val}" for val in self._obj[var].rio._to_repr()]
+
+        return "\n".join(repr_list)
