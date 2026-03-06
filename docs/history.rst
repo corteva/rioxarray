@@ -1,12 +1,12 @@
 History
 =======
 
-Latest
+0.22.0
 ------
-- ENH: Add read support for Zarr spatial and proj conventions (pull #900)
-- ENH: Add `convention` option to `set_options()` for future multi-convention support (pull #899)
-- REF: Extract CF convention logic to `_convention/cf.py` module (pull #899)
-
+- ENH: Add read support for Zarr spatial and proj conventions (#900)
+- ENH: Add `convention` option to `set_options()` for future multi-convention support (#899)
+- REF: Extract CF convention logic to `_convention/cf.py` module (#899)
+- DEP: pin xarray 2026.2+ (#907)
 
 0.21.0
 ------
