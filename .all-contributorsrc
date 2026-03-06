@@ -475,6 +475,15 @@
         "doc",
         "test"
       ]
+    },
+    {
+      "login": "Breeze-Hu",
+      "name": "Breeze-Hu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/173059909?v=4",
+      "profile": "https://github.com/Breeze-Hu",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7
