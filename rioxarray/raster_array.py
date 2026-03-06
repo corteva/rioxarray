@@ -1112,11 +1112,10 @@ class RasterArray(XRasterBase):
             blockysize = None
 
         # Never leave CRS empty
-        crs = self.crs
-        if crs is None:
+        if self.crs is None:
             crs = "Unprojected"
         else:
-            crs = crs.to_epsg()
+            crs = self.crs.to_epsg()
 
         # Never leave nodata empty
         nodata = self.encoded_nodata if self.encoded_nodata is not None else self.nodata
