@@ -8,6 +8,7 @@ This module provides functions for reading geospatial metadata according to:
 from typing import Optional, Union
 
 import rasterio.crs
+import rasterio.transform
 import xarray
 from affine import Affine
 
@@ -184,6 +185,55 @@ def _parse_transform_from_attrs(
 
 
 # ============================================================================
+# Writing utilities
+# ============================================================================
+
+_CONVENTION_DICTS = {"proj:": PROJ_CONVENTION, "spatial:": SPATIAL_CONVENTION}
+
+
+def add_convention_declaration(attrs: dict, convention_name: str) -> dict:
+    """
+    Add a convention to the zarr_conventions list in attrs, idempotent.
+
+    Parameters
+    ----------
+    attrs : dict
+        Attributes dictionary to modify in place
+    convention_name : str
+        Name of the convention to declare (e.g., "proj:" or "spatial:")
+
+    Returns
+    -------
+    dict
+        The modified attrs dict
+    """
+    if has_convention_declared(attrs, convention_name):
+        return attrs
+    zarr_conventions = list(attrs.get("zarr_conventions") or [])
+    zarr_conventions.append(_CONVENTION_DICTS[convention_name])
+    attrs["zarr_conventions"] = zarr_conventions
+    return attrs
+
+
+def format_proj_wkt2(crs: rasterio.crs.CRS) -> str:
+    """Format CRS as proj:wkt2 (WKT2 string)."""
+    return crs.to_wkt()
+
+
+def format_proj_code(crs: rasterio.crs.CRS) -> Optional[str]:
+    """Format CRS as proj:code (AUTHORITY:CODE) if an authority code exists, else None."""
+    auth_code = crs.to_authority()
+    if auth_code:
+        return f"{auth_code[0]}:{auth_code[1]}"
+    return None
+
+
+def format_spatial_transform(affine: Affine) -> list:
+    """Convert Affine to spatial:transform array [a, b, c, d, e, f]."""
+    return [affine.a, affine.b, affine.c, affine.d, affine.e, affine.f]
+
+
+# ============================================================================
 # ZarrConvention class implementing ConventionProtocol
 # ============================================================================
 
@@ -270,9 +320,7 @@ class ZarrConvention:
         **kwargs,  # pylint: disable=unused-argument
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Write CRS using Zarr conventions.
-
-        Note: Writing support will be implemented in a future PR.
+        Write CRS using Zarr proj: convention.
 
         Parameters
         ----------
@@ -281,22 +329,20 @@ class ZarrConvention:
         crs : rasterio.crs.CRS
             CRS to write
         **kwargs
-            Additional convention-specific parameters
+            Additional convention-specific parameters (e.g., grid_mapping_name for CF;
+            silently ignored here)
 
         Returns
         -------
         xarray.Dataset or xarray.DataArray
             Object with CRS written
-
-        Raises
-        ------
-        NotImplementedError
-            Zarr write support is not yet implemented
         """
-        raise NotImplementedError(
-            "Zarr CRS writing is not yet implemented. "
-            "Use Convention.CF for writing or wait for a future release."
-        )
+        add_convention_declaration(obj.attrs, "proj:")
+        obj.attrs["proj:wkt2"] = format_proj_wkt2(crs)
+        proj_code = format_proj_code(crs)
+        if proj_code is not None:
+            obj.attrs["proj:code"] = proj_code
+        return obj
 
     @classmethod
     def write_transform(
@@ -307,9 +353,7 @@ class ZarrConvention:
         **kwargs,  # pylint: disable=unused-argument
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
-        Write transform using Zarr conventions.
-
-        Note: Writing support will be implemented in a future PR.
+        Write transform using Zarr spatial: convention.
 
         Parameters
         ----------
@@ -318,19 +362,25 @@ class ZarrConvention:
         transform : affine.Affine
             Transform to write
         **kwargs
-            Additional convention-specific parameters
+            Additional convention-specific parameters (e.g., grid_mapping_name for CF;
+            silently ignored here)
 
         Returns
         -------
         xarray.Dataset or xarray.DataArray
             Object with transform written
-
-        Raises
-        ------
-        NotImplementedError
-            Zarr write support is not yet implemented
         """
-        raise NotImplementedError(
-            "Zarr transform writing is not yet implemented. "
-            "Use Convention.CF for writing or wait for a future release."
+        add_convention_declaration(obj.attrs, "spatial:")
+        obj.attrs["spatial:transform"] = format_spatial_transform(transform)
+        y_dim = obj.rio.y_dim
+        x_dim = obj.rio.x_dim
+        height = obj.sizes[y_dim]
+        width = obj.sizes[x_dim]
+        obj.attrs["spatial:dimensions"] = [y_dim, x_dim]
+        obj.attrs["spatial:shape"] = [height, width]
+        left, bottom, right, top = rasterio.transform.array_bounds(
+            height, width, transform
         )
+        obj.attrs["spatial:bbox"] = [left, bottom, right, top]
+        obj.attrs["spatial:registration"] = "pixel"
+        return obj
