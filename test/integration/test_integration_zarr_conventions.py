@@ -223,7 +223,6 @@ def test_write_crs__zarr_convention():
     assert zarr.has_convention_declared(result.attrs, "proj:") is True
     assert "proj:wkt2" in result.attrs
     assert CRS.from_wkt(result.attrs["proj:wkt2"]) == CRS.from_epsg(4326)
-    assert result.attrs.get("proj:code") == "EPSG:4326"
 
 
 def test_write_transform__zarr_convention():

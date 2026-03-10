@@ -3,8 +3,6 @@ import numpy as np
 import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
-from unittest.mock import Mock
-
 import rioxarray  # noqa: F401
 from rioxarray._convention import zarr
 from rioxarray._convention.zarr import ZarrConvention
@@ -180,19 +178,6 @@ def test_format_proj_wkt2():
     assert CRS.from_wkt(result) == crs
 
 
-def test_format_proj_code__known_crs():
-    """Test formatting known CRS as AUTHORITY:CODE string."""
-    crs = CRS.from_epsg(4326)
-    assert zarr.format_proj_code(crs) == "EPSG:4326"
-
-
-def test_format_proj_code__no_authority():
-    """Test that format_proj_code returns None when CRS has no authority code."""
-    crs = Mock()
-    crs.to_authority.return_value = None
-    assert zarr.format_proj_code(crs) is None
-
-
 def test_format_spatial_transform():
     """Test converting Affine to [a, b, c, d, e, f] list."""
     affine = Affine(1.0, 0.0, 100.0, 0.0, -1.0, 200.0)
@@ -232,23 +217,6 @@ def test_write_crs():
     assert zarr.has_convention_declared(result.attrs, "proj:") is True
     assert "proj:wkt2" in result.attrs
     assert CRS.from_wkt(result.attrs["proj:wkt2"]) == crs
-
-
-def test_write_crs__also_writes_code():
-    """Test that proj:code is written for a CRS with a known authority."""
-    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
-    result = ZarrConvention.write_crs(data, crs=CRS.from_epsg(4326))
-    assert result.attrs.get("proj:code") == "EPSG:4326"
-
-
-def test_write_crs__no_code_for_custom_crs():
-    """Test that proj:code is absent when CRS has no authority code."""
-    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
-    crs = Mock()
-    crs.to_wkt.return_value = CRS.from_epsg(4326).to_wkt()
-    crs.to_authority.return_value = None
-    result = ZarrConvention.write_crs(data, crs=crs)
-    assert "proj:code" not in result.attrs
 
 
 def test_write_crs__ignores_grid_mapping_name():

@@ -220,14 +220,6 @@ def format_proj_wkt2(crs: rasterio.crs.CRS) -> str:
     return crs.to_wkt()
 
 
-def format_proj_code(crs: rasterio.crs.CRS) -> Optional[str]:
-    """Format CRS as proj:code (AUTHORITY:CODE) if an authority code exists, else None."""
-    auth_code = crs.to_authority()
-    if auth_code:
-        return f"{auth_code[0]}:{auth_code[1]}"
-    return None
-
-
 def format_spatial_transform(affine: Affine) -> list:
     """Convert Affine to spatial:transform array [a, b, c, d, e, f]."""
     return [affine.a, affine.b, affine.c, affine.d, affine.e, affine.f]
@@ -339,9 +331,6 @@ class ZarrConvention:
         """
         add_convention_declaration(obj.attrs, "proj:")
         obj.attrs["proj:wkt2"] = format_proj_wkt2(crs)
-        proj_code = format_proj_code(crs)
-        if proj_code is not None:
-            obj.attrs["proj:code"] = proj_code
         return obj
 
     @classmethod
