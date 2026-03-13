@@ -1,6 +1,10 @@
 History
 =======
 
+Unreleased
+----------
+- ENH: Add write support for Zarr spatial and proj conventions
+
 0.22.0
 ------
 - ENH: Add read support for Zarr spatial and proj conventions (#900)

@@ -4,6 +4,7 @@ import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
 
+import rioxarray  # noqa: F401
 from rioxarray._convention import zarr
 from rioxarray._convention.zarr import ZarrConvention
 
@@ -163,3 +164,86 @@ def test_read_spatial_dimensions__no_convention_declared():
 
     dims = ZarrConvention.read_spatial_dimensions(data)
     assert dims is None
+
+
+# ============================================================================
+# Formatting utilities
+# ============================================================================
+
+
+def test_format_spatial_transform():
+    """Test converting Affine to [a, b, c, d, e, f] list."""
+    affine = Affine(1.0, 0.0, 100.0, 0.0, -1.0, 200.0)
+    assert zarr.format_spatial_transform(affine) == [1.0, 0.0, 100.0, 0.0, -1.0, 200.0]
+
+
+# ============================================================================
+# Convention declaration
+# ============================================================================
+
+
+def test_add_convention_declaration():
+    """Test adding a convention declaration to empty attrs."""
+    attrs = {}
+    zarr.add_convention_declaration(attrs, "proj:")
+    assert zarr.has_convention_declared(attrs, "proj:") is True
+
+
+def test_add_convention_declaration__idempotent():
+    """Test that duplicate declarations are not added."""
+    attrs = {}
+    zarr.add_convention_declaration(attrs, "proj:")
+    zarr.add_convention_declaration(attrs, "proj:")
+    assert len(attrs["zarr_conventions"]) == 1
+
+
+# ============================================================================
+# ZarrConvention.write_crs
+# ============================================================================
+
+
+def test_write_crs():
+    """Test writing CRS writes proj:wkt2 and declares convention."""
+    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
+    crs = CRS.from_epsg(4326)
+    result = ZarrConvention.write_crs(data, crs=crs)
+    assert zarr.has_convention_declared(result.attrs, "proj:") is True
+    assert "proj:wkt2" in result.attrs
+    assert CRS.from_wkt(result.attrs["proj:wkt2"]) == crs
+
+
+def test_write_crs__ignores_grid_mapping_name():
+    """Test that grid_mapping_name kwarg (CF-specific) is silently ignored."""
+    data = xr.DataArray(np.random.rand(10, 10), dims=["y", "x"])
+    result = ZarrConvention.write_crs(
+        data, crs=CRS.from_epsg(4326), grid_mapping_name="spatial_ref"
+    )
+    assert "proj:wkt2" in result.attrs
+
+
+# ============================================================================
+# ZarrConvention.write_transform
+# ============================================================================
+
+
+def test_write_transform():
+    """Test writing transform writes all spatial: attributes."""
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    transform = Affine(1.0, 0.0, 100.0, 0.0, -1.0, 200.0)
+    result = ZarrConvention.write_transform(data, transform=transform)
+    assert zarr.has_convention_declared(result.attrs, "spatial:") is True
+    assert result.attrs["spatial:transform"] == [1.0, 0.0, 100.0, 0.0, -1.0, 200.0]
+    assert result.attrs["spatial:dimensions"] == ["y", "x"]
+    assert result.attrs["spatial:shape"] == [10, 20]
+    assert "spatial:bbox" in result.attrs
+    assert result.attrs["spatial:registration"] == "pixel"
+
+
+def test_write_transform__ignores_grid_mapping_name():
+    """Test that grid_mapping_name kwarg (CF-specific) is silently ignored."""
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    transform = Affine(1.0, 0.0, 100.0, 0.0, -1.0, 200.0)
+    result = ZarrConvention.write_transform(
+        data, transform=transform, grid_mapping_name="spatial_ref"
+    )
+    assert "spatial:transform" in result.attrs

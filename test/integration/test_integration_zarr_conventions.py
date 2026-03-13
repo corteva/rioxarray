@@ -209,3 +209,54 @@ def test_read_proj_projjson():
     crs = data.rio.crs
     assert crs is not None
     assert crs == CRS.from_epsg(4326)
+
+
+# ============================================================================
+# Write tests
+# ============================================================================
+
+
+def test_write_crs__zarr_convention():
+    """Test writing CRS via Convention.ZARR produces correct proj: attributes."""
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    result = data.rio.write_crs("EPSG:4326", convention=Convention.ZARR)
+    assert zarr.has_convention_declared(result.attrs, "proj:") is True
+    assert "proj:wkt2" in result.attrs
+    assert CRS.from_wkt(result.attrs["proj:wkt2"]) == CRS.from_epsg(4326)
+
+
+def test_write_transform__zarr_convention():
+    """Test writing transform via Convention.ZARR produces correct spatial: attributes."""
+    transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    result = data.rio.write_transform(transform, convention=Convention.ZARR)
+    assert zarr.has_convention_declared(result.attrs, "spatial:") is True
+    assert result.attrs["spatial:transform"] == [1.0, 0.0, 0.0, 0.0, -1.0, 10.0]
+    assert result.attrs["spatial:dimensions"] == ["y", "x"]
+    assert result.attrs["spatial:shape"] == [10, 20]
+    assert "spatial:bbox" in result.attrs
+    assert result.attrs["spatial:registration"] == "pixel"
+
+
+def test_write_crs__zarr_roundtrip():
+    """Test that a CRS written with ZARR convention can be read back."""
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    written = data.rio.write_crs("EPSG:4326", convention=Convention.ZARR)
+    assert written.rio.crs == CRS.from_epsg(4326)
+
+
+def test_write_transform__zarr_roundtrip():
+    """Test that a transform written with ZARR convention can be read back."""
+    transform = Affine(1.0, 0.0, 0.0, 0.0, -1.0, 10.0)
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    written = data.rio.write_transform(transform, convention=Convention.ZARR)
+    assert written.rio._cached_transform() == transform
+
+
+def test_write_crs__zarr_via_set_options():
+    """Test writing CRS with Convention.ZARR set via set_options()."""
+    data = xr.DataArray(np.random.rand(10, 20), dims=["y", "x"])
+    with set_options(convention=Convention.ZARR):
+        result = data.rio.write_crs("EPSG:4326")
+    assert zarr.has_convention_declared(result.attrs, "proj:") is True
+    assert "proj:wkt2" in result.attrs
