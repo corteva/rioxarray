@@ -215,11 +215,6 @@ def add_convention_declaration(attrs: dict, convention_name: str) -> dict:
     return attrs
 
 
-def format_proj_wkt2(crs: rasterio.crs.CRS) -> str:
-    """Format CRS as proj:wkt2 (WKT2 string)."""
-    return crs.to_wkt()
-
-
 def format_spatial_transform(affine: Affine) -> list:
     """Convert Affine to spatial:transform array [a, b, c, d, e, f]."""
     return [affine.a, affine.b, affine.c, affine.d, affine.e, affine.f]
@@ -330,7 +325,7 @@ class ZarrConvention:
             Object with CRS written
         """
         add_convention_declaration(obj.attrs, "proj:")
-        obj.attrs["proj:wkt2"] = format_proj_wkt2(crs)
+        obj.attrs["proj:wkt2"] = crs.to_wkt()
         return obj
 
     @classmethod

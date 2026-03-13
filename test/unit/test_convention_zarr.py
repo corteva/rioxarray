@@ -3,6 +3,7 @@ import numpy as np
 import xarray as xr
 from affine import Affine
 from rasterio.crs import CRS
+
 import rioxarray  # noqa: F401
 from rioxarray._convention import zarr
 from rioxarray._convention.zarr import ZarrConvention
@@ -168,14 +169,6 @@ def test_read_spatial_dimensions__no_convention_declared():
 # ============================================================================
 # Formatting utilities
 # ============================================================================
-
-
-def test_format_proj_wkt2():
-    """Test formatting CRS as WKT2 string."""
-    crs = CRS.from_epsg(4326)
-    result = zarr.format_proj_wkt2(crs)
-    assert isinstance(result, str)
-    assert CRS.from_wkt(result) == crs
 
 
 def test_format_spatial_transform():
