@@ -455,7 +455,7 @@ class RasterDataset(XRasterBase):
 
     def _retrieve_da_mtd(
         self,
-        data_var,
+        data_var: xarray.DataArray,
         *,
         attrs_img: dict,
         encodings_img: dict,
@@ -559,19 +559,19 @@ class RasterDataset(XRasterBase):
         data_array = self._obj.to_array(dim=variable_dim)
 
         # ensure raster metadata preserved
-        attrs_img = {
+        attrs_img: dict[str, list] = {
             "scales": [],
             "offsets": [],
             "nodatavals": [],
         }
 
-        encodings_img = {
+        encodings_img: dict[str, list] = {
             "scales": [],
             "offsets": [],
             "nodatavals": [],
         }
-        band_tags = []
-        long_name = []
+        band_tags: list = []
+        long_name: list = []
 
         for data_var in data_array[variable_dim].values:
             self._retrieve_da_mtd(
@@ -680,7 +680,7 @@ class RasterDataset(XRasterBase):
             list(band_tags.keys()) == self.vars
         ), "You should give one band tag per Dataset variable."
 
-        data_obj = self._get_obj(inplace=inplace)
+        data_obj: xarray.Dataset = self._get_obj(inplace=inplace)  # type: ignore
 
         data_obj.rio._band_tags = band_tags
         for var in self.vars:

@@ -971,7 +971,7 @@ class RasterArray(XRasterBase):
         *,
         driver: Optional[str] = None,
         dtype: Optional[Union[str, numpy.dtype]] = None,
-        tags: Optional[dict[str, str]] = None,
+        tags: Optional[dict[str, str | list]] = None,
         windowed: bool = False,
         recalc_transform: bool = True,
         lock: Optional[bool] = None,
@@ -1143,7 +1143,7 @@ class RasterArray(XRasterBase):
         """
         assert len(band_tags) == self.count, "You should give one band tag per band."
 
-        data_obj: xarray.DataArray = self._get_obj(inplace=inplace)
+        data_obj: xarray.DataArray = self._get_obj(inplace=inplace)  # type: ignore
         data_obj.rio._band_tags = band_tags
         data_obj.encoding["band_tags"] = band_tags
         return data_obj

@@ -656,7 +656,9 @@ def build_subdataset_filter(
     )
 
 
-def _parse_and_sanitize_tags(tags: dict, other_unwanted_attrs: list = None) -> dict:
+def _parse_and_sanitize_tags(
+    tags: dict, other_unwanted_attrs: Optional[tuple] = None
+) -> dict:
     attrs = _parse_tags(tags)
 
     if other_unwanted_attrs is None:

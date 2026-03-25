@@ -75,7 +75,7 @@ class XRasterBase:
         self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
         self._gcps: Optional[list[GroundControlPoint]] = None
         self._rpcs: Optional[RPC] = None
-        self._band_tags: Optional[list[dict]] = None
+        self._band_tags: Optional[list[dict[str, Any]]] = None
 
     @property
     def crs(self) -> Optional[rasterio.crs.CRS]:
@@ -1135,27 +1135,7 @@ class XRasterBase:
         self._rpcs = RPC(**json_rpcs)
         return self._rpcs
 
-    def write_band_tags(
-        self, band_tags: list[dict], inplace: bool = False
-    ) -> Union[xarray.Dataset, xarray.DataArray]:
-        """
-        Write band tags to the object attributes, ensuring one tag per band.
-
-        The tags are stored in the array's attributes under the key :code:`"band_tags"`, ensuring they'll be written on disk with :func:`to_raster`.
-
-        Parameters
-        ----------
-        band_tags: list[dict]
-            A list of dictionnaries, one per band, containing the bands' metadata.
-
-        Returns
-        -------
-        :obj:`xarray.xarray.Dataset` or :obj:`xarray.DataArray`:
-            Modified Dataset / DataArray with band tags
-        """
-        raise NotImplementedError
-
-    def get_band_tags(self) -> list[dict]:
+    def get_band_tags(self) -> list[dict[str, Any]] | None:
         """
         Get the band tags
 
@@ -1167,6 +1147,6 @@ class XRasterBase:
         if self._band_tags is not None:
             band_tags = self._band_tags
         else:
-            band_tags = self._obj.encoding.get("band_tags")
+            band_tags = self._obj.encoding.get("band_tags")  # type: ignore
 
         return band_tags
