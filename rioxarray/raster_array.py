@@ -1058,6 +1058,15 @@ class RasterArray(XRasterBase):
             self.encoded_nodata if self.encoded_nodata is not None else self.nodata
         )
 
+        # Add band tags
+        band_tags = self.get_band_tags()
+
+        if band_tags:
+            if tags is None:
+                tags = {"band_tags": band_tags}
+            else:
+                tags["band_tags"] = band_tags
+
         return RasterioWriter(raster_path=raster_path).to_raster(
             xarray_dataarray=self._obj,
             tags=tags,
@@ -1091,7 +1100,7 @@ class RasterArray(XRasterBase):
         Example
         -------
 
-        >>> with xds.to_rasterio_dataset() as rio_ds:
+        >>> with xda.rio.to_rasterio_dataset() as rio_ds:
         >>>    rio_ds.count
 
         """
@@ -1099,3 +1108,42 @@ class RasterArray(XRasterBase):
             self.to_raster(memfile.name)
             with memfile.open() as src_ds:
                 yield src_ds
+
+    def write_band_tags(
+        self, band_tags: list[dict], inplace: bool = False
+    ) -> xarray.DataArray:
+        """
+        Write band tags to the :obj:`xarray.DataArray`'s attributes, ensuring one tag per band.
+
+        The tags are stored in the array's attributes under the key :code:`"band_tags"`, ensuring they'll be written on disk with :func:`to_raster`.
+
+        Parameters
+        ----------
+        band_tags: list[dict]
+            A list of dictionnaries, one per band, containing the bands' metadata.
+
+        Returns
+        -------
+        :obj:`xarray.DataArray`:
+            Modified DataArray with band tags
+
+        Raises
+        ------
+        AssertionError:
+            If the length of `band_tags` does not match the number of bands.
+
+        Example
+        -------
+
+        >>> band_tags = [
+        >>>      {"year": "yesterday", "where": "here"},
+        >>>      {"year": "now", "where": "here"}
+        >>> ],  # Raster has two bands
+        >>> xda.rio.write_band_tags(band_tags, inplace=True)
+        """
+        assert len(band_tags) == self.count, "You should give one band tag per band."
+
+        data_obj: xarray.DataArray = self._get_obj(inplace=inplace)
+        data_obj.rio._band_tags = band_tags
+        data_obj.encoding["band_tags"] = band_tags
+        return data_obj

@@ -538,7 +538,13 @@ class RasterDataset(XRasterBase):
                 encoded_nodatavals.append(self._obj[data_var].rio.encoded_nodata)
             else:
                 attr_nodatavals.append(self._obj[data_var].rio.nodata)
-            band_tags.append(self._obj[data_var].attrs.copy())
+
+            curr_band_tags = self._obj[data_var].rio.get_band_tags()
+            var_attrs = self._obj[data_var].attrs.copy()
+            if curr_band_tags is not None:
+                for cbt in curr_band_tags:
+                    var_attrs.update(cbt)
+            band_tags.append(var_attrs)
         if encoded_scales:
             data_array.encoding["scales"] = encoded_scales
         else:
@@ -583,3 +589,53 @@ class RasterDataset(XRasterBase):
             compute=compute,
             **profile_kwargs,
         )
+
+    def write_band_tags(
+        self, band_tags: dict[str, list[dict]], inplace: bool = False
+    ) -> xarray.Dataset:
+        """
+        Write band tags to the Dataset's attributes, ensuring one tag per band and per variable.
+
+        The tags are stored in the variables's attributes under the key :code:`"band_tags"`, ensuring they'll be written on disk with :func:`to_raster`.
+
+        Parameters
+        ----------
+        band_tags: dict[str, list[dict]]
+            A dictionary mapping the variable name to the band tags list of dictionnaries, one per variable's band, containing the bands' metadata.
+
+        Returns
+        --------
+        :class:`xarray.Dataset`:
+            Modified Dataset with band tags
+
+        Raises
+        ------
+        AssertionError:
+            If the length of `band_tags` does not match the number of variables.
+
+        Example
+        -------
+
+        >>> band_tags = {
+        >>>     "blue": [
+        >>>          {"year": "yesterday", "where": "here"},
+        >>>          {"year": "now", "where": "here"}
+        >>>     ],  # Blue has two bands
+        >>>     "green": [
+        >>>         {"year": "yesterday", "where": "there"},
+        >>>         {"year": "now", "where": "there"}
+        >>>     ],  # Green has two bands
+        >>> }
+        >>> xds.rio.write_band_tags(band_tags, inplace=True)
+        """
+        assert (
+            list(band_tags.keys()) == self.vars
+        ), "You should give one band tag per Dataset variable."
+
+        data_obj = self._get_obj(inplace=inplace)
+
+        data_obj.rio._band_tags = band_tags
+        for var in self.vars:
+            data_obj[var].rio.write_band_tags(band_tags=band_tags[var], inplace=True)
+
+        return data_obj
