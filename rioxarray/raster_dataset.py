@@ -456,6 +456,7 @@ class RasterDataset(XRasterBase):
     def _retrieve_da_mtd(
         self,
         data_var,
+        *,
         attrs_img: dict,
         encodings_img: dict,
         band_tags: list,
@@ -574,7 +575,11 @@ class RasterDataset(XRasterBase):
 
         for data_var in data_array[variable_dim].values:
             self._retrieve_da_mtd(
-                data_var, attrs_img, encodings_img, band_tags, long_name
+                data_var=data_var,
+                attrs_img=attrs_img,
+                encodings_img=encodings_img,
+                band_tags=band_tags,
+                long_name=long_name,
             )
 
         # Scale and offsets
