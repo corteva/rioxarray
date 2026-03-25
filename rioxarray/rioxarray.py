@@ -1165,6 +1165,8 @@ class XRasterBase:
             The band tags as a list of tags dict, one per band
         """
         if self._band_tags is not None:
-            return self._band_tags
+            band_tags = self._band_tags
         else:
-            return self._obj.encoding.get("band_tags")
+            band_tags = self._obj.encoding.get("band_tags")
+
+        return band_tags
