@@ -39,15 +39,16 @@ With rioxarry, you just have to print the accessor itself to have similar ionfor
     >>> xda = rioxarray.open_rasterio(r"my_raster.tif")
     >>> print(xda.rio)
 
-    rioxarray accessor (.rio) | RasterArray
-    Attributes:
+    rioxarray.RasterDataArray: (y[latitude (m)]: 10, x[latitude (m)]: 10, z[band]: 1)
+    Profile:
         count: 1
         crs: 32605
-        rasterio_dtype: float32
+        dtype: float32
         nodata: 0.0
-        transform: | 10.00, 0.00, 346860.00|
-    | 0.00,-10.00, 6392220.00|
-    | 0.00, 0.00, 1.00|
+        transform:
+            | 10.00, 0.00, 346860.00|
+            | 0.00,-10.00, 6392220.00|
+            | 0.00, 0.00, 1.00|
         height: 22547
         width: 21710
         blockxsize: 256

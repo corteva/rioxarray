@@ -1626,7 +1626,7 @@ def test_repr_nc():
             ds = ds.to_dataset(name="nc_ds")
         str_arr = str(ds.rio)
         print(str_arr)
-        assert "rioxarray accessor (.rio) | RasterDataset" in str_arr
+        assert str_arr.startswith("rioxarray.RasterDataset")
 
 
 def test_repr_tifs():
@@ -1637,4 +1637,4 @@ def test_repr_tifs():
         print(input_array)
         str_arr = str(rioxarray.open_rasterio(input_array).rio)
         print(str_arr)
-        assert "rioxarray accessor (.rio) | RasterArray" in str_arr
+        assert str_arr.startswith("rioxarray.RasterDataArray")

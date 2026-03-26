@@ -1127,9 +1127,9 @@ class RasterArray(XRasterBase):
         repr_dict = {
             "count": self.count,
             "crs": crs,
-            "rasterio_dtype": self._obj.encoding.get("rasterio_dtype"),
+            "dtype": self._obj.encoding.get("rasterio_dtype"),
             "nodata": nodata,
-            "transform": self.transform(),
+            "transform": f"\n{self.transform()}",
             "height": self.height,
             "width": self.width,
             "blockxsize": blockxsize,
@@ -1143,8 +1143,8 @@ class RasterArray(XRasterBase):
 
     def __repr__(self) -> str:
         repr_list = [
-            f"rioxarray accessor (.rio) | {self.__class__.__name__}",
-            "Attributes:",
-        ] + [f"\t{val}" for val in self._to_repr()]
+            f"rioxarray.RasterDataArray: ({self._dims_unit_to_repr()})",
+            "Profile:",
+        ] + ["\t\t\t".join(f"\t{val}".splitlines(True)) for val in self._to_repr()]
 
         return "\n".join(repr_list)

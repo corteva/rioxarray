@@ -84,25 +84,49 @@ The rio accessor has a string representation, this can help you check quickly th
     xds = rioxarray.open_rasterio("my.tif")
     xds.rio
 
-Wich gives:
+Wich gives here (and for DataArrays):
 
 .. code-block::
 
-    rioxarray accessor (.rio) | RasterArray
-    Attributes:
-            count: 1
-            crs: 32611
-            rasterio_dtype: float64
-            nodata: Unset
-            transform: | 14.26, 9.26, 305827.93|
-    | 9.26,-14.26, 5223236.60|
-    | 0.00, 0.00, 1.00|
-            height: 10
-            width: 10
-            blockxsize: 10
-            blockysize: 10
-            bounds: (305827.93, 5223236.6, 305997.93, 5223406.6)
+    rioxarray.RasterDataArray: (y[latitude (m)]: 10, x[latitude (m)]: 10, z[band]: 1)
+    Profile:
+        count: 1
+        crs: 32605
+        dtype: float32
+        nodata: 0.0
+        transform:
+            | 10.00, 0.00, 346860.00|
+            | 0.00,-10.00, 6392220.00|
+            | 0.00, 0.00, 1.00|
+        height: 22547
+        width: 21710
+        blockxsize: 256
+        blockysize: 256
+        bounds: (346860.0, 6166750.0, 563960.0, 6392220.0)
 
+For Datasets, it looks like:
+
+.. code-block::
+
+    rioxarray.RasterDataset
+    Dimensions: y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+    Data variables:
+        blue	y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+        green	y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+    Profile:
+        count: 2
+        crs: 32722
+        dtype: float64
+        nodata: nan
+        transform:
+            | 3.00, 0.00, 466266.00|
+            | 0.00,-3.00, 8084700.00|
+            | 0.00, 0.00, 1.00|
+        height: 10
+        width: 10
+        blockxsize: 10
+        blockysize: 10
+        bounds: (466266.0, 8084670.0, 466296.0, 8084700.0)
 
 Introductory Information
 --------------------------

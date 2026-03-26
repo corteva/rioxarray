@@ -586,12 +586,17 @@ class RasterDataset(XRasterBase):
 
     def __repr__(self) -> str:
         repr_list = [
-            f"rioxarray accessor (.rio) | {self.__class__.__name__}",
-            "Variables:",
+            "rioxarray.RasterDataset",
+            f"Dimensions: {self._dims_unit_to_repr()}",
+            "Data variables:",
         ]
 
         for var in self.vars:
-            repr_list += [f"\tName: '{var}'", f"\t'{var}' attributes:"]
-            repr_list += [f"\t\t{val}" for val in self._obj[var].rio._to_repr()]
+            repr_list += [f"\t{var}\t{self._obj[var].rio._dims_unit_to_repr()}"]
+
+        repr_list += ["Profile:"] + [
+            "\t\t".join(f"\t{r}".splitlines(True))
+            for r in self._obj[self.vars[0]].rio._to_repr()
+        ]
 
         return "\n".join(repr_list)
