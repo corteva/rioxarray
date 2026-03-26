@@ -84,7 +84,7 @@ The rio accessor has a string representation, this can help you check quickly th
     xds = rioxarray.open_rasterio("my.tif")
     xds.rio
 
-Wich gives here (and for DataArrays):
+Which gives here (and for DataArrays):
 
 .. code-block::
 
