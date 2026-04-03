@@ -75,6 +75,7 @@ class XRasterBase:
         self._crs: Union[rasterio.crs.CRS, None, Literal[False]] = None
         self._gcps: Optional[list[GroundControlPoint]] = None
         self._rpcs: Optional[RPC] = None
+        self._band_tags: Optional[list[dict[str, Any]]] = None
 
     @property
     def crs(self) -> Optional[rasterio.crs.CRS]:
@@ -119,6 +120,7 @@ class XRasterBase:
         obj_copy.rio._crs = self._crs
         obj_copy.rio._gcps = self._gcps
         obj_copy.rio._rpcs = self._rpcs
+        obj_copy.rio._band_tags = self._band_tags
         return obj_copy
 
     def set_crs(
@@ -1132,3 +1134,19 @@ class XRasterBase:
 
         self._rpcs = RPC(**json_rpcs)
         return self._rpcs
+
+    def get_band_tags(self) -> list[dict[str, Any]] | None:
+        """
+        Get the band tags
+
+        Returns
+        -------
+        :obj:`list[dict]` or None
+            The band tags as a list of tags dict, one per band
+        """
+        if self._band_tags is not None:
+            band_tags = self._band_tags
+        else:
+            band_tags = self._obj.encoding.get("band_tags")  # type: ignore
+
+        return band_tags
