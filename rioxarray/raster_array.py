@@ -1099,3 +1099,75 @@ class RasterArray(XRasterBase):
             self.to_raster(memfile.name)
             with memfile.open() as src_ds:
                 yield src_ds
+
+    def _to_repr(self, from_ds: bool = False, uniform_ds: bool = True) -> list[str]:
+        """
+        Function representing the DataArray. Not set directly in __repr__ as it is used also in Datasets.
+
+        Parameters
+        ----------
+        from_ds: bool
+            repr of a DataArray from a Dataset
+        uniform_ds: bool
+            the dataset is uniform, meaning all contained DataArrays have the same data
+        """
+
+        # Never leave CRS empty
+        if self.crs is None:
+            crs = "Unprojected"
+        else:
+            crs = self.crs.to_epsg()
+
+        # Create representation dict
+        # NOTE: height, width and count values are already present in the dimensions repr, so don't set them again
+        repr_dict = {}
+
+        # If we have a native DataArray or a Dataset with uniform coordinates
+        if not from_ds or (from_ds and uniform_ds):
+            repr_dict.update(
+                {
+                    "crs": crs,
+                    "transform": f"\n{self.transform()}",
+                    "gcps": self.get_gcps(),
+                    "rpcs": self.get_rpcs(),
+                    "bounds": self.bounds(),
+                }
+            )
+
+        # If we have a native DataArray, this is not useful in case of a Dataset (because it may vary between variables)
+        if not from_ds:
+            # Manage chunks
+            try:
+                pref_chunks = self._obj.encoding["preferred_chunks"]
+                blockxsize = pref_chunks["x"]
+                blockysize = pref_chunks["y"]
+            except KeyError:
+                blockxsize = None
+                blockysize = None
+
+            # Never leave nodata empty
+            nodata = (
+                self.encoded_nodata if self.encoded_nodata is not None else self.nodata
+            )
+
+            if nodata is None:
+                nodata = "Unset"
+
+            repr_dict.update(
+                {
+                    "nodata": nodata,
+                    "blockxsize": blockxsize,
+                    "blockysize": blockysize,
+                    "dtype": self._obj.encoding.get("rasterio_dtype"),
+                }
+            )
+
+        return [f"{key}: {val}" for key, val in repr_dict.items() if val is not None]
+
+    def __repr__(self) -> str:
+        repr_list = [
+            f"rioxarray.RasterDataArray: ({self._dims_unit_to_repr()})",
+            "Profile:",
+        ] + ["\t\t\t".join(f"\t{val}".splitlines(True)) for val in self._to_repr()]
+
+        return "\n".join(repr_list)

@@ -72,6 +72,61 @@ Why use :func:`rioxarray.open_rasterio` instead of `xarray.open_rasterio`?
 6. It loads raster metadata into the attributes.
 7. `xarray.open_rasterio` is deprecated (since v0.20.0)
 
+rio string representation
+--------------------------
+
+The rio accessor has a string representation, this can help you check quickly the more relevant attributes of your raster:
+
+.. code-block:: python
+
+    import rioxarray
+
+    xds = rioxarray.open_rasterio("my.tif")
+    xds.rio
+
+Which gives here (and for DataArrays):
+
+.. code-block::
+
+    rioxarray.RasterDataArray: (y[latitude (m)]: 10, x[latitude (m)]: 10, z[band]: 1)
+    Profile:
+        count: 1
+        crs: 32605
+        dtype: float32
+        nodata: 0.0
+        transform:
+            | 10.00, 0.00, 346860.00|
+            | 0.00,-10.00, 6392220.00|
+            | 0.00, 0.00, 1.00|
+        height: 22547
+        width: 21710
+        blockxsize: 256
+        blockysize: 256
+        bounds: (346860.0, 6166750.0, 563960.0, 6392220.0)
+
+For Datasets, it looks like:
+
+.. code-block::
+
+    rioxarray.RasterDataset
+    Dimensions: y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+    Data variables:
+        blue	y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+        green	y[latitude (m)]: 10, x[latitude (m)]: 10, z[time]: 2
+    Profile:
+        count: 2
+        crs: 32722
+        dtype: float64
+        nodata: nan
+        transform:
+            | 3.00, 0.00, 466266.00|
+            | 0.00,-3.00, 8084700.00|
+            | 0.00, 0.00, 1.00|
+        height: 10
+        width: 10
+        blockxsize: 10
+        blockysize: 10
+        bounds: (466266.0, 8084670.0, 466296.0, 8084700.0)
 
 Introductory Information
 --------------------------
