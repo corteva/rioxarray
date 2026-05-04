@@ -32,6 +32,7 @@ Stable release
       anaconda/miniconda. Using envs make it easier to
       debug problems with packages and ensure the stability
       of your root env."
+
         -- https://conda-forge.org/docs/user/tipsandtricks.html
 
   .. warning::

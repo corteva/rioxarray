@@ -25,7 +25,7 @@ class RasterDataset(XRasterBase):
 
     @property
     def vars(self) -> list:
-        """list: Returns non-coordinate varibles"""
+        """list: Returns non-coordinate variables."""
         return list(self._obj.data_vars)
 
     @property
@@ -63,7 +63,7 @@ class RasterDataset(XRasterBase):
         resolution: Optional[Union[float, tuple[float, float]]] = None,
         shape: Optional[tuple[int, int]] = None,
         transform: Optional[Affine] = None,
-        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
+        resampling: Optional[Union[Resampling, str]] = Resampling.nearest,
         nodata: Optional[float] = None,
         **kwargs,
     ) -> xarray.Dataset:
@@ -145,7 +145,7 @@ class RasterDataset(XRasterBase):
         self,
         match_data_array: Union[xarray.DataArray, xarray.Dataset],
         *,
-        resampling: Optional[Union[Resampling | str]] = Resampling.nearest,
+        resampling: Optional[Union[Resampling, str]] = Resampling.nearest,
         **reproject_kwargs,
     ) -> xarray.Dataset:
         """
