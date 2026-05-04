@@ -157,25 +157,36 @@
 <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
 <section id="API-Documentation">
-<h4>API Documentation<a class="headerlink" href="#API-Documentation" title="Link to this heading"></a></h4>
+<h3>API Documentation<a class="headerlink" href="#API-Documentation" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.set_options"><span class="std std-ref">rioxarray.set_options</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.enum.Convention"><span class="std std-ref">rioxarray.enum.Convention</span></a></p></li>
 </ul>
 </section>
 </section>
-</section>
 <section id="Accessing-the-CRS-object">
 <h2>Accessing the CRS object<a class="headerlink" href="#Accessing-the-CRS-object" title="Link to this heading"></a></h2>
 <p>If you have opened a dataset and the Coordinate Reference System (CRS) can be determined, you can access it via the <code class="docutils literal notranslate"><span class="pre">rio.crs</span></code> accessor.</p>
+<section id="Search-order-for-the-CRS-(DataArray-and-Dataset):">
+<h3>Search order for the CRS (DataArray and Dataset):<a class="headerlink" href="#Search-order-for-the-CRS-(DataArray-and-Dataset):" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Look in <code class="docutils literal notranslate"><span class="pre">encoding</span></code> of your data array for the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate name. Inside the <code class="docutils literal notranslate"><span class="pre">grid_mapping</span></code> coordinate first look for <code class="docutils literal notranslate"><span class="pre">spatial_ref</span></code> then <code class="docutils literal notranslate"><span class="pre">crs_wkt</span></code> and lastly the CF grid mapping attributes. This is in line with the Climate and Forecast (CF) conventions for storing the CRS as well as GDAL netCDF conventions.</p></li>
 <li><p>Look in the <code class="docutils literal notranslate"><span class="pre">crs</span></code> attribute and load in the CRS from there. This is for backwards compatibility with <code class="docutils literal notranslate"><span class="pre">xarray.open_rasterio</span></code>, which is deprecated since version 0.20.0. We recommend using <code class="docutils literal notranslate"><span class="pre">rioxarray.open_rasterio</span></code> instead.</p></li>
 </ol>
 <p>The value for the <code class="docutils literal notranslate"><span class="pre">crs</span></code> is anything accepted by <code class="docutils literal notranslate"><span class="pre">rasterio.crs.CRS.from_user_input()</span></code></p>
+</section>
+<section id="Search-order-for-the-CRS-for-Dataset:">
+<h3>Search order for the CRS for Dataset:<a class="headerlink" href="#Search-order-for-the-CRS-for-Dataset:" title="Link to this heading"></a></h3>
 <p>If the CRS is not found using the search methods above, it also searches the <code class="docutils literal notranslate"><span class="pre">data_vars</span></code> and uses the first valid CRS found.</p>
+</section>
+<section id="decode_coords=%22all%22">
+<h3>decode_coords=”all”<a class="headerlink" href="#decode_coords=%22all%22" title="Link to this heading"></a></h3>
 <p>If you use one of xarray’s open methods such as <code class="docutils literal notranslate"><span class="pre">xarray.open_dataset</span></code> to load netCDF files with the default engine, it is recommended to use <code class="docutils literal notranslate"><span class="pre">decode_coords=&quot;all&quot;</span></code>. This will load the grid mapping variable into coordinates for compatibility with rioxarray.</p>
+</section>
+<section id="id1">
+<h3>API Documentation<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.write_crs"><span class="std std-ref">rio.write_crs()</span></a></p></li>
 <li><p><a class="reference internal" href="../rioxarray.html#rioxarray.rioxarray.XRasterBase.crs"><span class="std std-ref">rio.crs</span></a></p></li>
@@ -605,6 +616,7 @@ Attributes:
 CRS.from_epsg(32722)
 </pre></div></div>
 </div>
+</section>
 </section>
 <section id="Setting-the-CRS">
 <h2>Setting the CRS<a class="headerlink" href="#Setting-the-CRS" title="Link to this heading"></a></h2>
