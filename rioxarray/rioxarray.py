@@ -130,7 +130,7 @@ class XRasterBase:
 
         .. deprecated:: 0.15.8
             It is recommended to use `rio.write_crs()` instead. This
-        method will likely be removed in a future release.
+            method will likely be removed in a future release.
 
         Parameters
         ----------
