@@ -130,7 +130,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 </pre></div>
 </div>
 </div>
@@ -139,10 +139,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;,
-)
-rds
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">rds</span>
 </pre></div>
 </div>
 </div>
@@ -546,8 +546,8 @@ Attributes:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># note how one time slice was selected on export to make the dataset 2D
-rds.isel(time=0).rio.to_raster(&quot;planet_scope.tif&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># note how one time slice was selected on export to make the dataset 2D</span>
+<span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;planet_scope.tif&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -555,7 +555,7 @@ rds.isel(time=0).rio.to_raster(&quot;planet_scope.tif&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!rio info planet_scope.tif
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>rio<span class="w"> </span>info<span class="w"> </span>planet_scope.tif
 </pre></div>
 </div>
 </div>
@@ -575,8 +575,8 @@ rds.isel(time=0).rio.to_raster(&quot;planet_scope.tif&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># note how selecting one variable allowed for multiple time steps in a single raster
-rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># note how selecting one variable allowed for multiple time steps in a single raster</span>
+<span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;planet_scope_green.tif&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -584,7 +584,7 @@ rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!rio info planet_scope_green.tif
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>rio<span class="w"> </span>info<span class="w"> </span>planet_scope_green.tif
 </pre></div>
 </div>
 </div>
@@ -604,8 +604,8 @@ rds.green.rio.to_raster(&quot;planet_scope_green.tif&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># you will get a two file raster: the .ers file with the metdata and the data with no extension
-rds.blue.rio.to_raster(&quot;planet_scope_green.ers&quot;, driver=&quot;ERS&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># you will get a two file raster: the .ers file with the metdata and the data with no extension</span>
+<span class="n">rds</span><span class="o">.</span><span class="n">blue</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;planet_scope_green.ers&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;ERS&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -616,7 +616,7 @@ rds.blue.rio.to_raster(&quot;planet_scope_green.ers&quot;, driver=&quot;ERS&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.blue.rio.to_raster(&quot;planet_scope_green_LZW_compression.tif&quot;, driver=&quot;GTiff&quot;, compress=&quot;LZW&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">blue</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;planet_scope_green_LZW_compression.tif&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZW&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -627,7 +627,7 @@ rds.blue.rio.to_raster(&quot;planet_scope_green.ers&quot;, driver=&quot;ERS&quot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.blue.dtype
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">blue</span><span class="o">.</span><span class="n">dtype</span>
 </pre></div>
 </div>
 </div>
@@ -644,7 +644,7 @@ dtype(&#39;float64&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.blue.astype(&#39;float32&#39;).rio.to_raster(&quot;planet_scope_green_LZW_compression.tif&quot;, driver=&quot;GTiff&quot;, compress=&quot;LZW&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">blue</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;planet_scope_green_LZW_compression.tif&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZW&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -662,17 +662,17 @@ dtype(&#39;float64&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;,
-    lock=False,  # disable internal caching
-    cache=False,  # don&#39;t keep data loaded in memory. pull from disk every time
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">,</span>
+    <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># disable internal caching</span>
+    <span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># don&#39;t keep data loaded in memory. pull from disk every time</span>
+<span class="p">)</span>
 
-rds.green.rio.to_raster(
-    &quot;planet_scope_tiled.tif&quot;,
-    tiled=True,  # GDAL: By default striped TIFF files are created. This option can be used to force creation of tiled TIFF files.
-    windowed=True,  # rioxarray: read &amp; write one window at a time
-)
+<span class="n">rds</span><span class="o">.</span><span class="n">green</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+    <span class="s2">&quot;planet_scope_tiled.tif&quot;</span><span class="p">,</span>
+    <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># GDAL: By default striped TIFF files are created. This option can be used to force creation of tiled TIFF files.</span>
+    <span class="n">windowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># rioxarray: read &amp; write one window at a time</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -680,7 +680,7 @@ rds.green.rio.to_raster(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!rio info planet_scope_tiled.tif
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>rio<span class="w"> </span>info<span class="w"> </span>planet_scope_tiled.tif
 </pre></div>
 </div>
 </div>
@@ -700,11 +700,11 @@ rds.green.rio.to_raster(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import io
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 
-with io.BytesIO() as buffer:
-    rds.rio.to_raster(buffer, driver=&quot;COG&quot;)
-    buffer.seek(0)
+<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+    <span class="n">rds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;COG&quot;</span><span class="p">)</span>
+    <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

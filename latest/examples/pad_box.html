@@ -118,10 +118,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
-import xarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
-%matplotlib inline
+<span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
@@ -131,7 +131,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -139,7 +139,7 @@ import xarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span>
 </pre></div>
 </div>
 </div>
@@ -594,7 +594,7 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -626,12 +626,12 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc = xds.rio.pad_box(
-    minx=-7.3e+06,
-    miny=4.99e+06,
-    maxx=-7.2e+06,
-    maxy=5.06e+06,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xdsc</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">pad_box</span><span class="p">(</span>
+    <span class="n">minx</span><span class="o">=-</span><span class="mf">7.3e+06</span><span class="p">,</span>
+    <span class="n">miny</span><span class="o">=</span><span class="mf">4.99e+06</span><span class="p">,</span>
+    <span class="n">maxx</span><span class="o">=-</span><span class="mf">7.2e+06</span><span class="p">,</span>
+    <span class="n">maxy</span><span class="o">=</span><span class="mf">5.06e+06</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -639,7 +639,7 @@ dl.xr-attrs {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc.values[0, 0]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xdsc</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -656,7 +656,7 @@ nan
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xdsc.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xdsc</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

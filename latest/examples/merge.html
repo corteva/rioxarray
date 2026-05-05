@@ -117,12 +117,12 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
-import xarray
-from rioxarray.merge import merge_arrays
-# Note: You can merge datasets with the merge_datasets method
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.merge</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_arrays</span>
+<span class="c1"># Note: You can merge datasets with the merge_datasets method</span>
 
-%matplotlib inline
+<span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
@@ -138,15 +138,15 @@ from rioxarray.merge import merge_arrays
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dem_test = &quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;
-rds = rioxarray.open_rasterio(dem_test)
-arrays = [
-    rds.isel(x=slice(100), y=slice(100)),
-    rds.isel(x=slice(100, 200), y=slice(100, 200)),
-    rds.isel(x=slice(100), y=slice(100, 200)),
-    rds.isel(x=slice(100, 200), y=slice(100)),
-]
-merged = merge_arrays(arrays)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dem_test</span> <span class="o">=</span> <span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;</span>
+<span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">dem_test</span><span class="p">)</span>
+<span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">)),</span>
+    <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)),</span>
+    <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)),</span>
+    <span class="n">rds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">100</span><span class="p">)),</span>
+<span class="p">]</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">merge_arrays</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -154,7 +154,7 @@ merged = merge_arrays(arrays)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rds.where(rds!=rds.rio.nodata).plot();
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rds</span><span class="o">!=</span><span class="n">rds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
@@ -169,7 +169,7 @@ merged = merge_arrays(arrays)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>merged.where(merged!=merged.rio.nodata).plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">merged</span><span class="o">!=</span><span class="n">merged</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

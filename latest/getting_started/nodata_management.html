@@ -122,10 +122,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
-import xarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
-file_path = &quot;../../test/test_data/input/tmmx_20190121.nc&quot;
+<span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;../../test/test_data/input/tmmx_20190121.nc&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -136,8 +136,8 @@ file_path = &quot;../../test/test_data/input/tmmx_20190121.nc&quot;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path, mask_and_scale=False) # performs mask_and_scale by default
-rds = rioxarray.open_rasterio(file_path)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># performs mask_and_scale by default</span>
+<span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -145,12 +145,12 @@ rds = rioxarray.open_rasterio(file_path)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;nodata:&quot;)
-print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.nodata}&quot;)
-print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.nodata}&quot;)
-print(&quot;\nencoded_nodata:&quot;)
-print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.encoded_nodata}&quot;)
-print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.encoded_nodata}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nodata:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- xarray.open_dataset: </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- rioxarray.open_rasterio: </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">encoded_nodata:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- xarray.open_dataset: </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- rioxarray.open_rasterio: </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -172,9 +172,9 @@ encoded_nodata:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;attributes:&quot;)
-print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.attrs}&quot;)
-print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.attrs}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;attributes:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- xarray.open_dataset:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">attrs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- rioxarray.open_rasterio:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">attrs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -201,8 +201,8 @@ attributes:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path) # performs mask_and_scale by default
-rds = rioxarray.open_rasterio(file_path, mask_and_scale=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="c1"># performs mask_and_scale by default</span>
+<span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -219,12 +219,12 @@ rds = rioxarray.open_rasterio(file_path, mask_and_scale=True)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;nodata:&quot;)
-print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.nodata}&quot;)
-print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.nodata}&quot;)
-print(&quot;\nencoded_nodata:&quot;)
-print(f&quot;- xarray.open_dataset: {xds.air_temperature.rio.encoded_nodata}&quot;)
-print(f&quot;- rioxarray.open_rasterio: {rds.air_temperature.rio.encoded_nodata}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nodata:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- xarray.open_dataset: </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- rioxarray.open_rasterio: </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">encoded_nodata:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- xarray.open_dataset: </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- rioxarray.open_rasterio: </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -246,9 +246,9 @@ encoded_nodata:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;attributes:&quot;)
-print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.attrs}&quot;)
-print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.attrs}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;attributes:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- xarray.open_dataset:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">attrs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- rioxarray.open_rasterio:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">attrs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -270,9 +270,9 @@ attributes:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;encoding:&quot;)
-print(f&quot;\n- xarray.open_dataset:\n    {xds.air_temperature.encoding}&quot;)
-print(f&quot;\n- rioxarray.open_rasterio:\n    {rds.air_temperature.encoding}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;encoding:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- xarray.open_dataset:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">encoding</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- rioxarray.open_rasterio:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">rds</span><span class="o">.</span><span class="n">air_temperature</span><span class="o">.</span><span class="n">encoding</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -298,12 +298,12 @@ encoding:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataset(file_path, mask_and_scale=False) # performs mask_and_scale by default
-raster = xds.air_temperature
-raster = raster.where(raster != raster.rio.nodata)
-# nodata does not reflect the data has been masked
-print(f&quot;nodata: {raster.rio.nodata}&quot;)
-print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># performs mask_and_scale by default</span>
+<span class="n">raster</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">air_temperature</span>
+<span class="n">raster</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">raster</span> <span class="o">!=</span> <span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+<span class="c1"># nodata does not reflect the data has been masked</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nodata: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;encoded_nodata: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -320,10 +320,10 @@ encoded_nodata: None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># update nodata value to show the data has been masked
-raster.rio.write_nodata(raster.rio.nodata, encoded=True, inplace=True)
-print(f&quot;nodata: {raster.rio.nodata}&quot;)
-print(f&quot;encoded_nodata: {raster.rio.encoded_nodata}&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># update nodata value to show the data has been masked</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">encoded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nodata: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;encoded_nodata: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">encoded_nodata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

@@ -125,9 +125,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 
-%matplotlib inline
+<span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
@@ -142,10 +142,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-    masked=True,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -153,7 +153,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -181,19 +181,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>geometries = [
-    {
-        &#39;type&#39;: &#39;Polygon&#39;,
-        &#39;coordinates&#39;: [[
-            [425499.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615331.540546387]
-        ]]
-    }
-]
-clipped = xds.rio.clip(geometries)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="p">[[</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">]</span>
+        <span class="p">]]</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+<span class="n">clipped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -201,7 +201,7 @@ clipped = xds.rio.clip(geometries)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -225,7 +225,7 @@ clipped = xds.rio.clip(geometries)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped.rio.to_raster(&quot;clipped.tif&quot;, compress=&#39;LZMA&#39;, tiled=True, dtype=&quot;int32&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -236,8 +236,8 @@ clipped = xds.rio.clip(geometries)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import geopandas
-from shapely.geometry import box
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 </pre></div>
 </div>
 </div>
@@ -245,12 +245,12 @@ from shapely.geometry import box
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>geodf = geopandas.GeoDataFrame(
-    geometry=[
-        box(425499.18381405267, 4615331.540546387, 425526.18381405267, 4615478.540546387)
-    ],
-    crs=&quot;EPSG:26915&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geodf</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">box</span><span class="p">(</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">,</span> <span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:26915&quot;</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -258,12 +258,12 @@ from shapely.geometry import box
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped = xds.rio.clip(geodf.geometry.values, geodf.crs, drop=False, invert=True)
-# Note: If you have rasterio &lt; 1.2 you will need convert the geometries to dict-like objects if the projection
-# of the geometries differ from the raster. For example:
-#
-# from shapely.geometry import mapping
-#  geometries = geodf.geometry.apply(mapping)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geodf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">geodf</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Note: If you have rasterio &lt; 1.2 you will need convert the geometries to dict-like objects if the projection</span>
+<span class="c1"># of the geometries differ from the raster. For example:</span>
+<span class="c1">#</span>
+<span class="c1"># from shapely.geometry import mapping</span>
+<span class="c1">#  geometries = geodf.geometry.apply(mapping)</span>
 </pre></div>
 </div>
 </div>
@@ -271,7 +271,7 @@ from shapely.geometry import box
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -295,7 +295,7 @@ from shapely.geometry import box
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped.rio.to_raster(&quot;clipped_invert.tif&quot;, compress=&#39;LZMA&#39;, tiled=True, dtype=&quot;int32&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped_invert.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -310,23 +310,23 @@ from shapely.geometry import box
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>geometries = [
-    {
-        &#39;type&#39;: &#39;Polygon&#39;,
-        &#39;coordinates&#39;: [[
-            [425499.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615478.540546387],
-            [425526.18381405267, 4615331.540546387],
-            [425499.18381405267, 4615331.540546387]
-        ]]
-    }
-]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="p">[[</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">]</span>
+        <span class="p">]]</span>
+    <span class="p">}</span>
+<span class="p">]</span>
 
-clipped = rioxarray.open_rasterio(
-    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-    masked=True,
-).rio.clip(geometries, from_disk=True)
+<span class="n">clipped</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">from_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -334,7 +334,7 @@ clipped = rioxarray.open_rasterio(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>clipped.plot()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

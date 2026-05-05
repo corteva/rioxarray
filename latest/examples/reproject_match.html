@@ -121,12 +121,12 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray # for the extension to load
-import xarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span> <span class="c1"># for the extension to load</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
-import matplotlib.pyplot as plt
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-%matplotlib inline
+<span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
 </div>
@@ -134,14 +134,14 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def print_raster(raster):
-    print(
-        f&quot;shape: {raster.rio.shape}\n&quot;
-        f&quot;resolution: {raster.rio.resolution()}\n&quot;
-        f&quot;bounds: {raster.rio.bounds()}\n&quot;
-        f&quot;sum: {raster.sum().item()}\n&quot;
-        f&quot;CRS: {raster.rio.crs}\n&quot;
-    )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">print_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;shape: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;resolution: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;bounds: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;sum: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;CRS: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -151,8 +151,8 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;)
-xds_match = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;</span><span class="p">)</span>
+<span class="n">xds_match</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -160,10 +160,10 @@ xds_match = xarray.open_dataarray(&quot;../../test/test_data/input/MODIS_ARRAY_M
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(ncols=2, figsize=(12,4))
-xds.plot(ax=axes[0])
-xds_match.plot(ax=axes[1])
-plt.draw()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">xds</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">xds_match</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -178,10 +178,10 @@ plt.draw()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Original Raster:\n----------------\n&quot;)
-print_raster(xds)
-print(&quot;Raster to Match:\n----------------\n&quot;)
-print_raster(xds_match)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original Raster:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">print_raster</span><span class="p">(</span><span class="n">xds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">print_raster</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -222,7 +222,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds_repr_match = xds.rio.reproject_match(xds_match)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds_repr_match</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject_match</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -230,10 +230,10 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Reprojected Raster:\n-------------------\n&quot;)
-print_raster(xds_repr_match)
-print(&quot;Raster to Match:\n----------------\n&quot;)
-print_raster(xds_match)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reprojected Raster:</span><span class="se">\n</span><span class="s2">-------------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">print_raster</span><span class="p">(</span><span class="n">xds_repr_match</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">print_raster</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -271,11 +271,11 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds_repr_match = xds_repr_match.assign_coords({
-    &quot;x&quot;: xds_match.x,
-    &quot;y&quot;: xds_match.y,
-})
-xds_sum = xds_repr_match + xds_match
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds_repr_match</span> <span class="o">=</span> <span class="n">xds_repr_match</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span>
+    <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+    <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">xds_sum</span> <span class="o">=</span> <span class="n">xds_repr_match</span> <span class="o">+</span> <span class="n">xds_match</span>
 </pre></div>
 </div>
 </div>
@@ -283,8 +283,8 @@ xds_sum = xds_repr_match + xds_match
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Sum Raster:\n-----------\n&quot;)
-print_raster(xds_sum)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sum Raster:</span><span class="se">\n</span><span class="s2">-----------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">print_raster</span><span class="p">(</span><span class="n">xds_sum</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -308,13 +308,13 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(ncols=3, figsize=(16,4))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 
-xds_repr_match.plot(ax=axes[0])
-xds_match.plot(ax=axes[1])
-xds_sum.plot(ax=axes[2])
+<span class="n">xds_repr_match</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">xds_match</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">xds_sum</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-plt.draw()
+<span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

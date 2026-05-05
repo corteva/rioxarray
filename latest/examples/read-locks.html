@@ -132,12 +132,12 @@ scheduler</a> and its <a class="reference external" href="https://distributed.da
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import rioxarray
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 
-url = (
-    &quot;https://naipeuwest.blob.core.windows.net/naip/v002/md/2013/md_100cm_2013/&quot;
-    &quot;39076/m_3907617_ne_18_1_20130924.tif&quot;
-)
+<span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;https://naipeuwest.blob.core.windows.net/naip/v002/md/2013/md_100cm_2013/&quot;</span>
+    <span class="s2">&quot;39076/m_3907617_ne_18_1_20130924.tif&quot;</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -145,8 +145,8 @@ url = (
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
-%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -170,8 +170,8 @@ Wall time: 3.32 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(1, -1, &quot;auto&quot;))
-%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">))</span>
+<span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -193,8 +193,8 @@ Wall time: 11.2 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, lock=False, chunks=(4, &quot;auto&quot;, -1))
-%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -211,7 +211,7 @@ Wall time: 3.25 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -229,8 +229,8 @@ Wall time: 2.97 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ds = rioxarray.open_rasterio(url, chunks=(4, &quot;auto&quot;, -1))  # use the default locking
-%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># use the default locking</span>
+<span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>
@@ -248,7 +248,7 @@ Wall time: 5.03 s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%time _ = ds.mean().compute()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> _ = ds.mean().compute()
 </pre></div>
 </div>
 </div>

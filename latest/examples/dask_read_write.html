@@ -119,16 +119,16 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import multiprocessing
-# Linux/OSX:
-import multiprocessing.popen_spawn_posix
-# Windows:
-# import multiprocessing.popen_spawn_win32
-import threading
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="c1"># Linux/OSX:</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing.popen_spawn_posix</span>
+<span class="c1"># Windows:</span>
+<span class="c1"># import multiprocessing.popen_spawn_win32</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 
-from dask.distributed import Client, LocalCluster, Lock
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">LocalCluster</span><span class="p">,</span> <span class="n">Lock</span>
 
-import rioxarray
+<span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 </pre></div>
 </div>
 </div>
@@ -151,11 +151,11 @@ import rioxarray
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-    chunks=True,
-)
-xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;simple_write.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -166,14 +166,14 @@ xds.rio.to_raster(&quot;simple_write.tif&quot;, tiled=True)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xds = rioxarray.open_rasterio(
-    &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-    chunks=True,
-    lock=False,
-    # lock=threading.Lock(), # when too many file handles open
-xds.rio.to_raster(
-    &quot;dask_thread.tif&quot;, tiled=True, lock=threading.Lock(),
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="c1"># lock=threading.Lock(), # when too many file handles open</span>
+<span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+    <span class="s2">&quot;dask_thread.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">(),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -184,18 +184,18 @@ xds.rio.to_raster(
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with LocalCluster() as cluster, Client(cluster) as client:
-    xds = rioxarray.open_rasterio(
-        &quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;,
-        chunks=True,
-        lock=False,
-        # lock=Lock(&quot;rio-read&quot;, client=client), # when too many file handles open
-    )
-    xds.rio.to_raster(
-        &quot;dask_multiworker.tif&quot;,
-        tiled=True,
-        lock=Lock(&quot;rio&quot;, client=client),
-    )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">LocalCluster</span><span class="p">()</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+    <span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
+        <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+        <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="c1"># lock=Lock(&quot;rio-read&quot;, client=client), # when too many file handles open</span>
+    <span class="p">)</span>
+    <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
+        <span class="s2">&quot;dask_multiworker.tif&quot;</span><span class="p">,</span>
+        <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lock</span><span class="o">=</span><span class="n">Lock</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">),</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
