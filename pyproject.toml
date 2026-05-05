@@ -45,6 +45,7 @@ dependencies = [
 doc = [
     "sphinx-click",
     "nbsphinx",
+    "ipython",
     "sphinx_rtd_theme",
 ]
 test = [
