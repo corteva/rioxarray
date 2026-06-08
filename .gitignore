@@ -83,6 +83,9 @@ celerybeat-schedule
 # dotenv
 .env
 
+# uv env
+uv.lock
+
 # virtualenv
 .venv
 venv/

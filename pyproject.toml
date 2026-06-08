@@ -15,12 +15,12 @@ keywords = [
     "rasterio",
 ]
 readme = "README.rst"
-license = {text = "Apache"}
+license = "Apache-2.0"
+license-files = ["LICENSE*", "AUTHORS.rst"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Natural Language :: English",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: GIS",
     "Programming Language :: Python",
@@ -78,7 +78,7 @@ changelog = "https://corteva.github.io/rioxarray/stable/history.html"
 [tool.setuptools.packages.find]
 include = ["rioxarray", "rioxarray.*"]
 
-[options.package_data]
+[tool.setuptools.package-data]
 rioxarray = [
   "py.typed",
 ]
@@ -93,6 +93,3 @@ interp = [
 all = [
     "scipy"
 ]
-
-[tool.black]
-target_version = ["py310"]
