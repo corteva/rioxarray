@@ -20,7 +20,7 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -66,7 +66,7 @@ jobs:
             run-with-scipy: 'NO'
             gdal-version: '3.11.5'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Update
         run: |
@@ -127,7 +127,7 @@ jobs:
         run-with-scipy: ['YES']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Conda
         uses: mamba-org/setup-micromamba@v3
@@ -193,7 +193,7 @@ jobs:
     name: Test latest dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Conda
         uses: mamba-org/setup-micromamba@v3
