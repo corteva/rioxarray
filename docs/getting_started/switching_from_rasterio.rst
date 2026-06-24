@@ -19,6 +19,43 @@ Beware, ``xarray`` comes also with gotchas! You can see some of them in `the ded
 
     ``rasterio`` Dataset and xarray Dataset are two completely different things! Please be careful with these overlapping names.
 
+Quickly check your raster metadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With ``rasterio``, you can rapidly print your dataset profile to grasp your dataset information (a bit like ``gdalinfo``):
+
+.. code-block:: python
+
+    >>> with rasterio.open(r"my_raster.tif") as ds:
+    >>>    print(ds.profile)
+
+    {'driver': 'GTiff', 'dtype': 'float32', 'nodata': 0.0, 'width': 21710, 'height': 22547, 'count': 1, 'crs': CRS.from_wkt('PROJCS["WGS 84 / UTM zone 5N",...]]'),
+    'transform': Affine(10.0, 0.0, 346860.0, 0.0, -10.0, 6392220.0), 'blockxsize': 256, 'blockysize': 256, 'tiled': True, 'compress': 'deflate', 'interleave': 'band'}
+
+With rioxarry, you just have to print the accessor itself to have similar ionformation:
+
+.. code-block:: python
+
+    >>> xda = rioxarray.open_rasterio(r"my_raster.tif")
+    >>> print(xda.rio)
+
+    rioxarray.RasterDataArray: (y[latitude (m)]: 10, x[latitude (m)]: 10, z[band]: 1)
+    Profile:
+        count: 1
+        crs: 32605
+        dtype: float32
+        nodata: 0.0
+        transform:
+            | 10.00, 0.00, 346860.00|
+            | 0.00,-10.00, 6392220.00|
+            | 0.00, 0.00, 1.00|
+        height: 22547
+        width: 21710
+        blockxsize: 256
+        blockysize: 256
+        bounds: (346860.0, 6166750.0, 563960.0, 6392220.0)
+
+
 Equivalences between ``rasterio`` and ``rioxarray``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
