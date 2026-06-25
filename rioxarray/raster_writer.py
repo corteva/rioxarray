@@ -16,6 +16,7 @@ from rasterio.windows import Window
 from xarray.conventions import encode_cf_variable
 
 from rioxarray._io import FILL_VALUE_NAMES, UNWANTED_RIO_ATTRS, _get_unsigned_dtype
+from rioxarray._spatial_utils import UNWANTED_TAGS
 from rioxarray.exceptions import RioXarrayError
 
 try:
@@ -39,19 +40,7 @@ def _write_tags(*, raster_handle, tags):
     Write tags to raster dataset
     """
     # filter out attributes that should be written in a different location
-    skip_tags = (
-        UNWANTED_RIO_ATTRS
-        + FILL_VALUE_NAMES
-        + (
-            "crs",
-            "transform",
-            "scales",
-            "scale_factor",
-            "add_offset",
-            "offsets",
-            "grid_mapping",
-        )
-    )
+    skip_tags = UNWANTED_RIO_ATTRS + FILL_VALUE_NAMES + UNWANTED_TAGS
     # this is for when multiple values are used
     # in this case, it will be stored in the raster description
     if not isinstance(tags.get("long_name"), str):

@@ -453,6 +453,48 @@ class RasterDataset(XRasterBase):
             x_dim=self.x_dim, y_dim=self.y_dim, inplace=True
         )
 
+    def _retrieve_da_mtd(
+        self,
+        data_var: xarray.DataArray,
+        *,
+        attrs_img: dict,
+        encodings_img: dict,
+        band_tags: list,
+        long_name: list,
+    ):
+        # Scale
+        try:
+            encodings_img["scales"].append(self._obj[data_var].encoding["scale_factor"])
+        except KeyError:
+            attrs_img["scales"].append(
+                self._obj[data_var].attrs.get("scale_factor", 1.0)
+            )
+
+        # Offset
+        try:
+            encodings_img["offsets"].append(self._obj[data_var].encoding["add_offset"])
+        except KeyError:
+            attrs_img["offsets"].append(
+                self._obj[data_var].attrs.get("add_offset", 0.0)
+            )
+
+        # Nodata
+        if self._obj[data_var].rio.encoded_nodata is not None:
+            encodings_img["nodatavals"].append(self._obj[data_var].rio.encoded_nodata)
+        else:
+            attrs_img["nodatavals"].append(self._obj[data_var].rio.nodata)
+
+        # Name
+        long_name.append(self._obj[data_var].attrs.get("long_name", data_var))
+
+        # Band tags
+        curr_band_tags = self._obj[data_var].rio.get_band_tags()
+        var_attrs = self._obj[data_var].attrs.copy()
+        if curr_band_tags is not None:
+            for cbt in curr_band_tags:
+                var_attrs.update(cbt)
+        band_tags.append(var_attrs)
+
     def to_raster(
         self,
         raster_path: Union[str, os.PathLike],
@@ -515,43 +557,52 @@ class RasterDataset(XRasterBase):
         # pylint: disable=too-many-locals
         variable_dim = f"band_{uuid4()}"
         data_array = self._obj.to_array(dim=variable_dim)
+
         # ensure raster metadata preserved
-        attr_scales = []
-        attr_offsets = []
-        attr_nodatavals = []
-        encoded_scales = []
-        encoded_offsets = []
-        encoded_nodatavals = []
-        band_tags = []
-        long_name = []
+        attrs_img: dict[str, list] = {
+            "scales": [],
+            "offsets": [],
+            "nodatavals": [],
+        }
+
+        encodings_img: dict[str, list] = {
+            "scales": [],
+            "offsets": [],
+            "nodatavals": [],
+        }
+        band_tags: list = []
+        long_name: list = []
+
         for data_var in data_array[variable_dim].values:
-            try:
-                encoded_scales.append(self._obj[data_var].encoding["scale_factor"])
-            except KeyError:
-                attr_scales.append(self._obj[data_var].attrs.get("scale_factor", 1.0))
-            try:
-                encoded_offsets.append(self._obj[data_var].encoding["add_offset"])
-            except KeyError:
-                attr_offsets.append(self._obj[data_var].attrs.get("add_offset", 0.0))
-            long_name.append(self._obj[data_var].attrs.get("long_name", data_var))
-            if self._obj[data_var].rio.encoded_nodata is not None:
-                encoded_nodatavals.append(self._obj[data_var].rio.encoded_nodata)
-            else:
-                attr_nodatavals.append(self._obj[data_var].rio.nodata)
-            band_tags.append(self._obj[data_var].attrs.copy())
-        if encoded_scales:
-            data_array.encoding["scales"] = encoded_scales
+            self._retrieve_da_mtd(
+                data_var=data_var,
+                attrs_img=attrs_img,
+                encodings_img=encodings_img,
+                band_tags=band_tags,
+                long_name=long_name,
+            )
+
+        # Scale and offsets
+        if encodings_img["scales"]:
+            data_array.encoding["scales"] = encodings_img["scales"]
         else:
-            data_array.attrs["scales"] = attr_scales
-        if encoded_offsets:
-            data_array.encoding["offsets"] = encoded_offsets
+            data_array.attrs["scales"] = attrs_img["scales"]
+        if encodings_img["offsets"]:
+            data_array.encoding["offsets"] = encodings_img["offsets"]
         else:
-            data_array.attrs["offsets"] = attr_offsets
+            data_array.attrs["offsets"] = attrs_img["offsets"]
+
+        # Band name and tags
         data_array.attrs["band_tags"] = band_tags
         data_array.attrs["long_name"] = long_name
 
-        use_encoded_nodatavals = bool(encoded_nodatavals)
-        nodatavals = encoded_nodatavals if use_encoded_nodatavals else attr_nodatavals
+        # Nodata
+        use_encoded_nodatavals = bool(encodings_img["nodatavals"])
+        nodatavals = (
+            encodings_img["nodatavals"]
+            if use_encoded_nodatavals
+            else attrs_img["nodatavals"]
+        )
         nodata = nodatavals[0]
         if (
             all(nodataval == nodata for nodataval in nodatavals)
@@ -563,10 +614,13 @@ class RasterDataset(XRasterBase):
         else:
             raise RioXarrayError(
                 "All nodata values must be the same when exporting to raster. "
-                f"Current values: {attr_nodatavals}"
+                f"Current values: {attrs_img['nodatavals']}"
             )
+
+        # CRS
         if self.crs is not None:
             data_array.rio.write_crs(self.crs, inplace=True)
+
         # write it to a raster
         return data_array.rio.set_spatial_dims(
             x_dim=self.x_dim,
@@ -583,3 +637,53 @@ class RasterDataset(XRasterBase):
             compute=compute,
             **profile_kwargs,
         )
+
+    def write_band_tags(
+        self, band_tags: dict[str, list[dict]], inplace: bool = False
+    ) -> xarray.Dataset:
+        """
+        Write band tags to the Dataset's attributes, ensuring one tag per band and per variable.
+
+        The tags are stored in the variables's attributes under the key :code:`"band_tags"`, ensuring they'll be written on disk with :func:`to_raster`.
+
+        Parameters
+        ----------
+        band_tags: dict[str, list[dict]]
+            A dictionary mapping the variable name to the band tags list of dictionnaries, one per variable's band, containing the bands' metadata.
+
+        Returns
+        --------
+        :class:`xarray.Dataset`:
+            Modified Dataset with band tags
+
+        Raises
+        ------
+        AssertionError:
+            If the length of `band_tags` does not match the number of variables.
+
+        Example
+        -------
+
+        >>> band_tags = {
+        >>>     "blue": [
+        >>>          {"year": "yesterday", "where": "here"},
+        >>>          {"year": "now", "where": "here"}
+        >>>     ],  # Blue has two bands
+        >>>     "green": [
+        >>>         {"year": "yesterday", "where": "there"},
+        >>>         {"year": "now", "where": "there"}
+        >>>     ],  # Green has two bands
+        >>> }
+        >>> xds.rio.write_band_tags(band_tags, inplace=True)
+        """
+        assert (
+            list(band_tags.keys()) == self.vars
+        ), "You should give one band tag per Dataset variable."
+
+        data_obj: xarray.Dataset = self._get_obj(inplace=inplace)  # type: ignore
+
+        data_obj.rio._band_tags = band_tags
+        for var in self.vars:
+            data_obj[var].rio.write_band_tags(band_tags=band_tags[var], inplace=True)
+
+        return data_obj
