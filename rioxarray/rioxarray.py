@@ -36,6 +36,7 @@ from rioxarray._spatial_utils import (  # noqa: F401, pylint: disable=unused-imp
     _has_spatial_dims,
     _order_bounds,
     _resolution,
+    _rotated_bounds,
     affine_to_coords,
 )
 from rioxarray.crs import crs_from_user_input
@@ -840,6 +841,11 @@ class XRasterBase:
         left, bottom, right, top: float
             Outermost coordinates of the `xarray.DataArray` | `xarray.Dataset`.
         """
+        transform = self._cached_transform()
+        if transform is not None and _affine_has_rotation(transform):
+            # a rotated/sheared grid is not axis-aligned, so the bounds are
+            # the envelope of the four (transformed) corners of the grid.
+            return _rotated_bounds(transform, width=self.width, height=self.height)
         minx, miny, maxx, maxy = self._unordered_bounds(recalc=recalc)
         resolution_x, resolution_y = self.resolution(recalc=recalc)
         return _order_bounds(
