@@ -1,13 +1,46 @@
 import os
 
+import numpy
 import pytest
 import xarray
 from numpy import nansum
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
+from rasterio.io import MemoryFile
+from rasterio.merge import merge as rio_merge
+from rasterio.transform import from_origin
 
 from rioxarray import open_rasterio
 from rioxarray.merge import merge_arrays, merge_datasets
 from test.conftest import TEST_INPUT_DATA_DIR
+
+
+@pytest.mark.parametrize("bounds", [None, (1, 1, 3, 3), (0.8, 0.6, 3.4, 3.2)])
+def test_merge_arrays__bounds(bounds):
+    data = numpy.arange(16, dtype=numpy.uint8).reshape(1, 4, 4)
+    transform = from_origin(0, 4, 1, 1)
+    array = (
+        xarray.DataArray(data, dims=("band", "y", "x"))
+        .rio.write_crs("EPSG:4326")
+        .rio.write_transform(transform)
+    )
+
+    with MemoryFile() as memory_file:
+        with memory_file.open(
+            driver="GTiff",
+            height=4,
+            width=4,
+            count=1,
+            dtype=data.dtype,
+            crs=array.rio.crs,
+            transform=transform,
+        ) as raster:
+            raster.write(data)
+            expected, expected_transform = rio_merge([raster], bounds=bounds)
+
+    merged = merge_arrays([array], bounds=bounds)
+
+    assert_array_equal(merged.values, expected)
+    assert merged.rio.transform() == expected_transform
 
 
 @pytest.mark.parametrize("squeeze", [True, False])
