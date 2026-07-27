@@ -41,12 +41,12 @@ from test.conftest import (
 )
 
 try:
-    SCIPY_LT_17 = version.parse(importlib.metadata.version("scipy")) < version.parse(
-        "1.7.0"
+    SCIPY_LT_1_18 = version.parse(importlib.metadata.version("scipy")) < version.parse(
+        "1.18.0"
     )
     SCIPY_INSTALLED = True
 except importlib.metadata.PackageNotFoundError:
-    SCIPY_LT_17 = True
+    SCIPY_LT_1_18 = True
     SCIPY_INSTALLED = False
 
 
@@ -1525,7 +1525,7 @@ def test_interpolate_na__missing_scipy():
 
 
 @pytest.mark.xfail(
-    SCIPY_LT_17 or platform.system() != "Linux",
+    SCIPY_LT_1_18 or platform.system() != "Linux",
     reason="griddata behaves differently across versions and platforms",
 )
 def test_interpolate_na_veris(interpolate_na_veris):
