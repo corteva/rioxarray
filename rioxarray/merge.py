@@ -9,6 +9,8 @@ from typing import Callable, Optional, Union
 import numpy
 from rasterio.crs import CRS
 from rasterio.merge import merge as _rio_merge
+from rasterio.transform import Affine
+from rasterio.windows import transform as _rio_window_transform
 from xarray import DataArray, Dataset, IndexVariable
 
 from rioxarray._spatial_utils import _get_nonspatial_coords, _make_coords
@@ -60,9 +62,10 @@ class RasterioDatasetDuck:
                 _, out_height, out_width = out_shape
             else:
                 out_height, out_width = out_shape
-            data_window = self._xds.rio.reproject(
-                self._xds.rio.crs,
-                transform=self.transform,
+            data_window = data_window.rio.reproject(
+                data_window.rio.crs,
+                transform=_rio_window_transform(window, self.transform)
+                * Affine.scale(window.width / out_width, window.height / out_height),
                 shape=(out_height, out_width),
             )
 

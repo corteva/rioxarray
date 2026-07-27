@@ -3,6 +3,7 @@ History
 
 Unreleased
 ----------
+- BUG: Preserve requested bounds when resampling merge inputs (#859)
 - ENH: Add write support for Zarr spatial and proj conventions
 
 0.22.0
