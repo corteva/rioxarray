@@ -21,7 +21,11 @@ from rasterio.crs import CRS
 from rasterio.windows import Window
 
 import rioxarray
-from rioxarray._spatial_utils import _generate_spatial_coords, _make_coords
+from rioxarray._spatial_utils import (
+    _affine_has_rotation,
+    _generate_spatial_coords,
+    _make_coords,
+)
 from rioxarray.exceptions import (
     DimensionMissingCoordinateError,
     MissingCRS,
@@ -3311,6 +3315,58 @@ def test_bounds__ordered__dataarray():
 def test_bounds__ordered__dataset():
     xds = xarray.Dataset(None, coords={"x": range(5), "y": range(5)})
     assert xds.rio.bounds() == (-0.5, -0.5, 4.5, 4.5)
+
+
+@pytest.mark.parametrize(
+    "affine",
+    [
+        Affine(1, 0.3, 0, 0.1, -1, 0),  # asymmetric shear (b != d), see gh #847
+        Affine(1, 0.3, 0, 0.3, -1, 0),  # symmetric shear (b == d)
+        Affine(1, 0.2, 0, 0, -1, 0),  # single off-diagonal
+    ],
+)
+def test_bounds__rotated(affine):
+    # https://github.com/corteva/rioxarray/issues/847
+    # a sheared/rotated affine (b or d nonzero) is detected as having rotation ...
+    assert _affine_has_rotation(affine)
+    width, height = 4, 5
+    image = numpy.zeros((height, width), dtype="uint8")
+    xds = (
+        xarray.DataArray(
+            image,
+            dims=("y", "x"),
+            coords=_generate_spatial_coords(affine=affine, width=width, height=height),
+        )
+        .rio.write_crs("EPSG:4326", inplace=True)
+        .rio.write_transform(affine, inplace=True)
+        .rio.write_coordinate_system(inplace=True)
+    )
+    # ... and the bounds are the axis-aligned envelope of the 4 corners
+    corners = [
+        affine * (0, 0),
+        affine * (width, 0),
+        affine * (0, height),
+        affine * (width, height),
+    ]
+    xs = [corner[0] for corner in corners]
+    ys = [corner[1] for corner in corners]
+    expected = (min(xs), min(ys), max(xs), max(ys))
+    assert_almost_equal(xds.rio.bounds(), expected)
+    # cross-check against rasterio's own bounds for the same transform
+    with rasterio.io.MemoryFile() as memfile:
+        with memfile.open(
+            driver="GTiff",
+            height=height,
+            width=width,
+            count=1,
+            dtype="uint8",
+            crs="EPSG:4326",
+            transform=affine,
+        ) as dataset:
+            dataset.write(image, 1)
+        with memfile.open() as dataset:
+            rasterio_bounds = dataset.bounds
+    assert_almost_equal(xds.rio.bounds(), tuple(rasterio_bounds))
 
 
 @pytest.mark.parametrize(

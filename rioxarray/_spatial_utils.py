@@ -58,7 +58,7 @@ def _affine_has_rotation(affine: Affine) -> bool:
     -------
     bool
     """
-    return affine.b == affine.d != 0
+    return affine.b != 0 or affine.d != 0
 
 
 def _resolution(affine: Affine) -> tuple[float, float]:
@@ -87,6 +87,41 @@ def _resolution(affine: Affine) -> tuple[float, float]:
         math.sqrt(affine.a**2 + affine.d**2),
         math.sqrt(affine.b**2 + affine.e**2),
     )
+
+
+def _rotated_bounds(
+    affine: Affine, *, width: int, height: int
+) -> tuple[float, float, float, float]:
+    """
+    Compute the axis-aligned bounds of a grid whose affine has rotation/shear.
+
+    The bounds are the envelope of the four corners of the grid transformed
+    by the affine. This matches how :obj:`rasterio.io.DatasetReader.bounds`
+    handles a non-north-up transform.
+
+    Parameters
+    ----------
+    affine: :obj:`affine.Affine`
+        The affine of the grid.
+    width: int
+        The width of the grid.
+    height: int
+        The height of the grid.
+
+    Returns
+    -------
+    left, bottom, right, top: float
+        Outermost coordinates of the grid.
+    """
+    corners = (
+        affine * (0, 0),
+        affine * (width, 0),
+        affine * (0, height),
+        affine * (width, height),
+    )
+    x_coords = [corner[0] for corner in corners]
+    y_coords = [corner[1] for corner in corners]
+    return min(x_coords), min(y_coords), max(x_coords), max(y_coords)
 
 
 def affine_to_coords(

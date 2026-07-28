@@ -7,6 +7,7 @@ Latest
 0.23.0
 ------
 - ENH: Add write support for Zarr spatial and proj conventions
+- BUG: Fix `rio.bounds()` for grids with rotation or asymmetric shear in the transform (#847)
 
 0.22.0
 ------
