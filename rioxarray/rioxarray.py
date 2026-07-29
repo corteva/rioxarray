@@ -1132,3 +1132,18 @@ class XRasterBase:
 
         self._rpcs = RPC(**json_rpcs)
         return self._rpcs
+
+    def _dims_unit_to_repr(self):
+        dims = self._obj.sizes
+
+        if self.crs is not None:
+            dim_unit = " (°)" if self.crs.is_geographic else " (m)"
+        else:
+            dim_unit = None
+
+        dims_str = f"{self.y_dim}[latitude{dim_unit}]: {self.height}, {self.x_dim}[latitude{dim_unit}]: {self.width}"
+        if len(dims) == 3:
+            last_key = [k for k in dims.keys() if k not in (self.y_dim, self.x_dim)][0]
+            dims_str += f", z[{last_key}]: {dims[last_key]}"
+
+        return dims_str
