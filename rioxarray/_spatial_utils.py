@@ -21,6 +21,15 @@ from rioxarray.exceptions import MissingSpatialDimensionError
 FILL_VALUE_NAMES = ("_FillValue", "missing_value", "fill_value", "nodata")
 UNWANTED_RIO_ATTRS = ("nodatavals", "is_tiled", "res")
 DEFAULT_GRID_MAP = "spatial_ref"
+UNWANTED_TAGS = (
+    "crs",
+    "transform",
+    "scales",
+    "scale_factor",
+    "add_offset",
+    "offsets",
+    "grid_mapping",
+)
 
 # DTYPE TO NODATA MAP
 # Based on: https://github.com/OSGeo/gdal/blob/v3.12.1/swig/python/gdal-utils/osgeo_utils/gdal_calc.py#L49-L66
