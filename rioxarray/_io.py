@@ -22,7 +22,7 @@ from numpy.typing import NDArray
 from packaging import version
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
-from xarray import Dataset, IndexVariable
+from xarray import Dataset, DataTree, IndexVariable
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager, FileManager
 from xarray.backends.locks import SerializableLock
@@ -779,9 +779,9 @@ def _pop_global_netcdf_attrs_from_vars(dataset_to_clean: Dataset) -> Dataset:
 
 def _subdataset_groups_to_dataset(
     *, dim_groups: dict[Hashable, dict[Hashable, DataArray]], global_tags: dict
-) -> Union[Dataset, list[Dataset]]:
+) -> Union[Dataset, DataTree]:
     if dim_groups:
-        dataset: Union[Dataset, list[Dataset]] = []
+        dataset: Union[Dataset, list[Dataset], DataTree] = []
         for dim_group in dim_groups.values():
             dataset_group = _pop_global_netcdf_attrs_from_vars(
                 Dataset(dim_group, attrs=global_tags)
@@ -796,6 +796,10 @@ def _subdataset_groups_to_dataset(
             dataset.append(dataset_group)
         if len(dataset) == 1:
             dataset = dataset.pop()
+        else:
+            dataset = DataTree.from_dict(
+                data={f"/group_{iii}": ds for iii, ds in enumerate(dataset)}
+            )
     else:
         dataset = Dataset(attrs=global_tags)
     return dataset
@@ -815,7 +819,7 @@ def _load_subdatasets(
     decode_times: bool,
     decode_timedelta: Optional[bool],
     **open_kwargs,
-) -> Union[Dataset, list[Dataset]]:
+) -> Union[Dataset, DataTree]:
     """
     Load in rasterio subdatasets
     """
@@ -1019,7 +1023,7 @@ def open_rasterio(
     decode_timedelta: Optional[bool] = None,
     band_as_variable: bool = False,
     **open_kwargs,
-) -> Union[Dataset, DataArray, list[Dataset]]:
+) -> Union[Dataset, DataArray, DataTree]:
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     """Open a file with rasterio (experimental).
 
@@ -1090,7 +1094,7 @@ def open_rasterio(
 
     Returns
     -------
-    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | list[:obj:`xarray.Dataset`]:
+    :obj:`xarray.Dataset` | :obj:`xarray.DataArray` | :obj:`xarray.DataTree`:
         The newly created dataset(s).
     """
     parse_coordinates = True if parse_coordinates is None else parse_coordinates
