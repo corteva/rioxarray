@@ -13,7 +13,11 @@ with the `rio` accessor. The `rio` accessor is activated by importing rioxarray 
 
 .. code-block:: python
 
-    import rioxarray
+    import rioxarray  # noqa: F401
+
+Importing rioxarray registers the ``rio`` accessor, even though the module is not
+used directly in this example. The ``# noqa: F401`` comment keeps linters from
+removing the import as unused.
 
 
 You can learn how to `clip`, `merge`, and `reproject` rasters in the :ref:`usage_examples`
