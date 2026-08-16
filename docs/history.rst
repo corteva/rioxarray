@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Close cached raster files before interpreter shutdown (issue #929)
 
 0.23.0
 ------

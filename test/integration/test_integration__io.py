@@ -5,6 +5,7 @@ import logging
 import os
 import pickle
 import shutil
+import subprocess
 import sys
 import tempfile
 import warnings
@@ -52,6 +53,93 @@ def _assert_tmmx_source(source):
         assert source.startswith("netcdf:") and source.endswith(
             "tmmx_20190121.nc:air_temperature"
         )
+
+
+def _assert_clean_rasterio_shutdown(script):
+    raster_path = os.path.abspath(os.path.join(TEST_INPUT_DATA_DIR, "2d_test.tif"))
+    result = subprocess.run(
+        [sys.executable, "-c", script, raster_path],
+        capture_output=True,
+        check=True,
+        text=True,
+        timeout=15,
+    )
+
+    assert result.stderr == ""
+
+
+def test_open_rasterio_closes_files_at_interpreter_shutdown():
+    _assert_clean_rasterio_shutdown(
+        """
+import rioxarray
+import sys
+
+for _ in range(5):
+    rioxarray.open_rasterio(sys.argv[1])
+"""
+    )
+
+
+def test_failed_open_rasterio_closes_files_at_interpreter_shutdown():
+    _assert_clean_rasterio_shutdown(
+        """
+import rioxarray
+import rioxarray._io
+import sys
+
+def raise_dtype_error(_):
+    raise RuntimeError("metadata failure")
+
+rioxarray._io._rasterio_to_numpy_dtype = raise_dtype_error
+try:
+    rioxarray.open_rasterio(sys.argv[1])
+except RuntimeError:
+    saved_exception = sys.exc_info()
+
+assert saved_exception[0] is RuntimeError
+"""
+    )
+
+
+def test_open_rasterio_shutdown_does_not_wait_for_locked_files():
+    _assert_clean_rasterio_shutdown(
+        """
+import rioxarray
+import rioxarray._io
+import sys
+import threading
+
+raster = rioxarray.open_rasterio(sys.argv[1])
+lock_acquired = threading.Event()
+
+def hold_file_lock():
+    with rioxarray._io.RASTERIO_LOCK:
+        lock_acquired.set()
+        threading.Event().wait()
+
+threading.Thread(target=hold_file_lock, daemon=True).start()
+assert lock_acquired.wait(timeout=5)
+"""
+    )
+
+
+def test_open_rasterio_closes_orphaned_cached_files_at_shutdown():
+    _assert_clean_rasterio_shutdown(
+        """
+from concurrent.futures import ThreadPoolExecutor
+import gc
+import rioxarray
+import sys
+
+def open_and_read(_):
+    raster = rioxarray.open_rasterio(sys.argv[1])
+    return raster.isel(x=0, y=0).values.tolist()
+
+with ThreadPoolExecutor(max_workers=16) as pool:
+    list(pool.map(open_and_read, range(100)))
+gc.collect()
+"""
+    )
 
 
 @pytest.mark.parametrize(

@@ -6,12 +6,14 @@ This file was adopted from: https://github.com/pydata/xarray # noqa
 Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py # noqa
 """
 # pylint: disable=too-many-lines
+import atexit
 import contextlib
 import importlib.metadata
 import os
 import re
 import threading
 import warnings
+import weakref
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from typing import Any, Optional, Union
@@ -25,7 +27,7 @@ from rasterio.vrt import WarpedVRT
 from xarray import Dataset, IndexVariable
 from xarray.backends.common import BackendArray
 from xarray.backends.file_manager import CachingFileManager, FileManager
-from xarray.backends.locks import SerializableLock
+from xarray.backends.locks import SerializableLock, acquire
 from xarray.coding import times, variables
 from xarray.core import indexing
 from xarray.core.dataarray import DataArray
@@ -43,6 +45,38 @@ from rioxarray.exceptions import RioXarrayError
 # TODO: should this be GDAL_LOCK instead?
 RASTERIO_LOCK = SerializableLock()
 NO_LOCK = contextlib.nullcontext()
+# xarray disables CachingFileManager.__del__ during interpreter shutdown.
+# Track the open files instead of their managers because concurrent manager
+# finalizers can leave files in xarray's cache after the managers are gone.
+_LIVE_RASTERIO_FILES: weakref.WeakKeyDictionary[Any, Any] = weakref.WeakKeyDictionary()
+_LIVE_RASTERIO_FILES_LOCK = threading.Lock()
+
+
+@atexit.register
+def _close_live_rasterio_files():
+    if not _LIVE_RASTERIO_FILES_LOCK.acquire(  # pylint: disable=consider-using-with
+        blocking=False
+    ):
+        return
+    try:
+        live_files = list(_LIVE_RASTERIO_FILES.items())
+    finally:
+        _LIVE_RASTERIO_FILES_LOCK.release()
+
+    for riods, lock in live_files:
+        if acquire(lock, blocking=False):
+            try:
+                riods.close()
+            finally:
+                lock.release()
+
+
+def _acquire_rasterio(manager, lock, needs_lock=True):
+    riods = manager.acquire(needs_lock=needs_lock)
+    if isinstance(manager, CachingFileManager):
+        with _LIVE_RASTERIO_FILES_LOCK:
+            _LIVE_RASTERIO_FILES[riods] = lock
+    return riods
 
 
 def _ensure_warped_vrt(riods, vrt_params):
@@ -312,7 +346,7 @@ class RasterioArrayWrapper(BackendArray):
         self.mask_and_scale = mask_and_scale
 
         # cannot save riods as an attribute: this would break pickleability
-        riods = _ensure_warped_vrt(manager.acquire(), vrt_params)
+        riods = _ensure_warped_vrt(_acquire_rasterio(manager, lock), vrt_params)
         self.vrt_params = vrt_params
         self._shape = (riods.count, riods.height, riods.width)
         self._dtype = None
@@ -430,7 +464,8 @@ class RasterioArrayWrapper(BackendArray):
         else:
             with self.lock:
                 riods = _ensure_warped_vrt(
-                    self.manager.acquire(needs_lock=False), self.vrt_params
+                    _acquire_rasterio(self.manager, self.lock, needs_lock=False),
+                    self.vrt_params,
                 )
                 out = riods.read(band_key, window=window, masked=self.masked)
                 if self._unsigned_dtype is not None:
@@ -1137,7 +1172,7 @@ def open_rasterio(
             )
         else:
             manager = URIManager(file_opener, filename, mode="r", kwargs=open_kwargs)
-        riods = manager.acquire()
+        riods = _acquire_rasterio(manager, lock)
         captured_warnings = rio_warnings.copy()
 
     # raise the NotGeoreferencedWarning if applicable
