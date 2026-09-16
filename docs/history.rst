@@ -5,6 +5,10 @@ Latest
 ------
 - DEP: Update supported Python (3.13+), GDAL (3.10+), pyproj (3.7+), numpy (2.1+) versions (#948)
 
+- BUG: Raise informative ``CoordinateDimensionError`` when spatial coordinates
+  are not 1-dimensional and fix ``rio.width``/``rio.height`` with 2D
+  coordinates (issue #848)
+
 0.23.0
 ------
 - ENH: Add write support for Zarr spatial and proj conventions
