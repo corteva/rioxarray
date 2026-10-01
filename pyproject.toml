@@ -33,6 +33,7 @@ classifiers = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "affine>=3.0",
     "packaging",
     "rasterio>=1.4.3",
     # https://github.com/pydata/xarray/issues/11000

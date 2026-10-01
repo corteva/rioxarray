@@ -3,6 +3,9 @@ History
 
 Latest
 ------
+- BUG: Use ``@`` instead of ``*`` for ``Affine`` multiplication to avoid
+  affine 3.0.1 ``PendingDeprecationWarning`` (issue #937)
+- DEP: Add explicit ``affine>=3.0`` dependency (issue #937)
 
 0.23.0
 ------

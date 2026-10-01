@@ -1612,3 +1612,32 @@ def test_reading_writing_rpcs(tmp_path):
         assert (
             dst.rpcs is not None
         ), "Existing RPCs in dst raster (through rpc attribute)"
+
+
+@pytest.mark.parametrize(
+    "transform",
+    [Affine(1, 0, 0, 0, -1, 4), Affine(1, 0.5, 0, 0.5, -1, 4)],
+    ids=["rectilinear", "rotated"],
+)
+def test_open_rasterio__no_affine_mul_warning(transform):
+    # https://github.com/corteva/rioxarray/issues/937
+    with rasterio.MemoryFile() as memfile:
+        with memfile.open(
+            driver="GTiff",
+            height=4,
+            width=4,
+            count=1,
+            dtype="uint8",
+            crs="EPSG:4326",
+            transform=transform,
+        ) as dataset:
+            dataset.write(numpy.zeros((1, 4, 4), dtype="uint8"))
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "error",
+                message="Use `@` matmul",
+                category=PendingDeprecationWarning,
+            )
+            with memfile.open() as dataset:
+                rds = rioxarray.open_rasterio(dataset)
+            rds.rio.transform(recalc=True)
