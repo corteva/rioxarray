@@ -18,6 +18,7 @@ from pyproj import CRS as pCRS
 from rasterio import DatasetReader
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
+from rasterio.warp import calculate_default_transform
 from rasterio.windows import Window
 
 import rioxarray
@@ -2917,6 +2918,20 @@ def test_reproject__2d_coordinates():
     xds = _two_dimensional_coordinate_dataarray()
     with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
         xds.rio.reproject("EPSG:2193")
+
+
+def test_reproject__2d_coordinates__src_geoloc_array():
+    xds = _two_dimensional_coordinate_dataarray()
+    src_geoloc_array = (xds.x.values, xds.y.values)
+    _, width, height = calculate_default_transform(
+        "EPSG:4326",
+        "EPSG:2193",
+        xds.rio.width,
+        xds.rio.height,
+        src_geoloc_array=src_geoloc_array,
+    )
+    reprojected = xds.rio.reproject("EPSG:2193", src_geoloc_array=src_geoloc_array)
+    assert reprojected.rio.shape == (height, width)
 
 
 def test_shape__2d_coordinates():

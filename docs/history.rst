@@ -7,7 +7,8 @@ Latest
 
 - BUG: Raise informative ``CoordinateDimensionError`` when spatial coordinates
   are not 1-dimensional and fix ``rio.width``/``rio.height`` with 2D
-  coordinates (issue #848)
+  coordinates, which also fixes the output size of ``rio.reproject`` with
+  ``src_geoloc_array`` (issue #848)
 
 0.23.0
 ------
