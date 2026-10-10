@@ -114,12 +114,13 @@ def affine_to_coords(
     dict: x and y coordinate arrays.
 
     """
-    transform = affine * affine.translation(0.5, 0.5)
+    # Affine's type hints do not cover arrays of coordinates
+    transform: Any = affine @ affine.translation(0.5, 0.5)
     if affine.is_rectilinear and not _affine_has_rotation(affine):
-        x_coords, _ = transform * (numpy.arange(width), numpy.zeros(width))
-        _, y_coords = transform * (numpy.zeros(height), numpy.arange(height))
+        x_coords, _ = transform @ (numpy.arange(width), numpy.zeros(width))
+        _, y_coords = transform @ (numpy.zeros(height), numpy.arange(height))
     else:
-        x_coords, y_coords = transform * numpy.meshgrid(
+        x_coords, y_coords = transform @ numpy.meshgrid(
             numpy.arange(width),
             numpy.arange(height),
         )
