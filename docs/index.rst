@@ -1,7 +1,7 @@
 Welcome to rioxarray's documentation!
 ======================================
 
-GitHub: http://github.com/corteva/rioxarray
+GitHub: http://github.com/vylor/rioxarray
 
 .. toctree::
    :maxdepth: 1

@@ -70,10 +70,10 @@ dev = [
 ]
 
 [project.urls]
-homepage = "https://corteva.github.io/rioxarray/"
-documentation = "https://corteva.github.io/rioxarray/"
-repository = "https://github.com/corteva/rioxarray"
-changelog = "https://corteva.github.io/rioxarray/stable/history.html"
+homepage = "https://vylor.github.io/rioxarray/"
+documentation = "https://vylor.github.io/rioxarray/"
+repository = "https://github.com/vylor/rioxarray"
+changelog = "https://vylor.github.io/rioxarray/stable/history.html"
 
 [tool.setuptools.packages.find]
 include = ["rioxarray", "rioxarray.*"]

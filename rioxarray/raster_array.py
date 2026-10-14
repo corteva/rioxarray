@@ -62,7 +62,7 @@ class RasterArray(XRasterBase):
         self._nodata: Optional[float] = None
         self._manager: Optional[
             FileManager
-        ] = None  # https://github.com/corteva/rioxarray/issues/254
+        ] = None  # https://github.com/vylor/rioxarray/issues/254
 
     def set_nodata(
         self, input_nodata: Optional[float], *, inplace: bool = True
@@ -469,7 +469,7 @@ class RasterArray(XRasterBase):
             resampling=resampling,
             **reproject_kwargs,
         )
-        # hack to resolve: https://github.com/corteva/rioxarray/issues/298
+        # hack to resolve: https://github.com/vylor/rioxarray/issues/298
         # may be resolved in the future by flexible indexes:
         # https://github.com/pydata/xarray/pull/4489#issuecomment-831809607
         x_attrs = reprojected_data_array[reprojected_data_array.rio.x_dim].attrs.copy()

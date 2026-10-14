@@ -2394,7 +2394,7 @@ def test_write_crs_cf__disable_grid_mapping():
 
 
 def test_write_crs_cf__grib_wkt():
-    # https://github.com/corteva/rioxarray/discussions/591
+    # https://github.com/vylor/rioxarray/discussions/591
     grib_rotated_wkt = """GEOGCRS["Coordinate System imported from GRIB file",
         BASEGEOGCRS["Coordinate System imported from GRIB file",
             DATUM["unnamed",

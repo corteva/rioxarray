@@ -864,7 +864,7 @@ def test_http_url():
     # more examples urls here
     # http://download.osgeo.org/geotiff/samples/
     url = (
-        "https://github.com/corteva/rioxarray/blob/master/"
+        "https://github.com/vylor/rioxarray/blob/master/"
         "test/test_data/input/cog.tif?raw=true"
     )
     with rioxarray.open_rasterio(url) as actual:
@@ -1110,7 +1110,7 @@ def test_rasterio_vrt_warp_extras(tmp_path):
 
 
 def test_rasterio_vrt_gcps__data_exists():
-    # https://github.com/corteva/rioxarray/issues/515
+    # https://github.com/vylor/rioxarray/issues/515
     vrt_file = os.path.join(TEST_INPUT_DATA_DIR, "cint16.tif")
     with rasterio.open(vrt_file) as src:
         crs = src.gcps[1]
@@ -1182,7 +1182,7 @@ def test_no_mask_and_scale(open_rasterio):
 
 
 def test_mask_and_scale__select_band_values(open_rasterio, tmp_path):
-    # https://github.com/corteva/rioxarray/issues/580
+    # https://github.com/vylor/rioxarray/issues/580
     output_nc = tmp_path / "test.nc"
     data = numpy.hypot(
         *numpy.meshgrid(numpy.linspace(-100, 500, 50), numpy.linspace(-150, 700, 60))

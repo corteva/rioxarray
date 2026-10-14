@@ -6,7 +6,7 @@ import rioxarray  # noqa: F401
 
 def test_reproject_match__exact():
     """
-    Based on: https://github.com/corteva/rioxarray/issues/298#issue-858511505
+    Based on: https://github.com/vylor/rioxarray/issues/298#issue-858511505
     """
     da1 = xarray.DataArray(
         numpy.random.rand(2, 3),

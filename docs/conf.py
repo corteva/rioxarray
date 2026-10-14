@@ -60,7 +60,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "rioxarray"
-copyright = "2019-2026, Corteva Agriscience™"
+copyright = "2019-2026, Vylor™"
 author = "rioxarray Contributors"
 
 # The version info for the project you're documenting, acts as replacement

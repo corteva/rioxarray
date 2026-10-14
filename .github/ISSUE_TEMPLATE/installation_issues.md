@@ -1,6 +1,6 @@
 ---
 name: Installation issues
-about: Issues installing rioxarray (https://corteva.github.io/rioxarray/stable/installation.html)
+about: Issues installing rioxarray (https://vylor.github.io/rioxarray/stable/installation.html)
 labels: installation-issues
 ---
 
