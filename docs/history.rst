@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- BUG: Use ``@`` for affine matrix multiplication and require rasterio>=1.5.1 and affine>=3 (#937)
 
 0.23.0
 ------

@@ -439,7 +439,7 @@ class XRasterBase:
             src_resolution_x, src_resolution_y = self.resolution(recalc=recalc)
         except (DimensionMissingCoordinateError, DimensionError):
             return Affine.identity() if transform is None else transform
-        return Affine.translation(src_left, src_top) * Affine.scale(
+        return Affine.translation(src_left, src_top) @ Affine.scale(
             src_resolution_x, src_resolution_y
         )
 
