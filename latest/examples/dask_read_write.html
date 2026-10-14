@@ -70,7 +70,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Multiple-worker-example">Multiple worker example</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://vylor.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
@@ -152,10 +152,10 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
-    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="s2">"../../test/test_data/compare/small_dem_3m_merged.tif"</span><span class="p">,</span>
     <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;simple_write.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">"simple_write.tif"</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -167,12 +167,12 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
-    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="s2">"../../test/test_data/compare/small_dem_3m_merged.tif"</span><span class="p">,</span>
     <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="c1"># lock=threading.Lock(), # when too many file handles open</span>
 <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
-    <span class="s2">&quot;dask_thread.tif&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">(),</span>
+    <span class="s2">"dask_thread.tif"</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">(),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -186,15 +186,15 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">LocalCluster</span><span class="p">()</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
     <span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
-        <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+        <span class="s2">"../../test/test_data/compare/small_dem_3m_merged.tif"</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">lock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="c1"># lock=Lock(&quot;rio-read&quot;, client=client), # when too many file handles open</span>
+        <span class="c1"># lock=Lock("rio-read", client=client), # when too many file handles open</span>
     <span class="p">)</span>
     <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
-        <span class="s2">&quot;dask_multiworker.tif&quot;</span><span class="p">,</span>
+        <span class="s2">"dask_multiworker.tif"</span><span class="p">,</span>
         <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">lock</span><span class="o">=</span><span class="n">Lock</span><span class="p">(</span><span class="s2">&quot;rio&quot;</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">),</span>
+        <span class="n">lock</span><span class="o">=</span><span class="n">Lock</span><span class="p">(</span><span class="s2">"rio"</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">),</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -213,7 +213,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

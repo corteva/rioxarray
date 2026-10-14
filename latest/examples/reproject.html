@@ -71,7 +71,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
-<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://vylor.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
@@ -135,7 +135,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">"../../test/test_data/input/PLANET_SCOPE_3D.nc"</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -633,7 +633,7 @@ Data variables:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds_lonlat</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds_lonlat</span> <span class="o">=</span> <span class="n">xds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1153,19 +1153,19 @@ CRS.from_epsg(32722)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;https://storage.googleapis.com/&quot;</span>
-    <span class="s2">&quot;gcp-public-data-landsat/LC08/01/047/027/&quot;</span>
-    <span class="s2">&quot;LC08_L1TP_047027_20130421_20170310_01_T1/&quot;</span>
-    <span class="s2">&quot;LC08_L1TP_047027_20130421_20170310_01_T1_B4.TIF&quot;</span>
+    <span class="s2">"https://storage.googleapis.com/"</span>
+    <span class="s2">"gcp-public-data-landsat/LC08/01/047/027/"</span>
+    <span class="s2">"LC08_L1TP_047027_20130421_20170310_01_T1/"</span>
+    <span class="s2">"LC08_L1TP_047027_20130421_20170310_01_T1_B4.TIF"</span>
 <span class="p">)</span>
 <span class="n">env</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">Env</span><span class="p">(</span>
-    <span class="n">GDAL_DISABLE_READDIR_ON_OPEN</span><span class="o">=</span><span class="s2">&quot;EMPTY_DIR&quot;</span><span class="p">,</span>
+    <span class="n">GDAL_DISABLE_READDIR_ON_OPEN</span><span class="o">=</span><span class="s2">"EMPTY_DIR"</span><span class="p">,</span>
     <span class="n">CPL_VSIL_CURL_USE_HEAD</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">CPL_VSIL_CURL_ALLOWED_EXTENSIONS</span><span class="o">=</span><span class="s2">&quot;TIF&quot;</span><span class="p">,</span>
+    <span class="n">CPL_VSIL_CURL_ALLOWED_EXTENSIONS</span><span class="o">=</span><span class="s2">"TIF"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">with</span> <span class="n">env</span><span class="p">:</span>
     <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">vrt</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span><span class="p">)</span> <span class="k">as</span> <span class="n">vrt</span><span class="p">:</span>
             <span class="n">rds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">vrt</span><span class="p">)</span>
             <span class="n">rds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">band</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">imshow</span><span class="p">()</span>
 </pre></div>
@@ -1192,7 +1192,7 @@ CRS.from_epsg(32722)
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

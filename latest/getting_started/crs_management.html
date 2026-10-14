@@ -148,13 +148,13 @@
     <span class="c1"># CF convention is tried first when reading</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span>
     <span class="c1"># CF convention is used for writing</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Or specify the convention per-method (for writing only):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
 
-<span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">,</span> <span class="n">convention</span><span class="o">=</span><span class="n">Convention</span><span class="o">.</span><span class="n">CF</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -210,7 +210,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/PLANET_SCOPE_3D.nc&quot;</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">"../../test/test_data/input/PLANET_SCOPE_3D.nc"</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1054,8 +1054,8 @@ CRS.from_epsg(4326)
     <span class="mi">4326</span>
     <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span>
-    <span class="n">x_dim</span><span class="o">=</span><span class="s2">&quot;lon&quot;</span><span class="p">,</span>
-    <span class="n">y_dim</span><span class="o">=</span><span class="s2">&quot;lat&quot;</span>
+    <span class="n">x_dim</span><span class="o">=</span><span class="s2">"lon"</span><span class="p">,</span>
+    <span class="n">y_dim</span><span class="o">=</span><span class="s2">"lat"</span>
     <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_coordinate_system</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -1130,7 +1130,7 @@ Affine(3.0, 0.0, 466266.0,
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -110,12 +110,12 @@ First create a function setting up the env and then submit it to every worker.</
 
 <span class="k">def</span><span class="w"> </span><span class="nf">set_env</span><span class="p">():</span>
     <span class="c1"># Set that to dask workers to make process=True work on cloud</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;AWS_S3_ENDPOINT&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_S3_ENDPOINT&quot;</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;AWS_S3_AWS_ACCESS_KEY_ID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_S3_AWS_ACCESS_KEY_ID&quot;</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;AWS_S3_AWS_SECRET_ACCESS_KEY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span>
-        <span class="s2">&quot;AWS_S3_AWS_SECRET_ACCESS_KEY&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"AWS_S3_ENDPOINT"</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"AWS_S3_ENDPOINT"</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"AWS_S3_AWS_ACCESS_KEY_ID"</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"AWS_S3_AWS_ACCESS_KEY_ID"</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"AWS_S3_AWS_SECRET_ACCESS_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span>
+        <span class="s2">"AWS_S3_AWS_SECRET_ACCESS_KEY"</span>
     <span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CPL_VSIL_CURL_ALLOWED_EXTENSIONS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;.vrt&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"CPL_VSIL_CURL_ALLOWED_EXTENSIONS"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">".vrt"</span>
 
 
 <span class="c1"># Run the client</span>
@@ -128,7 +128,7 @@ First create a function setting up the env and then submit it to every worker.</
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>There are gotchas with the environment and dask workers, see this <a class="reference external" href="https://github.com/corteva/rioxarray/discussions/630">discussion</a> for more insights.</p>
+<p>There are gotchas with the environment and dask workers, see this <a class="reference external" href="https://github.com/vylor/rioxarray/discussions/630">discussion</a> for more insights.</p>
 </div>
 </section>
 </section>
@@ -144,7 +144,7 @@ First create a function setting up the env and then submit it to every worker.</
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

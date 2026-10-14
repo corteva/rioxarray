@@ -22,7 +22,7 @@ This page contains links to a collection of examples of how to use rioxarray.
    transform_bounds.ipynb
    COG.ipynb
    dask_read_write.ipynb
-   Example - Zonal Statistics <https://corteva.github.io/geocube/html/examples/zonal_statistics.html>
+   Example - Zonal Statistics <https://vylor.github.io/geocube/html/examples/zonal_statistics.html>
 
 
 .. toctree::

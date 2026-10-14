@@ -77,12 +77,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for rioxarray._show_versions</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Utility methods to print system info for debugging</span>
 
 <span class="sd">adapted from :func:`sklearn.utils._show_versions`</span>
 <span class="sd">which was adapted from :func:`pandas.show_versions`</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="c1"># pylint: disable=import-outside-toplevel</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -91,29 +91,29 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_sys_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;System information</span>
+<span class="w">    </span><span class="sd">"""System information</span>
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    sys_info : dict</span>
 <span class="sd">        system and Python version information</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">blob</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;executable&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;machine&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">()),</span>
+        <span class="p">(</span><span class="s2">"python"</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"executable"</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"machine"</span><span class="p">,</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">()),</span>
     <span class="p">]</span>
 
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_main_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the main dependency information to hightlight.</span>
+<span class="w">    </span><span class="sd">"""Get the main dependency information to hightlight.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    proj_info: dict</span>
 <span class="sd">        system GDAL information</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -126,26 +126,26 @@
         <span class="n">gdal_data</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">blob</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;rasterio&quot;</span><span class="p">,</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;rasterio&quot;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;xarray&quot;</span><span class="p">,</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;xarray&quot;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;GDAL&quot;</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">__gdal_version__</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;GEOS&quot;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rasterio</span><span class="p">,</span> <span class="s2">&quot;__geos_version__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;PROJ&quot;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rasterio</span><span class="p">,</span> <span class="s2">&quot;__proj_version__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;PROJ DATA&quot;</span><span class="p">,</span> <span class="n">proj_data</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;GDAL DATA&quot;</span><span class="p">,</span> <span class="n">gdal_data</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"rasterio"</span><span class="p">,</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">"rasterio"</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"xarray"</span><span class="p">,</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">"xarray"</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"GDAL"</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">__gdal_version__</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"GEOS"</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rasterio</span><span class="p">,</span> <span class="s2">"__geos_version__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"PROJ"</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rasterio</span><span class="p">,</span> <span class="s2">"__proj_version__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"PROJ DATA"</span><span class="p">,</span> <span class="n">proj_data</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"GDAL DATA"</span><span class="p">,</span> <span class="n">gdal_data</span><span class="p">),</span>
     <span class="p">]</span>
 
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_deps_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Overview of the installed version of dependencies</span>
+<span class="w">    </span><span class="sd">"""Overview of the installed version of dependencies</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    deps_info: dict</span>
 <span class="sd">        version information on relevant Python libraries</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;pyproj&quot;</span><span class="p">]</span>
+<span class="sd">    """</span>
+    <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"scipy"</span><span class="p">,</span> <span class="s2">"pyproj"</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -157,29 +157,29 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_print_info_dict</span><span class="p">(</span><span class="n">info_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the information dictionary&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Print the information dictionary"""</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="show_versions">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.show_versions">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">show_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    .. versionadded:: 0.0.26</span>
 
 <span class="sd">    Print useful debugging information</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
-<span class="sd">    &gt; python -c &quot;import rioxarray; rioxarray.show_versions()&quot;</span>
+<span class="sd">    &gt; python -c "import rioxarray; rioxarray.show_versions()"</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rioxarray (</span><span class="si">{</span><span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s1">&#39;rioxarray&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">) deps:&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"rioxarray (</span><span class="si">{</span><span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s1">'rioxarray'</span><span class="p">)</span><span class="si">}</span><span class="s2">) deps:"</span><span class="p">)</span>
     <span class="n">_print_info_dict</span><span class="p">(</span><span class="n">_get_main_info</span><span class="p">())</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Other python deps:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Other python deps:"</span><span class="p">)</span>
     <span class="n">_print_info_dict</span><span class="p">(</span><span class="n">_get_deps_info</span><span class="p">())</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">System:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">System:"</span><span class="p">)</span>
     <span class="n">_print_info_dict</span><span class="p">(</span><span class="n">_get_sys_info</span><span class="p">())</span></div>
 
 </pre></div>
@@ -191,7 +191,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

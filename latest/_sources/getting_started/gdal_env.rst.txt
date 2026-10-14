@@ -40,4 +40,4 @@ First create a function setting up the env and then submit it to every worker.
 
 .. note::
 
-  There are gotchas with the environment and dask workers, see this `discussion <https://github.com/corteva/rioxarray/discussions/630>`__ for more insights.
+  There are gotchas with the environment and dask workers, see this `discussion <https://github.com/vylor/rioxarray/discussions/630>`__ for more insights.

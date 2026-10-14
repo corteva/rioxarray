@@ -103,8 +103,8 @@
 <h2>Reasons to switch from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code><a class="headerlink" href="#reasons-to-switch-from-rasterio-to-rioxarray" title="Link to this heading"></a></h2>
 <p>Usually, switching from <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> to <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> means you are working with rasters and you have to adapt your code to <code class="docutils literal notranslate"><span class="pre">xarray</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">xarray</span></code> is a powerful abstraction of both the raster dataset and the raster array. There is a lot of advantages to unite these two notions under the same object, as it simplifies the use of the functions, using attributes stored in the object rather than passing arguments to the functions.</p>
-<p><code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with a lot of very interesting built-in functions and can leverage several backends to replace <code class="docutils literal notranslate"><span class="pre">numpy</span></code> in cases where it is limiting (out-of-memory computation, running the code on clusters, on GPU…). Dask is one of the most well-knwown. <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> handles some basic <code class="docutils literal notranslate"><span class="pre">dask</span></code> features in I/O (see <a class="reference external" href="https://corteva.github.io/rioxarray/html/examples/dask_read_write.html">Dask I/O example</a>) but is not designed to support <code class="docutils literal notranslate"><span class="pre">dask</span></code> in more evolved functions such as reproject.</p>
-<p>Beware, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with gotchas! You can see some of them in <a class="reference external" href="https://corteva.github.io/rioxarray/html/getting_started/manage_information_loss.html">the dedicated section</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with a lot of very interesting built-in functions and can leverage several backends to replace <code class="docutils literal notranslate"><span class="pre">numpy</span></code> in cases where it is limiting (out-of-memory computation, running the code on clusters, on GPU…). Dask is one of the most well-knwown. <code class="docutils literal notranslate"><span class="pre">rioxarray</span></code> handles some basic <code class="docutils literal notranslate"><span class="pre">dask</span></code> features in I/O (see <a class="reference external" href="https://vylor.github.io/rioxarray/html/examples/dask_read_write.html">Dask I/O example</a>) but is not designed to support <code class="docutils literal notranslate"><span class="pre">dask</span></code> in more evolved functions such as reproject.</p>
+<p>Beware, <code class="docutils literal notranslate"><span class="pre">xarray</span></code> comes also with gotchas! You can see some of them in <a class="reference external" href="https://vylor.github.io/rioxarray/html/getting_started/manage_information_loss.html">the dedicated section</a>.</p>
 <blockquote>
 <div><div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -254,7 +254,7 @@ It is always better to look for <code class="docutils literal notranslate"><span
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

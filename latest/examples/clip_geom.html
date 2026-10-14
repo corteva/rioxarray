@@ -71,7 +71,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
-<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://vylor.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
@@ -143,7 +143,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
-    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="s2">"../../test/test_data/compare/small_dem_3m_merged.tif"</span><span class="p">,</span>
     <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -183,8 +183,8 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="p">[[</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="s1">'Polygon'</span><span class="p">,</span>
+        <span class="s1">'coordinates'</span><span class="p">:</span> <span class="p">[[</span>
             <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
             <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
             <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
@@ -225,7 +225,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">"clipped.tif"</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">'LZMA'</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"int32"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -249,7 +249,7 @@
     <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
         <span class="n">box</span><span class="p">(</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">,</span> <span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:26915&quot;</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:26915"</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -295,7 +295,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">&quot;clipped_invert.tif&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">&#39;LZMA&#39;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="s2">"clipped_invert.tif"</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s1">'LZMA'</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"int32"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -304,7 +304,7 @@
 <h2>Clipping larger rasters<a class="headerlink" href="#Clipping-larger-rasters" title="Link to this heading"></a></h2>
 <p>Note: Loading from disk will likely only work directly after opening a raster with <a class="reference internal" href="../rioxarray.html#rioxarray-open-rasterio"><span class="std std-ref">rioxarray.open_rasterio</span></a></p>
 <p>The clip operation needs the full raster loaded with the default method. This can be an issue if you don’t have enough memory (RAM) on you machine. If this is something you have run into, it is recommended to use the <code class="docutils literal notranslate"><span class="pre">from_disk=True</span></code> option. This option uses <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/topics/masking-by-shapefile.html">rasterio.mask.mask</a> when loading the data if possible.</p>
-<p>But be careful, these two methods, as they use different core functions, can have <strong>different outputs</strong>: small discrepencies may appear on the borders (1 pixel added or removed on some borders, see issue <a class="reference external" href="https://github.com/corteva/rioxarray/issues/310">#310</a>)</p>
+<p>But be careful, these two methods, as they use different core functions, can have <strong>different outputs</strong>: small discrepencies may appear on the borders (1 pixel added or removed on some borders, see issue <a class="reference external" href="https://github.com/vylor/rioxarray/issues/310">#310</a>)</p>
 <p>Alternatively, you can also use <code class="docutils literal notranslate"><span class="pre">rio.clip_box</span></code> followed by <code class="docutils literal notranslate"><span class="pre">rio.clip</span></code> for a more consistent memory efficient clip operation.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -312,8 +312,8 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="p">[[</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="s1">'Polygon'</span><span class="p">,</span>
+        <span class="s1">'coordinates'</span><span class="p">:</span> <span class="p">[[</span>
             <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615331.540546387</span><span class="p">],</span>
             <span class="p">[</span><span class="mf">425499.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
             <span class="p">[</span><span class="mf">425526.18381405267</span><span class="p">,</span> <span class="mf">4615478.540546387</span><span class="p">],</span>
@@ -324,7 +324,7 @@
 <span class="p">]</span>
 
 <span class="n">clipped</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span>
-    <span class="s2">&quot;../../test/test_data/compare/small_dem_3m_merged.tif&quot;</span><span class="p">,</span>
+    <span class="s2">"../../test/test_data/compare/small_dem_3m_merged.tif"</span><span class="p">,</span>
     <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">from_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -368,7 +368,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

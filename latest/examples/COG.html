@@ -65,7 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
-<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://vylor.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
@@ -127,8 +127,8 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># from https://openaerialmap.org/</span>
 <span class="n">cog_url</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;https://oin-hotosm.s3.amazonaws.com/&quot;</span>
-    <span class="s2">&quot;5d7dad0becaf880008a9bc88/0/5d7dad0becaf880008a9bc89.tif&quot;</span>
+    <span class="s2">"https://oin-hotosm.s3.amazonaws.com/"</span>
+    <span class="s2">"5d7dad0becaf880008a9bc88/0/5d7dad0becaf880008a9bc89.tif"</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -173,7 +173,7 @@ Attributes:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">rgb</span><span class="o">=</span><span class="s2">&quot;band&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rds</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"int"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">rgb</span><span class="o">=</span><span class="s2">"band"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -214,7 +214,7 @@ Clipping input data to the valid range for imshow with RGB data ([0..1] for floa
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

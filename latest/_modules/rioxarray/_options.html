@@ -77,21 +77,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for rioxarray._options</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This file contains global options for rioxarray</span>
 
 <span class="sd">Credits:</span>
 
 <span class="sd">This file was adopted from: https://github.com/pydata/xarray # noqa</span>
 <span class="sd">Source file: https://github.com/pydata/xarray/blob/2ab0666c1fcc493b1e0ebc7db14500c427f8804e/xarray/core/options.py  # noqa</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">rioxarray.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convention</span>
 
-<span class="n">EXPORT_GRID_MAPPING</span> <span class="o">=</span> <span class="s2">&quot;export_grid_mapping&quot;</span>
-<span class="n">SKIP_MISSING_SPATIAL_DIMS</span> <span class="o">=</span> <span class="s2">&quot;skip_missing_spatial_dims&quot;</span>
-<span class="n">CONVENTION</span> <span class="o">=</span> <span class="s2">&quot;convention&quot;</span>
+<span class="n">EXPORT_GRID_MAPPING</span> <span class="o">=</span> <span class="s2">"export_grid_mapping"</span>
+<span class="n">SKIP_MISSING_SPATIAL_DIMS</span> <span class="o">=</span> <span class="s2">"skip_missing_spatial_dims"</span>
+<span class="n">CONVENTION</span> <span class="o">=</span> <span class="s2">"convention"</span>
 
 <span class="n">OPTIONS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">EXPORT_GRID_MAPPING</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
@@ -102,7 +102,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_convention</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Convention</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate the convention option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Validate the convention option."""</span>
     <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Convention</span><span class="p">)</span>
 
 
@@ -113,7 +113,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_option</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the global rioxarray option.</span>
 
 <span class="sd">    .. versionadded:: 0.3.0</span>
@@ -126,14 +126,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Any: the value of the option.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">OPTIONS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="set_options">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.set_options">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">set_options</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-name</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Set the global rioxarray option.</span>
 
 <span class="sd">    .. versionadded:: 0.3.0</span>
@@ -168,18 +168,18 @@
 
 <span class="sd">        rioxarray.set_options(export_grid_mapping=False)</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">old</span> <span class="o">=</span> <span class="n">OPTIONS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">OPTIONS</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;argument name </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not in the set of valid options &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">OPTION_NAMES</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"argument name </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not in the set of valid options "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">OPTION_NAMES</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">VALIDATORS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">VALIDATORS</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">value</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;option </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> gave an invalid value: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"option </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> gave an invalid value: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">."</span><span class="p">)</span>
             <span class="n">OPTIONS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -198,7 +198,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

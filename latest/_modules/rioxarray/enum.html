@@ -77,14 +77,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for rioxarray.enum</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Enums for rioxarray.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Enums for rioxarray."""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 
 
 <div class="viewcode-block" id="Convention">
 <a class="viewcode-back" href="../../rioxarray.html#rioxarray.enum.Convention">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Convention</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Supported geospatial metadata conventions.</span>
 
 <span class="sd">    rioxarray supports conventions for storing geospatial metadata.</span>
@@ -107,7 +107,7 @@
 <span class="sd">    Use specific convention for a method:</span>
 
 <span class="sd">    &gt;&gt;&gt; from rioxarray.enum import Convention</span>
-<span class="sd">    &gt;&gt;&gt; data.rio.write_crs(&quot;EPSG:4326&quot;, convention=Convention.CF)</span>
+<span class="sd">    &gt;&gt;&gt; data.rio.write_crs("EPSG:4326", convention=Convention.CF)</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -118,16 +118,16 @@
 <span class="sd">    - CF Conventions: https://github.com/cf-convention/cf-conventions</span>
 <span class="sd">    - Zarr spatial convention: https://github.com/zarr-conventions/spatial</span>
 <span class="sd">    - Zarr geo-proj convention: https://github.com/zarr-conventions/geo-proj</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: Climate and Forecasts convention (default)</span>
     <span class="c1">#: https://github.com/cf-convention/cf-conventions</span>
-    <span class="n">CF</span> <span class="o">=</span> <span class="s2">&quot;CF&quot;</span>
+    <span class="n">CF</span> <span class="o">=</span> <span class="s2">"CF"</span>
 
     <span class="c1">#: Zarr spatial and proj conventions</span>
     <span class="c1">#: https://github.com/zarr-conventions/spatial</span>
     <span class="c1">#: https://github.com/zarr-conventions/geo-proj</span>
-    <span class="n">ZARR</span> <span class="o">=</span> <span class="s2">&quot;ZARR&quot;</span></div>
+    <span class="n">ZARR</span> <span class="o">=</span> <span class="s2">"ZARR"</span></div>
 
 </pre></div>
 
@@ -138,7 +138,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

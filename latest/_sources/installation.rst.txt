@@ -48,16 +48,16 @@ The source for rioxarray can be installed from the `GitHub repo`_.
 
 .. code-block:: bash
 
-    python -m pip install git+git://github.com/corteva/rioxarray.git#egg=rioxarray
+    python -m pip install git+git://github.com/vylor/rioxarray.git#egg=rioxarray
 
 
 To install for local development:
 
 .. code-block:: bash
 
-    git clone git@github.com:corteva/rioxarray.git
+    git clone git@github.com:vylor/rioxarray.git
     cd rioxarray
     python -m pip install -e . --group dev
 
 
-.. _GitHub repo: https://github.com/corteva/rioxarray
+.. _GitHub repo: https://github.com/vylor/rioxarray

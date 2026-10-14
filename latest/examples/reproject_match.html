@@ -70,7 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transform_bounds.html">Example - Transform Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="COG.html">Example - Cloud Optimized GeoTiff (COG)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dask_read_write.html">Example - Reading and Writing with Dask</a></li>
-<li class="toctree-l2"><a class="reference external" href="https://corteva.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
+<li class="toctree-l2"><a class="reference external" href="https://vylor.github.io/geocube/html/examples/zonal_statistics.html">Example - Zonal Statistics</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/328320/144357">Extracting data within geometry (shape)</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/329141/144357">Converting NetCDF dataset array to GeoTiff</a></li>
 <li class="toctree-l2"><a class="reference external" href="https://gis.stackexchange.com/a/345697/144357">How do I add projection to this NetCDF file? (Satellite)</a></li>
@@ -136,11 +136,11 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">print_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;shape: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;resolution: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;bounds: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;sum: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;CRS: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"shape: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"resolution: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"bounds: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">bounds</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"sum: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"CRS: </span><span class="si">{</span><span class="n">raster</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -151,8 +151,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY.nc&quot;</span><span class="p">)</span>
-<span class="n">xds_match</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">&quot;../../test/test_data/input/MODIS_ARRAY_MATCH.nc&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">"../../test/test_data/input/MODIS_ARRAY.nc"</span><span class="p">)</span>
+<span class="n">xds_match</span> <span class="o">=</span> <span class="n">xarray</span><span class="o">.</span><span class="n">open_dataarray</span><span class="p">(</span><span class="s2">"../../test/test_data/input/MODIS_ARRAY_MATCH.nc"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -178,9 +178,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original Raster:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Original Raster:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">print_raster</span><span class="p">(</span><span class="n">xds</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">print_raster</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -230,9 +230,9 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reprojected Raster:</span><span class="se">\n</span><span class="s2">-------------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Reprojected Raster:</span><span class="se">\n</span><span class="s2">-------------------</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">print_raster</span><span class="p">(</span><span class="n">xds_repr_match</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Raster to Match:</span><span class="se">\n</span><span class="s2">----------------</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">print_raster</span><span class="p">(</span><span class="n">xds_match</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -266,14 +266,14 @@ CRS: EPSG:32615
 <section id="Raster-Calculations">
 <h2>Raster Calculations<a class="headerlink" href="#Raster-Calculations" title="Link to this heading"></a></h2>
 <p>Now that the rasters have the same projection, resolution, and extents, you can do raster calculations.</p>
-<p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">assign_coords</span></code> to make the coordinates the exact same due to tiny differences in the coordinate values due to floating precision (<a class="reference external" href="https://github.com/corteva/rioxarray/issues/298">issue 298</a>).</p>
+<p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">assign_coords</span></code> to make the coordinates the exact same due to tiny differences in the coordinate values due to floating precision (<a class="reference external" href="https://github.com/vylor/rioxarray/issues/298">issue 298</a>).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xds_repr_match</span> <span class="o">=</span> <span class="n">xds_repr_match</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span>
-    <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-    <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+    <span class="s2">"x"</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+    <span class="s2">"y"</span><span class="p">:</span> <span class="n">xds_match</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
 <span class="p">})</span>
 <span class="n">xds_sum</span> <span class="o">=</span> <span class="n">xds_repr_match</span> <span class="o">+</span> <span class="n">xds_match</span>
 </pre></div>
@@ -283,7 +283,7 @@ CRS: EPSG:32615
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sum Raster:</span><span class="se">\n</span><span class="s2">-----------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Sum Raster:</span><span class="se">\n</span><span class="s2">-----------</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">print_raster</span><span class="p">(</span><span class="n">xds_sum</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -339,7 +339,7 @@ CRS: EPSG:32615
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2026, Corteva Agriscience™.</p>
+    <p>&#169; Copyright 2019-2026, Vylor™.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
