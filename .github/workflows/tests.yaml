@@ -14,6 +14,7 @@ concurrency:
 
 env:
   PIP_NO_BINARY: rasterio
+  UV_NO_BINARY_PACKAGE: rasterio
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
