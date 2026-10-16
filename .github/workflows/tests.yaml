@@ -89,13 +89,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           activate-environment: 'true'
+          enable-cache: "false"
 
       - name: Install dependencies
         run: |
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
           uv pip install $INSTALL_DEPS --no-binary rasterio
-          uv pip install -e . --group test
+          uv pip install -e . --group test --no-binary rasterio
 
       - name: Check and Log Environment
         shell: bash
