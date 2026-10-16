@@ -5,6 +5,7 @@ This module provides functions for reading geospatial metadata according to:
 - Zarr spatial convention: https://github.com/zarr-conventions/spatial
 - Zarr geo-proj convention: https://github.com/zarr-conventions/geo-proj
 """
+
 from typing import Optional, Union
 
 import rasterio.crs

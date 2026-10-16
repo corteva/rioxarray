@@ -1,4 +1,5 @@
 """Top-level package for rioxarray."""
+
 __author__ = """rioxarray Contributors"""
 import importlib.metadata
 

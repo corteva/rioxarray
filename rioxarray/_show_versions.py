@@ -4,6 +4,7 @@ Utility methods to print system info for debugging
 adapted from :func:`sklearn.utils._show_versions`
 which was adapted from :func:`pandas.show_versions`
 """
+
 # pylint: disable=import-outside-toplevel
 import importlib.metadata
 import os

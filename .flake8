@@ -1,15 +1,6 @@
 [flake8]
 max_line_length = 88
 ignore =
-    # line too long - let black handle that
-    E501
-    # Unnecessary dict/list/tuple call - rewrite as a literal
-    C408
-    # whitespace before ':' - doesn't work well with black
-    E203
-    # missing whitespace around operator - let black worry about that
-    E225
-    # line break occurred before a binary operator - let black worry about that
-    W503
-    # line break occurred adter a binary operator - let black worry about that
-    W504
+    # code formatting - let black handle that
+    E
+    W

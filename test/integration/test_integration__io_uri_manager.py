@@ -1,6 +1,7 @@
 """
 Tests based on: https://github.com/pydata/xarray/blob/071da2a900702d65c47d265192bc7e424bb57932/xarray/tests/test_backends_file_manager.py
 """
+
 import concurrent.futures
 import gc
 import pickle
@@ -32,7 +33,6 @@ def test_uri_manager_mock_write__threaded():
     manager = URIManager(opener, "filename")
 
     def write(iter):
-        nonlocal manager
         fh = manager.acquire()
         fh.write("contents")
         manager._local.thread_manager = None

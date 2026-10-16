@@ -1,6 +1,7 @@
 """
 This module contains helper methods for rasterio.crs.CRS.
 """
+
 from typing import Any
 
 import rasterio
