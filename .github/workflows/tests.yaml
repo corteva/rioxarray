@@ -103,6 +103,10 @@ jobs:
         run: |
           python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
+      - name: Install curl for codecov
+        run: |
+          apt-get install -y --no-install-recommends curl
+
       - uses: codecov/codecov-action@v7
 
 

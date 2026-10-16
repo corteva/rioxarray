@@ -8,7 +8,6 @@ Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042
 
 # pylint: disable=too-many-lines
 import contextlib
-import importlib.metadata
 import os
 import re
 import threading
@@ -20,7 +19,6 @@ from typing import Any, Optional, Union
 import numpy
 import rasterio
 from numpy.typing import NDArray
-from packaging import version
 from rasterio.errors import NotGeoreferencedWarning
 from rasterio.vrt import WarpedVRT
 from xarray import Dataset, IndexVariable
@@ -163,14 +161,6 @@ class SingleBandDatasetReader:
 RasterioReader = Union[
     rasterio.io.DatasetReader, rasterio.vrt.WarpedVRT, SingleBandDatasetReader
 ]
-
-
-try:
-    _DASK_GTE_018 = version.parse(importlib.metadata.version("dask")) >= version.parse(
-        "0.18.0"
-    )
-except importlib.metadata.PackageNotFoundError:
-    _DASK_GTE_018 = False
 
 
 def _get_unsigned_dtype(unsigned, dtype):
@@ -925,8 +915,6 @@ def _prepare_dask(
     if chunks in (True, "auto"):
         from dask.array.core import normalize_chunks
 
-        if not _DASK_GTE_018:
-            raise NotImplementedError("Automatic chunking requires dask >= 0.18.0")
         block_shape = (1,) + riods.block_shapes[0]
         chunks = normalize_chunks(
             chunks=(1, "auto", "auto"),

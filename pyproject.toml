@@ -33,7 +33,6 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "packaging",
     "rasterio>=1.4.3",
     # https://github.com/pydata/xarray/issues/11000
     "xarray>=2026.2",
@@ -54,6 +53,7 @@ test = [
     "pytest-timeout",
     "dask",
     "netcdf4",
+    "packaging",
 ]
 type = [
     "mypy",
