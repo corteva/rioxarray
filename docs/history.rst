@@ -3,6 +3,7 @@ History
 
 Latest
 ------
+- DEP: Update supported Python (3.13+), GDAL (3.10+), pyproj (3.7+), numpy (2.1+) versions (#948)
 
 0.23.0
 ------

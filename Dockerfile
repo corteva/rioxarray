@@ -1,6 +1,6 @@
 ARG GDAL=ubuntu-full-3.8.5
 FROM ghcr.io/osgeo/gdal:${GDAL}
-ARG PYTHON_VERSION="3.12"
+ARG PYTHON_VERSION="3.13"
 ENV LANG="C.UTF-8"
 ENV LC_ALL="C.UTF-8"
 ENV PIP_NO_BINARY="rasterio"
