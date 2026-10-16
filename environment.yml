@@ -11,6 +11,7 @@ dependencies:
 - libgdal-netcdf
 - libgdal-hdf4
 - libgdal-hdf5
+- pyproj
 - scipy
 - xarray
 - netcdf4

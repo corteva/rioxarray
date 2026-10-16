@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PIP_NO_BINARY: rasterio
   DEBIAN_FRONTEND: noninteractive
+  UV_LINK_MODE: copy
 
 jobs:
   linting:
