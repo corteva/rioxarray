@@ -137,13 +137,13 @@ class CFConvention:
         return None
 
     @classmethod
-    def write_crs(
+    def write_crs(  # pylint: disable=unused-argument
         cls,
         obj: Union[xarray.Dataset, xarray.DataArray],
         crs: rasterio.crs.CRS,
         *,
         grid_mapping_name: Optional[str] = None,
-        **kwargs,  # pylint: disable=unused-argument
+        **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write CRS using CF conventions.
@@ -200,13 +200,13 @@ class CFConvention:
         )
 
     @classmethod
-    def write_transform(
+    def write_transform(  # pylint: disable=unused-argument
         cls,
         obj: Union[xarray.Dataset, xarray.DataArray],
         *,
         transform: Affine,
         grid_mapping_name: Optional[str] = None,
-        **kwargs,  # pylint: disable=unused-argument
+        **kwargs,
     ) -> Union[xarray.Dataset, xarray.DataArray]:
         """
         Write transform using CF conventions (GeoTransform attribute).
