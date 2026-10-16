@@ -2929,6 +2929,7 @@ def test_reproject__2d_coordinates__src_geoloc_array():
         xds.rio.width,
         xds.rio.height,
         src_geoloc_array=src_geoloc_array,
+        georeferencing_convention="PIXEL_CENTER",
     )
     reprojected = xds.rio.reproject("EPSG:2193", src_geoloc_array=src_geoloc_array)
     assert reprojected.rio.shape == (height, width)
