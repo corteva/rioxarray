@@ -65,7 +65,7 @@ jobs:
 
       - name: Update
         run: |
-          rm /etc/apt/sources.list.d/apache-arrow.sources
+          rm /etc/apt/sources.list.d/apache-arrow.sources || true  # GDAL<=3.12 Remove arrow sources to avoid conflicts with libarrow-dev
           apt-get update
           apt-get -y install software-properties-common
           add-apt-repository -y ppa:deadsnakes/ppa
