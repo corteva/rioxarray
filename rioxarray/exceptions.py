@@ -39,5 +39,9 @@ class DimensionMissingCoordinateError(RioXarrayError):
     """This is raised when the dimension does not have the supporting coordinate."""
 
 
+class CoordinateDimensionError(RioXarrayError):
+    """This is raised when the coordinate of a spatial dimension is not 1-dimensional."""
+
+
 class MissingCRS(RioXarrayError):
     """Missing the CRS in the dataset."""

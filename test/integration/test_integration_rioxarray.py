@@ -18,11 +18,13 @@ from pyproj import CRS as pCRS
 from rasterio import DatasetReader
 from rasterio.control import GroundControlPoint
 from rasterio.crs import CRS
+from rasterio.warp import calculate_default_transform
 from rasterio.windows import Window
 
 import rioxarray
 from rioxarray._spatial_utils import _generate_spatial_coords, _make_coords
 from rioxarray.exceptions import (
+    CoordinateDimensionError,
     DimensionMissingCoordinateError,
     MissingCRS,
     MissingSpatialDimensionError,
@@ -2879,6 +2881,69 @@ def test_shape_order():
     ) as rds:
         rds = _ensure_dataset(rds)
         assert rds.air_temperature.rio.shape == (585, 1386)
+
+
+def _two_dimensional_coordinate_dataarray():
+    yy, xx = numpy.meshgrid(
+        numpy.linspace(-30.0, -40.0, 5),
+        numpy.linspace(150.0, 155.0, 6),
+        indexing="ij",
+    )
+    return xarray.DataArray(
+        numpy.zeros((5, 6)),
+        dims=("y", "x"),
+        coords={"x": (("y", "x"), xx), "y": (("y", "x"), yy)},
+    ).rio.write_crs("EPSG:4326")
+
+
+def test_bounds__2d_coordinates():
+    xds = _two_dimensional_coordinate_dataarray()
+    with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
+        xds.rio.bounds()
+
+
+def test_resolution__2d_coordinates():
+    xds = _two_dimensional_coordinate_dataarray()
+    with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
+        xds.rio.resolution()
+
+
+def test_transform__2d_coordinates():
+    xds = _two_dimensional_coordinate_dataarray()
+    with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
+        xds.rio.transform(recalc=True)
+
+
+def test_reproject__2d_coordinates():
+    xds = _two_dimensional_coordinate_dataarray()
+    with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
+        xds.rio.reproject("EPSG:2193")
+
+
+def test_reproject__2d_coordinates__src_geoloc_array():
+    xds = _two_dimensional_coordinate_dataarray()
+    src_geoloc_array = (xds.x.values, xds.y.values)
+    _, width, height = calculate_default_transform(
+        "EPSG:4326",
+        "EPSG:2193",
+        xds.rio.width,
+        xds.rio.height,
+        src_geoloc_array=src_geoloc_array,
+        georeferencing_convention="PIXEL_CENTER",
+    )
+    reprojected = xds.rio.reproject("EPSG:2193", src_geoloc_array=src_geoloc_array)
+    assert reprojected.rio.shape == (height, width)
+
+
+def test_shape__2d_coordinates():
+    xds = _two_dimensional_coordinate_dataarray()
+    assert xds.rio.shape == (5, 6)
+
+
+def test_bounds__2d_coordinates__dataset():
+    xds = xarray.Dataset({"var": _two_dimensional_coordinate_dataarray()})
+    with pytest.raises(CoordinateDimensionError, match="must be 1-dimensional"):
+        xds.rio.bounds()
 
 
 def test_write_transform__from_read(tmp_path):
