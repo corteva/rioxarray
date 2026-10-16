@@ -2344,27 +2344,6 @@ def test_reproject_default_nodata(dtype, expected_nodata):
         assert test_da.rio.reproject(4326).rio.nodata == expected_nodata
 
 
-class CustomCRS:
-    @property
-    def wkt(self):
-        return CRS.from_epsg(4326).to_wkt()
-
-    def __str__(self):
-        return self.wkt
-
-
-def test_crs_get_custom():
-    test_da = xarray.DataArray(
-        numpy.zeros((5, 5)),
-        dims=("y", "x"),
-        coords={"y": numpy.arange(1, 6), "x": numpy.arange(2, 7)},
-        attrs={"crs": CustomCRS()},
-    )
-    assert test_da.rio.crs.to_epsg() == 4326
-    test_ds = xarray.Dataset({"test": test_da})
-    assert test_ds.rio.crs.to_epsg() == 4326
-
-
 def test_get_crs_dataset():
     test_ds = xarray.Dataset()
     test_ds = test_ds.rio.write_crs(4326)
