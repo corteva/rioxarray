@@ -14,7 +14,6 @@ concurrency:
 
 env:
   PIP_NO_BINARY: rasterio
-  UV_NO_BINARY_PACKAGE: rasterio
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
@@ -95,7 +94,7 @@ jobs:
         run: |
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
-          uv pip install $INSTALL_DEPS
+          uv pip install $INSTALL_DEPS --no-binary rasterio
           uv pip install -e . --group test
 
       - name: Check and Log Environment
