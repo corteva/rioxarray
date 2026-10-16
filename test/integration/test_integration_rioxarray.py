@@ -314,8 +314,8 @@ def test_pad_box(modis_clip):
         if hasattr(xdi, "variables"):
             for var in xdi.rio.vars:
                 assert_almost_equal(
-                    xdi[var].rio._cached_transform(),
-                    padded_ds[var].rio._cached_transform(),
+                    tuple(xdi[var].rio._cached_transform()),
+                    tuple(padded_ds[var].rio._cached_transform()),
                 )
                 for padded_size, original_size in zip(
                     padded_ds[var].shape, xdi[var].shape
@@ -323,7 +323,8 @@ def test_pad_box(modis_clip):
                     assert padded_size == original_size
         else:
             assert_almost_equal(
-                xdi.rio._cached_transform(), padded_ds.rio._cached_transform()
+                tuple(xdi.rio._cached_transform()),
+                tuple(padded_ds.rio._cached_transform()),
             )
             for padded_size, original_size in zip(padded_ds.shape, xdi.shape):
                 assert padded_size == original_size
@@ -353,7 +354,9 @@ def test_clip_box(modis_clip):
         except KeyError:
             xdc_values = xdc.values
         assert_almost_equal(clipped_ds_values, xdc_values)
-        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
+        assert_almost_equal(
+            tuple(clipped_ds.rio.transform()), tuple(xdc.rio.transform())
+        )
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -381,7 +384,9 @@ def test_clip_box__auto_expand(modis_clip):
         except KeyError:
             xdc_values = xdc.values
         assert_almost_equal(clipped_ds_values, xdc_values)
-        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
+        assert_almost_equal(
+            tuple(clipped_ds.rio.transform()), tuple(xdc.rio.transform())
+        )
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -549,7 +554,9 @@ def test_slice_xy(modis_clip):
         except KeyError:
             xdc_values = xdc.values
         assert_almost_equal(clipped_ds_values, xdc_values)
-        assert_almost_equal(clipped_ds.rio.transform(), xdc.rio.transform())
+        assert_almost_equal(
+            tuple(clipped_ds.rio.transform()), tuple(xdc.rio.transform())
+        )
         # make sure it safely writes to netcdf
         clipped_ds.to_netcdf(modis_clip["output"])
 
@@ -624,7 +631,7 @@ def test_clip_geojson(open_func, from_disk):
         )
         # check the transform
         assert_almost_equal(
-            clipped_ds.rio.transform(),
+            tuple(clipped_ds.rio.transform()),
             (3.0, 0.0, 425500.68381405267, 0.0, -3.0, 4615477.040546387, 0.0, 0.0, 1.0),
         )
 
@@ -1420,15 +1427,15 @@ def test_make_coords__calc_trans(open_func, modis_reproject):
             dst_height=height,
         )
         widthr, heightr = xri.rio.shape
-        calculated_transformr = xri.rio.transform(recalc=True)
+        calculated_transform = xri.rio.transform(recalc=True)
         calc_coords_calc_transr = _make_coords(
             src_data_array=xri,
-            dst_affine=calculated_transformr,
+            dst_affine=calculated_transform,
             dst_width=widthr,
             dst_height=heightr,
         )
 
-        assert_almost_equal(calculated_transform, calculated_transformr)
+        assert_almost_equal(tuple(calculated_transform), tuple(calculated_transform))
         # check to see if they all match
         if not isinstance(open_func, partial):
             assert_almost_equal(
@@ -1470,14 +1477,14 @@ def test_make_coords__attr_trans(open_func, modis_reproject):
             dst_height=height,
         )
         widthr, heightr = xri.rio.shape
-        calculated_transformr = xri.rio.transform()
+        calculated_transform = xri.rio.transform()
         calc_coords_calc_transr = _make_coords(
             src_data_array=xri,
-            dst_affine=calculated_transformr,
+            dst_affine=calculated_transform,
             dst_width=widthr,
             dst_height=heightr,
         )
-        assert_almost_equal(attr_transform, calculated_transformr)
+        assert_almost_equal(tuple(attr_transform), tuple(calculated_transform))
         # check to see if they all match
         if not isinstance(open_func, partial):
             assert_almost_equal(
@@ -1946,7 +1953,7 @@ def test_to_raster__preserve_profile__none_nodata(windowed, tmpdir):
     with rasterio.open(str(tmp_raster)) as rds, rasterio.open(str(input_raster)) as rdc:
         assert rds.count == rdc.count
         assert rds.crs == rdc.crs
-        assert_array_equal(rds.transform, rdc.transform)
+        assert_array_equal(tuple(rds.transform), tuple(rdc.transform))
         assert_array_equal(rds.nodata, rdc.nodata)
         assert_almost_equal(rds.read(), rdc.read())
         assert rds.profile == rdc.profile
