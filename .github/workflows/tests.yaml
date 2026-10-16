@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PIP_NO_BINARY: rasterio
   DEBIAN_FRONTEND: noninteractive
+  UV_LINK_MODE: copy
 
 jobs:
   linting:
@@ -79,34 +79,33 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: |
           apt-get install -y --no-install-recommends \
-            python${{ matrix.python-version }} \
             python${{ matrix.python-version }}-dev \
-            python${{ matrix.python-version }}-venv \
-            python3-pip \
             g++ \
             git
           chown -R $(whoami) /github/home/
 
+      - name: Install the latest version of uv and set the python version
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: 'true'
+          enable-cache: "false"
+
       - name: Install dependencies
         run: |
-          python${{ matrix.python-version }} -m venv testenv
-          . testenv/bin/activate
-          python -m pip install --upgrade pip
           export INSTALL_DEPS='rasterio${{ matrix.rasterio-version }} xarray${{ matrix.xarray-version }}'
           [ "${{ matrix.run-with-scipy }}" = "YES" ] && export INSTALL_DEPS="${INSTALL_DEPS} scipy"
-          python -m pip install $INSTALL_DEPS
-          python -m pip install -e . --group test
+          uv pip install $INSTALL_DEPS --no-binary rasterio
+          uv pip install -e . --group test --no-binary rasterio
 
       - name: Check and Log Environment
         shell: bash
         run: |
-          . testenv/bin/activate
           python -V
           python -c "import rioxarray; rioxarray.show_versions();"
 
       - name: run tests
         run: |
-          . testenv/bin/activate
           python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
       - uses: codecov/codecov-action@v7
