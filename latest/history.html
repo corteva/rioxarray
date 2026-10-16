@@ -169,6 +169,10 @@
 <h2>Latest<a class="headerlink" href="#latest" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>DEP: Update supported Python (3.13+), GDAL (3.10+), pyproj (3.7+), numpy (2.1+) versions (#948)</p></li>
+<li><p>BUG: Raise informative <code class="docutils literal notranslate"><span class="pre">CoordinateDimensionError</span></code> when spatial coordinates
+are not 1-dimensional and fix <code class="docutils literal notranslate"><span class="pre">rio.width</span></code>/<code class="docutils literal notranslate"><span class="pre">rio.height</span></code> with 2D
+coordinates, which also fixes the output size of <code class="docutils literal notranslate"><span class="pre">rio.reproject</span></code> with
+<code class="docutils literal notranslate"><span class="pre">src_geoloc_array</span></code> (issue #848)</p></li>
 </ul>
 </section>
 <section id="id1">

@@ -79,6 +79,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-rioxarray.exceptions">rioxarray.exceptions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rioxarray.exceptions.CoordinateDimensionError"><code class="docutils literal notranslate"><span class="pre">CoordinateDimensionError</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rioxarray.exceptions.DimensionError"><code class="docutils literal notranslate"><span class="pre">DimensionError</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rioxarray.exceptions.DimensionMissingCoordinateError"><code class="docutils literal notranslate"><span class="pre">DimensionMissingCoordinateError</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rioxarray.exceptions.InvalidDimensionOrder"><code class="docutils literal notranslate"><span class="pre">InvalidDimensionOrder</span></code></a></li>
@@ -1661,6 +1662,13 @@ is True. Otherwise None is returned.</p>
 <section id="module-rioxarray.exceptions">
 <span id="rioxarray-exceptions-module"></span><h2>rioxarray.exceptions module<a class="headerlink" href="#module-rioxarray.exceptions" title="Link to this heading"></a></h2>
 <p>This contains exceptions for rioxarray.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="rioxarray.exceptions.CoordinateDimensionError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rioxarray.exceptions.</span></span><span class="sig-name descname"><span class="pre">CoordinateDimensionError</span></span><a class="reference internal" href="_modules/rioxarray/exceptions.html#CoordinateDimensionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.exceptions.CoordinateDimensionError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rioxarray.exceptions.RioXarrayError" title="rioxarray.exceptions.RioXarrayError"><code class="xref py py-class docutils literal notranslate"><span class="pre">RioXarrayError</span></code></a></p>
+<p>This is raised when the coordinate of a spatial dimension is not 1-dimensional.</p>
+</dd></dl>
+
 <dl class="py exception">
 <dt class="sig sig-object py" id="rioxarray.exceptions.DimensionError">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rioxarray.exceptions.</span></span><span class="sig-name descname"><span class="pre">DimensionError</span></span><a class="reference internal" href="_modules/rioxarray/exceptions.html#DimensionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rioxarray.exceptions.DimensionError" title="Link to this definition"></a></dt>
