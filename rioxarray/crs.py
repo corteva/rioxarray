@@ -4,9 +4,7 @@ This module contains helper methods for rasterio.crs.CRS.
 
 from typing import Any
 
-import rasterio
 import rasterio.crs
-from packaging import version
 from pyproj import CRS
 from rasterio.errors import CRSError
 
@@ -31,16 +29,9 @@ def crs_from_user_input(crs_input: Any) -> rasterio.crs.CRS:
     if isinstance(crs_input, rasterio.crs.CRS):
         return crs_input
     try:
-        # old versions of opendatacube CRS
-        crs_input = crs_input.wkt
-    except AttributeError:
-        pass
-    try:
         return rasterio.crs.CRS.from_user_input(crs_input)
     except CRSError:
         pass
     # use pyproj for edge cases
     crs = CRS.from_user_input(crs_input)
-    if version.parse(rasterio.__gdal_version__) > version.parse("3.0.0"):
-        return rasterio.crs.CRS.from_wkt(crs.to_wkt())
-    return rasterio.crs.CRS.from_wkt(crs.to_wkt("WKT1_GDAL"))
+    return rasterio.crs.CRS.from_wkt(crs.to_wkt())

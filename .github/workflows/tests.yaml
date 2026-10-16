@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       - uses: pre-commit/action@v3.0.1
 
   docker_tests:
@@ -34,43 +34,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        python-version: ['3.13', '3.14', '3.15']
         rasterio-version: ['']
         xarray-version: ['']
         run-with-scipy: ['YES']
-        gdal-version: ['3.12.1']
+        gdal-version: ['3.13.2']
         include:
-          - python-version: '3.12'
+          - python-version: '3.13'
             rasterio-version: ''
-            xarray-version: '==2024.7.0'
-            run-with-scipy: 'YES'
-            gdal-version: '3.8.5'
-          - python-version: '3.12'
-            rasterio-version: ''
-            xarray-version: ''
-            run-with-scipy: 'YES'
-            gdal-version: '3.9.3'
-          - python-version: '3.12'
-            rasterio-version: ''
-            xarray-version: ''
+            xarray-version: '==2026.2.0'
             run-with-scipy: 'YES'
             gdal-version: '3.10.3'
-          - python-version: '3.12'
+          - python-version: '3.13'
             rasterio-version: ''
             xarray-version: ''
             run-with-scipy: 'YES'
             gdal-version: '3.11.5'
-          - python-version: '3.12'
+          - python-version: '3.13'
+            rasterio-version: ''
+            xarray-version: ''
+            run-with-scipy: 'YES'
+            gdal-version: '3.12.2'
+          - python-version: '3.13'
             rasterio-version: ''
             xarray-version: ''
             run-with-scipy: 'NO'
-            gdal-version: '3.11.5'
+            gdal-version: '3.12.2'
     steps:
       - uses: actions/checkout@v7
 
       - name: Update
         run: |
-          rm /etc/apt/sources.list.d/apache-arrow.sources
+          rm /etc/apt/sources.list.d/apache-arrow.sources || true  # GDAL<=3.12 Remove arrow sources to avoid conflicts with libarrow-dev
           apt-get update
           apt-get -y install software-properties-common
           add-apt-repository -y ppa:deadsnakes/ppa
@@ -108,6 +103,10 @@ jobs:
         run: |
           python -m pytest --cov-report term-missing --cov=rioxarray --cov-report xml
 
+      - name: Install curl for codecov
+        run: |
+          apt-get install -y --no-install-recommends curl
+
       - uses: codecov/codecov-action@v7
 
 
@@ -119,7 +118,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-15-intel, windows-latest]
-        python-version: ['3.12', '3.13', '3.14']
+        python-version: ['3.13', '3.14']
         gdal-version: ['*']
         rasterio-version: ['*']
         xarray-version: ['*']
@@ -162,14 +161,14 @@ jobs:
           micromamba info
 
       - name: pylint
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.13'
         shell: bash
         run: |
           micromamba run -n test pylint rioxarray/
 
       - name: mypy
         shell: bash
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.13'
         run: |
           micromamba run -n test mypy rioxarray/
 
@@ -202,7 +201,7 @@ jobs:
           init-shell: bash
           environment-name: test
           create-args: >-
-            python=3.12
+            python=3.13
             proj
             libgdal-core
             libgdal-netcdf
