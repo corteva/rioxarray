@@ -60,9 +60,9 @@ class RasterArray(XRasterBase):
         self._obj: xarray.DataArray
         # properties
         self._nodata: Optional[float] = None
-        self._manager: Optional[
-            FileManager
-        ] = None  # https://github.com/vylor/rioxarray/issues/254
+        self._manager: Optional[FileManager] = (
+            None  # https://github.com/vylor/rioxarray/issues/254
+        )
 
     def set_nodata(
         self, input_nodata: Optional[float], *, inplace: bool = True

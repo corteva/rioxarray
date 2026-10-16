@@ -5,6 +5,7 @@ Credits:
 This file was adopted from: https://github.com/pydata/xarray # noqa
 Source file: https://github.com/pydata/xarray/blob/1d7bcbdc75b6d556c04e2c7d7a042e4379e15303/xarray/backends/rasterio_.py # noqa
 """
+
 # pylint: disable=too-many-lines
 import contextlib
 import importlib.metadata

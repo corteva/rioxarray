@@ -3367,9 +3367,10 @@ def test_non_rectilinear__reproject(rename, open_rasterio):
 def test_to_rasterio_dataset():
     in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
     in_rpc = rioxarray.open_rasterio(in_rpc_path)
-    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
-        in_rpc_path
-    ) as rio_ds:
+    with (
+        in_rpc.rio.to_rasterio_dataset() as riox_ds,
+        rasterio.open(in_rpc_path) as rio_ds,
+    ):
         # object type
         assert isinstance(riox_ds, DatasetReader), "Error in object type"
 
@@ -3395,9 +3396,10 @@ def test_to_rasterio_dataset():
 def test_to_rasterio_dataset_rpcs():
     in_rpc_path = os.path.join(TEST_INPUT_DATA_DIR, "test_rpcs.tif")
     in_rpc = rioxarray.open_rasterio(in_rpc_path)
-    with in_rpc.rio.to_rasterio_dataset() as riox_ds, rasterio.open(
-        in_rpc_path
-    ) as rio_ds:
+    with (
+        in_rpc.rio.to_rasterio_dataset() as riox_ds,
+        rasterio.open(in_rpc_path) as rio_ds,
+    ):
         # object type
         assert isinstance(riox_ds, DatasetReader), "Error in object type"
 

@@ -2,6 +2,7 @@
 This module allows for open_rasterio to be used with the xarray open methods
 through a backend entrypoint.
 """
+
 # pylint: disable=arguments-differ
 import os.path
 

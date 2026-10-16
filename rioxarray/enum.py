@@ -1,4 +1,5 @@
 """Enums for rioxarray."""
+
 from enum import Enum
 
 

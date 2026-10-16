@@ -1,6 +1,7 @@
 """
 Helper functions for determining spatial attributes.
 """
+
 import copy
 import math
 import warnings
