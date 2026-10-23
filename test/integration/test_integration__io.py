@@ -1138,6 +1138,7 @@ def test_mask_and_scale(open_rasterio):
         assert numpy.nanmax(rds.air_temperature.values) == numpy.float32(302.1)
         test_encoding = dict(rds.air_temperature.encoding)
         _assert_tmmx_source(test_encoding.pop("source"))
+        assert len(test_encoding.pop("band_tags")) == 1
         assert test_encoding == {
             "_Unsigned": "true",
             "add_offset": 220.0,
@@ -1167,6 +1168,7 @@ def test_no_mask_and_scale(open_rasterio):
         test_encoding = dict(rds.air_temperature.encoding)
         source = test_encoding.pop("source")
         _assert_tmmx_source(source)
+        assert len(test_encoding.pop("band_tags")) == 1
         assert test_encoding == {
             "_FillValue": 32767.0,
             "grid_mapping": "crs",
@@ -1612,3 +1614,77 @@ def test_reading_writing_rpcs(tmp_path):
         assert (
             dst.rpcs is not None
         ), "Existing RPCs in dst raster (through rpc attribute)"
+
+
+@pytest.mark.parametrize("inplace", [True, False])
+def test_write_band_tags_da(tmp_path, inplace):
+    # Open 2D data array
+    raster_2d_file = os.path.join(TEST_INPUT_DATA_DIR, "cog.tif")
+    raster_2d = rioxarray.open_rasterio(raster_2d_file)
+
+    # Write the tags
+    with pytest.raises(AssertionError):
+        raster_2d.rio.write_band_tags([{"first_tag": 1}, {"first_tag": 2}])
+
+    # Raster has one band
+    band_tag = [{"first_tag": 1}]
+    with_tags_2d = raster_2d.rio.write_band_tags(band_tag, inplace=inplace)
+
+    # Replace raster to check in case of inplace
+    with_tags_2d = raster_2d if inplace else with_tags_2d
+
+    # Check the tags
+    assert with_tags_2d.rio.get_band_tags() == band_tag, "Missing band tag"
+
+    if not inplace:
+        with pytest.raises(TypeError):
+            raster_2d.rio.get_band_tags()["first_tag"]
+
+    # Check and write the raster
+    out_path = tmp_path / "test.tif"
+    with_tags_2d.rio.to_raster(out_path)
+
+    # Check what is obtained after writing and reloading it
+    out = rioxarray.open_rasterio(out_path)
+    assert out.rio.get_band_tags() == band_tag, "Missing band tag"
+
+
+@pytest.mark.parametrize("inplace", [True, False])
+def test_write_band_tags_ds(tmp_path, inplace):
+    # Open 3D dataset
+    raster_3d_file = os.path.join(TEST_INPUT_DATA_DIR, "PLANET_SCOPE_3D.nc")
+    raster_3d = rioxarray.open_rasterio(raster_3d_file)
+
+    # Create tags
+    band_tags = {
+        "blue": [
+            {"year": "yesterday", "where": "here"},
+            {"year": "now", "where": "here"},
+        ],  # Blue as two bands
+        "green": [
+            {"year": "yesterday", "where": "there"},
+            {"year": "now", "where": "there"},
+        ],  # Green as two bands
+    }
+    with_tags_3d = raster_3d.rio.write_band_tags(band_tags, inplace=inplace)
+
+    # Replace raster to check in case of inplace
+    with_tags_3d = raster_3d if inplace else with_tags_3d
+
+    # Check the bands
+    for var in with_tags_3d.rio.vars:
+        assert (
+            with_tags_3d[var].rio.get_band_tags() == band_tags[var]
+        ), "Missing band tag"
+
+    # Check that the tags doesn't exist
+    if not inplace:
+        with pytest.raises(KeyError):
+            raster_3d["green"].rio.get_band_tags()[0]["year"]
+
+    # Write one 3D variable
+    out_path = tmp_path / "test_green.tif"
+    with_tags_3d["green"].rio.to_raster(out_path)
+
+    out = rioxarray.open_rasterio(out_path)
+    assert out.rio.get_band_tags() == band_tags["green"], "Missing band tag"
