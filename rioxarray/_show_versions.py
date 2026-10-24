@@ -29,7 +29,7 @@ def _get_sys_info() -> dict[str, str]:
 
 
 def _get_main_info() -> dict[str, str]:
-    """Get the main dependency information to hightlight.
+    """Get the main dependency information to highlight.
 
     Returns
     -------
